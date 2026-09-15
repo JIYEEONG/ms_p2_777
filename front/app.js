@@ -185,11 +185,135 @@ const modal = document.querySelector("#modal");
 let splashTimer;
 let toastTimer;
 let speechRecognition;
+let searchDebounceTimer;
+
+const SEARCH_LIMIT = 5;
+const SEARCH_DEBOUNCE_MS = 260;
+const searchUi = { inputId: null, activeIndex: 0 };
 
 function icon(id) { return `<svg aria-hidden="true"><use href="#i-${id}"></use></svg>`; }
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+}
+
+function normalizeSearch(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function policyRankCandidates(query, candidates, limit = SEARCH_LIMIT) {
+  const q = normalizeSearch(query);
+  if (!q) return [];
+  const matched = candidates.filter((item) => {
+    const fields = [item.name, item.queryValue, ...(item.tags || [])].filter(Boolean);
+    return fields.some((field) => normalizeSearch(field).startsWith(q));
+  });
+  const regionResults = matched
+    .filter((item) => item.category === "지역")
+    .sort((a, b) => (b.search_count || 0) - (a.search_count || 0) || a.name.localeCompare(b.name, "ko-KR"));
+  const placeResults = matched
+    .filter((item) => item.category !== "지역")
+    .sort((a, b) => (b.search_count || 0) - (a.search_count || 0) || Number(Boolean(b.blue_ribbon)) - Number(Boolean(a.blue_ribbon)) || a.name.localeCompare(b.name, "ko-KR"));
+  return [...regionResults, ...placeResults].slice(0, Math.min(limit, SEARCH_LIMIT));
+}
+
+function courseSearchCandidates() {
+  const regions = [
+    { id: "region-seongsu", name: "성수동", category: "지역", area: "서울", search_count: 90000, queryValue: "성수", tags: ["성수역", "서울숲", "카페"] },
+    { id: "region-hangang", name: "한강공원", category: "지역", area: "서울", search_count: 76000, queryValue: "한강", tags: ["반포", "잠원", "야경"] },
+    { id: "region-insadong", name: "인사동", category: "지역", area: "서울", search_count: 62000, queryValue: "인사", tags: ["전통", "문화", "공예"] },
+    { id: "region-jamsil", name: "잠실", category: "지역", area: "서울", search_count: 58000, queryValue: "잠실", tags: ["석촌호수", "롯데월드"] },
+  ];
+  const places = baseCourses.flatMap((course) => {
+    const baseScore = Number(course.likes || 0) * 100;
+    const courseItem = {
+      id: `course-${course.id}`,
+      name: course.name,
+      category: "코스",
+      sub_category: "나들이",
+      area: "서울",
+      search_count: baseScore,
+      blue_ribbon: Number(course.likes || 0) >= 900,
+      itemId: course.id,
+      tags: [course.desc, ...(course.stops || [])],
+    };
+    const stopItems = (course.stops || []).map((stop, index) => ({
+      id: `place-${course.id}-${index}`,
+      name: stop,
+      category: /카페|로스터리|커피/.test(stop) ? "카페" : /맛집|냉면|돈까스|먹자/.test(stop) ? "음식점" : "장소",
+      sub_category: course.name,
+      area: "서울",
+      search_count: Math.max(1000, baseScore - index * 500),
+      blue_ribbon: Number(course.likes || 0) >= 900,
+      queryValue: stop,
+      itemId: course.id,
+      tags: [course.name, course.desc],
+    }));
+    return [courseItem, ...stopItems];
+  });
+  return [...regions, ...places];
+}
+
+function productSearchCandidates() {
+  return products.map((product) => ({
+    id: `product-${product.id}`,
+    name: product.name,
+    category: "상품",
+    sub_category: product.category,
+    area: "차량",
+    search_count: (product.stock || 0) * 10000 + (product.recommended ? 5000 : 0),
+    blue_ribbon: product.recommended,
+    itemId: product.id,
+    tags: [product.desc, product.category],
+  }));
+}
+
+function historySearchCandidates() {
+  return historyRoutes.map((route) => ({
+    id: `history-${route.id}`,
+    name: route.name,
+    category: "이용기록",
+    area: "서울",
+    search_count: Number(new Date(route.date)),
+    itemId: route.id,
+    tags: [route.meta, ...(route.stops || [])],
+  }));
+}
+
+function getSearchCandidates(inputId) {
+  if (inputId === "product-search") return productSearchCandidates();
+  if (inputId === "course-search") return courseSearchCandidates();
+  if (inputId === "history-search") return historySearchCandidates();
+  return [];
+}
+
+function getSearchStateKey(inputId) {
+  return { "product-search": "productQuery", "course-search": "outingQuery", "history-search": "historyQuery" }[inputId];
+}
+
+function getSearchSuggestions(inputId, query) {
+  return policyRankCandidates(query, getSearchCandidates(inputId));
+}
+
+function renderSearchField({ inputId, stateKey, className, placeholder, label }) {
+  const value = state[stateKey] || "";
+  return `<div class="search-shell"><div class="card field-row ${className} search-with-suggest">${icon("search")}<input id="${inputId}" value="${escapeHtml(value)}" placeholder="${placeholder}" aria-label="${label}" autocomplete="off" aria-autocomplete="list" aria-expanded="${searchUi.inputId === inputId && getSearchSuggestions(inputId, value).length ? "true" : "false"}" /></div>${renderSearchSuggestions(inputId, value)}</div>`;
+}
+
+function renderSearchSuggestions(inputId, query) {
+  if (searchUi.inputId !== inputId) return "";
+  const suggestions = getSearchSuggestions(inputId, query);
+  if (!normalizeSearch(query)) return "";
+  if (!suggestions.length) return `<div class="search-suggestions empty" role="status">검색어와 일치하는 후보가 없어요</div>`;
+  const active = Math.min(searchUi.activeIndex, suggestions.length - 1);
+  return `<div class="search-suggestions" role="listbox" aria-label="자동완성 후보">${suggestions.map((item, index) => `<button class="${index === active ? "active" : ""}" data-action="search-suggestion" data-input="${inputId}" data-item="${escapeHtml(item.itemId || "")}" data-value="${escapeHtml(item.queryValue || item.name)}" role="option" aria-selected="${index === active ? "true" : "false"}"><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.sub_category || item.area || "")}</small></span><em>${escapeHtml(item.category)}${item.blue_ribbon ? " · 블루리본" : ""}</em></button>`).join("")}</div>`;
+}
+
+function courseMatchesQuery(course, query) {
+  const q = normalizeSearch(query);
+  if (!q) return true;
+  const fields = [course.name, course.desc, ...(course.stops || [])];
+  return fields.some((field) => normalizeSearch(field).startsWith(q));
 }
 
 function persist() {
@@ -597,13 +721,14 @@ function renderPurchase() {
 }
 
 function renderProducts() {
-  const query = state.productQuery.trim().toLowerCase();
+  const query = normalizeSearch(state.productQuery);
+  const rankedProductIds = query ? new Set(policyRankCandidates(query, productSearchCandidates(), products.length).map((item) => item.itemId)) : null;
   const list = products.filter((product) => {
     const categoryMatch = state.productCategory === "전체" || (state.productCategory === "추천" ? product.recommended : product.category === state.productCategory);
-    return categoryMatch && (!query || `${product.name} ${product.desc} ${product.category}`.toLowerCase().includes(query));
-  });
+    return categoryMatch && (!rankedProductIds || rankedProductIds.has(product.id));
+  }).sort((a, b) => query ? (b.stock || 0) - (a.stock || 0) || Number(b.recommended) - Number(a.recommended) || a.name.localeCompare(b.name, "ko-KR") : 0);
   const categories = [["전체", "전체 메뉴"], ["추천", "추천 상품"], ["음료·간식", "음료·간식"], ["식사", "식사"], ["편의용품", "편의용품"]];
-  return `<section class="card shop-banner"><span class="badge">현재 차량 재고</span><h3>이동 중 바로 먹고 사용할 수 있어요</h3><p>결제 완료 후 지정 수납함이 자동으로 열립니다.</p></section><div class="card field-row product-search"><span>${icon("search")}</span><input id="product-search" value="${escapeHtml(state.productQuery)}" placeholder="상품을 검색하세요" aria-label="상품 검색" /></div><div class="category-row compact" style="margin:12px 0">${categories.map(([id, label]) => `<button class="category-card ${state.productCategory === id ? "active" : ""}" data-action="product-category" data-value="${id}">${label}</button>`).join("")}</div>${list.length ? `<div class="product-grid">${list.map(productCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "다른 상품명이나 카테고리로 찾아보세요.")}`;
+  return `<section class="card shop-banner"><span class="badge">현재 차량 재고</span><h3>이동 중 바로 먹고 사용할 수 있어요</h3><p>결제 완료 후 지정 수납함이 자동으로 열립니다.</p></section>${renderSearchField({ inputId: "product-search", stateKey: "productQuery", className: "product-search", placeholder: "상품명을 입력하세요", label: "상품 검색" })}<div class="category-row compact" style="margin:12px 0">${categories.map(([id, label]) => `<button class="category-card ${state.productCategory === id ? "active" : ""}" data-action="product-category" data-value="${id}">${label}</button>`).join("")}</div>${list.length ? `<div class="product-grid">${list.map(productCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "앞글자가 일치하는 다른 상품명으로 찾아보세요.")}`;
 }
 
 function productCard(product) {
@@ -686,11 +811,11 @@ function renderOuting() {
 }
 
 function renderCourseBrowse() {
-  const query = state.outingQuery.trim().toLowerCase();
-  const filtered = baseCourses.filter((course) => !query || `${course.name} ${course.desc} ${course.stops.join(" ")}`.toLowerCase().includes(query));
+  const query = normalizeSearch(state.outingQuery);
+  const filtered = baseCourses.filter((course) => courseMatchesQuery(course, query));
   const list = [...filtered].sort((a, b) => state.outingSort === "latest" ? b.createdAt.localeCompare(a.createdAt) : state.outingSort === "nearby" ? a.distance - b.distance : b.likes - a.likes);
   const sorts = [["popular", "인기순"], ["latest", "최신순"], ["nearby", "가까운 순"]];
-  return `<section class="card outing-location"><span class="location-icon">${icon("pin")}</span><span><small>내 위치</small><strong>${state.locationReady ? escapeHtml(state.pickupLocation.replace("현재 위치 확인됨 · ", "")) : "위치를 확인해 주세요"}</strong></span><button class="mini-action" data-action="locate-outing">${state.locationReady ? "다시 찾기" : "내 위치 찾기"}</button></section><div class="card field-row course-search">${icon("search")}<input id="course-search" value="${escapeHtml(state.outingQuery)}" placeholder="지역이나 테마를 검색하세요" aria-label="코스 검색" /></div><div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div><div class="course-result-count">총 ${list.length}개 코스</div>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "다른 지역이나 테마로 검색해 보세요.")}`;
+  return `<section class="card outing-location"><span class="location-icon">${icon("pin")}</span><span><small>내 위치</small><strong>${state.locationReady ? escapeHtml(state.pickupLocation.replace("현재 위치 확인됨 · ", "")) : "위치를 확인해 주세요"}</strong></span><button class="mini-action" data-action="locate-outing">${state.locationReady ? "다시 찾기" : "내 위치 찾기"}</button></section>${renderSearchField({ inputId: "course-search", stateKey: "outingQuery", className: "course-search", placeholder: "지역명, 음식점, 카페를 입력하세요", label: "코스 검색" })}<div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div><div class="course-result-count">총 ${list.length}개 코스</div>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "앞글자가 일치하는 다른 지역이나 장소로 검색해 보세요.")}`;
 }
 
 function courseCard(course) {
@@ -832,9 +957,10 @@ function renderRegisterCourse() {
 function renderHistoryRoutes() {
   const cutoff = new Date();
   cutoff.setFullYear(cutoff.getFullYear() - 1);
-  const query = state.historyQuery.trim().toLowerCase();
-  const recent = historyRoutes.filter((route) => new Date(route.date) >= cutoff && (!query || `${route.name} ${route.meta} ${route.stops.join(" ")}`.toLowerCase().includes(query)));
-  return `<section class="history-picker"><div class="card field-row course-search">${icon("search")}<input id="history-search" value="${escapeHtml(state.historyQuery)}" placeholder="날짜, 장소, 코스 검색" aria-label="이용 기록 검색" /></div><div class="row history-summary"><span>최근 1년 전체 이용 기록</span><strong>${recent.length}건</strong></div><div class="stack">${recent.length ? recent.map((route) => `<button class="history-route" data-action="use-history-route" data-value="${route.id}"><span class="history-icon">${icon("clock")}</span><span><strong>${route.name}</strong><small>${route.meta}</small></span>${icon("chevron")}</button>`).join("") : emptyState("search", "검색 결과가 없어요", "최근 1년 내 다른 날짜나 장소를 검색해 보세요.")}</div><p class="history-retention">이용 기록은 이용일로부터 최대 1년간 보관 후 자동 삭제됩니다.</p></section>`;
+  const query = normalizeSearch(state.historyQuery);
+  const rankedHistoryIds = query ? new Set(policyRankCandidates(query, historySearchCandidates(), historyRoutes.length).map((item) => item.itemId)) : null;
+  const recent = historyRoutes.filter((route) => new Date(route.date) >= cutoff && (!rankedHistoryIds || rankedHistoryIds.has(route.id)));
+  return `<section class="history-picker">${renderSearchField({ inputId: "history-search", stateKey: "historyQuery", className: "course-search", placeholder: "날짜, 장소, 코스 검색", label: "이용 기록 검색" })}<div class="row history-summary"><span>최근 1년 전체 이용 기록</span><strong>${recent.length}건</strong></div><div class="stack">${recent.length ? recent.map((route) => `<button class="history-route" data-action="use-history-route" data-value="${route.id}"><span class="history-icon">${icon("clock")}</span><span><strong>${route.name}</strong><small>${route.meta}</small></span>${icon("chevron")}</button>`).join("") : emptyState("search", "검색 결과가 없어요", "최근 1년 내 앞글자가 일치하는 장소나 코스를 검색해 보세요.")}</div><p class="history-retention">이용 기록은 이용일로부터 최대 1년간 보관 후 자동 삭제됩니다.</p></section>`;
 }
 
 function stopEditor(stop, index) {
@@ -989,11 +1115,17 @@ document.addEventListener("compositionend", (event) => {
 function handleSearchInput(event, stateKey, inputId, forceRender = false) {
   if (!stateKey) return;
   state[stateKey] = event.target.value;
+  searchUi.inputId = inputId;
+  searchUi.activeIndex = 0;
   if (!forceRender && (event.isComposing || event.target.dataset.composing === "true")) return;
   const cursor = event.target.selectionStart;
-  render();
-  const nextInput = document.querySelector(`#${inputId}`);
-  if (nextInput) { nextInput.focus(); nextInput.setSelectionRange(cursor, cursor); }
+  clearTimeout(searchDebounceTimer);
+  const rerender = () => {
+    render();
+    const nextInput = document.querySelector(`#${inputId}`);
+    if (nextInput) { nextInput.focus(); nextInput.setSelectionRange(cursor, cursor); }
+  };
+  forceRender ? rerender() : searchDebounceTimer = setTimeout(rerender, SEARCH_DEBOUNCE_MS);
 }
 
 document.addEventListener("change", (event) => {
@@ -1017,6 +1149,7 @@ document.addEventListener("click", (event) => {
   if (button.dataset.tab) { if (button.dataset.tab === "home") state.homeStep = state.tripActive ? "service" : "mode"; return setTab(button.dataset.tab); }
   if (action === "skip-splash") { clearTimeout(splashTimer); showScreen("login"); }
   if (action === "close-modal") closeModal();
+  if (action === "search-suggestion") { applySearchSuggestion(button); return; }
   if (action === "open-status") openVehicleStatus();
   if (action === "open-security-proof") openVehicleStatus();
   if (action === "header-profile") setTab("profile");
@@ -1227,7 +1360,60 @@ function completeSecureCleanup(mode) {
 }
 
 modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });
-document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeModal(); });
+document.addEventListener("keydown", (event) => {
+  if (getSearchStateKey(event.target.id)) {
+    handleSearchKeydown(event);
+    return;
+  }
+  if (event.key === "Escape") closeModal();
+});
+
+function applySearchSuggestion(button) {
+  const inputId = button.dataset.input;
+  const stateKey = getSearchStateKey(inputId);
+  if (!stateKey) return;
+  state[stateKey] = button.dataset.value || "";
+  searchUi.inputId = null;
+  searchUi.activeIndex = 0;
+  render();
+  const itemId = button.dataset.item;
+  if (inputId === "product-search" && itemId) {
+    const product = products.find((item) => item.id === itemId);
+    if (product) openProductDetail(product, true, true);
+  }
+}
+
+function handleSearchKeydown(event) {
+  const inputId = event.target.id;
+  const suggestions = getSearchSuggestions(inputId, state[getSearchStateKey(inputId)]);
+  if (event.key === "Escape") {
+    if (searchUi.inputId === inputId) {
+      event.preventDefault();
+      searchUi.inputId = null;
+      render();
+    } else closeModal();
+    return;
+  }
+  if (!suggestions.length) return;
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault();
+    searchUi.inputId = inputId;
+    searchUi.activeIndex = (searchUi.activeIndex + (event.key === "ArrowDown" ? 1 : -1) + suggestions.length) % suggestions.length;
+    const cursor = event.target.selectionStart;
+    render();
+    const nextInput = document.querySelector(`#${inputId}`);
+    if (nextInput) { nextInput.focus(); nextInput.setSelectionRange(cursor, cursor); }
+    return;
+  }
+  if (event.key === "Enter" && searchUi.inputId === inputId) {
+    event.preventDefault();
+    const suggestion = suggestions[Math.min(searchUi.activeIndex, suggestions.length - 1)];
+    if (!suggestion) return;
+    state[getSearchStateKey(inputId)] = suggestion.queryValue || suggestion.name;
+    searchUi.inputId = null;
+    render();
+  }
+}
 
 function updateClock() { document.querySelector("#clock").textContent = new Date().toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: false }); }
 updateClock(); setInterval(updateClock, 30000); setInterval(updateUsageTimer, 1000);

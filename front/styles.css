@@ -163,6 +163,17 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .destination-box { display: grid; gap: 9px; padding: 14px; }
 .field-row { display: flex; align-items: center; gap: 9px; }
 .field-row input { min-width: 0; flex: 1; min-height: 38px; padding: 6px 2px; border: 0; background: transparent; font-size: .8rem; font-weight: 800; }
+.search-shell { position: relative; z-index: 3; }
+.search-with-suggest { position: relative; z-index: 2; }
+.search-suggestions { position: absolute; z-index: 12; left: 0; right: 0; top: calc(100% + 6px); overflow: hidden; border: 1px solid rgba(83,177,117,.28); border-radius: 14px; background: white; box-shadow: 0 12px 30px rgba(24,23,37,.14); }
+.search-suggestions button { width: 100%; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; min-height: 48px; padding: 9px 12px; border: 0; border-bottom: 1px solid #edf0ee; background: white; color: var(--ink); text-align: left; }
+.search-suggestions button:last-child { border-bottom: 0; }
+.search-suggestions button.active, .search-suggestions button:hover { background: var(--green-soft); }
+.search-suggestions strong, .search-suggestions small { display: block; }
+.search-suggestions strong { overflow: hidden; font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
+.search-suggestions small { margin-top: 3px; color: var(--muted); font-size: .6rem; }
+.search-suggestions em { color: var(--green-dark); font-size: .59rem; font-style: normal; font-weight: 900; white-space: nowrap; }
+.search-suggestions.empty { padding: 12px; color: var(--muted); font-size: .7rem; text-align: center; }
 .field-dot { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; background: var(--green); }
 .field-dot.end { background: var(--orange); }
 .mini-action { flex: 0 0 auto; min-height: 32px; padding: 7px 10px; border: 0; border-radius: 10px; background: var(--green-soft); color: var(--green-dark); font-size: .68rem; font-weight: 900; }
