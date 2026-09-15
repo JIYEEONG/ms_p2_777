@@ -68,6 +68,7 @@ const products = [
   { id: "green-tea", name: "무가당 녹차", desc: "350ml · 깔끔한 무가당 음료", price: 2200, image: "./assets/product-03-green-tea.jpg", category: "음료·간식", recommended: false, stock: 5, location: "냉장함 A-03" },
   { id: "protein-bar", name: "프로틴바", desc: "1개 · 이동 중 에너지 보충", price: 3200, image: "./assets/product-04-protein-bar.jpg", category: "음료·간식", recommended: true, stock: 7, location: "수납함 B-01" },
   { id: "mixed-nuts", name: "믹스넛", desc: "30g · 부스러기 적은 포장 스낵", price: 2900, image: "./assets/product-05-mixed-nuts.jpg", category: "음료·간식", recommended: false, stock: 5, location: "수납함 B-02" },
+  { id: "honey-butter-chips", name: "과자-허니버터칩", desc: "60g · 달콤한 허니버터 감자칩", price: 2500, image: "./assets/product-16-honey-butter-chips.png", category: "음료·간식", recommended: true, stock: 6, location: "수납함 B-03" },
   { id: "dried-fruit-chips", name: "건조 과일칩", desc: "25g · 산뜻한 과일 간식", price: 3400, image: "./assets/product-06-dried-fruit-chips.jpg", category: "음료·간식", recommended: false, stock: 4, location: "수납함 B-03" },
   { id: "rice-ball", name: "한입 주먹밥", desc: "2개입 · 개별 포장 식사", price: 4200, image: "./assets/product-07-rice-ball.jpg", category: "식사", recommended: true, stock: 4, location: "냉장함 C-01" },
   { id: "mini-sandwich", name: "미니 샌드위치", desc: "1팩 · 오늘 제조 간편식", price: 5900, image: "./assets/product-08-mini-sandwich.jpg", category: "식사", recommended: true, stock: 3, location: "냉장함 C-02" },
