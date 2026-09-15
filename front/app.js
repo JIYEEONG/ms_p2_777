@@ -63,7 +63,7 @@ const rentalOptionCatalog = [
 ];
 
 const products = [
-  { id: "bottled-water", name: "무라벨 생수", desc: "500ml · 시원하게 보관", price: 1200, image: "./assets/product-01-bottled-water.jpg", category: "음료·간식", recommended: true, stock: 10, location: "냉장함 A-01" },
+  { id: "bottled-water", name: "무라벨http://localhost:3000 생수", desc: "500ml · 시원하게 보관", price: 1200, image: "./assets/product-01-bottled-water.jpg", category: "음료·간식", recommended: true, stock: 10, location: "냉장함 A-01" },
   { id: "sparkling-water", name: "탄산수", desc: "330ml · 무향 탄산", price: 1800, image: "./assets/product-02-sparkling-water.jpg", category: "음료·간식", recommended: true, stock: 6, location: "냉장함 A-02" },
   { id: "green-tea", name: "무가당 녹차", desc: "350ml · 깔끔한 무가당 음료", price: 2200, image: "./assets/product-03-green-tea.jpg", category: "음료·간식", recommended: false, stock: 5, location: "냉장함 A-03" },
   { id: "protein-bar", name: "프로틴바", desc: "1개 · 이동 중 에너지 보충", price: 3200, image: "./assets/product-04-protein-bar.jpg", category: "음료·간식", recommended: true, stock: 7, location: "수납함 B-01" },
