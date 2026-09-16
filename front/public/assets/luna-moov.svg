@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1024" viewBox="0 0 1536 1024">
+  <defs>
+    <radialGradient id="body" cx="50%" cy="28%" r="68%"><stop offset="0" stop-color="#fff"/><stop offset=".43" stop-color="#defcf2"/><stop offset="1" stop-color="#9ff1d6"/></radialGradient>
+    <linearGradient id="rim" x1="12%" y1="47%" x2="88%" y2="53%"><stop offset="0" stop-color="#b7ff22"/><stop offset=".5" stop-color="#0af076"/><stop offset="1" stop-color="#08e3d8"/></linearGradient>
+    <radialGradient id="face" cx="50%" cy="43%" r="66%"><stop offset="0" stop-color="#0c4736"/><stop offset=".62" stop-color="#062d26"/><stop offset="1" stop-color="#031915"/></radialGradient>
+    <radialGradient id="ear" cx="45%" cy="32%" r="75%"><stop offset="0" stop-color="#eafff7"/><stop offset=".55" stop-color="#8cf2c5"/><stop offset="1" stop-color="#12b77a"/></radialGradient>
+    <filter id="shadow" x="-30%" y="-24%" width="160%" height="160%"><feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#0ccf8e" flood-opacity=".35"/><feDropShadow dx="0" dy="5" stdDeviation="10" flood-color="#fff" flood-opacity=".75"/></filter>
+    <filter id="eyeGlow" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="12" result="b"/><feColorMatrix in="b" type="matrix" values="0 0 0 0 .35 0 0 0 0 1 0 0 0 0 .67 0 0 0 .9 0"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M334 308c-60-44-117-40-156 11-34 44-18 103 43 145l75 53 77-123-39-86Z" fill="url(#ear)"/>
+    <path d="M181 225c-28-24-64-21-86 6-22 28-15 62 14 86l93 77 72-93-93-76Z" fill="url(#ear)"/>
+    <path d="M275 156c-17-33-51-44-82-28-31 17-41 51-23 84l55 104 105-56-55-104Z" fill="url(#ear)"/>
+    <ellipse cx="356" cy="528" rx="108" ry="148" fill="url(#ear)"/>
+    <ellipse cx="1180" cy="528" rx="108" ry="148" fill="url(#ear)"/>
+    <ellipse cx="768" cy="514" rx="443" ry="416" fill="url(#body)"/>
+    <path d="M365 502C384 342 539 262 768 262s384 80 403 240c13 110-48 209-162 247-72 24-154 35-241 35s-169-11-241-35C413 711 352 612 365 502Z" fill="url(#rim)"/>
+    <path d="M420 512c0-132 132-204 348-204s348 72 348 204c0 133-132 186-348 186S420 645 420 512Z" fill="url(#face)"/>
+    <path d="M590 503c26-55 90-55 116 0" fill="none" stroke="#fffdf4" stroke-width="43" stroke-linecap="round" filter="url(#eyeGlow)"/>
+    <path d="M831 503c26-55 90-55 116 0" fill="none" stroke="#fffdf4" stroke-width="43" stroke-linecap="round" filter="url(#eyeGlow)"/>
+    <circle cx="386" cy="697" r="92" fill="url(#body)"/>
+    <circle cx="1150" cy="697" r="92" fill="url(#body)"/>
+  </g>
+</svg>

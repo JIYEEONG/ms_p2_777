@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1024" viewBox="0 0 1536 1024">
+  <defs>
+    <radialGradient id="body" cx="50%" cy="28%" r="68%"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#defcf2"/><stop offset="1" stop-color="#9ff1d6"/></radialGradient>
+    <linearGradient id="rim" x1="12%" y1="47%" x2="88%" y2="53%"><stop offset="0" stop-color="#b7ff22"/><stop offset=".5" stop-color="#0af076"/><stop offset="1" stop-color="#08e3d8"/></linearGradient>
+    <radialGradient id="face" cx="50%" cy="43%" r="66%"><stop offset="0" stop-color="#0c4736"/><stop offset=".62" stop-color="#062d26"/><stop offset="1" stop-color="#031915"/></radialGradient>
+    <radialGradient id="ear" cx="45%" cy="32%" r="75%"><stop offset="0" stop-color="#eafff7"/><stop offset=".55" stop-color="#8cf2c5"/><stop offset="1" stop-color="#12b77a"/></radialGradient>
+    <linearGradient id="map" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#efffce"/><stop offset=".5" stop-color="#bdf3c0"/><stop offset="1" stop-color="#38cc91"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-24%" width="160%" height="160%"><feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#0ccf8e" flood-opacity=".35"/><feDropShadow dx="0" dy="5" stdDeviation="10" flood-color="#fff" flood-opacity=".75"/></filter>
+    <filter id="eyeGlow" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="12" result="b"/><feColorMatrix in="b" type="matrix" values="0 0 0 0 .3 0 0 0 0 .65 0 0 0 0 1 0 0 0 .9 0"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <ellipse cx="356" cy="508" rx="108" ry="148" fill="url(#ear)"/>
+    <ellipse cx="1180" cy="508" rx="108" ry="148" fill="url(#ear)"/>
+    <ellipse cx="768" cy="494" rx="443" ry="392" fill="url(#body)"/>
+    <path d="M365 482C384 322 539 242 768 242s384 80 403 240c13 110-48 209-162 247-72 24-154 35-241 35s-169-11-241-35C413 691 352 592 365 482Z" fill="url(#rim)"/>
+    <path d="M420 492c0-132 132-204 348-204s348 72 348 204c0 133-132 186-348 186S420 625 420 492Z" fill="url(#face)"/>
+    <rect x="585" y="410" width="92" height="156" rx="46" fill="#9ee0ff" filter="url(#eyeGlow)"/>
+    <rect x="858" y="410" width="92" height="156" rx="46" fill="#9ee0ff" filter="url(#eyeGlow)"/>
+    <path d="M473 732 650 668l236 74 198-82 0 237-198 82-236-74-177 64V732Z" fill="#f5f0d4"/>
+    <path d="M650 668v237M886 742v237" stroke="#dfd7b4" stroke-width="18"/>
+    <path d="M514 758 650 710v150l-136 49V758Zm414 19 114-47v148l-114 47V777Z" fill="url(#map)"/>
+    <circle cx="444" cy="874" r="84" fill="url(#body)"/>
+    <circle cx="1095" cy="874" r="84" fill="url(#body)"/>
+  </g>
+</svg>

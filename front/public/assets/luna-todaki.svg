@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1536" height="1024" viewBox="0 0 1536 1024">
+  <defs>
+    <radialGradient id="body" cx="50%" cy="28%" r="68%"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#defcf2"/><stop offset="1" stop-color="#9ff1d6"/></radialGradient>
+    <linearGradient id="rim" x1="12%" y1="47%" x2="88%" y2="53%"><stop offset="0" stop-color="#b7ff22"/><stop offset=".5" stop-color="#0af076"/><stop offset="1" stop-color="#08e3d8"/></linearGradient>
+    <radialGradient id="face" cx="50%" cy="43%" r="66%"><stop offset="0" stop-color="#0c4736"/><stop offset=".62" stop-color="#062d26"/><stop offset="1" stop-color="#031915"/></radialGradient>
+    <radialGradient id="ear" cx="45%" cy="32%" r="75%"><stop offset="0" stop-color="#eafff7"/><stop offset=".55" stop-color="#8cf2c5"/><stop offset="1" stop-color="#12b77a"/></radialGradient>
+    <filter id="shadow" x="-30%" y="-24%" width="160%" height="160%"><feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#0ccf8e" flood-opacity=".32"/><feDropShadow dx="0" dy="5" stdDeviation="10" flood-color="#fff" flood-opacity=".75"/></filter>
+    <filter id="eyeGlow" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="12" result="b"/><feColorMatrix in="b" type="matrix" values="0 0 0 0 .35 0 0 0 0 1 0 0 0 0 .67 0 0 0 .9 0"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="hair" x1="15%" y1="38%" x2="84%" y2="66%"><stop offset="0" stop-color="#6b3a29"/><stop offset=".5" stop-color="#b88472"/><stop offset="1" stop-color="#482116"/></linearGradient>
+    <radialGradient id="heart" cx="50%" cy="22%" r="74%"><stop offset="0" stop-color="#ffd7df"/><stop offset="1" stop-color="#ff8dac"/></radialGradient>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M348 286c92-143 276-159 418-95 156-69 343-33 430 116 66 113 50 285-51 404-122 145-315 174-377 177-86-4-278-43-386-180-96-122-100-297-34-422Z" fill="url(#hair)"/>
+    <ellipse cx="356" cy="528" rx="108" ry="148" fill="url(#ear)"/>
+    <ellipse cx="1180" cy="528" rx="108" ry="148" fill="url(#ear)"/>
+    <ellipse cx="768" cy="514" rx="416" ry="386" fill="url(#body)"/>
+    <path d="M365 502C384 342 539 262 768 262s384 80 403 240c13 110-48 209-162 247-72 24-154 35-241 35s-169-11-241-35C413 711 352 612 365 502Z" fill="url(#rim)"/>
+    <path d="M420 512c0-132 132-204 348-204s348 72 348 204c0 133-132 186-348 186S420 645 420 512Z" fill="url(#face)"/>
+    <path d="M590 503c26-55 90-55 116 0" fill="none" stroke="#fffdf4" stroke-width="43" stroke-linecap="round" filter="url(#eyeGlow)"/>
+    <path d="M831 503c26-55 90-55 116 0" fill="none" stroke="#fffdf4" stroke-width="43" stroke-linecap="round" filter="url(#eyeGlow)"/>
+    <ellipse cx="556" cy="602" rx="32" ry="22" fill="#ff9cb0"/>
+    <ellipse cx="981" cy="602" rx="32" ry="22" fill="#ff9cb0"/>
+    <path d="M768 890 545 690c-86-78-31-221 84-221 61 0 107 32 139 78 32-46 78-78 139-78 115 0 170 143 84 221L768 890Z" fill="url(#heart)"/>
+    <circle cx="502" cy="757" r="86" fill="url(#body)"/>
+    <circle cx="1034" cy="757" r="86" fill="url(#body)"/>
+  </g>
+</svg>

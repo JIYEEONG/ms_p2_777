@@ -56,6 +56,39 @@ const themeAssets = {
   "프라이빗": "./assets/theme-private.jpg",
 };
 
+const aiPersonas = [
+  { id: "moov", name: "무브", desc: "캐주얼한 잡담, 공감 위주 대화", image: "./assets/luna-moov.svg" },
+  { id: "todaki", name: "토닥이", desc: "고민 상담, 공감 기반 대화", image: "./assets/토닥이_캐릭터.png" },
+  { id: "doctor", name: "척척박사", desc: "아는 만큼 답해주는 지식 모드", image: "./assets/척척박사_캐릭터.png" },
+  { id: "ringo", name: "링고", desc: "실시간 통역과 주변 관광정보 안내", image: "./assets/링고_최종.png" },
+];
+
+const outingFilterConfig = [
+  { key: "category", label: "무엇을 할까요", values: ["전체", "음식점", "카페", "전시", "쇼핑", "관광", "체험"] },
+  { key: "mood", label: "분위기", values: ["전체", "조용함", "활기참", "감성", "트렌디", "로맨틱"] },
+  { key: "companion", label: "동행", values: ["전체", "혼자", "연인", "친구", "가족", "동료"] },
+  { key: "purpose", label: "목적", values: ["전체", "식사", "대화", "미팅", "휴식", "쇼핑", "체험", "데이트"] },
+  { key: "time", label: "시간대", values: ["전체", "아침", "점심", "오후", "저녁", "야간"] },
+];
+
+const courseTagProfiles = {
+  seongsu: { category: ["카페"], mood: ["감성", "트렌디"], companion: ["혼자", "친구", "연인"], purpose: ["대화", "휴식"], time: ["오후", "저녁"], price: 32000 },
+  hangang: { category: ["관광", "체험"], mood: ["로맨틱", "감성"], companion: ["연인", "친구", "가족"], purpose: ["휴식", "데이트"], time: ["저녁", "야간"], price: 22000 },
+  baseball: { category: ["음식점", "체험"], mood: ["활기참", "트렌디"], companion: ["친구", "가족"], purpose: ["식사", "체험"], time: ["저녁", "야간"], price: 45000 },
+  jazz: { category: ["음식점", "체험"], mood: ["로맨틱", "트렌디"], companion: ["연인", "친구"], purpose: ["데이트", "대화"], time: ["저녁", "야간"], price: 52000 },
+  camping: { category: ["음식점", "관광", "체험"], mood: ["감성", "활기참"], companion: ["친구", "가족"], purpose: ["휴식", "체험"], time: ["오후", "저녁"], price: 58000 },
+  bugak: { category: ["카페", "관광"], mood: ["조용함", "로맨틱"], companion: ["혼자", "연인"], purpose: ["휴식", "데이트"], time: ["저녁", "야간"], price: 26000 },
+  insadong: { category: ["카페", "쇼핑", "관광"], mood: ["조용함", "감성"], companion: ["혼자", "친구", "가족"], purpose: ["대화", "쇼핑", "휴식"], time: ["점심", "오후"], price: 30000 },
+  pottery: { category: ["체험", "관광"], mood: ["조용함", "감성"], companion: ["연인", "친구", "가족"], purpose: ["체험", "데이트"], time: ["점심", "오후"], price: 65000 },
+  seokchon: { category: ["카페", "관광"], mood: ["감성", "로맨틱"], companion: ["혼자", "연인", "친구"], purpose: ["휴식", "데이트"], time: ["오후", "저녁"], price: 28000 },
+  lotteworld: { category: ["체험", "쇼핑"], mood: ["활기참", "트렌디"], companion: ["연인", "친구", "가족"], purpose: ["체험", "데이트"], time: ["점심", "오후", "저녁"], price: 90000 },
+  seoulforest: { category: ["카페", "관광"], mood: ["조용함", "감성"], companion: ["혼자", "친구", "가족"], purpose: ["휴식", "대화"], time: ["아침", "오후"], price: 24000 },
+  artscenter: { category: ["전시", "체험"], mood: ["조용함", "로맨틱"], companion: ["혼자", "연인", "동료"], purpose: ["체험", "데이트"], time: ["오후", "저녁"], price: 70000 },
+  naengmyeon: { category: ["음식점"], mood: ["조용함"], companion: ["혼자", "친구", "동료"], purpose: ["식사"], time: ["점심", "저녁"], price: 23000 },
+  tonkatsu: { category: ["음식점", "관광"], mood: ["활기참"], companion: ["친구", "가족"], purpose: ["식사", "휴식"], time: ["점심", "저녁"], price: 34000 },
+  library: { category: ["관광", "체험"], mood: ["조용함"], companion: ["혼자", "동료"], purpose: ["휴식", "미팅"], time: ["아침", "오후"], price: 12000 },
+};
+
 const rentalOptionCatalog = [
   { id: "privacy", name: "프라이버시 글라스", price: 3000 },
   { id: "wellness", name: "웰니스 온도·조명", price: 2000 },
@@ -87,6 +120,12 @@ const appNotices = [
   { id: "notice-2", tag: "업데이트", title: "관심 상품과 구매 내역 기능 추가", date: "2026.09.12", text: "차량별 재고 확인, 관심 목록 저장과 전자 영수증 조회 기능이 추가되었습니다." },
 ];
 
+const homePromotions = [
+  { id: "food", tag: "프로모션", title: "특별한 오늘, 더 특별한 한 끼", desc: "근처 프리미엄 다이닝 코스를 추천해요.", image: "./assets/배너_음식점.png", action: "browse-courses-home" },
+  { id: "exhibit", tag: "추천 코스", title: "큐비스트: 시각의 혁신가들", desc: "전시와 산책을 잇는 문화 나들이.", image: "./assets/배너_전시.png", action: "browse-courses-home" },
+  { id: "movie", tag: "광고", title: "스파이더맨 브랜드 뉴 데이", desc: "극장가 이벤트와 주변 코스를 함께 확인하세요.", image: "./assets/배너_스파이더맨.webp", action: "browse-courses-home" },
+];
+
 const historyRoutes = [
   { id: "ride-1", date: "2026-09-10", name: "성수 → 한강 야경", meta: "2026.09.10 · 렌트 3시간 12분", stops: ["성수연방", "뚝섬 한강공원", "반포대교 달빛광장"] },
   { id: "ride-2", date: "2026-09-07", name: "북촌 산책 코스", meta: "2026.09.07 · 택시 2시간 5분", stops: ["안국역", "북촌한옥마을", "삼청동 카페거리"] },
@@ -103,6 +142,7 @@ function readSaved() {
 
 const saved = readSaved();
 const state = {
+  isAuthenticated: saved.isAuthenticated || false,
   activeTab: "home",
   homeMode: saved.homeMode || "taxi",
   homeStep: saved.tripActive ? "service" : "mode",
@@ -117,26 +157,35 @@ const state = {
   rentalVehicleType: saved.rentalVehicleType || "standard",
   rentalOptions: new Set(saved.rentalOptions || ["privacy"]),
   aiStatus: "idle",
-  aiPersona: "친구",
+  aiPersona: saved.aiPersona || "무브",
+  aiVoiceEnabled: saved.aiVoiceEnabled ?? true,
+  aiSaveEnabled: saved.aiSaveEnabled ?? false,
+  aiCrisisOpen: false,
+  aiChatExpanded: false,
+  aiStageRatio: saved.aiStageRatio || 56,
+  aiInputMode: saved.aiInputMode || "voice",
   aiSub: "talk",
   activeThreadId: saved.activeThreadId || "thread-main",
   chatThreads: saved.chatThreads || [{
     id: "thread-main",
-    title: "오늘의 이동 대화",
+    title: "오늘 이동 중 나눈 대화",
     updated: "방금 전",
-    persona: "친구",
-    messages: [{ role: "ai", text: "안녕하세요. 이동하는 동안 무엇이든 편하게 이야기해 주세요." }],
+    persona: "무브",
+    messages: [{ role: "ai", text: "안녕하세요! 이동 중에 저와 얘기하고 싶으시면 언제든 \"루나야\"라고 불러주세요." }],
   }],
   spaceSub: "purchase",
   purchaseSub: "search",
   productCategory: "추천",
   productQuery: "",
+  homeQuery: saved.homeQuery || "",
   productLikes: new Set((saved.productLikes || ["fruit-cup"]).filter((id) => products.some((product) => product.id === id))),
   cart: (saved.cart || [{ id: "bottled-water", qty: 1 }]).filter((line) => products.some((product) => product.id === line.id)),
   orders: saved.orders || [],
-  outingSub: "browse",
+  outingSub: "recommend",
   outingSort: saved.outingSort || "popular",
   outingQuery: "",
+  outingMapOpen: saved.outingMapOpen || false,
+  outingFilters: saved.outingFilters || { category: "전체", mood: "전체", companion: "전체", purpose: "전체", time: "전체", budget: 70000 },
   locationReady: saved.locationReady || false,
   likedCourseIds: new Set(saved.likedCourseIds || []),
   savedCourseIds: new Set((saved.savedCourseIds || ["seongsu"]).filter((id) => id !== "cheomseongdae")),
@@ -173,7 +222,7 @@ if (!rentalVehicles.some((vehicle) => vehicle.id === state.rentalVehicleType)) s
 const tabMeta = {
   ai: ["Moov", "AI 말동무"],
   space: ["Moov", "공간"],
-  home: ["Moov", "홈"],
+  home: ["Moov", ""],
   outing: ["Moov", "나들이"],
   profile: ["Moov", "내 정보"],
 };
@@ -186,6 +235,10 @@ let splashTimer;
 let toastTimer;
 let speechRecognition;
 let searchDebounceTimer;
+let aiSwipeSuppressUntil = 0;
+let aiPersonaMotionClass = "";
+let outingLeafletMap;
+let outingLeafletLayer;
 
 const SEARCH_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 260;
@@ -281,6 +334,7 @@ function historySearchCandidates() {
 }
 
 function getSearchCandidates(inputId) {
+  if (inputId === "home-search") return courseSearchCandidates();
   if (inputId === "product-search") return productSearchCandidates();
   if (inputId === "course-search") return courseSearchCandidates();
   if (inputId === "history-search") return historySearchCandidates();
@@ -288,7 +342,7 @@ function getSearchCandidates(inputId) {
 }
 
 function getSearchStateKey(inputId) {
-  return { "product-search": "productQuery", "course-search": "outingQuery", "history-search": "historyQuery" }[inputId];
+  return { "home-search": "homeQuery", "product-search": "productQuery", "course-search": "outingQuery", "history-search": "historyQuery" }[inputId];
 }
 
 function getSearchSuggestions(inputId, query) {
@@ -306,7 +360,7 @@ function renderSearchSuggestions(inputId, query) {
   if (!normalizeSearch(query)) return "";
   if (!suggestions.length) return `<div class="search-suggestions empty" role="status">검색어와 일치하는 후보가 없어요</div>`;
   const active = Math.min(searchUi.activeIndex, suggestions.length - 1);
-  return `<div class="search-suggestions" role="listbox" aria-label="자동완성 후보">${suggestions.map((item, index) => `<button class="${index === active ? "active" : ""}" data-action="search-suggestion" data-input="${inputId}" data-item="${escapeHtml(item.itemId || "")}" data-value="${escapeHtml(item.queryValue || item.name)}" role="option" aria-selected="${index === active ? "true" : "false"}"><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.sub_category || item.area || "")}</small></span><em>${escapeHtml(item.category)}${item.blue_ribbon ? " · 블루리본" : ""}</em></button>`).join("")}</div>`;
+  return `<div class="search-suggestions" role="listbox" aria-label="자동완성 후보">${suggestions.map((item, index) => `<button class="${index === active ? "active" : ""}" data-action="search-suggestion" data-input="${inputId}" data-option-id="${escapeHtml(item.id || "")}" data-item="${escapeHtml(item.itemId || "")}" data-value="${escapeHtml(item.queryValue || item.name)}" role="option" aria-selected="${index === active ? "true" : "false"}"><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.sub_category || item.area || "")}</small></span><em>${escapeHtml(item.category)}${item.blue_ribbon ? " · 블루리본" : ""}</em></button>`).join("")}</div>`;
 }
 
 function courseMatchesQuery(course, query) {
@@ -318,6 +372,7 @@ function courseMatchesQuery(course, query) {
 
 function persist() {
   const data = {
+    isAuthenticated: state.isAuthenticated,
     username: state.username,
     profilePhoto: state.profilePhoto,
     theme: state.theme,
@@ -329,6 +384,7 @@ function persist() {
     usageStartedAt: state.usageStartedAt,
     rentalEndsAt: state.rentalEndsAt,
     homeMode: state.homeMode,
+    homeQuery: state.homeQuery,
     pickupLocation: state.pickupLocation,
     rentalHours: state.rentalHours,
     taxiVehicleType: state.taxiVehicleType,
@@ -341,6 +397,13 @@ function persist() {
     customCourses: state.customCourses,
     selectedCourse: state.selectedCourse,
     routeStops: state.routeStops,
+    outingMapOpen: state.outingMapOpen,
+    outingFilters: state.outingFilters,
+    aiPersona: state.aiPersona,
+    aiVoiceEnabled: state.aiVoiceEnabled,
+    aiSaveEnabled: state.aiSaveEnabled,
+    aiInputMode: state.aiInputMode,
+    aiStageRatio: state.aiStageRatio,
     chatThreads: state.chatThreads,
     activeThreadId: state.activeThreadId,
     paymentCards: state.paymentCards,
@@ -362,6 +425,7 @@ function login() {
     return;
   }
   state.username = id.slice(0, 12);
+  state.isAuthenticated = true;
   if (!state.profilePhoto) state.profilePhoto = DEFAULT_PROFILE_PHOTO;
   state.homeStep = state.tripActive ? "service" : "mode";
   persist();
@@ -386,8 +450,39 @@ function render() {
   content.innerHTML = views[state.activeTab]();
   if (state.activeTab === "ai" && state.aiSub === "talk") requestAnimationFrame(scrollChat);
   requestAnimationFrame(enableDragScroll);
+  requestAnimationFrame(enableAiPersonaSwipe);
+  requestAnimationFrame(enableAiPanelResize);
+  if (state.activeTab === "outing" && state.outingSub === "recommend" && state.outingMapOpen) requestAnimationFrame(initOutingMap);
   syncCabinPreview();
   syncHeaderProfile();
+}
+
+function currentAiPersona() {
+  return aiPersonas.find((persona) => persona.name === state.aiPersona) || aiPersonas[0];
+}
+
+function setAiPersona(name, silent = false) {
+  const persona = aiPersonas.find((item) => item.name === name) || aiPersonas[0];
+  state.aiPersona = persona.name;
+  state.personaMenuOpen = false;
+  currentThread().persona = persona.name;
+  persist();
+  render();
+  if (aiPersonaMotionClass) {
+    const motionClass = aiPersonaMotionClass;
+    setTimeout(() => {
+      document.querySelectorAll(`.${motionClass}`).forEach((el) => el.classList.remove(motionClass));
+      if (aiPersonaMotionClass === motionClass) aiPersonaMotionClass = "";
+    }, 520);
+  }
+  if (!silent) toast(`${persona.name} 모드로 변경했어요.`);
+}
+
+function shiftAiPersona(direction) {
+  const currentIndex = Math.max(0, aiPersonas.findIndex((persona) => persona.name === state.aiPersona));
+  const nextIndex = (currentIndex + direction + aiPersonas.length) % aiPersonas.length;
+  aiPersonaMotionClass = direction > 0 ? "persona-slide-left" : "persona-slide-right";
+  setAiPersona(aiPersonas[nextIndex].name);
 }
 
 function syncHeaderProfile() {
@@ -411,6 +506,7 @@ function enableDragScroll() {
       scroller.dataset.dragMoved = "false";
       scroller.setPointerCapture(event.pointerId);
       scroller.classList.add("dragging");
+      if (scroller.classList.contains("home-promo-slider")) scroller.classList.add("bouncing");
     });
     scroller.addEventListener("pointermove", (event) => {
       if (!dragging) return;
@@ -423,6 +519,18 @@ function enableDragScroll() {
       if (!dragging) return;
       dragging = false;
       scroller.classList.remove("dragging");
+      if (scroller.classList.contains("home-promo-slider")) {
+        const firstSlide = scroller.querySelector(".home-promo-slide");
+        if (firstSlide) {
+          const style = getComputedStyle(scroller);
+          const gap = Number.parseFloat(style.columnGap || style.gap || "0") || 0;
+          const step = firstSlide.getBoundingClientRect().width + gap;
+          const target = Math.round(scroller.scrollLeft / step) * step;
+          scroller.scrollTo({ left: target, behavior: "smooth" });
+        }
+        scroller.classList.add("settling");
+        setTimeout(() => { if (scroller.isConnected) scroller.classList.remove("bouncing", "settling"); }, 360);
+      }
       if (scroller.hasPointerCapture?.(event.pointerId)) scroller.releasePointerCapture(event.pointerId);
     };
     scroller.addEventListener("pointerup", stop);
@@ -430,6 +538,91 @@ function enableDragScroll() {
     scroller.addEventListener("click", (event) => {
       if (scroller.dataset.dragMoved === "true") { event.preventDefault(); event.stopPropagation(); scroller.dataset.dragMoved = "false"; }
     }, true);
+  });
+}
+
+function enableAiPersonaSwipe() {
+  const stage = document.querySelector("[data-ai-persona-swipe]");
+  if (!stage) return;
+  let startX = 0;
+  let startY = 0;
+  let pointerId = null;
+  let swiped = false;
+  stage.addEventListener("pointerdown", (event) => {
+    pointerId = event.pointerId;
+    startX = event.clientX;
+    startY = event.clientY;
+    swiped = false;
+    stage.dataset.swiping = "false";
+    stage.setPointerCapture?.(event.pointerId);
+  });
+  stage.addEventListener("pointermove", (event) => {
+    if (pointerId !== event.pointerId) return;
+    const dx = event.clientX - startX;
+    const dy = event.clientY - startY;
+    if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.15) {
+      stage.dataset.swiping = "true";
+      event.preventDefault();
+    }
+  });
+  const finish = (event) => {
+    if (pointerId !== event.pointerId) return;
+    const dx = event.clientX - startX;
+    const dy = event.clientY - startY;
+    if (Math.abs(dx) > 58 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+      swiped = true;
+      aiSwipeSuppressUntil = Date.now() + 350;
+      stage.dataset.personaSwiped = "true";
+      shiftAiPersona(dx < 0 ? 1 : -1);
+      setTimeout(() => { if (stage.isConnected) stage.dataset.personaSwiped = "false"; }, 250);
+    }
+    if (stage.hasPointerCapture?.(event.pointerId)) stage.releasePointerCapture(event.pointerId);
+    pointerId = null;
+    stage.dataset.swiping = "false";
+  };
+  stage.addEventListener("pointerup", finish);
+  stage.addEventListener("pointercancel", finish);
+  stage.addEventListener("click", (event) => {
+    if (swiped || stage.dataset.personaSwiped === "true") {
+      event.preventDefault();
+      event.stopPropagation();
+      swiped = false;
+      stage.dataset.personaSwiped = "false";
+    }
+  }, true);
+}
+
+function enableAiPanelResize() {
+  const shell = document.querySelector("[data-ai-resizable]");
+  const handle = document.querySelector("[data-ai-resize-handle]");
+  if (!shell || !handle || handle.dataset.bound === "true") return;
+  handle.dataset.bound = "true";
+  const updateRatio = (clientY) => {
+    const rect = shell.getBoundingClientRect();
+    const ratio = Math.round(((clientY - rect.top) / Math.max(rect.height, 1)) * 100);
+    state.aiStageRatio = Math.min(72, Math.max(34, ratio));
+    shell.style.setProperty("--ai-stage-ratio", `${state.aiStageRatio}%`);
+  };
+  handle.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    handle.setPointerCapture?.(event.pointerId);
+    shell.classList.add("resizing");
+  });
+  handle.addEventListener("pointermove", (event) => {
+    if (!handle.hasPointerCapture?.(event.pointerId)) return;
+    updateRatio(event.clientY);
+  });
+  const stop = (event) => {
+    if (handle.hasPointerCapture?.(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+    shell.classList.remove("resizing");
+    persist();
+  };
+  handle.addEventListener("pointerup", stop);
+  handle.addEventListener("pointercancel", stop);
+  handle.addEventListener("dblclick", () => {
+    state.aiStageRatio = 56;
+    shell.style.setProperty("--ai-stage-ratio", "56%");
+    persist();
   });
 }
 
@@ -458,7 +651,12 @@ function renderHome() {
 }
 
 function renderHomeModeChoice() {
-  return `<div class="home-mode-entry"><section class="home-mode-hero"><img src="./assets/cabin-default.jpg" alt="서울 풍경이 보이는 MOOV 무인차 내부" /><div class="home-mode-hero-shade"></div><div><span class="badge">MOOV MOBILITY</span><h3>moov 서비스</h3><p>이동 방식에 맞춰 가까운 무인차를 연결합니다.</p></div></section>${renderHomeNoticePreview()}<div class="home-mode-grid"><button class="home-mode-card taxi" data-action="select-home-mode" data-value="taxi"><img src="./assets/icon-taxi.png" alt="택시 아이콘" /><span><strong>택시</strong><small>목적지까지 빠르게 이동하고<br />거리만큼 자동 결제해요.</small></span><em>가까운 차량 약 3분 ${icon("chevron")}</em></button><button class="home-mode-card rent" data-action="select-home-mode" data-value="rent"><img src="./assets/icon-rent.png" alt="렌트 아이콘" /><span><strong>렌트</strong><small>차량과 공간 옵션을 골라<br />2~24시간 자유롭게 이용해요.</small></span><em>시간당 22,000원부터 ${icon("chevron")}</em></button></div></div>`;
+  return `<div class="home-mode-entry">${renderSearchField({ inputId: "home-search", stateKey: "homeQuery", className: "home-search", placeholder: "원하는 곳, 코스를 검색하세요", label: "홈 검색" })}<div class="home-mode-grid"><button class="home-mode-card taxi" data-action="select-home-mode" data-value="taxi"><img src="./assets/icon-taxi.png" alt="택시 아이콘" /><span><strong>택시</strong><small>목적지까지 빠르게 이동하고<br />거리만큼 자동 결제해요.</small></span><em>가까운 차량 약 3분 ${icon("chevron")}</em></button><button class="home-mode-card rent" data-action="select-home-mode" data-value="rent"><img src="./assets/icon-rent.png" alt="렌트 아이콘" /><span><strong>렌트</strong><small>차량과 공간 옵션을 골라<br />2~24시간 자유롭게 이용해요.</small></span><em>시간당 22,000원부터 ${icon("chevron")}</em></button></div>${renderHomePromotionSlider()}${renderHomeNoticePreview()}</div>`;
+}
+
+function renderHomePromotionSlider() {
+  const slides = [...homePromotions, ...homePromotions];
+  return `<section class="home-promo-section" aria-label="광고와 추천 코스"><div class="section-row"><strong>광고·프로모션</strong><span class="small muted">추천 코스</span></div><div class="home-promo-slider" data-drag-scroll>${slides.map((promo, index) => `<button class="home-promo-slide promo-${promo.id}" data-action="${promo.action}" aria-label="${escapeHtml(promo.title)}"><img src="${promo.image}" alt="${escapeHtml(promo.title)}" /><span class="home-promo-shade"></span><span class="home-promo-copy"><small>${escapeHtml(promo.tag)}</small><strong>${escapeHtml(promo.title)}</strong><em>${escapeHtml(promo.desc)}</em></span></button>`).join("")}</div></section>`;
 }
 
 function renderHomeNoticePreview() {
@@ -496,7 +694,7 @@ function renderPickupCard() {
 }
 
 function renderDestinationCard(route) {
-  return `<section class="card search-panel"><div class="row"><div><span class="small muted">목적지 선택</span><h3 style="margin:4px 0">${route ? escapeHtml(route.name) : escapeHtml(state.routeStops.at(-1) || "목적지를 선택해 주세요")}</h3></div><button class="mini-action" data-action="open-destination">직접 설정</button></div>${state.routeStops.length ? `<div class="selected-route">${state.routeStops.map((stop, index) => `<div class="route-stop"><span class="route-number">${index + 1}</span><strong>${escapeHtml(stop)}</strong><span>${index === state.routeStops.length - 1 ? "목적지" : index === 0 ? "출발" : "경유"}</span></div>`).join("")}</div>` : ""}<div class="destination-actions"><button data-action="choose-saved-course">${icon("bookmark")}<span><strong>관심 코스</strong><small>저장한 전체 코스 가져오기</small></span></button><button data-action="browse-courses-home">${icon("compass")}<span><strong>나들이 코스</strong><small>코스 보기에서 따라가기</small></span></button></div></section>`;
+  return `<section class="card search-panel"><div class="row"><div><span class="small muted">목적지 선택</span><h3 style="margin:4px 0">${route ? escapeHtml(route.name) : escapeHtml(state.routeStops.at(-1) || "목적지를 선택해 주세요")}</h3></div><button class="mini-action" data-action="open-destination">직접 설정</button></div>${state.routeStops.length ? `<div class="selected-route">${state.routeStops.map((stop, index) => `<div class="route-stop"><span class="route-number">${index + 1}</span><strong>${escapeHtml(stop)}</strong><span>${index === state.routeStops.length - 1 ? "목적지" : index === 0 ? "출발" : "경유"}</span></div>`).join("")}</div>` : ""}<div class="destination-actions"><button data-action="choose-saved-course">${icon("bookmark")}<span><strong>관심 코스</strong><small>저장한 전체 코스 가져오기</small></span></button><button data-action="browse-courses-home">${icon("compass")}<span><strong>나들이 코스</strong><small>AI 코스 추천에서 따라가기</small></span></button></div></section>`;
 }
 
 function renderUsageStatus() {
@@ -558,7 +756,7 @@ function openDestinationSearch() {
   openModal({
     title: "목적지 검색",
     iconName: "pin",
-    body: `<p>목적지와 경유지를 직접 입력하거나 관심 코스 전체를 불러오세요.</p><div class="popup-form"><label class="form-label">출발지<input id="route-start" value="${escapeHtml(state.pickupLocation)}" /></label><label class="form-label">경유지<input id="route-waypoint" placeholder="선택 사항" value="${escapeHtml(state.routeStops.length > 2 ? state.routeStops[1] : "")}" /></label><label class="form-label">목적지<input id="route-end" value="${escapeHtml(state.routeStops.at(-1) || "")}" placeholder="목적지 입력" /></label><button class="secondary-button full" data-action="choose-saved-course">${icon("bookmark")} 관심 코스에서 선택</button><button class="ghost-button full" data-action="browse-courses-home">${icon("compass")} 나들이 코스 보기</button></div>`,
+    body: `<p>목적지와 경유지를 직접 입력하거나 관심 코스 전체를 불러오세요.</p><div class="popup-form"><label class="form-label">출발지<input id="route-start" value="${escapeHtml(state.pickupLocation)}" /></label><label class="form-label">경유지<input id="route-waypoint" placeholder="선택 사항" value="${escapeHtml(state.routeStops.length > 2 ? state.routeStops[1] : "")}" /></label><label class="form-label">목적지<input id="route-end" value="${escapeHtml(state.routeStops.at(-1) || "")}" placeholder="목적지 입력" /></label><button class="secondary-button full" data-action="choose-saved-course">${icon("bookmark")} 관심 코스에서 선택</button><button class="ghost-button full" data-action="browse-courses-home">${icon("compass")} AI 코스 추천 열기</button></div>`,
     primary: "경로 등록",
     secondary: "취소",
     onConfirm: () => {
@@ -603,26 +801,82 @@ function chooseSavedCourse() {
 }
 
 function renderAi() {
-  const tabs = [["talk", "대화"], ["history", "대화 기록"], ["settings", "말동무 설정"]];
-  if (state.aiSub === "history") return `${subtabs(tabs, state.aiSub, "ai-sub")}${renderAiHistory()}`;
-  if (state.aiSub === "settings") return `${subtabs(tabs, state.aiSub, "ai-sub")}${renderAiSettings()}`;
+  const tabs = [["talk", "대화"], ["history", "대화 기록"], ["settings", "루나 설정"]];
+  if (state.aiSub === "history") return `${renderAiStaticFrame()}${subtabs(tabs, state.aiSub, "ai-sub")}${renderAiHistory()}`;
+  if (state.aiSub === "settings") return `${renderAiStaticFrame()}${subtabs(tabs, state.aiSub, "ai-sub")}${renderAiSettings()}`;
   const thread = currentThread();
-  const recentThread = state.chatThreads[0] || thread;
   const listening = state.aiStatus === "listening";
-  const status = listening ? "듣고 있어요" : state.aiStatus === "paused" ? "대화를 잠시 멈췄어요" : "지금 어떤 이야기를 나눌까요?";
-  return `${subtabs(tabs, state.aiSub, "ai-sub")}
-    <section class="ai-cabin-stage ${listening ? "listening" : ""}"><img src="./assets/cabin-default.jpg" alt="서울 풍경이 보이는 MOOV 차량 내부" /><div class="ai-cabin-shade"></div><span class="ai-connected"><i></i>차량과 연결됨</span><button class="spatial-ai" data-action="voice-toggle" aria-label="공간형 AI 음성 대화 시작 또는 멈춤"><span class="ai-face"><i></i><i></i><b></b></span><span class="ai-ring one"></span><span class="ai-ring two"></span></button><div class="ai-live-state"><i></i><strong>${listening ? "듣고 있어요" : "AI 말동무 대기 중"}</strong></div></section>
-    <div class="persona-chips ai-personas">${["친구", "상담가", "지식 전문가", "통역·여행 가이드"].map((p) => `<button class="${state.aiPersona === p ? "selected" : ""}" data-action="persona" data-value="${p}">${p}</button>`).join("")}</div>
-    <section class="ai-voice-console"><h3>${status}</h3><p>${state.aiPersona} 모드 · 음성과 차량 환경에 맞춰 대화해요.</p><div class="voice-wave ${listening ? "active" : ""}" aria-hidden="true">${Array.from({length: 17}, (_, index) => `<i style="--wave:${(index % 5) + 1}"></i>`).join("")}</div><div class="ai-control-row"><button class="ai-side-control" data-action="ai-pause">${icon("pause")}<span>잠시 멈춤</span></button><button class="ai-main-control ${listening ? "active" : ""}" data-action="voice-toggle" aria-label="${listening ? "음성 입력 멈춤" : "음성 대화 시작"}">${icon("mic")}</button><button class="ai-side-control stop" data-action="ai-stop">${icon("stop")}<span>대화 종료</span></button></div></section>
-    <section class="recent-conversation"><button class="recent-summary" data-action="ai-recent-history">${icon("clock")}<span><small>최근 대화</small><strong>${escapeHtml(recentThread.title)}</strong></span>${icon("chevron")}</button><button class="resume-thread" data-action="resume-thread" data-value="${recentThread.id}">이어하기</button></section>
-    <section id="chat-window" class="chat-window compact-chat">${thread.messages.map((m) => `<div class="chat-bubble ${m.role === "user" ? "user" : ""}">${escapeHtml(m.text)}</div>`).join("")}</section>
-    <form id="chat-form" class="chat-input"><button type="button" class="mic-button" data-action="voice-toggle" aria-label="음성 입력">${icon("mic")}</button><input id="chat-text" autocomplete="off" placeholder="메시지를 입력하세요" aria-label="AI 말동무 메시지" /><button class="send-button" type="submit" aria-label="메시지 보내기">${icon("send")}</button></form>`;
+  const off = state.aiStatus === "off";
+  const persona = currentAiPersona();
+  if (off) {
+    return `<section class="ai-off-stage card">
+        <div class="ai-off-orb"><img src="${persona.image}" alt="" /></div>
+        <h3>루나를 종료했어요</h3>
+        <p>"알겠습니다. 대화 모드를 종료할게요." 다시 대화하고 싶을 때 언제든 시작할 수 있어요.</p>
+        <button class="primary-button" data-action="ai-restart">루나 다시 시작</button>
+      </section>${subtabs(tabs, state.aiSub, "ai-sub")}`;
+  }
+  const hasStartedChat = thread.messages.some((message) => message.role === "user") || listening;
+  const starterPrompts = [
+    "요즘 환율 추이가 어때?",
+    "지금 배고픈데 주변에 맛집 있어?",
+  ];
+  const ratio = Math.min(72, Math.max(34, Number(state.aiStageRatio || 56)));
+  return `<section id="ai-live-block" class="luna-resizable-shell ${state.aiInputMode === "text" ? "text-mode" : "voice-mode"}" data-ai-resizable style="--ai-stage-ratio:${ratio}%">
+    <section class="luna-character-pane" data-ai-persona-swipe>
+      <img class="luna-cabin-bg" src="./assets/cabin-default.jpg" alt="서울 풍경이 보이는 MOOV 차량 내부" />
+      <div class="luna-cabin-shade"></div>
+      <button class="luna-hero-character persona-${persona.id} ${aiPersonaMotionClass}" type="button" data-action="persona-menu" aria-label="${persona.name} 모드 선택">
+        <img src="${persona.image}" alt="${persona.name} 캐릭터" />
+      </button>
+      <div class="ai-persona-dropdown ${state.personaMenuOpen ? "open" : ""}">
+        ${aiPersonas.map(({ name, desc }) => `<button class="ai-persona-option ${state.aiPersona === name ? "selected" : ""}" data-action="persona" data-value="${name}"><strong>${name}</strong><small>${desc}</small></button>`).join("")}
+      </div>
+    </section>
+    <button class="ai-resize-handle" type="button" data-ai-resize-handle aria-label="캐릭터와 채팅 영역 크기 조절"><span></span></button>
+    <section id="chat-window" class="luna-dialog-pane">
+      <div class="ai-mode-tabs" role="group" aria-label="말동무 모드">
+        <button class="${state.aiInputMode !== "text" ? "active" : ""}" type="button" data-action="ai-mode" data-value="voice">대화</button>
+        <button class="${state.aiInputMode === "text" ? "active" : ""}" type="button" data-action="ai-mode" data-value="text">대화 기록</button>
+        <button type="button" data-action="ai-sub" data-value="settings">루나 설정</button>
+      </div>
+      <div class="crisis-overlay ${state.aiCrisisOpen ? "open" : ""}">
+        <div class="crisis-overlay-head">
+          <div class="crisis-overlay-icon">${icon("shield")}</div>
+          <div><h4>혼자 두지 않을게요</h4><p>지금 벅찬 감정, 괜찮다면 조금 더 이야기해줄래요? 필요하면 아래 번호로 언제든 연결할 수 있어요.</p></div>
+          <button class="crisis-overlay-close" data-action="crisis-close" aria-label="위기 안내 닫기">${icon("x")}</button>
+        </div>
+        <div class="crisis-overlay-actions"><button class="crisis-call-button" data-action="crisis-call">${icon("shield")}자살예방상담전화 1393 연결</button></div>
+      </div>
+      <div class="luna-chat-log">
+        <div class="chat-date-divider"><span>${new Date().toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}</span></div>
+        ${thread.messages.map((m) => `<div class="detail-message-row ${m.role === "user" ? "user" : ""}"><div class="detail-message-bubble">${escapeHtml(m.text)}<small>${escapeHtml(m.time || "방금 전")}</small></div></div>`).join("")}
+        ${hasStartedChat ? "" : `<div class="starter-chat-box" aria-label="예시 질문">${starterPrompts.map((prompt) => `<button type="button" class="starter-chat-bubble" data-action="starter-prompt" data-value="${escapeHtml(prompt)}">${escapeHtml(prompt)}</button>`).join("")}</div>`}
+      </div>
+      <div class="luna-dialog-footer">
+        <form id="main-text-form" class="chat-input luna-text-input">
+          <button class="input-plus-button" type="button" aria-label="추가 메뉴">${icon("plus")}</button>
+          <input id="main-text-input" autocomplete="off" placeholder="메시지를 입력하세요" aria-label="루나에게 메시지 입력" />
+        </form>
+        <button class="ai-center-mic ${listening ? "listening" : ""}" type="button" data-action="voice-toggle" aria-label="${listening ? "음성 입력 멈춤" : "음성 대화 시작"}">${icon("mic")}</button>
+        <div class="ai-bottom-controls">
+          <button class="voice-status-pill ${listening ? "listening" : ""}" type="button" data-action="ai-mode" data-value="voice">${listening ? "듣는 중" : state.aiVoiceEnabled ? "대기 중" : "텍스트"}</button>
+          <button class="send-button" type="submit" form="main-text-form" aria-label="메시지 보내기">${icon("send")}</button>
+        </div>
+      </div>
+    </section>
+  </section>`;
+}
+
+function renderAiStaticFrame() {
+  const persona = currentAiPersona();
+  return `<section class="ai-cabin-stage ai-static-frame"><img src="./assets/cabin-default.jpg" alt="서울 풍경이 보이는 MOOV 차량 내부" /><div class="ai-cabin-shade"></div><div class="spatial-ai static persona-${persona.id}"><img class="luna-bot-image" src="${persona.image}" alt="${persona.name} 캐릭터" /></div></section>`;
 }
 
 function currentThread() {
   let thread = state.chatThreads.find((item) => item.id === state.activeThreadId);
   if (!thread) {
-    thread = { id: `thread-${Date.now()}`, title: "새 대화", updated: "방금 전", persona: state.aiPersona, messages: [{ role: "ai", text: "안녕하세요. 무엇을 함께 이야기해볼까요?" }] };
+    thread = { id: `thread-${Date.now()}`, title: "새 대화", updated: "방금 전", persona: state.aiPersona, messages: [{ role: "ai", text: "안녕하세요! 이동 중에 저와 얘기하고 싶으시면 언제든 \"루나야\"라고 불러주세요.", time: "방금 전" }] };
     state.chatThreads.unshift(thread);
     state.activeThreadId = thread.id;
   }
@@ -630,20 +884,22 @@ function currentThread() {
 }
 
 function renderAiHistory() {
-  return `<section class="section-lead"><h3>대화 기록</h3><p>음성과 텍스트로 나눈 대화를 이어서 확인할 수 있어요.</p></section><section class="card">${state.chatThreads.map((thread) => `<button class="history-item" data-action="open-thread" data-value="${thread.id}"><span class="history-icon">${icon("chat")}</span><span><strong>${escapeHtml(thread.title)}</strong><small>${escapeHtml(thread.updated)} · ${escapeHtml(thread.persona)}</small></span>${icon("chevron")}</button>`).join("")}</section>`;
+  return `<section class="section-lead"><h3>대화 기록</h3><p>저장에 동의한 대화만 여기 남아요. 원하는 기록만 골라 이어갈 수 있어요.</p></section>${state.chatThreads.length ? `<section class="card">${state.chatThreads.map((thread) => `<button class="history-item deletable" data-action="open-thread" data-value="${thread.id}"><span class="history-icon">${icon("chat")}</span><span><strong>${escapeHtml(thread.title)}</strong><small>${escapeHtml(thread.updated)} · ${escapeHtml(thread.messages.length)}개 메시지</small></span><span class="badge gray">${escapeHtml(thread.persona)}</span>${icon("chevron")}</button>`).join("")}</section>` : emptyState("chat", "아직 저장된 대화가 없어요", "설정에서 대화 기록 저장을 켜면 다음 대화부터 여기 남길 수 있어요.")}`;
 }
 
 function renderAiSettings() {
-  return `<section class="section-lead"><h3>말동무 설정</h3><p>음성, 자동 시작, 대화 기록 범위를 설정하세요.</p></section><section class="card">${toggleItem("대화 음성", "따뜻한 중저음", true)}${toggleItem("승차 후 자동 시작", "차량 탑승 확인 후 인사", false)}${toggleItem("대화 기록 저장", "기기 내 최근 대화와 연결", true)}</section><div class="policy-note">위기·범죄·응급 상황은 AI 답변보다 안전 행동과 긴급 연락 안내를 우선합니다.</div>`;
+  return `<section class="section-lead"><h3>루나 설정</h3><p>대화 방식과 기록 저장 범위를 설정하세요.</p></section><section class="card">${toggleItem("루나", "끄면 루나 전체 기능이 종료돼요.", state.aiStatus !== "off", "ai-power")}${toggleItem("음성으로 대화하기", "필요하면 이것만 따로 켜고 끌 수 있어요.", state.aiVoiceEnabled, "ai-voice-setting")}${toggleItem("승차 후 자동 시작", "차량 탑승 확인 후 먼저 인사해요.", false)}${toggleItem("대화 기록 저장", "동의해야만 대화 내용이 남아요.", state.aiSaveEnabled, "ai-save-setting")}</section><div class="policy-note">위기 감지 관련 대화는 기록 저장 동의 여부와 관계없이 대화 기록에서 제외돼요.</div>`;
 }
 
 function sendMessage(text, voice = false) {
   const clean = text.trim();
   if (!clean) return;
   const thread = currentThread();
-  thread.messages.push({ role: "user", text: clean });
-  const reply = voice ? "음성 내용을 확인했어요. 원하시면 관련 장소를 목적지나 나들이 코스로 이어드릴게요." : `“${clean.slice(0, 18)}${clean.length > 18 ? "…" : ""}”에 대해 함께 이야기해볼게요. 이동 상황도 고려해서 간단히 안내할게요.`;
-  thread.messages.push({ role: "ai", text: reply });
+  const now = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
+  thread.messages.push({ role: "user", text: clean, time: now });
+  if (checkCrisisKeywords(clean)) state.aiCrisisOpen = true;
+  const reply = voice ? "음성 내용을 확인했어요. 원하시면 관련 장소를 목적지나 나들이 코스로 이어드릴게요." : pickLunaReply(clean);
+  thread.messages.push({ role: "ai", text: reply, time: new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false }) });
   thread.title = clean.slice(0, 18) || thread.title;
   thread.updated = "방금 전";
   thread.persona = state.aiPersona;
@@ -652,7 +908,21 @@ function sendMessage(text, voice = false) {
   speakReply(reply);
 }
 
-function scrollChat() { const box = document.querySelector("#chat-window"); if (box) box.scrollTop = box.scrollHeight; }
+function pickLunaReply(text) {
+  if (state.aiPersona === "토닥이") return "많이 힘드셨겠어요. 천천히 이야기해주셔도 괜찮아요. 제가 옆에서 같이 들어볼게요.";
+  if (state.aiPersona === "척척박사") return "제가 아는 선에서 정리해드릴게요. 이동 중이라면 핵심부터 짧게 안내할게요.";
+  if (state.aiPersona === "링고") return "주변에 관심 있는 곳이 있는지 한번 찾아볼게요. 말해주신 표현도 자연스럽게 다듬어드릴 수 있어요.";
+  return `좋아요. “${text.slice(0, 18)}${text.length > 18 ? "…" : ""}” 이야기부터 편하게 이어가 볼게요.`;
+}
+
+function checkCrisisKeywords(text) {
+  return ["죽고 싶", "자살", "해치고", "힘들어 죽", "사라지고 싶", "살기 싫"].some((keyword) => text.includes(keyword));
+}
+
+function scrollChat() {
+  const box = document.querySelector(".luna-chat-log") || document.querySelector("#chat-window");
+  if (box) box.scrollTop = box.scrollHeight;
+}
 
 function speakReply(text) {
   if (!("speechSynthesis" in window)) return;
@@ -664,6 +934,10 @@ function speakReply(text) {
 }
 
 function startVoiceConversation() {
+  if (!state.aiVoiceEnabled) {
+    toast("음성 대화가 꺼져 있어요. 설정에서 다시 켤 수 있어요.");
+    return;
+  }
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!Recognition) {
     state.aiStatus = "idle";
@@ -805,9 +1079,113 @@ function renderOtt() {
 function serviceCard(letter, name, desc, color, on) { return `<article class="card service-card"><span class="service-logo ${color}">${letter}</span><div style="flex:1"><h4>${name}</h4><p>${desc}</p></div><button class="switch ${on ? "on" : ""}" data-action="toggle" aria-label="${name} 연결"></button></article>`; }
 
 function renderOuting() {
-  const tabs = [["browse", "코스 보기"], ["recommend", "AI 코스 추천"], ["register", "코스 등록"], ["interest", "관심 코스"]];
-  const bodies = { browse: renderCourseBrowse, recommend: renderRecommendation, register: renderRegisterCourse, interest: renderInterestCourses };
-  return `<div class="subtabs outing-tabs" role="tablist">${tabs.map(([id, label]) => `<button class="${state.outingSub === id ? "active" : ""}" data-action="outing-sub" data-value="${id}">${label}</button>`).join("")}</div>${bodies[state.outingSub]()}`;
+  const tabs = [["recommend", "AI 코스 추천"], ["register", "코스 등록"], ["interest", "관심 코스"]];
+  const bodies = { recommend: renderRecommendation, register: renderRegisterCourse, interest: renderInterestCourses };
+  if (!bodies[state.outingSub]) state.outingSub = "recommend";
+  const searchZone = state.outingSub === "recommend" ? renderOutingSearchZone() : "";
+  return `${searchZone}<div class="subtabs outing-tabs" role="tablist">${tabs.map(([id, label]) => `<button class="${state.outingSub === id ? "active" : ""}" data-action="outing-sub" data-value="${id}">${label}</button>`).join("")}</div>${bodies[state.outingSub]()}`;
+}
+
+function renderOutingSearchZone() {
+  return `<section class="outing-search-zone">${renderSearchField({ inputId: "course-search", stateKey: "outingQuery", className: "course-search", placeholder: "지역명, 음식점, 카페를 입력하세요", label: "코스 검색" })}<div class="outing-search-actions"><button class="mini-action" data-action="locate-outing">${icon("pin")} ${state.locationReady ? "내 위치 다시 찾기" : "내 위치 찾기"}</button><button class="mini-action ${state.outingMapOpen ? "active" : ""}" data-action="toggle-outing-map">${icon("compass")} 지도로 보기</button></div></section>`;
+}
+
+function renderOutingMap() {
+  const courses = getFilteredOutingCourses().slice(0, 12);
+  return `<section class="outing-map-shell">
+    ${renderOutingFilterBar(courses.length)}
+    <section class="card outing-map-card">
+      <div id="outing-osm-map" class="outing-osm-map" role="application" aria-label="나들이 코스 지도"></div>
+      <div class="outing-map-toolbar">
+        <button class="mini-action" data-action="outing-map-reset">${icon("pin")} 지도 초기화</button>
+        <a class="mini-action" href="https://www.openstreetmap.org/#map=12/37.5421/126.9360" target="_blank" rel="noreferrer">OSM 열기</a>
+      </div>
+    </section>
+    <section class="card map-data-panel">
+      <div class="section-row"><strong>필터 결과</strong><span class="small muted">${courses.length}개 코스</span></div>
+      ${courses.length ? courses.map((course) => `<button class="map-data-row" data-action="map-course-focus" data-value="${course.id}"><span class="history-icon">${icon("pin")}</span><span><strong>${escapeHtml(course.name)}</strong><small>${escapeHtml(getCourseTags(course).category.join(" · "))} · ${escapeHtml(course.stops.join(" · "))}</small></span>${icon("chevron")}</button>`).join("") : emptyState("search", "조건에 맞는 코스가 없어요", "필터를 넓히거나 예산 범위를 올려 보세요.")}
+    </section>
+  </section>`;
+}
+
+function getCourseTags(course) {
+  const fallback = { category: ["관광"], mood: ["감성"], companion: ["친구"], purpose: ["휴식"], time: ["오후"], price: 30000 };
+  return courseTagProfiles[course.id] || course.tagProfile || fallback;
+}
+
+function getFilteredOutingCourses() {
+  const query = normalizeSearch(state.outingQuery);
+  return [...baseCourses, ...state.customCourses].filter((course) => {
+    if (query && !courseMatchesQuery(course, query)) return false;
+    const tags = getCourseTags(course);
+    return outingFilterConfig.every(({ key }) => {
+      const selected = state.outingFilters?.[key] || "전체";
+      if (selected === "전체") return true;
+      return (tags[key] || []).includes(selected);
+    }) && Number(tags.price || 0) <= Number(state.outingFilters?.budget || 70000);
+  });
+}
+
+function renderOutingFilterBar(count) {
+  const budget = Number(state.outingFilters?.budget || 70000);
+  return `<section class="card outing-filter-card">
+    <div class="section-row"><strong>취향 필터</strong><span class="small muted">${count}개 결과</span></div>
+    ${outingFilterConfig.map(({ key, label, values }) => `<div class="map-filter-group"><h4>${label}</h4><div class="filter-chips">${values.map((value) => `<button class="${(state.outingFilters?.[key] || "전체") === value ? "selected" : ""}" data-action="outing-filter" data-filter="${key}" data-value="${value}">${value}</button>`).join("")}</div></div>`).join("")}
+    <div class="map-filter-group budget-filter"><div class="row"><h4>예산</h4><strong>${budget.toLocaleString("ko-KR")}원 이하</strong></div><input type="range" min="10000" max="100000" step="5000" value="${budget}" data-action="outing-budget" aria-label="코스 예산" /></div>
+  </section>`;
+}
+
+function getCourseMapPoints(course, courseIndex = 0) {
+  const seed = course.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), courseIndex * 17);
+  const baseLat = 37.5421 + ((seed % 9) - 4) * 0.006;
+  const baseLng = 126.9360 + (((seed / 7) % 11) - 5) * 0.009;
+  return course.stops.map((stop, index) => ({
+    name: stop,
+    lat: baseLat + index * 0.006 + Math.sin(seed + index) * 0.002,
+    lng: baseLng + index * 0.009 + Math.cos(seed + index) * 0.003,
+  }));
+}
+
+function initOutingMap(focusCourseId = null) {
+  const el = document.querySelector("#outing-osm-map");
+  if (!el || !window.L) return;
+  const center = [37.5421, 126.9360];
+  if (!outingLeafletMap || outingLeafletMap._container !== el) {
+    outingLeafletMap = L.map(el, { zoomControl: true, attributionControl: true }).setView(center, 12);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(outingLeafletMap);
+  } else {
+    setTimeout(() => outingLeafletMap.invalidateSize(), 0);
+  }
+  if (outingLeafletLayer) outingLeafletLayer.remove();
+  outingLeafletLayer = L.layerGroup().addTo(outingLeafletMap);
+  const courses = getFilteredOutingCourses().slice(0, 12);
+  const bounds = [];
+  courses.forEach((course, courseIndex) => {
+    const points = getCourseMapPoints(course, courseIndex);
+    const latLngs = points.map((point) => [point.lat, point.lng]);
+    const selected = focusCourseId === course.id;
+    L.polyline(latLngs, { color: selected ? "#111111" : "#53B175", weight: selected ? 5 : 3, opacity: selected ? 0.9 : 0.55 }).addTo(outingLeafletLayer);
+    points.forEach((point, index) => {
+      const marker = L.circleMarker([point.lat, point.lng], {
+        radius: selected ? 7 : 5,
+        color: "white",
+        weight: 2,
+        fillColor: index === points.length - 1 ? "#E88D2A" : "#53B175",
+        fillOpacity: 1,
+      }).addTo(outingLeafletLayer);
+      marker.bindPopup(`<strong>${escapeHtml(course.name)}</strong><br>${escapeHtml(index + 1)}. ${escapeHtml(point.name)}`);
+      bounds.push([point.lat, point.lng]);
+    });
+  });
+  if (focusCourseId) {
+    const course = courses.find((item) => item.id === focusCourseId);
+    if (course) outingLeafletMap.fitBounds(getCourseMapPoints(course).map((point) => [point.lat, point.lng]), { padding: [30, 30] });
+  } else if (bounds.length) {
+    outingLeafletMap.fitBounds(bounds, { padding: [24, 24] });
+  }
 }
 
 function renderCourseBrowse() {
@@ -815,7 +1193,7 @@ function renderCourseBrowse() {
   const filtered = baseCourses.filter((course) => courseMatchesQuery(course, query));
   const list = [...filtered].sort((a, b) => state.outingSort === "latest" ? b.createdAt.localeCompare(a.createdAt) : state.outingSort === "nearby" ? a.distance - b.distance : b.likes - a.likes);
   const sorts = [["popular", "인기순"], ["latest", "최신순"], ["nearby", "가까운 순"]];
-  return `<section class="card outing-location"><span class="location-icon">${icon("pin")}</span><span><small>내 위치</small><strong>${state.locationReady ? escapeHtml(state.pickupLocation.replace("현재 위치 확인됨 · ", "")) : "위치를 확인해 주세요"}</strong></span><button class="mini-action" data-action="locate-outing">${state.locationReady ? "다시 찾기" : "내 위치 찾기"}</button></section>${renderSearchField({ inputId: "course-search", stateKey: "outingQuery", className: "course-search", placeholder: "지역명, 음식점, 카페를 입력하세요", label: "코스 검색" })}<div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div><div class="course-result-count">총 ${list.length}개 코스</div>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "앞글자가 일치하는 다른 지역이나 장소로 검색해 보세요.")}`;
+  return `${state.outingMapOpen ? renderOutingMap() : ""}<div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div><div class="course-result-count">총 ${list.length}개 코스</div>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "앞글자가 일치하는 다른 지역이나 장소로 검색해 보세요.")}`;
 }
 
 function courseCard(course) {
@@ -920,7 +1298,7 @@ function useCourseForHome(course) {
 }
 
 function renderRecommendation() {
-  return `<section class="section-lead"><h3>어떤 나들이를 원하세요?</h3><p>${escapeHtml(state.username)}님의 취향과 예산으로 코스를 만듭니다.</p></section><section class="card preference-panel">${choiceGroup("나들이 관심사", ["맛집 투어", "감성 카페", "쇼핑", "관광 명소", "야경 힐링"], 1)}${choiceGroup("선호하는 분위기", ["활기찬", "여유로운", "로맨틱", "가족과 함께"], 1)}<div class="choice-group"><div class="row"><h4>예산 설정</h4><strong class="green">약 10만원</strong></div><input class="budget" type="range" min="3" max="30" value="10" /></div>${choiceGroup("누구와 함께 하나요?", ["혼자", "커플", "친구", "가족"], 0)}<button class="primary-button full" data-action="recommend-course">코스 추천받기</button></section>`;
+  return `<section class="section-lead"><h3>어떤 나들이를 원하세요?</h3><p>${escapeHtml(state.username)}님의 취향과 예산으로 코스를 만들고, 기존 코스도 함께 추천합니다.</p></section><section class="card preference-panel">${choiceGroup("나들이 관심사", ["맛집 투어", "감성 카페", "쇼핑", "관광 명소", "야경 힐링"], 1)}${choiceGroup("선호하는 분위기", ["활기찬", "여유로운", "로맨틱", "가족과 함께"], 1)}<div class="choice-group"><div class="row"><h4>예산 설정</h4><strong class="green">약 10만원</strong></div><input class="budget" type="range" min="3" max="30" value="10" /></div>${choiceGroup("누구와 함께 하나요?", ["혼자", "커플", "친구", "가족"], 0)}<button class="primary-button full" data-action="recommend-course">코스 추천받기</button></section><section class="section-lead compact"><h3>추천 코스 둘러보기</h3><p>검색과 지도 필터로 원하는 코스를 골라 직접 만들 수 있어요.</p></section>${renderCourseBrowse()}`;
 }
 
 function buildAiRecommendedCourse() {
@@ -973,7 +1351,7 @@ function stopEditor(stop, index) {
 
 function renderInterestCourses() {
   const list = getInterestCourses();
-  return `<section class="section-lead"><h3>관심 코스</h3><p>저장한 코스와 직접 등록한 코스를 한곳에서 확인하세요.</p></section>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("bookmark", "관심 코스가 없어요", "코스 보기에서 저장하거나 새 코스를 등록해 주세요.")}`;
+  return `<section class="section-lead"><h3>관심 코스</h3><p>저장한 코스와 직접 등록한 코스를 한곳에서 확인하세요.</p></section>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("bookmark", "관심 코스가 없어요", "AI 코스 추천에서 저장하거나 새 코스를 등록해 주세요.")}`;
 }
 
 function getCourse(id) { return baseCourses.find((course) => course.id === id) || state.customCourses.find((course) => course.id === id); }
@@ -1066,7 +1444,7 @@ function openUsageDetail(id) {
 
 function subtabs(items, active, action) { return `<div class="subtabs" role="tablist">${items.map(([id, label]) => `<button class="${active === id ? "active" : ""}" data-action="${action}" data-value="${id}">${label}</button>`).join("")}</div>`; }
 function choiceGroup(name, values, selected) { return `<div class="choice-group"><h4>${name}</h4><div class="filter-chips">${values.map((value, index) => `<button class="${index === selected ? "selected" : ""}" data-action="chip">${value}</button>`).join("")}</div></div>`; }
-function toggleItem(titleText, desc, on) { return `<div class="menu-item"><span class="menu-icon">${icon("chat")}</span><span><strong>${titleText}</strong><small>${desc}</small></span><button class="switch ${on ? "on" : ""}" data-action="toggle" aria-label="${titleText} 전환"></button></div>`; }
+function toggleItem(titleText, desc, on, action = "toggle") { return `<div class="menu-item ${action === "ai-power" ? "ai-master-toggle" : ""}"><span class="menu-icon">${icon("chat")}</span><span><strong>${titleText}</strong><small>${desc}</small></span><button class="switch ${on ? "on" : ""}" data-action="${action}" aria-label="${titleText} 전환"></button></div>`; }
 function menuItem(iconName, titleText, desc, action = "menu-info", value = titleText) { return `<button class="menu-item" data-action="${action}" data-value="${value}"><span class="menu-icon">${icon(iconName)}</span><span><strong>${titleText}</strong><small>${desc}</small></span>${icon("chevron")}</button>`; }
 function emptyState(iconName, heading, text) { return `<section class="card empty-state">${icon(iconName)}<h4>${heading}</h4><p>${text}</p></section>`; }
 
@@ -1088,13 +1466,19 @@ function toast(message) { const el = document.querySelector("#toast"); el.textCo
 
 document.addEventListener("submit", (event) => {
   if (event.target.id === "login-form") { event.preventDefault(); login(); }
-  if (event.target.id === "chat-form") { event.preventDefault(); const input = document.querySelector("#chat-text"); sendMessage(input?.value || ""); }
+  if (event.target.id === "chat-form" || event.target.id === "main-text-form") { event.preventDefault(); const input = document.querySelector("#chat-text, #main-text-input"); sendMessage(input?.value || ""); if (input) input.value = ""; }
 });
 
 document.addEventListener("input", (event) => {
   if (event.target.dataset.courseField) state.courseDraft[event.target.dataset.courseField] = event.target.value;
   if (event.target.dataset.stopName !== undefined) state.courseDraft.stops[Number(event.target.dataset.stopName)].name = event.target.value;
   if (event.target.id === "course-search") handleSearchInput(event, "outingQuery", "course-search");
+  if (event.target.dataset.action === "outing-budget") {
+    state.outingFilters.budget = Number(event.target.value);
+    persist();
+    render();
+  }
+  if (event.target.id === "home-search") handleSearchInput(event, "homeQuery", "home-search");
   if (event.target.id === "product-search") handleSearchInput(event, "productQuery", "product-search");
   if (event.target.id === "history-search") handleSearchInput(event, "historyQuery", "history-search");
   if (event.target.id === "theme-temp") { const value = document.querySelector("#temp-value"); if (value) value.textContent = `${event.target.value}℃`; }
@@ -1102,13 +1486,13 @@ document.addEventListener("input", (event) => {
 });
 
 document.addEventListener("compositionstart", (event) => {
-  if (event.target.matches?.("#course-search, #product-search, #history-search")) event.target.dataset.composing = "true";
+  if (event.target.matches?.("#home-search, #course-search, #product-search, #history-search")) event.target.dataset.composing = "true";
 });
 
 document.addEventListener("compositionend", (event) => {
-  if (!event.target.matches?.("#course-search, #product-search, #history-search")) return;
+  if (!event.target.matches?.("#home-search, #course-search, #product-search, #history-search")) return;
   event.target.dataset.composing = "false";
-  const map = { "course-search": "outingQuery", "product-search": "productQuery", "history-search": "historyQuery" };
+  const map = { "home-search": "homeQuery", "course-search": "outingQuery", "product-search": "productQuery", "history-search": "historyQuery" };
   handleSearchInput(event, map[event.target.id], event.target.id, true);
 });
 
@@ -1147,7 +1531,7 @@ document.addEventListener("click", (event) => {
   if (!button) return;
   const action = button.dataset.action; const value = button.dataset.value;
   if (button.dataset.tab) { if (button.dataset.tab === "home") state.homeStep = state.tripActive ? "service" : "mode"; return setTab(button.dataset.tab); }
-  if (action === "skip-splash") { clearTimeout(splashTimer); showScreen("login"); }
+  if (action === "skip-splash") { clearTimeout(splashTimer); if (state.isAuthenticated) { showScreen("app"); setTab(state.activeTab || "home"); } else showScreen("login"); }
   if (action === "close-modal") closeModal();
   if (action === "search-suggestion") { applySearchSuggestion(button); return; }
   if (action === "open-status") openVehicleStatus();
@@ -1160,7 +1544,7 @@ document.addEventListener("click", (event) => {
   if (action === "open-pin-picker") openMapPinPicker();
   if (action === "toggle-map-pin") { state.mapPinOpen = !state.mapPinOpen; render(); }
   if (action === "map-pin-select") { applyPickupLocation(value); closeModal(); toast("선택한 위치를 출발지로 설정했어요."); }
-  if (action === "browse-courses-home") { closeModal(); state.returnToHomeAfterCourse = true; state.outingSub = "browse"; setTab("outing"); toast("원하는 코스에서 따라가기를 눌러 주세요."); }
+  if (action === "browse-courses-home") { closeModal(); state.returnToHomeAfterCourse = true; state.outingSub = "recommend"; setTab("outing"); toast("AI 코스 추천에서 원하는 코스를 골라 주세요."); }
   if (action === "open-destination") openDestinationSearch();
   if (action === "choose-saved-course") chooseSavedCourse();
   if (action === "select-home-course") { const course = getCourse(value); if (course) { state.selectedCourse = course; state.routeStops = [state.pickupLocation, ...course.stops]; state.homeStep = "setup"; persist(); closeModal(); render(); toast("관심 코스 전체를 목적지에 등록했어요."); } }
@@ -1174,11 +1558,21 @@ document.addEventListener("click", (event) => {
   if (action === "switch-to-rent") openModal({ title: "렌트로 전환할까요?", body: "<p>렌트 조건과 결제가 확정될 때까지 현재 택시 이동은 계속됩니다. 안전 정차 후 차량 옵션을 선택합니다.</p>", iconName: "key", primary: "전환 설정", secondary: "취소", onConfirm: () => { state.tripActive = false; state.usageStartedAt = null; state.rentalEndsAt = null; state.homeMode = "rent"; state.homeStep = "setup"; persist(); render(); toast("렌트 조건을 선택해 주세요."); } });
   if (action === "request-rent") { const vehicle = rentalVehicles.find((item) => item.id === state.rentalVehicleType) || rentalVehicles[0]; const optionPrice = rentalOptionCatalog.filter((item) => state.rentalOptions.has(item.id)).reduce((sum, item) => sum + item.price, 0); const total = state.rentalHours * vehicle.price + optionPrice; if (!state.routeStops.at(-1) || state.routeStops.length < 2) return toast("출발지와 목적지를 먼저 설정해 주세요."); openModal({ title: `${vehicle.name} ${state.rentalHours}시간 렌트`, body: `<p>${escapeHtml(state.pickupLocation)}으로 차량을 배정합니다. 예상 요금은 ${total.toLocaleString("ko-KR")}원이며 선택 옵션 ${state.rentalOptions.size}개가 적용됩니다.</p>`, iconName: "key", primary: "예약", onConfirm: () => { state.tripActive = true; state.homeStep = "service"; state.usageStartedAt = Date.now(); state.rentalEndsAt = state.usageStartedAt + state.rentalHours * 3600000; persist(); render(); toast("렌트 차량이 출발지로 이동 중이에요."); } }); }
   if (action === "finish-trip") openEndConfirmation();
-  if (action === "ai-sub") { state.aiSub = value; render(); }
-  if (action === "persona") { state.aiPersona = value; currentThread().persona = value; persist(); render(); }
-  if (action === "voice-toggle") { if (state.aiStatus === "listening") { stopVoiceConversation(); toast("음성 입력을 멈췄어요."); } else startVoiceConversation(); }
+  if (action === "ai-sub") { state.aiSub = value; state.personaMenuOpen = false; render(); }
+  if (action === "persona-menu") { state.personaMenuOpen = !state.personaMenuOpen; render(); }
+  if (action === "persona") setAiPersona(value);
+  if (action === "starter-prompt") sendMessage(value || "");
+  if (action === "voice-toggle") { if (Date.now() < aiSwipeSuppressUntil) return; if (state.aiStatus === "listening") { stopVoiceConversation(); toast("음성 입력을 멈췄어요."); } else startVoiceConversation(); }
   if (action === "ai-pause") { stopVoiceConversation("paused"); toast("대화를 잠시 멈췄어요."); }
-  if (action === "ai-stop") { stopVoiceConversation(); toast("현재 답변을 중단했어요."); }
+  if (action === "ai-stop") { stopVoiceConversation("off"); persist(); toast("루나를 종료했어요."); }
+  if (action === "ai-restart") { state.aiStatus = "idle"; state.aiVoiceEnabled = true; persist(); render(); toast("루나를 다시 시작했어요."); }
+  if (action === "ai-power") { state.aiStatus = state.aiStatus === "off" ? "idle" : "off"; if (state.aiStatus === "off") stopVoiceConversation("off"); else render(); persist(); toast(state.aiStatus === "off" ? "루나를 종료했어요." : "루나를 다시 시작했어요."); }
+  if (action === "ai-voice-setting") { state.aiVoiceEnabled = !state.aiVoiceEnabled; if (!state.aiVoiceEnabled && state.aiStatus === "listening") stopVoiceConversation(); persist(); render(); toast(state.aiVoiceEnabled ? "음성으로 대화할 수 있어요." : "음성을 껐어요. 이제 텍스트로만 대화해요."); }
+  if (action === "ai-save-setting") { state.aiSaveEnabled = !state.aiSaveEnabled; persist(); render(); toast(state.aiSaveEnabled ? "대화 기록 저장을 켰어요." : "대화 기록 저장을 껐어요."); }
+  if (action === "crisis-close") { state.aiCrisisOpen = false; render(); }
+  if (action === "crisis-call") toast("프로토타입에서는 전화 연결 대신 안내만 표시해요. 실제 상황에서는 1393 또는 119에 연락해 주세요.");
+  if (action === "chat-expand") { state.aiInputMode = "text"; state.aiChatExpanded = !state.aiChatExpanded; persist(); render(); }
+  if (action === "ai-mode") { state.aiInputMode = value === "text" ? "text" : "voice"; state.aiChatExpanded = false; persist(); render(); }
   if (action === "ai-recent-history") { state.aiSub = "history"; render(); }
   if (action === "resume-thread" || action === "open-thread") { state.activeThreadId = value; state.aiSub = "talk"; persist(); render(); toast("최근 대화를 이어갑니다."); }
   if (action === "space-sub") { state.spaceSub = value; render(); }
@@ -1196,6 +1590,10 @@ document.addEventListener("click", (event) => {
   if (action === "toggle") { button.classList.toggle("on"); toast(button.classList.contains("on") ? "연결했어요." : "연결을 해제했어요."); }
   if (action === "play-ott") toast("차량 디스플레이에서 재생을 시작했어요.");
   if (action === "outing-sub") { state.outingSub = value; render(); }
+  if (action === "toggle-outing-map") { state.outingMapOpen = !state.outingMapOpen; state.outingSub = "recommend"; persist(); render(); }
+  if (action === "outing-map-reset") { state.outingMapOpen = true; render(); requestAnimationFrame(() => initOutingMap()); }
+  if (action === "outing-filter") { state.outingFilters[button.dataset.filter] = value; state.outingMapOpen = true; persist(); render(); }
+  if (action === "map-course-focus") { const course = getCourse(value); if (course) { state.courseDraft.title = course.name; state.courseDraft.desc = course.desc; state.courseDraft.stops = course.stops.map((name, index) => ({ type: index === course.stops.length - 1 ? "목적지" : "경유지", name, photo: course.stopDetails?.[index]?.photo || null })); state.outingSub = "register"; persist(); render(); toast("선택한 코스를 코스 등록 화면에 불러왔어요."); } }
   if (action === "course-sort") { state.outingSort = value; persist(); render(); }
   if (action === "course-detail") { const course = getCourse(value); if (course) openCourseDetail(course); }
   if (action === "course-stop-detail") { const course = state.activeDetailCourse; if (course) openCourseStopDetail(course, Number(value)); }
@@ -1219,7 +1617,7 @@ document.addEventListener("click", (event) => {
   if (action === "profile-section") { state.profileView = value; render(); content.scrollTop = 0; }
   if (action === "profile-back") { state.profileView = "menu"; render(); }
   if (action === "home-notices") { state.profileView = "notices"; setTab("profile"); }
-  if (action === "logout") { closeModal(); showScreen("login"); document.querySelector("#user-password").value = ""; toast("로그아웃했어요."); }
+  if (action === "logout") { state.isAuthenticated = false; persist(); closeModal(); showScreen("login"); document.querySelector("#user-password").value = ""; toast("로그아웃했어요."); }
   if (action === "notice-detail") openModal({ title: button.dataset.title, body: `<p>${escapeHtml(button.dataset.text)}</p>`, iconName: "bell", primary: "확인", secondary: null });
   if (action === "usage-detail") openUsageDetail(value);
   if (action === "payment-add") openPaymentEditor();
@@ -1282,7 +1680,7 @@ function publishCourse() {
   const draft = getDraftCourse();
   if (!draft) return;
   const { titleText, validStops } = draft;
-  const course = { id: `mine-${Date.now()}`, author: state.username, name: titleText, desc: state.courseDraft.desc.trim() || "내 이동 경험으로 등록한 코스", image: validStops.find((stop) => stop.photo)?.photo || null, time: `${validStops.length}곳 · 나의 코스`, stops: validStops.map((stop) => stop.name), dwell: validStops.map(() => "60분"), distance: 0, likes: 0, createdAt: new Date().toISOString().slice(0, 10), recommend: "각 장소의 운영시간을 확인하고 여유 있게 이동해 보세요.", stopDetails: validStops.map((stop) => ({ type: stop.type, name: stop.name, photo: stop.photo || null })), visual: "" };
+  const course = { id: `mine-${Date.now()}`, author: state.username, name: titleText, desc: state.courseDraft.desc.trim() || "내 이동 경험으로 등록한 코스", image: validStops.find((stop) => stop.photo)?.photo || null, time: `${validStops.length}곳 · 나의 코스`, stops: validStops.map((stop) => stop.name), dwell: validStops.map(() => "60분"), distance: 0, likes: 0, createdAt: new Date().toISOString().slice(0, 10), recommend: "각 장소의 운영시간을 확인하고 여유 있게 이동해 보세요.", stopDetails: validStops.map((stop) => ({ type: stop.type, name: stop.name, photo: stop.photo || null })), tagProfile: { category: [state.outingFilters.category].filter((item) => item && item !== "전체"), mood: [state.outingFilters.mood].filter((item) => item && item !== "전체"), companion: [state.outingFilters.companion].filter((item) => item && item !== "전체"), purpose: [state.outingFilters.purpose].filter((item) => item && item !== "전체"), time: [state.outingFilters.time].filter((item) => item && item !== "전체"), price: Number(state.outingFilters.budget || 30000) }, visual: "" };
   state.customCourses.unshift(course); state.savedCourseIds.add(course.id); state.courseDraft = { title: "", desc: "", stops: [{ type: "경유지", name: "", photo: null }, { type: "목적지", name: "", photo: null }] }; state.outingSub = "interest"; persist(); render(); toast("내 코스를 관심 코스에 등록했어요.");
 }
 
@@ -1381,6 +1779,29 @@ function applySearchSuggestion(button) {
     const product = products.find((item) => item.id === itemId);
     if (product) openProductDetail(product, true, true);
   }
+  if (inputId === "home-search") {
+    const candidate = getSearchCandidates(inputId).find((item) => item.id === button.dataset.optionId);
+    applyHomeSearchSelection(candidate, button.dataset.value || state.homeQuery);
+  }
+}
+
+function applyHomeSearchSelection(candidate, fallbackValue) {
+  const course = candidate?.itemId ? getCourse(candidate.itemId) : null;
+  if (course && candidate.category === "코스") {
+    state.selectedCourse = course;
+    state.routeStops = [state.pickupLocation, ...course.stops];
+    state.homeStep = "setup";
+    persist();
+    render();
+    toast("검색한 코스를 목적지에 등록했어요.");
+    return;
+  }
+  state.selectedCourse = null;
+  state.routeStops = [state.pickupLocation, candidate?.queryValue || candidate?.name || fallbackValue || state.homeQuery];
+  state.homeStep = "setup";
+  persist();
+  render();
+  toast("검색한 장소를 목적지로 설정했어요.");
 }
 
 function handleSearchKeydown(event) {
@@ -1411,10 +1832,21 @@ function handleSearchKeydown(event) {
     if (!suggestion) return;
     state[getSearchStateKey(inputId)] = suggestion.queryValue || suggestion.name;
     searchUi.inputId = null;
+    if (inputId === "home-search") {
+      applyHomeSearchSelection(suggestion, state.homeQuery);
+      return;
+    }
     render();
   }
 }
 
 function updateClock() { document.querySelector("#clock").textContent = new Date().toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: false }); }
 updateClock(); setInterval(updateClock, 30000); setInterval(updateUsageTimer, 1000);
-splashTimer = setTimeout(() => showScreen("login"), 1200);
+splashTimer = setTimeout(() => {
+  if (state.isAuthenticated) {
+    showScreen("app");
+    setTab(state.activeTab || "home");
+  } else {
+    showScreen("login");
+  }
+}, 1200);
