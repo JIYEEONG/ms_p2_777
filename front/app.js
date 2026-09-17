@@ -874,7 +874,7 @@ function renderAi() {
           <button type="button" data-action="font-size" data-value="1" aria-label="채팅 글자 크게" ${state.chatFontScale >= 1.3 ? "disabled" : ""}>＋</button>
         </div>
         <button type="button" class="chat-expand-toggle" data-action="chat-expand" aria-label="${state.aiChatExpanded ? "채팅창 축소" : "채팅창 확대"}">${icon(state.aiChatExpanded ? "shrink" : "expand")}</button>
-        <div class="chat-date-divider"><span>${new Date().toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}</span></div>
+        <div class="chat-date-divider"><span>${new Date().toLocaleDateString(window.MoovI18n?.locale() || "ko-KR", { month: "long", day: "numeric", weekday: "short" })}</span></div>
         ${thread.messages.map((m) => `<div class="detail-message-row ${m.role === "user" ? "user" : ""}"><div class="detail-message-bubble">${escapeHtml(m.text)}<small>${escapeHtml(m.time || "방금 전")}</small></div></div>`).join("")}
       </div>
       ${voiceOn ? `<div class="ai-mic-stage" id="ai-voice-stage">
@@ -952,6 +952,12 @@ function sendMessage(text, voice = false) {
 }
 
 function pickLunaReply(text) {
+  if (window.MoovI18n?.getLanguage() === "en") {
+    if (state.aiPersona === "토닥이") return "That sounds really hard. Take your time telling me. I'm here to listen.";
+    if (state.aiPersona === "척척박사") return "I'll explain what I can. If you're on the move, I'll start with the key points.";
+    if (state.aiPersona === "링고") return "I'll look for places nearby that might interest you. I can also help you phrase what you said naturally.";
+    return `Sounds good. Let's start with “${text.slice(0, 18)}${text.length > 18 ? "…" : ""}” and take it from there.`;
+  }
   if (state.aiPersona === "토닥이") return "많이 힘드셨겠어요. 천천히 이야기해주셔도 괜찮아요. 제가 옆에서 같이 들어볼게요.";
   if (state.aiPersona === "척척박사") return "제가 아는 선에서 정리해드릴게요. 이동 중이라면 핵심부터 짧게 안내할게요.";
   if (state.aiPersona === "링고") return "주변에 관심 있는 곳이 있는지 한번 찾아볼게요. 말해주신 표현도 자연스럽게 다듬어드릴 수 있어요.";
@@ -971,8 +977,7 @@ function scrollChat() {
 function speakReply(text) {
   if (!("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "ko-KR";
+  const utterance = window.MoovI18n?.utterance(text) || new SpeechSynthesisUtterance(text);
   utterance.rate = 1;
   window.speechSynthesis.speak(utterance);
 }
@@ -994,7 +999,7 @@ function startVoiceConversation() {
   }
   if (speechRecognition) speechRecognition.abort();
   speechRecognition = new Recognition();
-  speechRecognition.lang = "ko-KR";
+  speechRecognition.lang = window.MoovI18n?.locale() || "ko-KR";
   speechRecognition.interimResults = false;
   speechRecognition.continuous = false;
   // 무음 임계값: Azure Speech SDK 연동 시 SegmentationSilenceTimeoutMs를 800ms로 설정 (정책 B-11).
@@ -1072,14 +1077,14 @@ function renderSpace() {
 }
 
 function renderSpaceContents() {
-  return `<iframe class="space-content-frame" src="/space-content/index.html?embed=1#ott" title="MOOV 공간 콘텐츠" loading="eager"></iframe>`;
+  return `<iframe class="space-content-frame" src="/space-content/index.html?embed=1&lang=${window.MoovI18n?.getLanguage() || "ko"}#ott" title="MOOV 공간 콘텐츠" loading="eager"></iframe>`;
 }
 
 function renderPurchase() {
   const tabs = [["search", "상품 찾기"], ["cart", "장바구니"], ["orders", "구매 내역"], ["favorites", "관심 목록"]];
   const bodies = { search: renderProducts, cart: renderCart, orders: renderOrders, favorites: renderFavoriteProducts };
   if (!bodies[state.purchaseSub]) state.purchaseSub = "search";
-  return `<div class="subtabs purchase-tabs" role="tablist">${tabs.map(([id, label]) => `<button class="${state.purchaseSub === id ? "active" : ""}" data-action="purchase-sub" data-value="${id}"><span>${label}</span>${id === "cart" && cartCount() ? `<em class="cart-dot">${Math.min(cartCount(), 99)}</em>` : ""}</button>`).join("")}</div>${bodies[state.purchaseSub]()}`;
+  return `<div class="subtabs purchase-tabs" role="tablist">${tabs.map(([id, label]) => `<button class="${state.purchaseSub === id ? "active" : ""}" data-action="purchase-sub" data-value="${id}"><span ${id === "search" ? 'data-i18n-en="Browse"' : id === "orders" ? 'data-i18n-en="Orders"' : ""}>${label}</span>${id === "cart" && cartCount() ? `<em class="cart-dot">${Math.min(cartCount(), 99)}</em>` : ""}</button>`).join("")}</div>${bodies[state.purchaseSub]()}`;
 }
 
 function renderProducts() {
@@ -1090,7 +1095,7 @@ function renderProducts() {
     return categoryMatch && (!rankedProductIds || rankedProductIds.has(product.id));
   }).sort((a, b) => query ? (b.stock || 0) - (a.stock || 0) || Number(b.recommended) - Number(a.recommended) || a.name.localeCompare(b.name, "ko-KR") : 0);
   const categories = [["전체", "전체 메뉴"], ["추천", "추천 상품"], ["음료·간식", "음료·간식"], ["식사", "식사"], ["편의용품", "편의용품"]];
-  return `<section class="card shop-banner"><span class="badge">현재 차량 재고</span><h3>이동 중 바로 먹고 사용할 수 있어요</h3><p>결제 완료 후 지정 수납함이 자동으로 열립니다.</p></section>${renderSearchField({ inputId: "product-search", stateKey: "productQuery", className: "product-search", placeholder: "상품명을 입력하세요", label: "상품 검색" })}<div class="category-row compact" style="margin:12px 0">${categories.map(([id, label]) => `<button class="category-card ${state.productCategory === id ? "active" : ""}" data-action="product-category" data-value="${id}">${label}</button>`).join("")}</div>${list.length ? `<div class="product-grid">${list.map(productCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "앞글자가 일치하는 다른 상품명으로 찾아보세요.")}`;
+  return `<section class="card shop-banner"><span class="badge">현재 차량 재고</span><h3>이동 중 바로 먹고 사용할 수 있어요</h3><p>결제 완료 후 지정 수납함이 자동으로 열립니다.</p></section>${renderSearchField({ inputId: "product-search", stateKey: "productQuery", className: "product-search", placeholder: "상품명을 입력하세요", label: "상품 검색" })}<div class="category-row compact" style="margin:12px 0">${categories.map(([id, label]) => `<button class="category-card ${state.productCategory === id ? "active" : ""}" data-action="product-category" data-value="${id}" ${id === "추천" ? 'data-i18n-en="Suggested"' : id === "음료·간식" ? 'data-i18n-en="Drinks &amp; snacks"' : ""}>${label}</button>`).join("")}</div>${list.length ? `<div class="product-grid">${list.map(productCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "앞글자가 일치하는 다른 상품명으로 찾아보세요.")}`;
 }
 
 function productCard(product) {
@@ -1171,7 +1176,7 @@ function renderOuting() {
   const bodies = { recommend: renderRecommendation, register: renderRegisterCourse, interest: renderInterestCourses };
   if (!bodies[state.outingSub]) state.outingSub = "recommend";
   const searchZone = state.outingSub === "recommend" ? renderOutingSearchZone() : "";
-  return `${searchZone}<div class="subtabs outing-tabs" role="tablist">${tabs.map(([id, label]) => `<button class="${state.outingSub === id ? "active" : ""}" data-action="outing-sub" data-value="${id}">${label}</button>`).join("")}</div>${bodies[state.outingSub]()}`;
+  return `${searchZone}<div class="subtabs outing-tabs" role="tablist">${tabs.map(([id, label]) => `<button class="${state.outingSub === id ? "active" : ""}" data-action="outing-sub" data-value="${id}" ${id === "recommend" ? 'data-i18n-en="AI picks"' : ""}>${label}</button>`).join("")}</div>${bodies[state.outingSub]()}`;
 }
 
 function renderOutingSearchZone() {
@@ -1390,7 +1395,7 @@ function renderRecommendation() {
 }
 
 function buildAiRecommendedCourse() {
-  const selected = [...document.querySelectorAll(".preference-panel .choice-chip.selected")].map((button) => button.textContent.trim()).filter(Boolean);
+  const selected = [...document.querySelectorAll(".preference-panel .choice-chip.selected")].map((button) => button.dataset.value).filter(Boolean);
   const budget = Number(document.querySelector(".preference-panel .budget")?.value || 10);
   const mood = selected.includes("로맨틱") || selected.includes("야경 힐링") ? "노을과 야경" : selected.includes("가족과 함께") ? "가족 휴식" : "감성 산책";
   const name = selected.includes("야경 힐링") || selected.includes("로맨틱") ? "AI 추천 한강 노을·남산 야경 코스" : selected.includes("관광 명소") ? "AI 추천 서울 명소 반나절 코스" : "AI 추천 성수 감성 카페 코스";
@@ -1531,7 +1536,7 @@ function openUsageDetail(id) {
 }
 
 function subtabs(items, active, action) { return `<div class="subtabs" role="tablist">${items.map(([id, label]) => `<button class="${active === id ? "active" : ""}" data-action="${action}" data-value="${id}">${label}</button>`).join("")}</div>`; }
-function choiceGroup(name, values, selected) { return `<div class="choice-group"><h4>${name}</h4><div class="filter-chips">${values.map((value, index) => `<button class="${index === selected ? "selected" : ""}" data-action="chip">${value}</button>`).join("")}</div></div>`; }
+function choiceGroup(name, values, selected) { return `<div class="choice-group"><h4>${name}</h4><div class="filter-chips">${values.map((value, index) => `<button class="choice-chip ${index === selected ? "selected" : ""}" data-action="chip" data-value="${escapeHtml(value)}">${value}</button>`).join("")}</div></div>`; }
 
 function toggleItem(titleText, desc, on, action = "toggle", iconVariant = null) {
   const iconHtml = iconVariant === "luna-bot" ? `<img src="${LUNA_BOT_IMAGE}" alt="" />` : icon("chat");

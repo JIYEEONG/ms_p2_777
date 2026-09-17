@@ -88,6 +88,10 @@
 
         <section id="login" class="screen login-screen" aria-label="로그인">
           <div class="login-head">
+            <div class="language-switch" role="group" aria-label="Language" data-i18n-skip>
+              <button type="button" data-language="ko" aria-pressed="true">한국어</button>
+              <button type="button" data-language="en" aria-pressed="false">English</button>
+            </div>
             <div class="mini-logo">M</div>
             <p class="eyebrow">RoboTAXI · TRAVEL · CULTURE</p>
             <h2>MOOV</h2>
@@ -116,7 +120,7 @@
           </header>
           <div id="app-content" class="app-content" tabindex="-1"></div>
           <nav class="bottom-nav" aria-label="메인 메뉴">
-            <button data-tab="ai"><svg><use href="#i-chat"></use></svg><span>AI 말동무</span></button>
+            <button data-tab="ai"><svg><use href="#i-chat"></use></svg><span data-i18n-en="AI Chat">AI 말동무</span></button>
             <button data-tab="space"><svg><use href="#i-space"></use></svg><span>공간</span></button>
             <button data-tab="home" class="nav-active"><svg><use href="#i-home"></use></svg><span>홈</span></button>
             <button data-tab="outing"><svg><use href="#i-compass"></use></svg><span>나들이</span></button>
@@ -141,6 +145,8 @@
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./public/i18n-data.js"></script>
+    <script src="./public/i18n.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>
