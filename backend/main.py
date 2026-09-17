@@ -63,11 +63,27 @@ def detect_persona_switch(message: str, current_persona: str) -> str | None:
             return name
     return None
 
+# --- RAG 연결 지점 (뼈대) ---
+# TODO: 데이터 담당자의 Databricks/DB 파이프라인 완료 후 실제 검색 로직으로 교체.
+# 현재는 데이터가 없어 항상 None을 반환 — 이 함수만 나중에 채우면 파이프라인 전체가 연결됨.
+def search_local_knowledge(query: str, persona: str) -> str | None:
+    """
+    지역 DB/RAG 검색. persona가 '링고'일 때 주로 쓰일 예정 (B-5).
+    반환값: 검색된 컨텍스트 텍스트, 없으면 None.
+    """
+    return None
+
+
 @app.post("/api/luna/chat")
 def chat(req: ChatRequest):
     switched_to = detect_persona_switch(req.message, req.persona)
     active_persona = switched_to or req.persona
     system_prompt = PERSONA_PROMPTS.get(active_persona, DEFAULT_PERSONA_PROMPT)
+
+    # RAG 검색 결과가 있으면 시스템 프롬프트에 컨텍스트로 추가
+    rag_context = search_local_knowledge(req.message, active_persona)
+    if rag_context:
+        system_prompt += f"\n\n[참고 정보]\n{rag_context}\n위 정보를 참고해서 답변해. 정보에 없는 내용은 지어내지 마."
 
     messages = [{"role": "system", "content": system_prompt}]
     messages.extend(req.history)
