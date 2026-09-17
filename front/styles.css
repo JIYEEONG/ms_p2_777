@@ -647,8 +647,8 @@ html[lang="en"] .route-line > span:nth-child(2) { min-width: 0; }
 .shop-banner h3 { margin: 4px 0 5px; font-size: 1.08rem; }
 .shop-banner p { margin: 0; color: var(--green-dark); font-size: .72rem; font-weight: 800; }
 .purchase-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-flow: initial; overflow: visible; }
-.purchase-tabs button { position: relative; min-width: 0; padding: 7px 2px; font-size: .66rem; }
-.purchase-tabs button span { overflow: hidden; text-overflow: ellipsis; }
+.purchase-tabs button { position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; padding: 6px 2px; font-size: .66rem; line-height: 1.15; white-space: normal; }
+.purchase-tabs button span { display: block; min-width: 0; max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
 .cart-dot { position: absolute; top: -5px; right: -2px; min-width: 19px; height: 19px; display: grid; place-items: center; padding: 0 5px; border: 2px solid #f2f3f2; border-radius: 99px; background: #e84142; color: white; font-size: .58rem; font-style: normal; font-weight: 950; }
 .product-search { margin-top: 12px; padding: 8px 12px; }
 .product-search > span { color: var(--muted); }
