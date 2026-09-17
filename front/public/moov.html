@@ -111,6 +111,9 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 
 .login-screen { flex-direction: column; justify-content: space-between; overflow-y: auto; padding: 80px 25px 40px; background: white; }
 .login-head { text-align: left; }
+.language-switch { display: flex; justify-content: flex-end; gap: 5px; margin: -52px 0 35px; }
+.language-switch button { border: 1px solid #dce6df; border-radius: 999px; background: #fff; color: #64736c; padding: 8px 11px; font: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; }
+.language-switch button.is-active { border-color: #53b175; background: #edf8f0; color: #247348; }
 .mini-logo { width: 58px; height: 58px; margin: 0 auto 34px; border-radius: 18px; font-size: 1.25rem; }
 .eyebrow { margin: 0 0 7px; color: var(--green); font-size: .72rem; font-weight: 900; letter-spacing: .09em; }
 .login-head h2 { margin: 0 0 12px; font-size: 2rem; line-height: 1.2; letter-spacing: -.045em; }
@@ -277,6 +280,13 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .home-notice-row strong { overflow: hidden; font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
 .home-notice-row small { margin-top: 3px; color: var(--muted); font-size: .61rem; }
 .home-notice-row > svg { color: #aaa; }
+/* Keep translated home cards within the phone's content column. */
+html[lang="en"] .home-mode-entry,
+html[lang="en"] .home-mode-grid { grid-template-columns: minmax(0, 1fr); }
+html[lang="en"] .home-mode-card { min-width: 0; grid-template-columns: 82px minmax(0, 1fr); }
+html[lang="en"] .home-mode-card > span { min-width: 0; }
+html[lang="en"] .home-notice-row { grid-template-columns: auto minmax(0, 1fr) 17px; }
+html[lang="en"] .home-notice-row > span:nth-child(2) { min-width: 0; }
 .mobility-screen { display: grid; gap: 12px; margin: -7px -6px 0; }
 .mobility-mode-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .mode-back { width: 38px; height: 38px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: white; color: var(--ink); font-size: 1.15rem; font-weight: 900; }
@@ -346,6 +356,8 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .route-line strong { max-width: 225px; margin-top: 3px; overflow: hidden; font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
 .route-line em { color: var(--green-dark); font-size: .62rem; font-style: normal; font-weight: 850; }
 .route-line svg { width: 17px; height: 17px; color: #aaa; }
+html[lang="en"] .route-line { grid-template-columns: 14px minmax(0, 1fr) auto; }
+html[lang="en"] .route-line > span:nth-child(2) { min-width: 0; }
 .route-tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 9px 0 14px; }
 .route-tools button { min-width: 0; min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 7px 3px; border: 1px solid #dcefe2; border-radius: 11px; background: #f5fbf7; color: var(--green-dark); font-size: .61rem; font-weight: 850; white-space: nowrap; }
 .route-tools svg { width: 14px; height: 14px; }
@@ -678,6 +690,7 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .category-card.active { border-color: rgba(83,177,117,.35); background: var(--green-soft); color: var(--green-dark); }
 .category-row.compact { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
 .category-row.compact .category-card { min-width: 0; min-height: 38px; padding: 7px 2px; border-radius: 11px; font-size: .58rem; letter-spacing: -.01em; white-space: nowrap; }
+html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-size: .54rem; line-height: 1.1; white-space: normal; }
 .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .product-card { min-width: 0; padding: 12px; }
 .product-thumb { width: 100%; height: 154px; display: grid; place-items: center; overflow: hidden; margin-bottom: 10px; padding: 6px; border: 0; border-radius: 13px; background: #fafafa; }
@@ -1108,6 +1121,10 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 
         <section id="login" class="screen login-screen" aria-label="로그인">
           <div class="login-head">
+            <div class="language-switch" role="group" aria-label="Language" data-i18n-skip>
+              <button type="button" data-language="ko" aria-pressed="true">한국어</button>
+              <button type="button" data-language="en" aria-pressed="false">English</button>
+            </div>
             <div class="mini-logo">M</div>
             <p class="eyebrow">ROBOTAXI · TRAVEL · CULTURE</p>
             <h2>moov 시작하기</h2>
@@ -1136,7 +1153,7 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
           </header>
           <div id="app-content" class="app-content" tabindex="-1"></div>
           <nav class="bottom-nav" aria-label="메인 메뉴">
-            <button data-tab="ai"><svg><use href="#i-chat"></use></svg><span>AI 말동무</span></button>
+            <button data-tab="ai"><svg><use href="#i-chat"></use></svg><span data-i18n-en="AI Chat">AI 말동무</span></button>
             <button data-tab="space"><svg><use href="#i-space"></use></svg><span>공간</span></button>
             <button data-tab="home" class="nav-active"><svg><use href="#i-home"></use></svg><span>홈</span></button>
             <button data-tab="outing"><svg><use href="#i-compass"></use></svg><span>나들이</span></button>
@@ -1160,6 +1177,8 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
       </section>
     </main>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="./i18n-data.js"></script>
+    <script src="./i18n.js"></script>
     <script>
 const STORAGE_KEY = "moov-app-v2";
 const APP_VERSION = "2.6.2";
@@ -2038,7 +2057,7 @@ function renderAi() {
           <button type="button" data-action="font-size" data-value="1" aria-label="채팅 글자 크게" ${state.chatFontScale >= 1.3 ? "disabled" : ""}>＋</button>
         </div>
         <button type="button" class="chat-expand-toggle" data-action="chat-expand" aria-label="${state.aiChatExpanded ? "채팅창 축소" : "채팅창 확대"}">${icon(state.aiChatExpanded ? "shrink" : "expand")}</button>
-        <div class="chat-date-divider"><span>${new Date().toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}</span></div>
+        <div class="chat-date-divider"><span>${new Date().toLocaleDateString(window.MoovI18n?.locale() || "ko-KR", { month: "long", day: "numeric", weekday: "short" })}</span></div>
         ${thread.messages.map((m) => `<div class="detail-message-row ${m.role === "user" ? "user" : ""}"><div class="detail-message-bubble">${escapeHtml(m.text)}<small>${escapeHtml(m.time || "방금 전")}</small></div></div>`).join("")}
       </div>
       ${voiceOn ? `<div class="ai-mic-stage" id="ai-voice-stage">
@@ -2141,6 +2160,12 @@ async function sendMessage(text, voice = false) {
 }
 
 function pickLunaReply(text) {
+  if (window.MoovI18n?.getLanguage() === "en") {
+    if (state.aiPersona === "토닥이") return "That sounds really hard. Take your time telling me. I'm here to listen.";
+    if (state.aiPersona === "척척박사") return "I'll explain what I can. If you're on the move, I'll start with the key points.";
+    if (state.aiPersona === "링고") return "I'll look for places nearby that might interest you. I can also help you phrase what you said naturally.";
+    return `Sounds good. Let's start with “${text.slice(0, 18)}${text.length > 18 ? "…" : ""}” and take it from there.`;
+  }
   if (state.aiPersona === "토닥이") return "많이 힘드셨겠어요. 천천히 이야기해주셔도 괜찮아요. 제가 옆에서 같이 들어볼게요.";
   if (state.aiPersona === "척척박사") return "제가 아는 선에서 정리해드릴게요. 이동 중이라면 핵심부터 짧게 안내할게요.";
   if (state.aiPersona === "링고") return "주변에 관심 있는 곳이 있는지 한번 찾아볼게요. 말해주신 표현도 자연스럽게 다듬어드릴 수 있어요.";
@@ -2183,7 +2208,7 @@ async function speakReply(text) {
     console.error("TTS 오류:", err);
   }
 }
-1
+
 function startVoiceConversation() {
     if (!state.aiVoiceEnabled) {
     toast("음성 대화가 꺼져 있어요. 설정에서 다시 켤 수 있어요.");
@@ -2292,14 +2317,14 @@ function renderSpace() {
 }
 
 function renderSpaceContents() {
-  return `<iframe class="space-content-frame" src="/space-content/index.html?embed=1#ott" title="MOOV 공간 콘텐츠" loading="eager"></iframe>`;
+  return `<iframe class="space-content-frame" src="/space-content/index.html?embed=1&lang=${window.MoovI18n?.getLanguage() || "ko"}#ott" title="MOOV 공간 콘텐츠" loading="eager"></iframe>`;
 }
 
 function renderPurchase() {
   const tabs = [["search", "상품 찾기"], ["cart", "장바구니"], ["orders", "구매 내역"], ["favorites", "관심 목록"]];
   const bodies = { search: renderProducts, cart: renderCart, orders: renderOrders, favorites: renderFavoriteProducts };
   if (!bodies[state.purchaseSub]) state.purchaseSub = "search";
-  return `<div class="subtabs purchase-tabs" role="tablist">${tabs.map(([id, label]) => `<button class="${state.purchaseSub === id ? "active" : ""}" data-action="purchase-sub" data-value="${id}"><span>${label}</span>${id === "cart" && cartCount() ? `<em class="cart-dot">${Math.min(cartCount(), 99)}</em>` : ""}</button>`).join("")}</div>${bodies[state.purchaseSub]()}`;
+  return `<div class="subtabs purchase-tabs" role="tablist">${tabs.map(([id, label]) => `<button class="${state.purchaseSub === id ? "active" : ""}" data-action="purchase-sub" data-value="${id}"><span ${id === "search" ? 'data-i18n-en="Browse"' : id === "orders" ? 'data-i18n-en="Orders"' : ""}>${label}</span>${id === "cart" && cartCount() ? `<em class="cart-dot">${Math.min(cartCount(), 99)}</em>` : ""}</button>`).join("")}</div>${bodies[state.purchaseSub]()}`;
 }
 
 function renderProducts() {
@@ -2310,7 +2335,7 @@ function renderProducts() {
     return categoryMatch && (!rankedProductIds || rankedProductIds.has(product.id));
   }).sort((a, b) => query ? (b.stock || 0) - (a.stock || 0) || Number(b.recommended) - Number(a.recommended) || a.name.localeCompare(b.name, "ko-KR") : 0);
   const categories = [["전체", "전체 메뉴"], ["추천", "추천 상품"], ["음료·간식", "음료·간식"], ["식사", "식사"], ["편의용품", "편의용품"]];
-  return `<section class="card shop-banner"><span class="badge">현재 차량 재고</span><h3>이동 중 바로 먹고 사용할 수 있어요</h3><p>결제 완료 후 지정 수납함이 자동으로 열립니다.</p></section>${renderSearchField({ inputId: "product-search", stateKey: "productQuery", className: "product-search", placeholder: "상품명을 입력하세요", label: "상품 검색" })}<div class="category-row compact" style="margin:12px 0">${categories.map(([id, label]) => `<button class="category-card ${state.productCategory === id ? "active" : ""}" data-action="product-category" data-value="${id}">${label}</button>`).join("")}</div>${list.length ? `<div class="product-grid">${list.map(productCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "앞글자가 일치하는 다른 상품명으로 찾아보세요.")}`;
+  return `<section class="card shop-banner"><span class="badge">현재 차량 재고</span><h3>이동 중 바로 먹고 사용할 수 있어요</h3><p>결제 완료 후 지정 수납함이 자동으로 열립니다.</p></section>${renderSearchField({ inputId: "product-search", stateKey: "productQuery", className: "product-search", placeholder: "상품명을 입력하세요", label: "상품 검색" })}<div class="category-row compact" style="margin:12px 0">${categories.map(([id, label]) => `<button class="category-card ${state.productCategory === id ? "active" : ""}" data-action="product-category" data-value="${id}" ${id === "추천" ? 'data-i18n-en="Suggested"' : id === "음료·간식" ? 'data-i18n-en="Drinks &amp; snacks"' : ""}>${label}</button>`).join("")}</div>${list.length ? `<div class="product-grid">${list.map(productCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "앞글자가 일치하는 다른 상품명으로 찾아보세요.")}`;
 }
 
 function productCard(product) {
@@ -2391,7 +2416,7 @@ function renderOuting() {
   const bodies = { recommend: renderRecommendation, register: renderRegisterCourse, interest: renderInterestCourses };
   if (!bodies[state.outingSub]) state.outingSub = "recommend";
   const searchZone = state.outingSub === "recommend" ? renderOutingSearchZone() : "";
-  return `${searchZone}<div class="subtabs outing-tabs" role="tablist">${tabs.map(([id, label]) => `<button class="${state.outingSub === id ? "active" : ""}" data-action="outing-sub" data-value="${id}">${label}</button>`).join("")}</div>${bodies[state.outingSub]()}`;
+  return `${searchZone}<div class="subtabs outing-tabs" role="tablist">${tabs.map(([id, label]) => `<button class="${state.outingSub === id ? "active" : ""}" data-action="outing-sub" data-value="${id}" ${id === "recommend" ? 'data-i18n-en="AI picks"' : ""}>${label}</button>`).join("")}</div>${bodies[state.outingSub]()}`;
 }
 
 function renderOutingSearchZone() {
@@ -2610,7 +2635,7 @@ function renderRecommendation() {
 }
 
 function buildAiRecommendedCourse() {
-  const selected = [...document.querySelectorAll(".preference-panel .choice-chip.selected")].map((button) => button.textContent.trim()).filter(Boolean);
+  const selected = [...document.querySelectorAll(".preference-panel .choice-chip.selected")].map((button) => button.dataset.value).filter(Boolean);
   const budget = Number(document.querySelector(".preference-panel .budget")?.value || 10);
   const mood = selected.includes("로맨틱") || selected.includes("야경 힐링") ? "노을과 야경" : selected.includes("가족과 함께") ? "가족 휴식" : "감성 산책";
   const name = selected.includes("야경 힐링") || selected.includes("로맨틱") ? "AI 추천 한강 노을·남산 야경 코스" : selected.includes("관광 명소") ? "AI 추천 서울 명소 반나절 코스" : "AI 추천 성수 감성 카페 코스";
@@ -2751,7 +2776,7 @@ function openUsageDetail(id) {
 }
 
 function subtabs(items, active, action) { return `<div class="subtabs" role="tablist">${items.map(([id, label]) => `<button class="${active === id ? "active" : ""}" data-action="${action}" data-value="${id}">${label}</button>`).join("")}</div>`; }
-function choiceGroup(name, values, selected) { return `<div class="choice-group"><h4>${name}</h4><div class="filter-chips">${values.map((value, index) => `<button class="${index === selected ? "selected" : ""}" data-action="chip">${value}</button>`).join("")}</div></div>`; }
+function choiceGroup(name, values, selected) { return `<div class="choice-group"><h4>${name}</h4><div class="filter-chips">${values.map((value, index) => `<button class="choice-chip ${index === selected ? "selected" : ""}" data-action="chip" data-value="${escapeHtml(value)}">${value}</button>`).join("")}</div></div>`; }
 function toggleItemInner(titleText, desc, on, action) { return `<span><strong>${titleText}</strong><small>${desc}</small></span><button class="switch ${on ? "on" : ""}" data-action="${action}" aria-label="${titleText} 전환"></button>`; }
 function toggleItem(titleText, desc, on, action = "toggle", iconVariant = null) { const iconHtml = iconVariant === "luna-bot" ? `<img src="${LUNA_BOT_IMAGE}" alt="" />` : icon("chat"); return `<div class="menu-item ${action === "ai-power" ? "ai-master-toggle" : ""}"><span class="menu-icon">${iconHtml}</span>${toggleItemInner(titleText, desc, on, action)}</div>`; }
 function menuItem(iconName, titleText, desc, action = "menu-info", value = titleText) { return `<button class="menu-item" data-action="${action}" data-value="${value}"><span class="menu-icon">${icon(iconName)}</span><span><strong>${titleText}</strong><small>${desc}</small></span>${icon("chevron")}</button>`; }
