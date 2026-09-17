@@ -1,0 +1,45 @@
+{
+  "setName": "MOOV Wellness Stretch Images - Legacy Neck and Shoulder Set",
+  "version": "1.2.0",
+  "status": "legacy",
+  "activeDataFile": "../../../js/data/wellness-routines.js",
+  "note": "현재 화면은 PDF 최종 정책에 따라 lower-body 이미지와 wellness-routines.js 데이터를 사용합니다.",
+  "imageSize": { "width": 1024, "height": 1536 },
+  "format": "jpg, png, webp",
+  "yogaAssets": [
+    { "id": "yoga-mountain", "file": "yoga/seated-mountain.webp", "usage": "정차중·주차중" },
+    { "id": "yoga-cat-cow", "file": "yoga/seated-cat-cow.webp", "usage": "정차중·주차중" },
+    { "id": "yoga-side-bend", "file": "yoga/seated-side-bend.webp", "usage": "정차중·주차중, 좌우 반전" },
+    { "id": "yoga-twist", "file": "yoga/seated-twist.webp", "usage": "정차중·주차중, 좌우 반전" },
+    { "id": "yoga-warrior", "file": "yoga/warrior-two.webp", "usage": "주차중, 좌우 반전" },
+    { "id": "yoga-tree", "file": "yoga/tree-pose.webp", "usage": "주차중, 좌우 반전" },
+    { "id": "yoga-chair", "file": "yoga/chair-pose.webp", "usage": "주차중 초·중·고급" },
+    { "id": "yoga-high-lunge", "file": "yoga/high-lunge.webp", "usage": "주차중 중·고급, 좌우 반전" },
+    { "id": "yoga-reverse-warrior", "file": "yoga/reverse-warrior.webp", "usage": "주차중 중·고급, 좌우 반전" },
+    { "id": "yoga-triangle", "file": "yoga/triangle-pose.webp", "usage": "주차중 초·중·고급, 좌우 반전" },
+    { "id": "yoga-half-moon", "file": "yoga/half-moon.webp", "usage": "주차중 중·고급, 좌우 반전" },
+    { "id": "yoga-dancer", "file": "yoga/dancer-pose.webp", "usage": "주차중 중·고급, 좌우 반전" }
+  ],
+  "routines": [
+    {
+      "id": "neck",
+      "title": "목 스트레칭",
+      "steps": [
+        { "step": 1, "file": "neck_01.jpg", "caption": "허리를 세우고 정면을 봅니다." },
+        { "step": 2, "file": "neck_02.jpg", "caption": "오른쪽으로 목을 천천히 기울입니다." },
+        { "step": 3, "file": "neck_03.jpg", "caption": "중앙으로 돌아와 목과 어깨의 힘을 풉니다." },
+        { "step": 4, "file": "neck_04.jpg", "caption": "왼쪽으로 목을 천천히 기울입니다." }
+      ]
+    },
+    {
+      "id": "shoulder",
+      "title": "어깨 스트레칭",
+      "steps": [
+        { "step": 1, "file": "shoulder_01.jpg", "caption": "양손을 어깨에 가볍게 올립니다." },
+        { "step": 2, "file": "shoulder_02.jpg", "caption": "팔꿈치를 앞쪽과 위쪽으로 천천히 올립니다." },
+        { "step": 3, "file": "shoulder_03.jpg", "caption": "팔꿈치를 양옆으로 열며 가슴을 폅니다." },
+        { "step": 4, "file": "shoulder_04.jpg", "caption": "팔꿈치를 내리며 어깨의 힘을 풉니다." }
+      ]
+    }
+  ]
+}

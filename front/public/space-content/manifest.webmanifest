@@ -1,0 +1,10 @@
+{
+  "name": "MOOV Space",
+  "short_name": "MOOV",
+  "description": "완전자율주행 차량의 개인 공간 모드 컨트롤러",
+  "start_url": "./#ott",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "lang": "ko-KR"
+}
