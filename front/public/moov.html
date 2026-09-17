@@ -2124,15 +2124,29 @@ async function sendMessage(text, voice = false) {
   thread.messages.push({ role: "user", text: clean, time: now() });
   if (checkCrisisKeywords(clean)) state.aiCrisisOpen = true;
 
+  // B-7: "저장해줘"라는 음성/텍스트 발화도 저장 동의로 인정
+  if (!state.aiSaveEnabled && /저장해\s*줘|저장해\s*주세요/.test(clean)) {
+    state.aiSaveEnabled = true;
+    state.liveSessionKey = Date.now();
+    toast("대화 기록 저장을 켰어요.");
+  }
+
   // 사용자 메시지를 먼저 화면에 반영 (응답 기다리는 동안 답답하지 않게)
+  const loadingMessage = { role: "ai", text: "루나가 생각 중...", time: now(), loading: true };
+  thread.messages.push(loadingMessage);
   persist(); render(); scrollChat();
 
   let reply;
   try {
+    const history = thread.messages
+      .slice(0, -1)   // 방금 push한 현재 사용자 메시지는 제외 (아래서 message로 따로 보냄)
+      .slice(-10)     // 최근 10개 메시지만 (토큰 비용 관리)
+      .map((m) => ({ role: m.role === "user" ? "user" : "assistant", content: m.text }));
+
     const res = await fetch("http://127.0.0.1:8000/api/luna/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: clean, persona: state.aiPersona }),
+      body: JSON.stringify({ message: clean, persona: state.aiPersona, history }),
     });
     if (!res.ok) throw new Error(`서버 응답 오류: ${res.status}`);
     const data = await res.json();
@@ -2142,9 +2156,16 @@ async function sendMessage(text, voice = false) {
     }
   } catch (err) {
     console.error("루나 응답 실패:", err);
-    reply = "지금 루나가 답을 못 하고 있어요. 잠시 후 다시 말 걸어주세요.";
+    if (err.name === "AbortError" || err.message?.includes("Failed to fetch")) {
+      reply = "서버에 연결할 수 없어요. 네트워크 상태를 확인해 주세요.";
+    } else if (err.message?.includes("서버 응답 오류")) {
+      reply = "루나 서버에 문제가 있어요. 잠시 후 다시 시도해 주세요.";
+    } else {
+      reply = "지금 루나가 답을 못 하고 있어요. 잠시 후 다시 말 걸어주세요.";
+    }
   }
 
+  thread.messages = thread.messages.filter((m) => !m.loading);
   thread.messages.push({ role: "ai", text: reply, time: now() });
   if (state.aiSaveEnabled) {
     const session = getOrCreateSavedSession();
@@ -2206,6 +2227,7 @@ async function speakReply(text) {
     audio.play();
   } catch (err) {
     console.error("TTS 오류:", err);
+    toast("음성 재생에 실패했어요. 텍스트로 확인해 주세요.");
   }
 }
 
@@ -2232,12 +2254,19 @@ function startVoiceConversation() {
   }
 
   speechRecognition = new Recognition();
-  speechRecognition.lang = "ko-KR";
+  speechRecognition.lang = window.MoovI18n?.locale() || "ko-KR";
   speechRecognition.interimResults = true;
   speechRecognition.continuous = true;
 
   let finalTranscript = "";
   let silenceTimer = null;
+
+  // B-11: 무한 듣기 상태 방지 — 최대 발화 시간(20초) 초과 시 강제 종료
+  const MAX_LISTEN_MS = 20000;
+  const maxListenTimer = setTimeout(() => {
+    toast("최대 발화 시간을 초과해 자동으로 종료했어요.");
+    speechRecognition.stop();
+  }, MAX_LISTEN_MS);
 
   speechRecognition.onresult = (event) => {
     for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -2248,16 +2277,18 @@ function startVoiceConversation() {
     clearTimeout(silenceTimer);
     silenceTimer = setTimeout(() => {
       speechRecognition.stop();
-    }, 1200);
+    }, 800);
   };
   speechRecognition.onerror = () => {
     clearTimeout(silenceTimer);
+    clearTimeout(maxListenTimer);
     state.aiStatus = "idle";
     render();
     toast("음성을 확인하지 못했어요. 다시 말하거나 텍스트로 입력해 주세요.");
   };
   speechRecognition.onend = () => {
     clearTimeout(silenceTimer);
+    clearTimeout(maxListenTimer);
     state.aiStatus = "idle";
     const transcript = finalTranscript.trim();
     if (transcript) sendMessage(transcript, true);
