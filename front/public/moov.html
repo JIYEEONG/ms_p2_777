@@ -1220,10 +1220,10 @@ const themeAssets = {
 };
 
 const aiPersonas = [
-  { id: "moov", name: "무브", desc: "캐주얼한 잡담, 공감 위주 대화", image: "./assets/luna-moov.svg" },
-  { id: "todaki", name: "토닥이", desc: "고민 상담, 공감 기반 대화", image: "./assets/luna-todaki.svg" },
-  { id: "doctor", name: "척척박사", desc: "아는 만큼 답해주는 지식 모드", image: "./assets/luna-doctor.svg" },
-  { id: "ringo", name: "링고", desc: "실시간 통역과 주변 관광정보 안내", image: "./assets/luna-ringo.svg" },
+  { id: "moov", name: "무브", desc: "캐주얼한 잡담, 공감 위주 대화", image: "./assets/무브_캐릭터.png" },
+  { id: "todaki", name: "토닥이", desc: "고민 상담, 공감 기반 대화", image: "./assets/토닥이_캐릭터.png" },
+  { id: "doctor", name: "척척박사", desc: "아는 만큼 답해주는 지식 모드", image: "./assets/척척박사_캐릭터.png" },
+  { id: "ringo", name: "링고", desc: "실시간 통역과 주변 관광정보 안내", image: "./assets/링고_캐릭터.png" },
 ];
 const LUNA_BOT_IMAGE = "./assets/luna-bot.svg"; // 캐빈 화면 외 모든 곳(꺼짐 화면, 설정 아이콘 등)에서 쓰는 공통 루나 아이콘
 
@@ -2097,14 +2097,35 @@ function renderAiSettings() {
   return `<p class="settings-group-label">대화 방식</p><section class="card">${toggleItem("루나", "끄면 루나 전체 기능이 종료돼요. \"그만 대화하고 싶어\"라고 말해도 동일하게 꺼져요.", state.aiStatus !== "off", "ai-power", "luna-bot")}<div class="menu-item settings-sub-item">${toggleItemInner("음성으로 대화하기", "기본적으로 루나 on/off와 같이 움직여요. 필요하면 이것만 따로 켜고 끌 수 있어요.", state.aiVoiceEnabled, "ai-voice-setting")}</div></section><p class="settings-group-label" style="margin-top:18px;">이용 설정</p><section class="card">${toggleItem("승차 후 자동 시작", "차량 탑승이 확인되면 먼저 인사해요. 인사말에서 \"루나야\"라고 부르면 언제든 대화를 시작할 수 있다고 안내해요.", state.aiAutoStart, "ai-autostart-setting")}${toggleItem("대화 기록 저장", "동의해야만 대화 내용이 남아요 (기본 꺼짐)", state.aiSaveEnabled, "ai-save-setting")}</section>`;
 }
 
-function sendMessage(text, voice = false) {
+async function sendMessage(text, voice = false) {
   const clean = text.trim();
   if (!clean) return;
   const now = () => new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
   const thread = currentThread();
   thread.messages.push({ role: "user", text: clean, time: now() });
   if (checkCrisisKeywords(clean)) state.aiCrisisOpen = true;
-  const reply = voice ? "음성 내용을 확인했어요. 원하시면 관련 장소를 목적지나 나들이 코스로 이어드릴게요." : pickLunaReply(clean);
+
+  // 사용자 메시지를 먼저 화면에 반영 (응답 기다리는 동안 답답하지 않게)
+  persist(); render(); scrollChat();
+
+  let reply;
+  try {
+    const res = await fetch("http://127.0.0.1:8000/api/luna/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: clean, persona: state.aiPersona }),
+    });
+    if (!res.ok) throw new Error(`서버 응답 오류: ${res.status}`);
+    const data = await res.json();
+    reply = data.reply;
+    if (data.switched_persona) {
+      setAiPersona(data.switched_persona, true);  // silent=true로 토스트 중복 방지
+    }
+  } catch (err) {
+    console.error("루나 응답 실패:", err);
+    reply = "지금 루나가 답을 못 하고 있어요. 잠시 후 다시 말 걸어주세요.";
+  }
+
   thread.messages.push({ role: "ai", text: reply, time: now() });
   if (state.aiSaveEnabled) {
     const session = getOrCreateSavedSession();
@@ -2136,17 +2157,35 @@ function scrollChat() {
   if (box) box.scrollTop = box.scrollHeight;
 }
 
-function speakReply(text) {
-  if (!("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "ko-KR";
-  utterance.rate = 1;
-  window.speechSynthesis.speak(utterance);
-}
+let currentTtsAudio = null;
 
+async function speakReply(text) {
+  try {
+    // 이전에 재생 중이던 음성이 있으면 먼저 멈춤
+    if (currentTtsAudio) {
+      currentTtsAudio.pause();
+      currentTtsAudio.currentTime = 0;
+      currentTtsAudio = null;
+    }
+
+    const res = await fetch("http://127.0.0.1:8000/api/luna/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, persona: state.aiPersona }),
+    });
+    if (!res.ok) throw new Error("TTS 요청 실패");
+    const audioBlob = await res.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    currentTtsAudio = audio;
+    audio.play();
+  } catch (err) {
+    console.error("TTS 오류:", err);
+  }
+}
+1
 function startVoiceConversation() {
-  if (!state.aiVoiceEnabled) {
+    if (!state.aiVoiceEnabled) {
     toast("음성 대화가 꺼져 있어요. 설정에서 다시 켤 수 있어요.");
     return;
   }
@@ -2160,24 +2199,45 @@ function startVoiceConversation() {
     toast("이 브라우저는 음성 인식을 지원하지 않아요. 화면은 데모로 표시돼요.");
     return;
   }
-  if (speechRecognition) speechRecognition.abort();
+  if (speechRecognition) {
+  speechRecognition.onresult = null;
+  speechRecognition.onerror = null;
+  speechRecognition.onend = null;
+  speechRecognition.abort();
+  }
+
   speechRecognition = new Recognition();
   speechRecognition.lang = "ko-KR";
-  speechRecognition.interimResults = false;
-  speechRecognition.continuous = false;
+  speechRecognition.interimResults = true;
+  speechRecognition.continuous = true;
+
+  let finalTranscript = "";
+  let silenceTimer = null;
+
   speechRecognition.onresult = (event) => {
-    const transcript = event.results?.[0]?.[0]?.transcript || "";
-    state.aiStatus = "idle";
-    if (transcript) sendMessage(transcript, true);
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript;
+      }
+    }
+    clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(() => {
+      speechRecognition.stop();
+    }, 1200);
   };
   speechRecognition.onerror = () => {
+    clearTimeout(silenceTimer);
     state.aiStatus = "idle";
     render();
     toast("음성을 확인하지 못했어요. 다시 말하거나 텍스트로 입력해 주세요.");
   };
   speechRecognition.onend = () => {
-    if (state.aiStatus === "listening") { state.aiStatus = "idle"; render(); }
+    clearTimeout(silenceTimer);
+    state.aiStatus = "idle";
+    const transcript = finalTranscript.trim();
+    if (transcript) sendMessage(transcript, true);
   };
+
   try {
     speechRecognition.start();
   } catch {
@@ -2776,6 +2836,10 @@ document.addEventListener("change", (event) => {
 });
 
 document.addEventListener("click", (event) => {
+  if (state.personaMenuOpen && !event.target.closest(".ai-persona-dropdown, .ai-persona-badge")) {
+    state.personaMenuOpen = false;
+    render();
+  }
   const button = event.target.closest("button, [data-action]");
   if (!button) return;
   const action = button.dataset.action; const value = button.dataset.value;
