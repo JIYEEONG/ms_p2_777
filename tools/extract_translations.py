@@ -12,7 +12,7 @@ import json
 import re
 import subprocess
 
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
 
@@ -91,14 +91,18 @@ def inventory():
 def main():
     entries = inventory()
     translations = json.loads((ROOT / "translations" / "wellness-en.json").read_text(encoding="utf-8"))
+    existing = {}
+    if OUTPUT.exists():
+        old_sheet = load_workbook(OUTPUT, read_only=True).active
+        existing = {row[1]: (row[2], row[3]) for row in list(old_sheet.values)[1:] if row[1] and row[2]}
     OUTPUT.parent.mkdir(exist_ok=True)
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = "UI and voice"
     sheet.append(["ID", "한국어", "English", "검수 상태", "원본 위치"])
     for index, (korean, locations) in enumerate(sorted(entries.items()), start=1):
-        english = translations.get(korean, "")
-        sheet.append([f"MOOV-{index:04d}", korean, english, "검수 필요" if english else "번역 필요", "\n".join(sorted(locations))])
+        english, status = existing.get(korean, (translations.get(korean, ""), "검수 필요" if korean in translations else "번역 필요"))
+        sheet.append([f"MOOV-{index:04d}", korean, english, status, "\n".join(sorted(locations))])
     sheet.freeze_panes = "C2"
     sheet.auto_filter.ref = sheet.dimensions
     for column, width in {"A": 16, "B": 66, "C": 66, "D": 16, "E": 64}.items():
@@ -110,7 +114,7 @@ def main():
         for cell in row:
             cell.alignment = Alignment(vertical="top", wrap_text=True)
     workbook.save(OUTPUT)
-    translated = sum(phrase in translations for phrase in entries)
+    translated = sum(bool(existing.get(phrase, (translations.get(phrase),))[0]) for phrase in entries)
     print(f"{len(entries)} Korean entries, {translated} translated -> {OUTPUT.relative_to(ROOT)}")
 
 
