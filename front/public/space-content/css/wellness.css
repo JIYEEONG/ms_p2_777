@@ -10,10 +10,20 @@
 .active-theme-strip strong { font-size: 14px; }
 .active-theme-strip strong span { color: #8ee4ae; }
 .active-theme-strip small { margin-top: 5px; color: rgba(255,255,255,.78); font-size: 12px; }
-.wellness-state-switch { margin: 0 0 17px; padding: 5px; border-radius: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; background: var(--surface); }
+.wellness-state-row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; margin-bottom: 12px; }
+.wellness-vehicle-status { min-height: 38px; padding: 0 11px; border: 1px solid #dce7e0; border-radius: 13px; display: inline-flex; align-items: center; gap: 7px; color: #5d7164; background: #f8fbf9; font-size: 12px; font-weight: 900; white-space: nowrap; }
+.wellness-vehicle-status i { width: 8px; height: 8px; border-radius: 50%; background: #9aa99e; }
+.wellness-vehicle-status.is-driving { color: #287b49; background: #edf9f1; }
+.wellness-vehicle-status.is-driving i { background: #2aa45d; }
+.wellness-state-switch { min-width: 0; padding: 4px; border-radius: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--surface); }
 .wellness-state-switch button { min-height: 44px; border: 0; border-radius: 11px; color: #7d827f; background: transparent; font-size: 13px; font-weight: 900; cursor: pointer; }
 .wellness-state-switch button span { margin-right: 5px; }
-.wellness-state-switch button.is-active { color: #fff; background: var(--moov); box-shadow: 0 5px 14px rgba(45,151,96,.2); }
+.wellness-state-switch button.is-active { color: var(--moov-deep); background: #fff; box-shadow: 0 3px 12px rgba(45,151,96,.12); }
+.wellness-phone-notice { min-height: 58px; margin-bottom: 16px; padding: 10px 13px; border-radius: 15px; display: flex; align-items: center; gap: 11px; color: #315942; background: #eefaf2; }
+.wellness-phone-notice > span { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #16814c; background: #d9f2e3; font-size: 18px; }
+.wellness-phone-notice strong, .wellness-phone-notice small { display: block; }
+.wellness-phone-notice strong { font-size: 12px; }
+.wellness-phone-notice small { margin-top: 3px; color: #6d8575; font-size: 11px; }
 .wellness-empty { min-height: 150px; padding: 25px 18px; border: 1px dashed #cdd8d2; border-radius: 18px; display: grid; align-content: center; text-align: center; background: #fbfcfb; }
 .wellness-empty strong { color: var(--navy); font-size: 16px; }
 .wellness-empty p { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.55; }

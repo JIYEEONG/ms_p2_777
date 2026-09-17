@@ -9,7 +9,16 @@ import { CABIN_THEME_EVENT, cabinPreviewMarkup, updateCabinPreview } from "./cor
 const panel = document.querySelector("#space-panel");
 const scroller = document.querySelector("#space-scroll");
 const contentTabs = document.querySelector("#content-tabs");
+const embedded = document.documentElement.classList.contains("embedded");
 let state = { primary: "contents", content: "ott" };
+
+function reportEmbeddedHeight() {
+  if (!embedded || window.parent === window) return;
+  window.parent.postMessage({
+    type: "moov:space-content-height",
+    height: scroller.scrollHeight
+  }, location.origin);
+}
 
 function activeThemeId() {
   try {
@@ -76,6 +85,7 @@ function renderPanel({ updateHistory = false } = {}) {
   else renderContentsPanel(panel);
   scroller.scrollTop = 0;
   if (updateHistory) history.pushState(state, "", `#${canonicalHash()}`);
+  requestAnimationFrame(reportEmbeddedHeight);
 }
 
 document.querySelectorAll("[data-primary-tab]").forEach((button) => {
@@ -121,7 +131,16 @@ updateClock();
 setInterval(updateClock, 30000);
 renderPanel();
 
-if (!document.documentElement.classList.contains("embedded") && "serviceWorker" in navigator && location.protocol !== "file:") {
+if (embedded) {
+  const resizeObserver = new ResizeObserver(reportEmbeddedHeight);
+  resizeObserver.observe(scroller);
+  resizeObserver.observe(panel);
+  document.addEventListener("load", reportEmbeddedHeight, true);
+  window.addEventListener("resize", reportEmbeddedHeight);
+  requestAnimationFrame(reportEmbeddedHeight);
+}
+
+if (!embedded && "serviceWorker" in navigator && location.protocol !== "file:") {
   navigator.serviceWorker.register("./sw.js").then((registration) => registration.update()).catch(() => {});
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (sessionStorage.getItem("moov-sw-refreshed")) return;

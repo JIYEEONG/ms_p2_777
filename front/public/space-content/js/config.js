@@ -17,7 +17,7 @@ export const CONFIG = Object.freeze({
     primaryTab: "contents"
   },
   wellness: {
-    // 실제 차량 미연결 상태는 null입니다. 사용자가 정차/주차 목록을 직접 미리 봅니다.
+    // 실차 API가 없으면 MOOV 앱의 이용 상태를 읽고, 정차/주차 프로그램은 별도로 선택합니다.
     mockVehicleState: null,
     preparationSeconds: 3,
     sideTransitionSeconds: 0

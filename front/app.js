@@ -238,6 +238,13 @@ const tabMeta = {
 };
 
 const content = document.querySelector("#app-content");
+window.addEventListener("message", (event) => {
+  if (event.origin !== location.origin || event.data?.type !== "moov:space-content-height") return;
+  const frame = content.querySelector(".space-content-frame");
+  if (event.source !== frame?.contentWindow) return;
+  const height = Number(event.data.height);
+  if (Number.isFinite(height) && height > 0) frame.style.height = `${Math.ceil(height)}px`;
+});
 const title = document.querySelector("#section-title");
 const kicker = document.querySelector("#section-kicker");
 const modal = document.querySelector("#modal");

@@ -1,15 +1,15 @@
 html.embedded,
 html.embedded body {
-  height: 100%;
+  height: auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   background: white;
 }
 
 html.embedded .experience-shell {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   min-height: 0;
   margin: 0;
   padding: 0;
@@ -28,11 +28,76 @@ html.embedded .primary-tabs {
 
 html.embedded .secondary-tabs {
   margin-top: 0;
+  padding: 4px;
+  border-radius: 15px;
 }
+
+html.embedded .secondary-tabs button {
+  min-height: 40px;
+  border-radius: 12px;
+  font-size: .66rem;
+}
+
+html.embedded .ott-view .panel-heading h2,
+html.embedded .theme-view .panel-heading h2,
+html.embedded .private-theme-view .panel-heading h2 {
+  font-size: 18px;
+}
+
+html.embedded .ott-view .panel-heading p,
+html.embedded .theme-view .panel-heading p,
+html.embedded .private-theme-view .panel-heading p {
+  font-size: 12px;
+}
+
+html.embedded .ott-view .service-copy strong { font-size: 13px; }
+html.embedded .ott-view .service-copy span { font-size: 12px; }
+html.embedded .ott-view .continue-heading h3 { font-size: 15px; }
+html.embedded .ott-view .continue-card h3 { font-size: 16px; }
+html.embedded .ott-login-view .ott-login-brand h2 { font-size: 19px; }
+html.embedded .ott-login-view .account-result strong { font-size: 14px; }
+
+html.embedded .theme-view .theme-section-title h3 { font-size: 15px; }
+html.embedded .theme-view .theme-card-copy strong { font-size: 15px; }
+html.embedded .theme-view .theme-preview-copy strong { font-size: 19px; }
+html.embedded .private-theme-view .private-setting-card h3 { font-size: 14px; }
+
+html.embedded .active-theme-strip {
+  margin-bottom: 14px;
+  padding: 11px 13px;
+}
+
+html.embedded .active-theme-strip strong { font-size: 12px; }
+
+html.embedded .wellness-activity-tabs,
+html.embedded .guide-tabs {
+  padding: 4px;
+  gap: 4px;
+  border-radius: 14px;
+}
+
+html.embedded .wellness-activity-tabs button,
+html.embedded .guide-tabs button {
+  min-height: 36px;
+  border-radius: 11px;
+  font-size: 12px;
+}
+
+html.embedded .wellness-state-switch {
+  padding: 3px;
+  gap: 3px;
+}
+
+html.embedded .wellness-state-switch button {
+  min-height: 34px;
+  font-size: 11px;
+}
+
+html.embedded .wellness-vehicle-status { min-height: 34px; }
 
 html.embedded .phone-frame {
   width: 100%;
-  height: 100%;
+  height: auto;
   min-height: 0;
   max-width: none;
   margin: 0;
@@ -44,16 +109,18 @@ html.embedded .phone-frame {
 }
 
 html.embedded .app-shell {
-  height: 100%;
-  grid-template-rows: minmax(0, 1fr);
+  display: block;
+  height: auto;
+  overflow: visible;
   border-radius: 0;
 }
 
 html.embedded .space-scroll {
-  height: 100%;
+  height: auto;
   padding: 0 0 24px;
+  overflow: visible;
 }
 
 html.embedded .space-panel {
-  padding-top: 0;
+  padding-top: 12px;
 }

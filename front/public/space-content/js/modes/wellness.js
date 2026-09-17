@@ -5,7 +5,7 @@ import { WELLNESS_PROGRAMS, WELLNESS_SAFETY_NOTICES, WELLNESS_STEPS } from "../d
 
 let state = {
   view: "list",
-  previewState: null,
+  previewState: "stopped",
   actualVehicleState: null,
   activity: "stretch",
   guideMode: "voice",
@@ -88,13 +88,17 @@ function nextProgramFor(mode, currentId) {
 }
 
 function canStart(mode) {
-  return !state.actualVehicleState || state.actualVehicleState === mode;
+  return mode === "stopped" || mode === "parked";
 }
 
 function renderStateChooser() {
-  return `<div class="wellness-state-switch" role="group" aria-label="차량 상태별 프로그램 보기">
+  const driving = state.actualVehicleState === "driving";
+  return `<div class="wellness-state-row">
+    <span class="wellness-vehicle-status ${driving ? "is-driving" : ""}" role="status"><i aria-hidden="true"></i>${driving ? "운행 중" : "미운행 중"}</span>
+    <div class="wellness-state-switch" role="group" aria-label="프로그램 선택">
     <button type="button" data-preview-state="stopped" class="${state.previewState === "stopped" ? "is-active" : ""}" aria-pressed="${state.previewState === "stopped"}"><span>◉</span>정차중</button>
     <button type="button" data-preview-state="parked" class="${state.previewState === "parked" ? "is-active" : ""}" aria-pressed="${state.previewState === "parked"}"><span>P</span>주차중</button>
+    </div>
   </div>`;
 }
 
@@ -137,7 +141,6 @@ function renderList(container) {
   stopSpeech();
   state.view = "list";
   state.programId = null;
-  if (state.actualVehicleState === "driving") return renderBlocked(container);
   const mode = state.previewState;
   container.innerHTML = `
     <section class="panel-view wellness-view" data-panel="wellness" data-wellness-view="list">
@@ -145,6 +148,7 @@ function renderList(container) {
       <div class="panel-heading split-heading wellness-title-row"><div><h2>프로그램</h2></div></div>
       ${renderActivityChooser()}
       ${renderStateChooser()}
+      <div class="wellness-phone-notice"><span aria-hidden="true">📱</span><div><strong>휴대폰에서 모든 프로그램 실행 가능</strong><small>운행 중에는 차량 전면 화면에 표시되지 않아요.</small></div></div>
       ${!mode ? `<div class="wellness-empty"><strong>운행을 시작하세요</strong><p>차량 상태가 확인되면 이용 가능한 ${state.activity === "yoga" ? "요가" : "스트레칭"}가 자동으로 표시됩니다.</p></div>` : `
         <h3 class="wellness-list-label">${mode === "parked" ? "주차중" : "정차중"} ${state.activity === "yoga" ? "요가" : "스트레칭"}</h3>
         ${(() => {
@@ -364,19 +368,11 @@ function renderComplete(container) {
   container.querySelector("#wellness-complete-next").addEventListener("click", () => nextProgram ? startProgram(container, nextProgram.id) : renderList(container));
 }
 
-function renderBlocked(container) {
-  clearTimer();
-  stopSpeech();
-  container.innerHTML = `<section class="panel-view wellness-blocked" data-wellness-view="blocked"><div class="wellness-blocked-icon">${icon("icon-car")}</div><h2>차량 이동 중에는 이용할 수 없어요</h2><p>안전을 위해 프로그램과 음성 안내를 정지했습니다.</p></section>`;
-}
-
 function handleVehicleState(nextState) {
   if (!nextState) return;
   state.actualVehicleState = nextState;
-  state.previewState = nextState === "driving" ? null : nextState;
   if (!activeContainer) return;
-  if (nextState === "driving") renderBlocked(activeContainer);
-  else renderList(activeContainer);
+  if (state.view === "list") renderList(activeContainer);
 }
 
 export function renderWellnessPanel(container) {

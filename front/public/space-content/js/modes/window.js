@@ -58,8 +58,7 @@ const EFFECT_SOUNDS = Object.freeze([
   { id: SKY_WIND_ID, label: "하늘 바람", synth: "wind" },
   { id: "space-ambient", label: "우주 앰비언트", synth: "space" },
   { id: "interstellar-demo", label: "인터스텔라", synth: "cosmic-organ" },
-  { id: "cabin-announcement", label: "기내 방송 · 1회", action: true },
-  { id: "birds-off", label: "새소리 끄기", action: true }
+  { id: "cabin-announcement", label: "기내 방송 · 1회", action: true }
 ]);
 
 const rainAudio = new Audio(CONFIG.media.rainSound);
@@ -179,26 +178,23 @@ function ambientOptions(soundKey) {
   const amphibians = nature.filter((sound) => sound.group === "개구리·양서류");
   const grouped = (sounds) => sounds.map((sound) => ({ ...sound, group: "환경음·효과" }));
 
-  if (soundKey === "forest") return [...birds, ...amphibians, ...classics, ...grouped([effect("forest-crickets")]), effect("birds-off")];
+  if (soundKey === "forest") return [...birds, ...amphibians, ...classics, ...grouped([effect("forest-crickets")])];
   if (soundKey === "sea") return [
     ...birds.filter((sound) => sound.id === "bird-seagull"),
     ...classics,
-    ...grouped([...waves, effect("sea-whale"), effect("sea-dolphin")]),
-    effect("birds-off")
+    ...grouped([...waves, effect("sea-whale"), effect("sea-dolphin")])
   ];
   if (soundKey === "sky") return [
     ...birds,
     ...classics,
     ...grouped([effect(SKY_WIND_ID)]),
-    effect("cabin-announcement"),
-    effect("birds-off")
+    effect("cabin-announcement")
   ];
   if (soundKey === SPACE_SOUND_KEY) return [...classics, effect("cabin-announcement")];
   return [
     ...nature,
     ...classics,
-    ...grouped([...waves, effect("forest-crickets"), effect("sea-whale"), effect("sea-dolphin"), effect(SKY_WIND_ID), effect("space-ambient"), effect("interstellar-demo")]),
-    effect("birds-off")
+    ...grouped([...waves, effect("forest-crickets"), effect("sea-whale"), effect("sea-dolphin"), effect(SKY_WIND_ID), effect("space-ambient"), effect("interstellar-demo")])
   ];
 }
 
@@ -391,7 +387,6 @@ function soundSettingsMarkup(soundKey, { privateMode = false } = {}) {
   const dropdownOptions = selectable.filter((sound) => !featuredIds.includes(sound.id));
   const selectedOptions = selectable.filter((sound) => selected.includes(sound.id));
   const groups = ["새소리", "개구리·양서류", "클래식", "환경음·효과"];
-  const hasBirds = selectable.some((sound) => sound.group === "새소리");
   const hasCabinAnnouncement = options.some((sound) => sound.id === "cabin-announcement");
   const label = soundKey === SPACE_SOUND_KEY ? "Space" : soundKey === "private" ? "Private" : themeById(soundKey).label;
   return `<section class="inline-theme-settings" data-sound-settings="${soundKey}">
@@ -412,7 +407,6 @@ function soundSettingsMarkup(soundKey, { privateMode = false } = {}) {
     </div>
     <div class="sound-action-row">
       ${hasCabinAnnouncement ? `<button type="button" data-sound-id="cabin-announcement" class="is-action">기내 방송 · 1회</button>` : ""}
-      ${hasBirds ? `<button type="button" data-sound-id="birds-off" class="is-action">새소리 끄기</button>` : ""}
     </div>
     ${privateMode ? `<p class="private-selection">업로드한 개인 음악과 공통 배경음을 함께 사용할 수 있습니다.</p>` : ""}
     <div class="inline-slider-grid">
@@ -449,15 +443,6 @@ function bindSoundSettings(container, soundKey, rerender) {
     const id = button.dataset.soundId;
     const option = ambientOptions(soundKey).find((sound) => sound.id === id);
     if (id === "cabin-announcement") { playCabinAnnouncementOnce((state.volumeByTheme[soundKey] || 55) / 100); return; }
-    if (id === "birds-off") {
-      const birdIds = new Set(NATURE_SOUNDS.filter((sound) => sound.group === "새소리").map((sound) => sound.id));
-      state.soundByTheme[soundKey] = ensureSoundChoice(soundKey).filter((soundId) => !birdIds.has(soundId));
-      saveDisplayPreferences();
-      syncAmbientAudio(state.theme);
-      dataService.sendVehicleCommand("window.sound", { theme: soundKey, selected: state.soundByTheme[soundKey] });
-      rerender();
-      return;
-    }
     const current = [...ensureSoundChoice(soundKey)];
     const exists = current.includes(id);
     let next = exists ? current.filter((value) => value !== id) : [...current, id];
