@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7c83ff"/><stop offset="1" stop-color="#493f9a"/></linearGradient><filter id="s"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-opacity=".2"/></filter></defs>
+  <rect width="1600" height="800" rx="56" fill="url(#bg)"/>
+  <circle cx="1320" cy="100" r="330" fill="#fff" opacity=".08"/><circle cx="1220" cy="690" r="360" fill="#fff" opacity=".08"/>
+  <text x="100" y="185" font-family="Arial,'Noto Sans KR',sans-serif" font-size="42" font-weight="800" fill="#fff" opacity=".82">CULTURE DRIVE</text>
+  <text x="100" y="330" font-family="Arial,'Noto Sans KR',sans-serif" font-size="96" font-weight="900" fill="#fff">City art walk</text>
+  <text x="100" y="420" font-family="Arial,'Noto Sans KR',sans-serif" font-size="34" font-weight="600" fill="#fff" opacity=".86">An art outing that starts when you step out</text>
+  <g transform="translate(1010 130)" filter="url(#s)"><rect x="35" y="35" width="470" height="470" rx="38" fill="#fff" opacity=".96"/><rect x="88" y="90" width="364" height="260" rx="18" fill="#d8dbff"/><circle cx="270" cy="220" r="94" fill="#ff9e79"/><path d="M135 420c90-130 190-130 270 0" fill="none" stroke="#6a64cb" stroke-width="46" stroke-linecap="round"/></g>
+</svg>
