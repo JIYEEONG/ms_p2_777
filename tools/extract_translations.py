@@ -93,12 +93,17 @@ def main():
     translations = json.loads((ROOT / "translations" / "wellness-en.json").read_text(encoding="utf-8"))
     existing = {}
     if OUTPUT.exists():
-        old_sheet = load_workbook(OUTPUT, read_only=True).active
+        workbook = load_workbook(OUTPUT)
+        old_sheet = workbook["UI and voice"]
         existing = {row[1]: (row[2], row[3]) for row in list(old_sheet.values)[1:] if row[1] and row[2]}
+        del workbook["UI and voice"]
+        sheet = workbook.create_sheet("UI and voice", 0)
+    else:
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "UI and voice"
     OUTPUT.parent.mkdir(exist_ok=True)
-    workbook = Workbook()
-    sheet = workbook.active
-    sheet.title = "UI and voice"
+    workbook.active = 0
     sheet.append(["ID", "한국어", "English", "검수 상태", "원본 위치"])
     for index, (korean, locations) in enumerate(sorted(entries.items()), start=1):
         english, status = existing.get(korean, (translations.get(korean, ""), "검수 필요" if korean in translations else "번역 필요"))

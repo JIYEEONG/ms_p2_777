@@ -18,6 +18,8 @@ flagged = 0
 for row in sheet.iter_rows(min_row=2):
     korean = row[1].value or ""
     english = row[2].value or ""
+    if row[3].value not in {"기계 번역 · 검수 필요", "용어 초안 · 검수 필요", "번역 필요"}:
+        continue
     replacement = corrections.get(korean)
     if replacement is None:
         minutes = re.fullmatch(r"(\d+)분", korean)
