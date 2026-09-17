@@ -1,6 +1,7 @@
-const CACHE = "moov-space-v34";
+const CACHE = "moov-space-v36";
 const SHELL = [
   "./", "./index.html", "./asset-library.html", "./manifest.webmanifest", "./css/app.css", "./css/wellness.css",
+  "../i18n-data.js", "../i18n.js",
   "./js/app.js", "./js/config.js", "./js/core/ui.js", "./js/services/data-service.js",
   "./js/core/cabin-preview.js",
   "./js/data/space-content.js", "./js/data/wellness-routines.js",

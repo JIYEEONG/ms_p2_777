@@ -95,7 +95,11 @@ def main():
     if OUTPUT.exists():
         workbook = load_workbook(OUTPUT)
         old_sheet = workbook["UI and voice"]
-        existing = {row[1]: (row[2], row[3]) for row in list(old_sheet.values)[1:] if row[1] and row[2]}
+        headers = {cell.value: cell.column - 1 for cell in old_sheet[1]}
+        existing = {
+            row[1]: (row[2], row[headers["2차변경"]] if "2차변경" in headers else "", row[headers["검수 상태"]])
+            for row in list(old_sheet.values)[1:] if row[1] and row[2]
+        }
         del workbook["UI and voice"]
         sheet = workbook.create_sheet("UI and voice", 0)
     else:
@@ -104,13 +108,13 @@ def main():
         sheet.title = "UI and voice"
     OUTPUT.parent.mkdir(exist_ok=True)
     workbook.active = 0
-    sheet.append(["ID", "한국어", "English", "검수 상태", "원본 위치"])
+    sheet.append(["ID", "한국어", "English", "2차변경", "검수 상태", "원본 위치"])
     for index, (korean, locations) in enumerate(sorted(entries.items()), start=1):
-        english, status = existing.get(korean, (translations.get(korean, ""), "검수 필요" if korean in translations else "번역 필요"))
-        sheet.append([f"MOOV-{index:04d}", korean, english, status, "\n".join(sorted(locations))])
+        english, second_pass, status = existing.get(korean, (translations.get(korean, ""), "", "검수 필요" if korean in translations else "번역 필요"))
+        sheet.append([f"MOOV-{index:04d}", korean, english, second_pass, status, "\n".join(sorted(locations))])
     sheet.freeze_panes = "C2"
     sheet.auto_filter.ref = sheet.dimensions
-    for column, width in {"A": 16, "B": 66, "C": 66, "D": 16, "E": 64}.items():
+    for column, width in {"A": 16, "B": 66, "C": 66, "D": 66, "E": 16, "F": 64}.items():
         sheet.column_dimensions[column].width = width
     for cell in sheet[1]:
         cell.fill = PatternFill("solid", fgColor="234336")

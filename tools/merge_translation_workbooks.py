@@ -41,6 +41,7 @@ ORIGINAL_BASELINE = {"연결": "Connect"}
 def main():
     book = load_workbook(OUTPUT)
     sheet = book["UI and voice"]
+    headers = {cell.value: cell.column - 1 for cell in sheet[1]}
     san = load_workbook(SANSKRIT, read_only=True, data_only=True)["UI and voice"]
 
     if sheet.max_row != san.max_row:
@@ -61,7 +62,8 @@ def main():
     poses = 0
 
     for row, candidate in zip(sheet.iter_rows(min_row=2), san.iter_rows(min_row=2, values_only=True)):
-        identifier, korean, current, _, location = [cell.value for cell in row]
+        identifier, korean, current = [cell.value for cell in row[:3]]
+        location = row[headers["원본 위치"]].value
         if (identifier, korean, location) != (candidate[0], candidate[1], candidate[4]):
             raise ValueError(f"Row alignment mismatch at {identifier}")
 
@@ -75,7 +77,7 @@ def main():
             poses += 1
 
         row[2].value = chosen
-        row[3].value = candidate[3]
+        row[headers["검수 상태"]].value = candidate[3]
         if chosen != proposed:
             overrides += 1
         if original != proposed:

@@ -33,15 +33,14 @@ function speechRateFor(text, availableSeconds) {
   const spokenCharacters = text.replace(/\s+/g, "").length;
   const estimatedSecondsAtNormalRate = spokenCharacters / 4.1;
   const targetSeconds = Math.max(1.4, availableSeconds - .8);
-  return Math.min(1.8, Math.max(1.2, estimatedSecondsAtNormalRate / targetSeconds));
+  return Math.min(1.5, Math.max(1, estimatedSecondsAtNormalRate / targetSeconds));
 }
 
 function speak(text, availableSeconds = 8) {
   if (state.guideMode !== "voice" || !("speechSynthesis" in window)) return;
   stopSpeech();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "ko-KR";
-  utterance.rate = speechRateFor(text, availableSeconds);
+  const utterance = window.MoovI18n?.utterance(text) || new SpeechSynthesisUtterance(text);
+  utterance.rate = speechRateFor(utterance.text, availableSeconds);
   utterance.pitch = 1;
   window.speechSynthesis.speak(utterance);
 }
@@ -96,7 +95,7 @@ function renderStateChooser() {
   return `<div class="wellness-state-row">
     <span class="wellness-vehicle-status ${driving ? "is-driving" : ""}" role="status"><i aria-hidden="true"></i>${driving ? "운행 중" : "미운행 중"}</span>
     <div class="wellness-state-switch" role="group" aria-label="프로그램 선택">
-    <button type="button" data-preview-state="stopped" class="${state.previewState === "stopped" ? "is-active" : ""}" aria-pressed="${state.previewState === "stopped"}"><span>◉</span>정차중</button>
+    <button type="button" data-preview-state="stopped" class="${state.previewState === "stopped" ? "is-active" : ""}" aria-pressed="${state.previewState === "stopped"}"><span class="state-wheel" aria-hidden="true">${icon("icon-wheel")}</span>정차중</button>
     <button type="button" data-preview-state="parked" class="${state.previewState === "parked" ? "is-active" : ""}" aria-pressed="${state.previewState === "parked"}"><span>P</span>주차중</button>
     </div>
   </div>`;
@@ -302,7 +301,7 @@ function renderSession(container) {
   const elapsed = sessionElapsedSeconds();
   container.innerHTML = `
     <section class="panel-view wellness-detail" data-panel="wellness" data-wellness-view="session">
-      <div class="wellness-session-top"><button class="inline-back" id="wellness-back" type="button">${icon("icon-chevron-left")} 프로그램 목록</button><span class="vehicle-badge">${state.previewState === "parked" ? "P 주차중" : "◉ 정차중"}</span></div>
+      <div class="wellness-session-top"><button class="inline-back" id="wellness-back" type="button">${icon("icon-chevron-left")} 프로그램 목록</button><span class="vehicle-badge">${state.previewState === "parked" ? "P 주차중" : `${icon("icon-wheel")} 정차중`}</span></div>
       <div class="wellness-step-head"><div><span class="program-badge">${program.name}</span><h2>${segment.step.title}</h2></div><strong>${state.segmentIndex + 1} / ${state.segments.length}</strong></div>
       <article class="wellness-step-card">
         <div class="wellness-image-frame">

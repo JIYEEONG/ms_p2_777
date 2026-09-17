@@ -33,6 +33,20 @@ const WAVE_SOUNDS = Object.freeze([
 const SKY_WIND_ID = "sky-wind";
 const SPACE_SOUND_KEY = "space";
 const MAX_MIXED_SOUNDS = 3;
+const FEATURED_TITLES_EN = Object.freeze({
+  forest: "Forest animal",
+  sea: "Wave sounds",
+  sky: "Birds of prey",
+  space: "Classical · Holst"
+});
+const FEATURED_SOUND_NAMES_EN = Object.freeze({
+  "waves-soft": "Gentle",
+  "waves-medium": "Medium",
+  "waves-strong": "Strong",
+  "classic-holst-mars": "Mars",
+  "classic-holst-jupiter": "Jupiter",
+  "classic-holst-venus": "Venus"
+});
 const CLASSIC_SOUNDS = Object.freeze([
   { id: "classic-bach-air", label: "바흐 · G선상의 아리아", src: "./assets/audio/classic/bach-air.mp3", group: "클래식" },
   { id: "classic-beethoven-collection", label: "베토벤 · 교향곡 모음", src: "./assets/audio/classic/beethoven-symphonies.mp3", group: "클래식" },
@@ -291,8 +305,10 @@ function playCabinAnnouncementOnce(volume = .5) {
   playTone(880, .4, volume * .16, "sine", .32);
   announcementTimer = window.setTimeout(() => {
     if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) return;
-    const message = new SpeechSynthesisUtterance("Ladies and gentlemen, welcome aboard MOOV. Please remain seated and keep your seat belt fastened. We hope you enjoy your journey.");
-    message.lang = "en-US";
+    const announcement = window.MoovI18n?.getLanguage() === "en"
+      ? "Ladies and gentlemen, welcome aboard MOOV. Please remain seated and keep your seat belt fastened. We hope you enjoy your journey."
+      : "MOOV에 탑승하신 것을 환영합니다. 자리에 앉아 안전벨트를 착용해 주세요. 즐거운 여행 되시기 바랍니다.";
+    const message = window.MoovI18n?.utterance(announcement) || new SpeechSynthesisUtterance(announcement);
     message.rate = .84;
     message.pitch = .92;
     message.volume = Math.min(1, volume);
@@ -391,7 +407,7 @@ function soundSettingsMarkup(soundKey, { privateMode = false } = {}) {
   const label = soundKey === SPACE_SOUND_KEY ? "Space" : soundKey === "private" ? "Private" : themeById(soundKey).label;
   return `<section class="inline-theme-settings" data-sound-settings="${soundKey}">
     <div class="inline-settings-title"><div><strong>${icon("icon-music")} ${label} 배경음</strong><small>테마에 어울리는 소리만 표시 · 최대 ${MAX_MIXED_SOUNDS}개</small></div><button type="button" data-sound-off class="sound-off ${selected.length ? "" : "is-active"}">전체 소리 끄기</button></div>
-    ${featuredOptions.length ? `<div class="featured-sound-block"><span>핵심 소리</span><div class="featured-sound-row">${featuredOptions.map((sound) => `<button type="button" data-sound-id="${sound.id}" class="${selected.includes(sound.id) ? "is-active" : ""}" aria-pressed="${selected.includes(sound.id)}">${sound.label}</button>`).join("")}</div></div>` : ""}
+    ${featuredOptions.length ? `<div class="featured-sound-block"><span data-i18n-en="${FEATURED_TITLES_EN[soundKey] || "Featured sounds"}">핵심 소리</span><div class="featured-sound-row">${featuredOptions.map((sound) => `<button type="button" data-sound-id="${sound.id}" ${FEATURED_SOUND_NAMES_EN[sound.id] ? `data-i18n-en="${FEATURED_SOUND_NAMES_EN[sound.id]}"` : ""} class="${selected.includes(sound.id) ? "is-active" : ""}" aria-pressed="${selected.includes(sound.id)}">${sound.label}</button>`).join("")}</div></div>` : ""}
     <div class="sound-dropdown-row">
       <label for="sound-picker-${soundKey}">소리 선택</label>
       <select id="sound-picker-${soundKey}" data-sound-picker>

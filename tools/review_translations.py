@@ -12,13 +12,14 @@ path = ROOT / "translations" / "moov-ko-en.xlsx"
 corrections = json.loads((ROOT / "translations" / "ui-corrections.json").read_text(encoding="utf-8"))
 book = load_workbook(path)
 sheet = book.active
+status_index = next(index for index, cell in enumerate(sheet[1]) if cell.value == "검수 상태")
 changed = 0
 flagged = 0
 
 for row in sheet.iter_rows(min_row=2):
     korean = row[1].value or ""
     english = row[2].value or ""
-    if row[3].value not in {"기계 번역 · 검수 필요", "용어 초안 · 검수 필요", "번역 필요"}:
+    if row[status_index].value not in {"기계 번역 · 검수 필요", "용어 초안 · 검수 필요", "번역 필요"}:
         continue
     replacement = corrections.get(korean)
     if replacement is None:
@@ -41,11 +42,11 @@ for row in sheet.iter_rows(min_row=2):
             replacement = re.sub(r"\bMOV\b", "MOOV", english)
     if replacement and replacement != english:
         row[2].value = replacement
-        row[3].value = "용어 초안 · 검수 필요"
+        row[status_index].value = "용어 초안 · 검수 필요"
         english = replacement
         changed += 1
     if re.search(r"[가-힣]", english) or not english.strip() or len(english) > max(100, 4 * len(korean)):
-        row[3].value = "우선 검수 필요"
+        row[status_index].value = "우선 검수 필요"
         for cell in row:
             cell.fill = PatternFill("solid", fgColor="FFF1D6")
         flagged += 1

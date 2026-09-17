@@ -377,6 +377,8 @@ input[type="range"] { width: 100%; accent-color: var(--moov); }
 .featured-sound-row { display: flex; flex-wrap: wrap; gap: 7px; }
 .featured-sound-row button { min-height: 36px; padding: 7px 11px; border: 1px solid #c8dfd2; border-radius: 999px; color: var(--green-dark); background: #fff; font-size: 12px; font-weight: 900; cursor: pointer; }
 .featured-sound-row button.is-active { color: #fff; border-color: var(--green); background: var(--green); }
+html[lang="en"] .inline-theme-settings:is([data-sound-settings="sea"], [data-sound-settings="space"]) .featured-sound-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+html[lang="en"] .inline-theme-settings:is([data-sound-settings="sea"], [data-sound-settings="space"]) .featured-sound-row button { min-width: 0; padding-inline: 3px; font-size: 11px; white-space: nowrap; }
 .sound-dropdown-row { margin-top: 12px; display: grid; gap: 6px; }
 .sound-dropdown-row label { color: #465149; font-size: 12px; font-weight: 900; }
 .sound-dropdown-row select { width: 100%; min-height: 44px; padding: 9px 36px 9px 11px; border: 1px solid #cddbd4; border-radius: 12px; color: var(--navy); background: #fff; font: inherit; font-size: 14px; }
