@@ -1,0 +1,216 @@
+.active-theme-strip {
+  margin-bottom: 18px;
+  padding: 14px 15px;
+  border-radius: 16px;
+  color: #fff;
+  background: #244535;
+}
+.active-theme-strip strong,
+.active-theme-strip small { display: block; }
+.active-theme-strip strong { font-size: 14px; }
+.active-theme-strip strong span { color: #8ee4ae; }
+.active-theme-strip small { margin-top: 5px; color: rgba(255,255,255,.78); font-size: 12px; }
+.wellness-state-row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; margin-bottom: 12px; }
+.wellness-vehicle-status { min-height: 38px; padding: 0 11px; border: 1px solid #dce7e0; border-radius: 13px; display: inline-flex; align-items: center; gap: 7px; color: #5d7164; background: #f8fbf9; font-size: 12px; font-weight: 900; white-space: nowrap; }
+.wellness-vehicle-status i { width: 8px; height: 8px; border-radius: 50%; background: #9aa99e; }
+.wellness-vehicle-status.is-driving { color: #287b49; background: #edf9f1; }
+.wellness-vehicle-status.is-driving i { background: #2aa45d; }
+.wellness-state-switch { min-width: 0; padding: 4px; border-radius: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--surface); }
+.wellness-state-switch button { min-height: 44px; border: 0; border-radius: 11px; color: #7d827f; background: transparent; font-size: 13px; font-weight: 900; cursor: pointer; }
+.wellness-state-switch button span { margin-right: 5px; }
+.wellness-state-switch button.is-active { color: var(--moov-deep); background: #fff; box-shadow: 0 3px 12px rgba(45,151,96,.12); }
+.wellness-phone-notice { min-height: 58px; margin-bottom: 16px; padding: 10px 13px; border-radius: 15px; display: flex; align-items: center; gap: 11px; color: #315942; background: #eefaf2; }
+.wellness-phone-notice > span { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #16814c; background: #d9f2e3; font-size: 18px; }
+.wellness-phone-notice strong, .wellness-phone-notice small { display: block; }
+.wellness-phone-notice strong { font-size: 12px; }
+.wellness-phone-notice small { margin-top: 3px; color: #6d8575; font-size: 11px; }
+.wellness-empty { min-height: 150px; padding: 25px 18px; border: 1px dashed #cdd8d2; border-radius: 18px; display: grid; align-content: center; text-align: center; background: #fbfcfb; }
+.wellness-empty strong { color: var(--navy); font-size: 16px; }
+.wellness-empty p { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+.wellness-title-row { margin-bottom: 12px; }
+.wellness-activity-tabs { margin-bottom: 10px; padding: 5px; border-radius: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; background: #eaf1ed; }
+.wellness-activity-tabs button { min-height: 44px; border: 0; border-radius: 11px; color: #69736e; background: transparent; font-size: 14px; font-weight: 900; cursor: pointer; }
+.wellness-activity-tabs button.is-active { color: #fff; background: #244535; box-shadow: 0 5px 14px rgba(24,59,41,.18); }
+.wellness-list-label { margin: 0 0 10px; color: var(--navy); font-size: 15px; }
+.wellness-program-list { display: grid; gap: 8px; }
+.wellness-difficulty-section { margin-top: 17px; }
+.wellness-difficulty-section h4 { margin: 0 0 9px; display: flex; align-items: center; gap: 10px; color: var(--navy); font-size: 15px; }
+.wellness-difficulty-section h4::after { height: 1px; flex: 1; content: ""; background: #d9e2dd; }
+.wellness-difficulty-section h4 span { flex: 0 0 auto; }
+.wellness-all-program {
+  width: 100%; min-height: 54px; margin: 0 0 10px; padding: 8px 10px 8px 14px; border: 1px solid #a9d8bb; border-radius: 15px;
+  display: grid; grid-template-columns: 1fr 38px; align-items: center; gap: 9px; color: var(--green-dark); background: var(--green-soft); text-align: left; cursor: pointer;
+}
+.wellness-all-program > strong { font-size: 16px; }
+.wellness-all-program > i { width: 36px; height: 36px; border: 1px solid #a9d8bb; border-radius: 50%; display: grid; place-items: center; background: #fff; font-style: normal; }
+.wellness-all-program svg { width: 18px; height: 18px; fill: currentColor; }
+.wellness-all-program:disabled { opacity: .58; cursor: not-allowed; }
+.parking-symbol {
+  width: 18px;
+  height: 18px;
+  border: 1.8px solid currentColor;
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.wellness-program-card.compact {
+  min-height: 72px;
+  padding: 7px 8px;
+  border: 1px solid #dce5e0;
+  border-radius: 15px;
+  display: grid;
+  grid-template-columns: 52px 25px minmax(0, 1fr) 42px;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(25, 47, 36, .035);
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+.wellness-program-card.compact:hover,
+.wellness-program-card.compact:focus-visible { border-color: var(--green); background: var(--green-soft); outline: none; }
+.wellness-program-card.compact:active { transform: scale(.99); }
+.wellness-program-card.compact > img {
+  width: 52px;
+  height: 58px;
+  border-radius: 11px;
+  object-fit: cover;
+  object-position: center;
+  background: var(--surface);
+}
+.program-number { color: var(--green-dark); font-size: 15px; font-weight: 900; text-align: center; }
+.wellness-program-copy { min-width: 0; }
+.wellness-program-copy h3 { margin: 0; color: var(--navy); font-size: 14px; line-height: 1.35; letter-spacing: -.025em; }
+.wellness-program-copy small { margin-top: 6px; display: flex; align-items: center; gap: 4px; color: #79808a; font-size: 12px; }
+.wellness-program-copy small svg { width: 15px; height: 15px; }
+.wellness-program-copy em { margin-top: 4px; display: block; color: #7d847f; font-size: 11px; font-style: normal; }
+.wellness-program-card.is-readonly { opacity: .58; cursor: not-allowed; }
+.routine-start { width: 42px; height: 42px; padding: 0; border: 0; display: grid; place-items: center; color: var(--green); background: transparent; cursor: pointer; }
+.routine-start span { width: 34px; height: 34px; border: 1px solid #d8e3dd; border-radius: 50%; display: grid; place-items: center; background: #fff; }
+.routine-start svg { width: 18px; height: 18px; fill: currentColor; }
+
+.wellness-course-card {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid #cce9d7;
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 23px;
+  align-items: center;
+  gap: 11px;
+  color: #173124;
+  background: var(--green-soft);
+  text-align: left;
+  cursor: pointer;
+}
+.wellness-course-card .course-image { width: 58px; height: 66px; border-radius: 12px; overflow: hidden; }
+.wellness-course-card img { width: 100%; height: 100%; object-fit: cover; }
+.wellness-course-card strong,
+.wellness-course-card small,
+.wellness-course-card em { display: block; }
+.wellness-course-card strong { color: var(--green-dark); font-size: 16px; }
+.wellness-course-card small { margin-top: 3px; font-size: 12px; line-height: 1.35; }
+.wellness-course-card em { margin-top: 6px; color: #469a68; font-size: 11px; font-style: normal; font-weight: 800; }
+.wellness-course-card > svg { color: var(--green-dark); fill: currentColor; }
+
+.wellness-safety { margin-top: 13px; padding: 14px 15px; border: 1px solid #f0dfad; border-radius: 17px; color: #6b5a2f; background: #fff9e9; }
+.wellness-safety strong { display: block; margin-bottom: 6px; color: #7c6429; font-size: 14px; }
+.wellness-safety ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; }
+.wellness-safety li + li { margin-top: 3px; }
+
+.inline-back { margin: 0 0 13px; padding: 8px 10px 8px 7px; border: 0; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px; color: var(--green-dark); background: var(--green-soft); font-size: 13px; font-weight: 800; cursor: pointer; }
+.inline-back svg { width: 18px; height: 18px; }
+.wellness-session-top { min-height: 43px; display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+.wellness-session-top .inline-back { margin-bottom: 8px; }
+.wellness-step-head { margin: 3px 0 12px; display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+.wellness-step-head h2 { margin: 8px 0 0; color: var(--navy); font-size: 22px; line-height: 1.25; letter-spacing: -.04em; }
+.wellness-step-head > strong { flex: 0 0 auto; color: var(--green-dark); font-size: 13px; }
+.program-badge { padding: 6px 9px; }
+
+.wellness-step-card { border: 1px solid var(--line); border-radius: 21px; overflow: hidden; background: #fff; box-shadow: var(--shadow); }
+.wellness-step-card.is-paused { opacity: .72; }
+.wellness-image-frame { position: relative; width: 100%; height: clamp(360px, 106vw, 470px); display: grid; place-items: center; overflow: hidden; background: #eef1f0; }
+.wellness-image-frame img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: contain; opacity: 1; cursor: pointer; transition: opacity .2s; }
+.wellness-image-frame img.is-mirrored { transform: scaleX(-1); }
+.wellness-media-controls {
+  position: absolute; z-index: 4; right: 0; bottom: 0; left: 0; min-height: 58px; padding: 13px 10px 8px;
+  display: grid; grid-template-columns: 38px 38px 38px 38px 1fr; align-items: center; gap: 4px;
+  color: #fff; background: linear-gradient(180deg, transparent, rgba(8, 14, 12, .86));
+}
+.wellness-media-seek { --seek: 0%; position: absolute; top: 0; right: 10px; left: 10px; width: calc(100% - 20px); height: 15px; margin: 0; border: 0; appearance: none; -webkit-appearance: none; background: transparent; cursor: pointer; }
+.wellness-media-seek::-webkit-slider-runnable-track { height: 3px; border-radius: 99px; background: linear-gradient(to right, #ff2451 0 var(--seek), rgba(255,255,255,.36) var(--seek) 100%); }
+.wellness-media-seek::-moz-range-track { height: 3px; border-radius: 99px; background: linear-gradient(to right, #ff2451 0 var(--seek), rgba(255,255,255,.36) var(--seek) 100%); }
+.wellness-media-seek::-webkit-slider-thumb { width: 14px; height: 14px; margin-top: -5.5px; border: 2px solid #fff; border-radius: 50%; appearance: none; -webkit-appearance: none; opacity: 0; background: #ff2451; box-shadow: 0 1px 5px rgba(0,0,0,.4); transition: opacity .15s; }
+.wellness-media-seek::-moz-range-thumb { width: 11px; height: 11px; border: 2px solid #fff; border-radius: 50%; opacity: 0; background: #ff2451; box-shadow: 0 1px 5px rgba(0,0,0,.4); transition: opacity .15s; }
+.wellness-media-seek:hover::-webkit-slider-thumb, .wellness-media-seek:focus-visible::-webkit-slider-thumb { opacity: 1; }
+.wellness-media-seek:hover::-moz-range-thumb, .wellness-media-seek:focus-visible::-moz-range-thumb { opacity: 1; }
+.wellness-media-controls button { width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; color: #fff; background: rgba(20,24,23,.62); cursor: pointer; }
+.wellness-media-controls button:disabled { opacity: .35; cursor: default; }
+.wellness-media-controls button.is-on { background: rgba(20,24,23,.72); }
+.wellness-media-controls svg { width: 21px; height: 21px; }
+.wellness-media-controls #wellness-pause svg { fill: currentColor; }
+.wellness-media-controls > strong { justify-self: end; padding: 7px 10px; border-radius: 999px; background: rgba(20,24,23,.7); font-size: 12px; white-space: nowrap; }
+.wellness-image-frame.is-loading img { opacity: 0; }
+.wellness-image-loader,
+.wellness-image-fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 22px; color: #777c86; background: linear-gradient(105deg, #eef0f0 30%, #f8f9f9 50%, #eef0f0 70%); background-size: 230% 100%; text-align: center; font-size: 13px; }
+.wellness-image-loader { animation: loading-wave 1.25s linear infinite; }
+@keyframes loading-wave { to { background-position: -230% 0; } }
+.wellness-image-frame:not(.is-loading) .wellness-image-loader { display: none; }
+.wellness-image-fallback { z-index: 3; background: #eef0f0; }
+.wellness-caption { padding: 14px 15px 13px; border-bottom: 1px solid #e6ebe8; background: #fff; }
+.wellness-caption > div { display: flex; align-items: center; gap: 8px; }
+.wellness-caption > div > span { flex: 0 0 auto; padding: 4px 7px; border-radius: 999px; color: var(--green-dark); background: var(--green-soft); font-size: 12px; font-weight: 900; }
+.wellness-caption > div > strong { color: var(--navy); font-size: 17px; line-height: 1.3; }
+.wellness-caption > b { margin-top: 7px; display: block; color: var(--green-dark); font-size: 13px; }
+.wellness-caption > p { margin: 7px 0 0; color: #5f6872; font-size: 14px; line-height: 1.5; }
+.wellness-caption > small { margin-top: 8px; display: block; color: #765f31; font-size: 12px; line-height: 1.45; }
+.wellness-caption > small strong { margin-right: 5px; }
+.wellness-step-copy { padding: 16px; }
+.wellness-step-copy > span { color: var(--green-dark); font-size: 12px; font-weight: 900; letter-spacing: .08em; }
+.wellness-step-copy h3 { margin: 6px 0; color: var(--navy); font-size: 20px; }
+.wellness-step-copy p { min-height: 44px; margin: 0; color: #646b76; font-size: 14px; line-height: 1.55; }
+.stretch-caution { margin-top: 13px; padding: 11px 12px; border-radius: 13px; display: flex; align-items: flex-start; gap: 9px; color: #725d30; background: #fff8e8; font-size: 12px; line-height: 1.45; }
+.stretch-caution strong { flex: 0 0 auto; }
+
+.wellness-session-actions { margin-top: 12px; display: grid; grid-template-columns: 1fr; gap: 8px; }
+.wellness-session-actions .green-action { margin: 0; }
+.wellness-session-actions button { min-width: 0; padding-inline: 8px; font-size: 13px; }
+
+.wellness-complete { padding: 30px 20px; border: 1px solid var(--line); border-radius: 23px; text-align: center; background: linear-gradient(180deg, var(--green-soft), #fff 52%); box-shadow: var(--shadow); }
+.complete-mark { width: 68px; height: 68px; margin: 0 auto 17px; border-radius: 22px; display: grid; place-items: center; color: #fff; background: var(--green); }
+.complete-mark svg { width: 34px; height: 34px; stroke-width: 2.4; }
+.wellness-complete h2 { margin: 12px 0 7px; color: var(--navy); font-size: 24px; }
+.wellness-complete p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.wellness-complete-actions { margin-top: 18px; display: grid; gap: 12px; }
+.wellness-complete-actions .green-action { margin: 0; }
+
+.wellness-blocked { min-height: 390px; padding: 28px 22px; border: 1px solid var(--line); border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #fff; }
+.wellness-blocked > .vehicle-badge { margin-bottom: 24px; }
+.wellness-blocked-icon { width: 72px; height: 72px; border-radius: 24px; display: grid; place-items: center; color: #fff; background: var(--navy); }
+.wellness-blocked-icon svg { width: 36px; height: 36px; }
+.wellness-blocked h2 { margin: 20px 0 8px; color: var(--navy); font-size: 21px; }
+.wellness-blocked p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+@media (max-width: 370px) {
+  .wellness-program-card.compact { grid-template-columns: 46px 22px minmax(0, 1fr) 38px; gap: 6px; }
+  .wellness-program-card.compact > img { width: 46px; height: 54px; }
+  .wellness-program-copy h3 { font-size: 13px; }
+  .wellness-image-frame { height: 390px; }
+  .wellness-media-controls { grid-template-columns: repeat(4, 34px) 1fr; gap: 2px; padding-inline: 7px; }
+  .wellness-media-controls button { width: 33px; height: 33px; }
+  .wellness-media-controls > strong { padding-inline: 8px; font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wellness-image-loader { animation: none; }
+}
+
+@media (pointer: coarse) {
+  .wellness-media-seek::-webkit-slider-thumb { opacity: 1; }
+  .wellness-media-seek::-moz-range-thumb { opacity: 1; }
+}

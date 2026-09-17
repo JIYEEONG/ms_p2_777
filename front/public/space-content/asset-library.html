@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="MOOV Space 이미지·음악·영상 자산 미리보기 및 다운로드" />
+    <title>MOOV 자산 보관함</title>
+    <style>
+      :root { color-scheme: dark; --bg:#07110d; --panel:#101d17; --line:#294034; --text:#f3faf6; --muted:#a4b8ad; --accent:#65d993; }
+      * { box-sizing:border-box; }
+      body { margin:0; font-family:Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif; background:radial-gradient(circle at 80% 0,#17392a 0,transparent 34rem),var(--bg); color:var(--text); }
+      button, input { font:inherit; }
+      a { color:inherit; }
+      .shell { width:min(1180px,calc(100% - 32px)); margin:auto; padding:46px 0 80px; }
+      header { display:grid; grid-template-columns:1fr auto; align-items:end; gap:24px; padding-bottom:28px; border-bottom:1px solid var(--line); }
+      .eyebrow { margin:0 0 10px; color:var(--accent); font-size:.82rem; font-weight:800; letter-spacing:.16em; }
+      h1 { margin:0; font-size:clamp(2rem,6vw,4.5rem); line-height:.96; letter-spacing:-.06em; }
+      .intro { max-width:720px; margin:18px 0 0; color:var(--muted); font-size:1rem; line-height:1.7; }
+      .back { text-decoration:none; border:1px solid var(--line); border-radius:999px; padding:11px 16px; white-space:nowrap; }
+      .toolbar { display:grid; grid-template-columns:1fr auto; gap:16px; margin:28px 0 18px; }
+      .search { width:100%; min-height:48px; color:var(--text); background:#0c1712; border:1px solid var(--line); border-radius:14px; padding:0 16px; outline:none; }
+      .search:focus { border-color:var(--accent); box-shadow:0 0 0 3px #65d99322; }
+      .filters { display:flex; gap:8px; flex-wrap:wrap; }
+      .filter { min-height:48px; color:var(--muted); background:#0c1712; border:1px solid var(--line); border-radius:14px; padding:0 16px; cursor:pointer; }
+      .filter.is-active { color:#06100b; background:var(--accent); border-color:var(--accent); font-weight:800; }
+      .summary { margin:0 0 24px; color:var(--muted); }
+      .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px; }
+      .card { overflow:hidden; display:flex; flex-direction:column; min-height:245px; background:linear-gradient(180deg,#14231b,#0d1712); border:1px solid var(--line); border-radius:20px; }
+      .preview { aspect-ratio:16/10; display:grid; place-items:center; overflow:hidden; background:#050a07; }
+      .preview img, .preview video { width:100%; height:100%; object-fit:cover; }
+      .audio-preview { width:100%; padding:24px 16px; }
+      audio { width:100%; height:40px; }
+      .meta { display:flex; flex-direction:column; flex:1; gap:8px; padding:16px; }
+      .kind { color:var(--accent); font-size:.75rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+      .name { overflow-wrap:anywhere; font-size:.95rem; font-weight:750; line-height:1.35; }
+      .path { overflow:hidden; color:var(--muted); font-size:.76rem; white-space:nowrap; text-overflow:ellipsis; }
+      .download { margin-top:auto; align-self:flex-start; text-decoration:none; color:#06100b; background:var(--accent); border-radius:10px; padding:9px 12px; font-size:.84rem; font-weight:850; }
+      .empty { grid-column:1/-1; padding:64px 24px; color:var(--muted); text-align:center; border:1px dashed var(--line); border-radius:20px; }
+      .notice { margin-top:32px; padding:18px 20px; color:var(--muted); background:#0d1712; border:1px solid var(--line); border-radius:16px; line-height:1.65; }
+      @media (max-width:720px) { .shell{width:min(100% - 20px,1180px);padding-top:28px} header{grid-template-columns:1fr}.back{justify-self:start}.toolbar{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.card{min-height:220px} }
+      @media (max-width:460px) { .grid{grid-template-columns:1fr} }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <div>
+          <p class="eyebrow">MOOV SPACE · ASSET LIBRARY</p>
+          <h1>이미지와 음악을<br />한곳에서 가져가세요.</h1>
+          <p class="intro">프론트 통합에 필요한 이미지·음악·영상 파일을 미리 확인하고 개별 다운로드할 수 있습니다. 파일 경로는 통합용 ZIP과 동일합니다.</p>
+        </div>
+        <a class="back" href="./index.html">MOOV 앱으로 돌아가기</a>
+      </header>
+
+      <section class="toolbar" aria-label="자산 검색 및 필터">
+        <input class="search" id="search" type="search" placeholder="파일명 또는 폴더명 검색" aria-label="자산 검색" />
+        <div class="filters" role="group" aria-label="파일 종류">
+          <button class="filter is-active" type="button" data-kind="all">전체</button>
+          <button class="filter" type="button" data-kind="image">이미지</button>
+          <button class="filter" type="button" data-kind="audio">음악·소리</button>
+          <button class="filter" type="button" data-kind="video">영상</button>
+        </div>
+      </section>
+      <p class="summary" id="summary"></p>
+      <section class="grid" id="grid" aria-live="polite"></section>
+      <p class="notice"><strong>사용 전 확인:</strong> 이 페이지는 팀 개발·인수인계를 위한 자산 전달용입니다. 특히 클래식 음원은 곡 자체의 보호기간과 별개로 연주·녹음물 권리가 존재할 수 있으므로 외부 공개나 상업 배포 전 각 파일의 출처와 이용 허락을 확인하세요.</p>
+    </main>
+
+    <script>
+      const assets = ["assets/audio/birds/black-naped-oriole.mp3","assets/audio/birds/eurasian-magpie-proxy.mp3","assets/audio/birds/eurasian-skylark.mp3","assets/audio/birds/eurasian-tree-sparrow.mp3","assets/audio/birds/great-spotted-woodpecker.mp3","assets/audio/birds/greater-white-fronted-goose.mp3","assets/audio/birds/japanese-bush-warbler.mp3","assets/audio/birds/japanese-tit.mp3","assets/audio/birds/oriental-scops-owl.mp3","assets/audio/birds/oriental-turtle-dove.mp3","assets/audio/classic/bach-air.mp3","assets/audio/classic/beethoven-pastoral.mp3","assets/audio/classic/beethoven-symphonies.mp3","assets/audio/classic/chopin-nocturne-9-2.mp3","assets/audio/classic/debussy-la-mer.mp3","assets/audio/classic/dvorak-new-world-4.mp3","assets/audio/classic/grieg-morning-mood.mp3","assets/audio/classic/holst-jupiter.mp3","assets/audio/classic/holst-mars.mp3","assets/audio/classic/holst-venus.mp3","assets/audio/classic/mozart-clarinet-adagio.mp3","assets/audio/classic/saint-saens-aquarium.mp3","assets/audio/classic/satie-gymnopedie-1.mp3","assets/audio/classic/tchaikovsky-barcarolle.mp3","assets/audio/classic/vivaldi-spring.mp3","assets/audio/nature/black-naped-oriole.mp3","assets/audio/nature/dusky-thrush.mp3","assets/audio/nature/eagle.mp3","assets/audio/nature/frog-chorus.mp3","assets/audio/nature/goshawk.mp3","assets/audio/nature/narrow-mouth-frog.mp3","assets/audio/nature/nightingale.mp3","assets/audio/nature/oriental-scops-owl.mp3","assets/audio/nature/oriental-turtle-dove.mp3","assets/audio/nature/owl.mp3","assets/audio/nature/red-tailed-hawk.mp3","assets/audio/nature/seagull.mp3","assets/audio/nature/skylark.mp3","assets/audio/nature/sparrow.mp3","assets/audio/nature/tit.mp3","assets/audio/nature/toad.mp3","assets/audio/nature/tree-frog.mp3","assets/audio/nature/warbler.mp3","assets/audio/nature/wren.mp3","assets/audio/sea-waves.mp3","assets/images/cabin/cabin-three-window.png","assets/images/purchase/cabin-market.png","assets/images/wellness/lower-body/stretch_01_pelvic_tilt.png","assets/images/wellness/lower-body/stretch_02_knee_to_chest.png","assets/images/wellness/lower-body/stretch_03_torso_rotation.png","assets/images/wellness/lower-body/stretch_04_hip_flexor.png","assets/images/wellness/lower-body/stretch_05_glute.png","assets/images/wellness/lower-body/stretch_06_hamstring.png","assets/images/wellness/lower-body/stretch_07_side_body.png","assets/images/wellness/manifest.json","assets/images/wellness/neck/neck_01.jpg","assets/images/wellness/neck/neck_02.jpg","assets/images/wellness/neck/neck_03.jpg","assets/images/wellness/neck/neck_04.jpg","assets/images/wellness/shoulder/arm-shoulder-pull-v2.png","assets/images/wellness/shoulder/shoulder_01.jpg","assets/images/wellness/shoulder/shoulder_02.jpg","assets/images/wellness/shoulder/shoulder_03.jpg","assets/images/wellness/shoulder/shoulder_04.jpg","assets/images/wellness/yoga/chair-pose.webp","assets/images/wellness/yoga/dancer-pose.webp","assets/images/wellness/yoga/eight-angle-pose.webp","assets/images/wellness/yoga/half-moon.webp","assets/images/wellness/yoga/high-lunge.webp","assets/images/wellness/yoga/reverse-warrior.webp","assets/images/wellness/yoga/seated-cat-cow.webp","assets/images/wellness/yoga/seated-mountain.webp","assets/images/wellness/yoga/seated-side-bend.webp","assets/images/wellness/yoga/seated-twist.webp","assets/images/wellness/yoga/tree-pose.webp","assets/images/wellness/yoga/triangle-pose.webp","assets/images/wellness/yoga/warrior-two.webp","assets/images/window/forest/forest_1_front.jpg","assets/images/window/forest/forest_2_right.jpg","assets/images/window/forest/forest_3_left.jpg","assets/images/window/sea/sea_1_right.jpg","assets/images/window/sea/sea_2_front.jpg","assets/images/window/sea/sea_3_left.jpg","assets/images/window/sky/sky_1_right.jpg","assets/images/window/sky/sky_2_front.jpg","assets/images/window/sky/sky_3_left.jpg","assets/images/window/space/space-front.png","assets/images/window/space/space-left.png","assets/images/window/space/space-right.png","assets/images/window/theme-forest.png","assets/images/window/theme-park.png","assets/images/window/theme-sea.png","assets/images/window/theme-sky.png","assets/media/forest-loop.mp4","assets/media/forest-poster.svg","assets/media/ocean-loop.mp4","assets/media/ocean-poster.svg","assets/media/park-loop.mp4","assets/media/park-poster.svg","assets/media/rain-loop.mp4","assets/media/rain-poster.svg","assets/media/sky-loop.mp4","assets/media/sky-poster.svg","assets/media/sunset-loop.mp4","assets/media/sunset-poster.svg","assets/video/sea/sea-front.mp4","assets/video/sea/sea-left.mp4","assets/video/sea/sea-right.mp4"];
+      const state = { kind: "all", query: "" };
+      const grid = document.querySelector("#grid");
+      const summary = document.querySelector("#summary");
+      const labels = { image: "이미지", audio: "음악·소리", video: "영상" };
+
+      function assetKind(path) {
+        const ext = path.split(".").pop().toLowerCase();
+        if (["jpg","jpeg","png","webp","svg","gif"].includes(ext)) return "image";
+        if (["mp3","wav","m4a","ogg","aac"].includes(ext)) return "audio";
+        return "video";
+      }
+
+      function card(path) {
+        const kind = assetKind(path);
+        const name = path.split("/").pop();
+        const src = `./${path}`;
+        const media = kind === "image"
+          ? `<img src="${src}" alt="${name}" loading="lazy" />`
+          : kind === "audio"
+            ? `<div class="audio-preview"><audio controls preload="none" src="${src}"></audio></div>`
+            : `<video controls preload="metadata" src="${src}"></video>`;
+        return `<article class="card"><div class="preview">${media}</div><div class="meta"><span class="kind">${labels[kind]}</span><span class="name">${name}</span><span class="path" title="${path}">${path}</span><a class="download" href="${src}" download>다운로드</a></div></article>`;
+      }
+
+      function render() {
+        const q = state.query.trim().toLowerCase();
+        const shown = assets.filter((path) => (state.kind === "all" || assetKind(path) === state.kind) && (!q || path.toLowerCase().includes(q)));
+        summary.textContent = `전체 ${assets.length}개 중 ${shown.length}개 표시`;
+        grid.innerHTML = shown.length ? shown.map(card).join("") : `<p class="empty">조건에 맞는 파일이 없습니다.</p>`;
+      }
+
+      document.querySelector("#search").addEventListener("input", (event) => { state.query = event.target.value; render(); });
+      document.querySelectorAll(".filter").forEach((button) => button.addEventListener("click", () => {
+        document.querySelectorAll(".filter").forEach((item) => item.classList.remove("is-active"));
+        button.classList.add("is-active");
+        state.kind = button.dataset.kind;
+        render();
+      }));
+      render();
+    </script>
+  </body>
+</html>

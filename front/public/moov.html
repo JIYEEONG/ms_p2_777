@@ -138,6 +138,9 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .header-profile img { width: 100%; height: 100%; object-fit: cover; }
 .app-content { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 22px 100px; scroll-behavior: smooth; scrollbar-width: none; }
 .app-content::-webkit-scrollbar { display: none; }
+.app-content:has(.space-content-frame) { overflow-y: auto; padding-bottom: 100px; }
+.app-content:has(.space-content-frame) > .subtabs { flex: none; margin-bottom: 12px; }
+.space-content-frame { display: block; width: 100%; height: 1px; border: 0; background: white; }
 .bottom-nav { position: absolute; z-index: 15; inset: auto 0 0; height: 88px; display: grid; grid-template-columns: repeat(5, 1fr); align-items: start; padding: 9px 6px 20px; border-top: 1px solid #ececec; border-radius: 18px 18px 0 0; background: rgba(255,255,255,.98); box-shadow: 0 -12px 36px rgba(24,23,37,.07); backdrop-filter: blur(14px); }
 .bottom-nav button { min-width: 0; display: grid; justify-items: center; gap: 5px; padding: 3px 1px; border: 0; background: transparent; color: #8e8e93; }
 .bottom-nav svg { width: 22px; height: 22px; }
@@ -1397,6 +1400,13 @@ const tabMeta = {
 };
 
 const content = document.querySelector("#app-content");
+window.addEventListener("message", (event) => {
+  if (event.origin !== location.origin || event.data?.type !== "moov:space-content-height") return;
+  const frame = content.querySelector(".space-content-frame");
+  if (event.source !== frame?.contentWindow) return;
+  const height = Number(event.data.height);
+  if (Number.isFinite(height) && height > 0) frame.style.height = `${Math.ceil(height)}px`;
+});
 const title = document.querySelector("#section-title");
 const kicker = document.querySelector("#section-kicker");
 const modal = document.querySelector("#modal");
@@ -2217,8 +2227,12 @@ function openDeleteThreadConfirm(threadId) {
 }
 
 function renderSpace() {
-  const tabs = [["purchase", "상품 구매"], ["ott", "OTT"]];
-  return `${subtabs(tabs, state.spaceSub, "space-sub")}${state.spaceSub === "purchase" ? renderPurchase() : renderOtt()}`;
+  const tabs = [["purchase", "상품 구매"], ["contents", "콘텐츠"]];
+  return `${subtabs(tabs, state.spaceSub, "space-sub")}${state.spaceSub === "purchase" ? renderPurchase() : renderSpaceContents()}`;
+}
+
+function renderSpaceContents() {
+  return `<iframe class="space-content-frame" src="/space-content/index.html?embed=1#ott" title="MOOV 공간 콘텐츠" loading="eager"></iframe>`;
 }
 
 function renderPurchase() {
