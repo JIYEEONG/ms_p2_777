@@ -419,7 +419,7 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .history-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px; background: var(--green-soft); color: var(--green-dark); }
 .history-item strong { display: block; font-size: .8rem; }
 .history-item small { display: block; margin-top: 3px; color: var(--muted); font-size: .67rem; }
-.ai-cabin-stage { position: relative; height: 270px; overflow: hidden; border-radius: 16px; background: #dcebe2; box-shadow: 0 10px 26px rgba(24,23,37,.12); }
+.ai-cabin-stage { position: relative; height: 224px; overflow: hidden; border-radius: 16px; background: #dcebe2 url('./assets/cabin-default.jpg') center/cover; box-shadow: 0 10px 26px rgba(24,23,37,.12); }
 .ai-cabin-stage > img { width: 100%; height: 100%; object-fit: cover; }
 .ai-cabin-shade { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(17,33,25,.08), transparent 45%, rgba(13,25,20,.56)); }
 .ai-connected { position: absolute; left: 12px; top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 9px; border-radius: 9px; background: rgba(255,255,255,.94); color: var(--green-dark); font-size: .62rem; font-weight: 900; box-shadow: 0 4px 12px rgba(24,23,37,.12); }
@@ -597,18 +597,38 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .ai-mode-tabs button.active { background: white; color: var(--green-dark); box-shadow: 0 3px 8px rgba(24,23,37,.08); }
 .luna-resizable-shell .ai-persona-dropdown { left: 12px; top: 12px; }
 .luna-resizable-shell .luna-chat-log { min-height: 0; max-height: none; overflow-y: auto; padding: 0 2px 8px; }
-.luna-dialog-footer { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 74px auto; align-items: center; gap: 10px; padding-top: 8px; }
-.luna-dialog-footer .ai-center-mic { width: 58px; height: 58px; border-width: 6px; }
-.luna-dialog-footer .ai-center-mic svg { width: 24px; height: 24px; }
-.luna-dialog-footer .ai-bottom-controls { justify-self: end; }
-.luna-resizable-shell.voice-mode .luna-chat-log .detail-message-row.user { display: none; }
-.luna-resizable-shell.voice-mode .luna-text-input { opacity: .5; pointer-events: none; }
-.luna-resizable-shell.text-mode .luna-dialog-footer .ai-center-mic { background: white; color: var(--green-dark); }
+.luna-dialog-footer { position: relative; padding-top: 4px; }
+.ai-mic-stage { padding: 16px 14px 4px; text-align: center; }
+.ai-example-text { margin: 0 0 14px; min-height: 40px; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+.ai-example-text strong { display: block; color: var(--ink); font-weight: 800; }
+
+/* ---- 루나: luna-extra.css에서 이식 (말동무 화면에만 영향, 값 충돌분은 원본 기획/목업 기준) ---- */
+.ai-cabin-wrap { position: relative; }
+.luna-chat-log { position: relative; }
+.chat-font-size-control { position: absolute; z-index: 5; left: 10px; top: 10px; display: flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: rgba(255,255,255,.94); box-shadow: 0 4px 10px rgba(24,23,37,.12); }
+.chat-font-size-control button { width: 28px; height: 28px; border: 0; background: transparent; color: var(--ink); font-size: .95rem; font-weight: 900; }
+.chat-font-size-control button:first-child { border-right: 1px solid var(--line); }
+.chat-font-size-control button:disabled { color: #ccc; }
+.ai-persona-badge.open svg { transform: rotate(-90deg); }
+.settings-group-label { margin: 2px 2px 8px; color: var(--muted); font-size: .72rem; font-weight: 800; }
+.menu-item.settings-sub-item { grid-template-columns: 1fr auto; padding-left: 56px; background: #fafafa; }
+.menu-item.ai-master-toggle { align-items: flex-start; padding-top: 12px; padding-bottom: 12px; }
+.menu-item.ai-master-toggle .menu-icon { margin-top: 1px; }
+.menu-item.ai-master-toggle .menu-icon img { width: 26px; height: 26px; object-fit: contain; }
+.history-delete { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 10px; background: #fff2f2; color: var(--danger); }
+.history-delete svg { width: 15px; height: 15px; }
+.thread-detail-head { display: grid; grid-template-columns: 36px 1fr 44px; align-items: center; gap: 9px; margin-bottom: 12px; }
+.thread-detail-head strong, .thread-detail-head small { display: block; }
+.thread-detail-head strong { font-size: .85rem; }
+.thread-detail-head small { margin-top: 3px; color: var(--muted); font-size: .62rem; }
+.thread-detail-head .header-delete { width: 36px; height: 36px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 11px; background: #fff2f2; color: var(--danger); }
+.thread-detail-head .header-delete svg { width: 16px; height: 16px; }
+.luna-chat-log.static-log { padding: 2px; }
 
 @media (max-height: 760px) {
   .luna-resizable-shell { min-height: calc(100vh - 118px); grid-template-rows: minmax(150px, var(--ai-stage-ratio)) 16px minmax(160px, 1fr); }
-  .luna-dialog-footer { grid-template-columns: minmax(0, 1fr) 60px; }
-  .luna-dialog-footer .ai-bottom-controls { display: none; }
+  .ai-mic-stage { padding: 10px 14px 2px; }
+  .ai-example-text { min-height: 0; margin-bottom: 8px; }
 }
 
 .shop-banner { padding: 15px; border: 0; background: linear-gradient(115deg, #ecf8ef 0 56%, #fff3e6 56%); }

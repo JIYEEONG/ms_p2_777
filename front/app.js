@@ -58,10 +58,11 @@ const themeAssets = {
 
 const aiPersonas = [
   { id: "moov", name: "무브", desc: "캐주얼한 잡담, 공감 위주 대화", image: "./assets/luna-moov.svg" },
-  { id: "todaki", name: "토닥이", desc: "고민 상담, 공감 기반 대화", image: "./assets/토닥이_캐릭터.png" },
-  { id: "doctor", name: "척척박사", desc: "아는 만큼 답해주는 지식 모드", image: "./assets/척척박사_캐릭터.png" },
-  { id: "ringo", name: "링고", desc: "실시간 통역과 주변 관광정보 안내", image: "./assets/링고_최종.png" },
+  { id: "todaki", name: "토닥이", desc: "고민 상담, 공감 기반 대화", image: "./assets/luna-todaki.svg" },
+  { id: "doctor", name: "척척박사", desc: "아는 만큼 답해주는 지식 모드", image: "./assets/luna-doctor.svg" },
+  { id: "ringo", name: "링고", desc: "실시간 통역과 주변 관광정보 안내", image: "./assets/luna-ringo.svg" },
 ];
+const LUNA_BOT_IMAGE = "./assets/luna-bot.svg"; // 캐빈 라이브 화면 외 모든 곳에서 사용하는 공통 루나 아이콘
 
 const outingFilterConfig = [
   { key: "category", label: "무엇을 할까요", values: ["전체", "음식점", "카페", "전시", "쇼핑", "관광", "체험"] },
@@ -96,7 +97,7 @@ const rentalOptionCatalog = [
 ];
 
 const products = [
-  { id: "bottled-water", name: "무라벨http://localhost:3000 생수", desc: "500ml · 시원하게 보관", price: 1200, image: "./assets/product-01-bottled-water.jpg", category: "음료·간식", recommended: true, stock: 10, location: "냉장함 A-01" },
+  { id: "bottled-water", name: "무라벨 생수", desc: "500ml · 시원하게 보관", price: 1200, image: "./assets/product-01-bottled-water.jpg", category: "음료·간식", recommended: true, stock: 10, location: "냉장함 A-01" },
   { id: "sparkling-water", name: "탄산수", desc: "330ml · 무향 탄산", price: 1800, image: "./assets/product-02-sparkling-water.jpg", category: "음료·간식", recommended: true, stock: 6, location: "냉장함 A-02" },
   { id: "green-tea", name: "무가당 녹차", desc: "350ml · 깔끔한 무가당 음료", price: 2200, image: "./assets/product-03-green-tea.jpg", category: "음료·간식", recommended: false, stock: 5, location: "냉장함 A-03" },
   { id: "protein-bar", name: "프로틴바", desc: "1개 · 이동 중 에너지 보충", price: 3200, image: "./assets/product-04-protein-bar.jpg", category: "음료·간식", recommended: true, stock: 7, location: "수납함 B-01" },
@@ -160,18 +161,27 @@ const state = {
   aiPersona: saved.aiPersona || "무브",
   aiVoiceEnabled: saved.aiVoiceEnabled ?? true,
   aiSaveEnabled: saved.aiSaveEnabled ?? false,
+  aiAutoStart: saved.aiAutoStart ?? true,
   aiCrisisOpen: false,
   aiChatExpanded: false,
-  aiStageRatio: saved.aiStageRatio || 56,
-  aiInputMode: saved.aiInputMode || "voice",
+  aiHistoryDetailId: null,
+  personaMenuOpen: false,
+  chatFontScale: saved.chatFontScale ?? 1,
   aiSub: "talk",
-  activeThreadId: saved.activeThreadId || "thread-main",
+  // 진행 중인 대화(라이브 스레드)는 대화 기록 저장 동의와 무관하게 항상 이어짐.
+  // 저장 동의가 켜져 있을 때만 아래 chatThreads(대화 기록)에 별도로 반영됨.
+  liveThread: saved.liveThread || null,
+  liveSessionKey: saved.liveSessionKey || null,
   chatThreads: saved.chatThreads || [{
-    id: "thread-main",
+    id: "thread-sample-1",
     title: "오늘 이동 중 나눈 대화",
-    updated: "방금 전",
+    updated: "3분 전",
     persona: "무브",
-    messages: [{ role: "ai", text: "안녕하세요! 이동 중에 저와 얘기하고 싶으시면 언제든 \"루나야\"라고 불러주세요." }],
+    messages: [
+      { role: "ai", text: "오늘따라 차가 좀 막히네요. 심심하지 않으세요?", time: "15:12" },
+      { role: "user", text: "응 좀 심심했어", time: "15:12" },
+      { role: "ai", text: "그럼 가벼운 얘기 하나 해드릴까요? 요즘 성수동에 재밌는 팝업이 많더라고요.", time: "15:13" },
+    ],
   }],
   spaceSub: "purchase",
   purchaseSub: "search",
@@ -402,10 +412,11 @@ function persist() {
     aiPersona: state.aiPersona,
     aiVoiceEnabled: state.aiVoiceEnabled,
     aiSaveEnabled: state.aiSaveEnabled,
-    aiInputMode: state.aiInputMode,
-    aiStageRatio: state.aiStageRatio,
+    aiAutoStart: state.aiAutoStart,
+    chatFontScale: state.chatFontScale,
     chatThreads: state.chatThreads,
-    activeThreadId: state.activeThreadId,
+    liveThread: state.liveThread,
+    liveSessionKey: state.liveSessionKey,
     paymentCards: state.paymentCards,
     securityProof: state.securityProof,
   };
@@ -450,8 +461,9 @@ function render() {
   content.innerHTML = views[state.activeTab]();
   if (state.activeTab === "ai" && state.aiSub === "talk") requestAnimationFrame(scrollChat);
   requestAnimationFrame(enableDragScroll);
-  requestAnimationFrame(enableAiPersonaSwipe);
-  requestAnimationFrame(enableAiPanelResize);
+  // 요청사항: 무브 캐릭터 캐빈은 크기 조절이 되면 안 됨 — 스와이프/리사이즈 기능 비활성화(주석 처리, 삭제하지 않음)
+  // requestAnimationFrame(enableAiPersonaSwipe);
+  // requestAnimationFrame(enableAiPanelResize);
   if (state.activeTab === "outing" && state.outingSub === "recommend" && state.outingMapOpen) requestAnimationFrame(initOutingMap);
   syncCabinPreview();
   syncHeaderProfile();
@@ -802,108 +814,132 @@ function chooseSavedCourse() {
 
 function renderAi() {
   const tabs = [["talk", "대화"], ["history", "대화 기록"], ["settings", "루나 설정"]];
-  if (state.aiSub === "history") return `${renderAiStaticFrame()}${subtabs(tabs, state.aiSub, "ai-sub")}${renderAiHistory()}`;
-  if (state.aiSub === "settings") return `${renderAiStaticFrame()}${subtabs(tabs, state.aiSub, "ai-sub")}${renderAiSettings()}`;
+  if (state.aiSub === "history") return `${subtabs(tabs, state.aiSub, "ai-sub")}${renderAiHistory()}`;
+  if (state.aiSub === "settings") return `${subtabs(tabs, state.aiSub, "ai-sub")}${renderAiSettings()}`;
   const thread = currentThread();
   const listening = state.aiStatus === "listening";
   const off = state.aiStatus === "off";
   const persona = currentAiPersona();
   if (off) {
-    return `<section class="ai-off-stage card">
-        <div class="ai-off-orb"><img src="${persona.image}" alt="" /></div>
-        <h3>루나를 종료했어요</h3>
-        <p>"알겠습니다. 대화 모드를 종료할게요." 다시 대화하고 싶을 때 언제든 시작할 수 있어요.</p>
-        <button class="primary-button" data-action="ai-restart">루나 다시 시작</button>
-      </section>${subtabs(tabs, state.aiSub, "ai-sub")}`;
+    return `${subtabs(tabs, state.aiSub, "ai-sub")}<section class="ai-off-stage card">
+      <div class="ai-off-orb"><img src="${LUNA_BOT_IMAGE}" alt="" /></div>
+      <h3>루나를 종료했어요</h3>
+      <p>"알겠습니다. 대화 모드를 종료할게요." 다시 대화하고 싶을 때 언제든 시작할 수 있어요.</p>
+      <button class="primary-button" type="button" data-action="ai-restart">루나 다시 시작</button>
+    </section>`;
   }
-  const hasStartedChat = thread.messages.some((message) => message.role === "user") || listening;
-  const starterPrompts = [
-    "요즘 환율 추이가 어때?",
-    "지금 배고픈데 주변에 맛집 있어?",
-  ];
-  const ratio = Math.min(72, Math.max(34, Number(state.aiStageRatio || 56)));
-  return `<section id="ai-live-block" class="luna-resizable-shell ${state.aiInputMode === "text" ? "text-mode" : "voice-mode"}" data-ai-resizable style="--ai-stage-ratio:${ratio}%">
-    <section class="luna-character-pane" data-ai-persona-swipe>
-      <img class="luna-cabin-bg" src="./assets/cabin-default.jpg" alt="서울 풍경이 보이는 MOOV 차량 내부" />
-      <div class="luna-cabin-shade"></div>
-      <button class="luna-hero-character persona-${persona.id} ${aiPersonaMotionClass}" type="button" data-action="persona-menu" aria-label="${persona.name} 모드 선택">
-        <img src="${persona.image}" alt="${persona.name} 캐릭터" />
+  const recording = state.aiSaveEnabled;
+  const voiceOn = state.aiVoiceEnabled;
+  return `<div id="ai-live-block" class="luna-live ${state.aiChatExpanded ? "chat-expanded" : ""}">
+    ${subtabs(tabs, state.aiSub, "ai-sub")}
+    <div class="ai-cabin-wrap">
+      <div class="ai-cabin-stage ${listening ? "listening" : ""}">
+        <div class="ai-cabin-shade"></div>
+        <div class="spatial-ai persona-${persona.id}">
+          <img class="luna-bot-image" src="${persona.image}" alt="${persona.name} 캐릭터" />
+        </div>
+        <span class="ai-ring one"></span>
+        <span class="ai-ring two"></span>
+        <div class="ai-status-badges">
+          ${recording ? `<span class="ai-status-badge recording"><i class="dot"></i>대화를 기록 중입니다</span>` : ""}
+          ${voiceOn ? `<span class="ai-status-badge">음성 제어가 가능한 상태입니다</span>` : ""}
+        </div>
+        <div class="crisis-overlay ${state.aiCrisisOpen ? "open" : ""}">
+          <div class="crisis-overlay-head">
+            <div class="crisis-overlay-icon">${icon("shield")}</div>
+            <div><h4>혼자 두지 않을게요</h4><p>지금 벅찬 감정, 괜찮다면 조금 더 이야기해줄래요? 필요하면 아래 번호로 언제든 연결할 수 있어요.</p></div>
+            <button class="crisis-overlay-close" type="button" data-action="crisis-close" aria-label="위기 안내 닫기">${icon("x")}</button>
+          </div>
+          <div class="crisis-overlay-actions"><button class="crisis-call-button" type="button" data-action="crisis-call">${icon("shield")}자살예방상담전화 1393 연결</button></div>
+        </div>
+      </div>
+      <button class="ai-persona-badge ${state.personaMenuOpen ? "open" : ""}" type="button" data-action="persona-menu" aria-label="페르소나 선택">
+        <span>${persona.name}</span>${icon("chevron")}
       </button>
       <div class="ai-persona-dropdown ${state.personaMenuOpen ? "open" : ""}">
-        ${aiPersonas.map(({ name, desc }) => `<button class="ai-persona-option ${state.aiPersona === name ? "selected" : ""}" data-action="persona" data-value="${name}"><strong>${name}</strong><small>${desc}</small></button>`).join("")}
+        ${aiPersonas.map(({ name, desc }) => `<button class="ai-persona-option ${state.aiPersona === name ? "selected" : ""}" type="button" data-action="persona" data-value="${name}"><strong>${name}</strong><small>${desc}</small></button>`).join("")}
       </div>
-    </section>
-    <button class="ai-resize-handle" type="button" data-ai-resize-handle aria-label="캐릭터와 채팅 영역 크기 조절"><span></span></button>
-    <section id="chat-window" class="luna-dialog-pane">
-      <div class="ai-mode-tabs" role="group" aria-label="말동무 모드">
-        <button class="${state.aiInputMode !== "text" ? "active" : ""}" type="button" data-action="ai-mode" data-value="voice">대화</button>
-        <button class="${state.aiInputMode === "text" ? "active" : ""}" type="button" data-action="ai-mode" data-value="text">대화 기록</button>
-        <button type="button" data-action="ai-sub" data-value="settings">루나 설정</button>
-      </div>
-      <div class="crisis-overlay ${state.aiCrisisOpen ? "open" : ""}">
-        <div class="crisis-overlay-head">
-          <div class="crisis-overlay-icon">${icon("shield")}</div>
-          <div><h4>혼자 두지 않을게요</h4><p>지금 벅찬 감정, 괜찮다면 조금 더 이야기해줄래요? 필요하면 아래 번호로 언제든 연결할 수 있어요.</p></div>
-          <button class="crisis-overlay-close" data-action="crisis-close" aria-label="위기 안내 닫기">${icon("x")}</button>
+    </div>
+    <div class="luna-chat-panel">
+      <div class="luna-chat-log" id="main-chat-log">
+        <div class="chat-font-size-control">
+          <button type="button" data-action="font-size" data-value="-1" aria-label="채팅 글자 작게" ${state.chatFontScale <= 0.85 ? "disabled" : ""}>−</button>
+          <button type="button" data-action="font-size" data-value="1" aria-label="채팅 글자 크게" ${state.chatFontScale >= 1.3 ? "disabled" : ""}>＋</button>
         </div>
-        <div class="crisis-overlay-actions"><button class="crisis-call-button" data-action="crisis-call">${icon("shield")}자살예방상담전화 1393 연결</button></div>
-      </div>
-      <div class="luna-chat-log">
+        <button type="button" class="chat-expand-toggle" data-action="chat-expand" aria-label="${state.aiChatExpanded ? "채팅창 축소" : "채팅창 확대"}">${icon(state.aiChatExpanded ? "shrink" : "expand")}</button>
         <div class="chat-date-divider"><span>${new Date().toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}</span></div>
         ${thread.messages.map((m) => `<div class="detail-message-row ${m.role === "user" ? "user" : ""}"><div class="detail-message-bubble">${escapeHtml(m.text)}<small>${escapeHtml(m.time || "방금 전")}</small></div></div>`).join("")}
-        ${hasStartedChat ? "" : `<div class="starter-chat-box" aria-label="예시 질문">${starterPrompts.map((prompt) => `<button type="button" class="starter-chat-bubble" data-action="starter-prompt" data-value="${escapeHtml(prompt)}">${escapeHtml(prompt)}</button>`).join("")}</div>`}
       </div>
-      <div class="luna-dialog-footer">
-        <form id="main-text-form" class="chat-input luna-text-input">
-          <button class="input-plus-button" type="button" aria-label="추가 메뉴">${icon("plus")}</button>
-          <input id="main-text-input" autocomplete="off" placeholder="메시지를 입력하세요" aria-label="루나에게 메시지 입력" />
-        </form>
-        <button class="ai-center-mic ${listening ? "listening" : ""}" type="button" data-action="voice-toggle" aria-label="${listening ? "음성 입력 멈춤" : "음성 대화 시작"}">${icon("mic")}</button>
-        <div class="ai-bottom-controls">
-          <button class="voice-status-pill ${listening ? "listening" : ""}" type="button" data-action="ai-mode" data-value="voice">${listening ? "듣는 중" : state.aiVoiceEnabled ? "대기 중" : "텍스트"}</button>
-          <button class="send-button" type="submit" form="main-text-form" aria-label="메시지 보내기">${icon("send")}</button>
+      ${voiceOn ? `<div class="ai-mic-stage" id="ai-voice-stage">
+        <div id="ai-voice-widget">
+          ${!listening ? `<p class="ai-example-text"><strong>이런 걸 물어볼 수 있어요</strong>"요즘 운전하면서 듣기 좋은 얘기 없어?"</p>` : ""}
+          <div class="voice-wave ${listening ? "active" : ""}" style="display:${listening ? "flex" : "none"};" aria-hidden="true">
+            <i style="--wave:1"></i><i style="--wave:2"></i><i style="--wave:3"></i><i style="--wave:4"></i><i style="--wave:5"></i><i style="--wave:1"></i><i style="--wave:3"></i><i style="--wave:5"></i><i style="--wave:2"></i><i style="--wave:4"></i>
+          </div>
+          <button class="ai-main-control ai-mic-toggle ${listening ? "listening" : ""}" type="button" data-action="voice-toggle" aria-label="${listening ? "음성 입력 멈춤" : "음성 대화 시작"}">${icon("mic")}</button>
+          <p class="ai-status-line ${listening ? "listening" : ""}">${listening ? "듣고 있어요" : "루나 대기 중"}</p>
         </div>
-      </div>
-    </section>
-  </section>`;
+      </div>` : `<p class="ai-status-line" style="text-align:center; margin-top:10px;">텍스트로 말씀해 주세요</p>`}
+      <form id="main-text-form" class="chat-input" style="grid-template-columns:1fr 44px; margin-top:${voiceOn ? "0" : "6px"};">
+        <input id="main-text-input" autocomplete="off" placeholder="메시지를 입력하세요" aria-label="루나에게 메시지 입력" />
+        <button class="send-button" type="submit" aria-label="메시지 보내기">${icon("send")}</button>
+      </form>
+    </div>
+  </div>`;
 }
 
-function renderAiStaticFrame() {
-  const persona = currentAiPersona();
-  return `<section class="ai-cabin-stage ai-static-frame"><img src="./assets/cabin-default.jpg" alt="서울 풍경이 보이는 MOOV 차량 내부" /><div class="ai-cabin-shade"></div><div class="spatial-ai static persona-${persona.id}"><img class="luna-bot-image" src="${persona.image}" alt="${persona.name} 캐릭터" /></div></section>`;
-}
-
+// 진행 중인(라이브) 대화 스레드 — 대화 기록 저장 동의 여부와 무관하게 항상 존재/유지됨.
 function currentThread() {
-  let thread = state.chatThreads.find((item) => item.id === state.activeThreadId);
-  if (!thread) {
-    thread = { id: `thread-${Date.now()}`, title: "새 대화", updated: "방금 전", persona: state.aiPersona, messages: [{ role: "ai", text: "안녕하세요! 이동 중에 저와 얘기하고 싶으시면 언제든 \"루나야\"라고 불러주세요.", time: "방금 전" }] };
-    state.chatThreads.unshift(thread);
-    state.activeThreadId = thread.id;
+  if (!state.liveThread) {
+    state.liveThread = { messages: [{ role: "ai", text: "안녕하세요! 이동 중에 저와 얘기하고 싶으시면 언제든 \"루나야\"라고 불러주세요.", time: "방금 전" }] };
   }
-  return thread;
+  return state.liveThread;
+}
+
+// 대화 기록 저장이 켜져 있는 동안에만 사용되는 "저장된 세션" — liveSessionKey가 바뀔 때마다(저장을 새로 켤 때마다) 새 항목으로 시작됨.
+function getOrCreateSavedSession() {
+  let session = state.chatThreads.find((item) => item.sessionKey === state.liveSessionKey);
+  if (!session) {
+    session = { id: `thread-${Date.now()}`, sessionKey: state.liveSessionKey, title: "새 대화", updated: "방금 전", persona: state.aiPersona, messages: [] };
+    state.chatThreads.unshift(session);
+  }
+  return session;
 }
 
 function renderAiHistory() {
-  return `<section class="section-lead"><h3>대화 기록</h3><p>저장에 동의한 대화만 여기 남아요. 원하는 기록만 골라 이어갈 수 있어요.</p></section>${state.chatThreads.length ? `<section class="card">${state.chatThreads.map((thread) => `<button class="history-item deletable" data-action="open-thread" data-value="${thread.id}"><span class="history-icon">${icon("chat")}</span><span><strong>${escapeHtml(thread.title)}</strong><small>${escapeHtml(thread.updated)} · ${escapeHtml(thread.messages.length)}개 메시지</small></span><span class="badge gray">${escapeHtml(thread.persona)}</span>${icon("chevron")}</button>`).join("")}</section>` : emptyState("chat", "아직 저장된 대화가 없어요", "설정에서 대화 기록 저장을 켜면 다음 대화부터 여기 남길 수 있어요.")}`;
+  if (state.aiHistoryDetailId) return renderAiHistoryDetail();
+  return `<section class="section-lead"><h3>대화 기록</h3><p>저장에 동의한 대화만 여기 남아요. 카드의 휴지통 아이콘으로 원하는 기록만 골라 지울 수 있어요.</p></section>${state.chatThreads.length ? `<section class="card">${state.chatThreads.map((thread) => `<div class="history-item deletable" data-action="open-thread-detail" data-value="${thread.id}" role="button" tabindex="0"><span class="history-icon">${icon("chat")}</span><span><strong>${escapeHtml(thread.title)}</strong><small>${escapeHtml(thread.updated)} · ${escapeHtml(thread.messages.length)}개 메시지</small></span><span class="badge gray">${escapeHtml(thread.persona)}</span><button class="history-delete" type="button" data-action="delete-thread" data-value="${thread.id}" aria-label="삭제">${icon("trash")}</button></div>`).join("")}</section>` : emptyState("chat", "아직 저장된 대화가 없어요", "설정에서 대화 기록 저장을 켜면 다음 대화부터 여기 남길 수 있어요.")}`;
+}
+
+function renderAiHistoryDetail() {
+  const thread = state.chatThreads.find((item) => item.id === state.aiHistoryDetailId);
+  if (!thread) { state.aiHistoryDetailId = null; return renderAiHistory(); }
+  return `<div class="thread-detail-head"><button class="back-button" type="button" data-action="close-thread-detail" aria-label="목록으로">${icon("back")}</button><div><strong>${escapeHtml(thread.title)}</strong><small>${escapeHtml(thread.updated)}</small></div><button class="header-delete" type="button" data-action="delete-thread" data-value="${thread.id}" aria-label="삭제">${icon("trash")}</button></div><div class="policy-note">위기 감지 관련 대화는 이 기록에 포함되지 않아요.</div><div class="luna-chat-log static-log">${thread.messages.map((m) => `<div class="detail-message-row ${m.role === "user" ? "user" : ""}"><div class="detail-message-bubble">${escapeHtml(m.text)}<small>${escapeHtml(m.time || "")}</small></div></div>`).join("")}</div>`;
 }
 
 function renderAiSettings() {
-  return `<section class="section-lead"><h3>루나 설정</h3><p>대화 방식과 기록 저장 범위를 설정하세요.</p></section><section class="card">${toggleItem("루나", "끄면 루나 전체 기능이 종료돼요.", state.aiStatus !== "off", "ai-power")}${toggleItem("음성으로 대화하기", "필요하면 이것만 따로 켜고 끌 수 있어요.", state.aiVoiceEnabled, "ai-voice-setting")}${toggleItem("승차 후 자동 시작", "차량 탑승 확인 후 먼저 인사해요.", false)}${toggleItem("대화 기록 저장", "동의해야만 대화 내용이 남아요.", state.aiSaveEnabled, "ai-save-setting")}</section><div class="policy-note">위기 감지 관련 대화는 기록 저장 동의 여부와 관계없이 대화 기록에서 제외돼요.</div>`;
+  return `<p class="settings-group-label">대화 방식</p><section class="card">${toggleItem("루나", "끄면 루나 전체 기능이 종료돼요. \"그만 대화하고 싶어\"라고 말해도 동일하게 꺼져요.", state.aiStatus !== "off", "ai-power", "luna-bot")}<div class="menu-item settings-sub-item">${toggleItemInner("음성으로 대화하기", "기본적으로 루나 on/off와 같이 움직여요. 필요하면 이것만 따로 켜고 끌 수 있어요.", state.aiVoiceEnabled, "ai-voice-setting")}</div></section><p class="settings-group-label" style="margin-top:18px;">이용 설정</p><section class="card">${toggleItem("승차 후 자동 시작", "차량 탑승이 확인되면 먼저 인사해요. 인사말에서 \"루나야\"라고 부르면 언제든 대화를 시작할 수 있다고 안내해요.", state.aiAutoStart, "ai-autostart-setting")}${toggleItem("대화 기록 저장", "동의해야만 대화 내용이 남아요 (기본 꺼짐)", state.aiSaveEnabled, "ai-save-setting")}</section>`;
 }
 
 function sendMessage(text, voice = false) {
   const clean = text.trim();
   if (!clean) return;
+  const now = () => new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
   const thread = currentThread();
-  const now = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
-  thread.messages.push({ role: "user", text: clean, time: now });
+  thread.messages.push({ role: "user", text: clean, time: now() });
   if (checkCrisisKeywords(clean)) state.aiCrisisOpen = true;
   const reply = voice ? "음성 내용을 확인했어요. 원하시면 관련 장소를 목적지나 나들이 코스로 이어드릴게요." : pickLunaReply(clean);
-  thread.messages.push({ role: "ai", text: reply, time: new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false }) });
-  thread.title = clean.slice(0, 18) || thread.title;
-  thread.updated = "방금 전";
-  thread.persona = state.aiPersona;
-  state.chatThreads = [thread, ...state.chatThreads.filter((item) => item.id !== thread.id)];
+  thread.messages.push({ role: "ai", text: reply, time: now() });
+  // 대화 기록 저장에 동의한 경우에만 별도의 저장 세션에도 같은 내용을 반영한다.
+  if (state.aiSaveEnabled) {
+    const session = getOrCreateSavedSession();
+    session.messages.push({ role: "user", text: clean, time: now() });
+    session.messages.push({ role: "ai", text: reply, time: now() });
+    session.title = clean.slice(0, 18) || session.title;
+    session.updated = "방금 전";
+    session.persona = state.aiPersona;
+    state.chatThreads = [session, ...state.chatThreads.filter((item) => item.id !== session.id)];
+  }
   persist(); render();
   speakReply(reply);
 }
@@ -915,8 +951,9 @@ function pickLunaReply(text) {
   return `좋아요. “${text.slice(0, 18)}${text.length > 18 ? "…" : ""}” 이야기부터 편하게 이어가 볼게요.`;
 }
 
+// 기획서 원안(말동무_html.html)의 위기 키워드 목록 그대로 복원 — 띄어쓰기 유무 변형까지 포함.
 function checkCrisisKeywords(text) {
-  return ["죽고 싶", "자살", "해치고", "힘들어 죽", "사라지고 싶", "살기 싫"].some((keyword) => text.includes(keyword));
+  return ["우울해", "우울하", "죽고싶", "죽고 싶", "살기싫", "살기 싫", "힘들어 죽겠", "자살"].some((keyword) => text.includes(keyword));
 }
 
 function scrollChat() {
@@ -938,11 +975,14 @@ function startVoiceConversation() {
     toast("음성 대화가 꺼져 있어요. 설정에서 다시 켤 수 있어요.");
     return;
   }
+  // 기획서 B-11 정책: 마이크를 누르면 즉시 듣는 중 상태(빨간 버튼 + 파형)로 전환한다.
+  // 실제 브라우저 음성 인식 성공 여부와 무관하게 UI 상태를 먼저 반영한다(원본 목업과 동일).
+  state.aiStatus = "listening";
+  render();
+
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!Recognition) {
-    state.aiStatus = "idle";
-    render();
-    openModal({ title: "음성 인식을 지원하지 않는 브라우저예요", body: "<p>Chrome·Edge 등 지원 브라우저를 사용하거나 아래 텍스트 입력창에서 대화를 이어가 주세요.</p>", iconName: "mic", secondary: null });
+    toast("이 브라우저는 음성 인식을 지원하지 않아요. 화면은 데모로 표시돼요.");
     return;
   }
   if (speechRecognition) speechRecognition.abort();
@@ -950,6 +990,8 @@ function startVoiceConversation() {
   speechRecognition.lang = "ko-KR";
   speechRecognition.interimResults = false;
   speechRecognition.continuous = false;
+  // 무음 임계값: Azure Speech SDK 연동 시 SegmentationSilenceTimeoutMs를 800ms로 설정 (정책 B-11).
+  // 브라우저 내장 SpeechRecognition은 이 값을 직접 노출하지 않아 브라우저 기본 동작을 따름.
   speechRecognition.onresult = (event) => {
     const transcript = event.results?.[0]?.[0]?.transcript || "";
     state.aiStatus = "idle";
@@ -963,23 +1005,58 @@ function startVoiceConversation() {
   speechRecognition.onend = () => {
     if (state.aiStatus === "listening") { state.aiStatus = "idle"; render(); }
   };
-  state.aiStatus = "listening";
-  render();
   try {
     speechRecognition.start();
-    toast("음성 입력을 시작했어요.");
   } catch {
-    state.aiStatus = "idle";
-    render();
-    openModal({ title: "마이크를 시작할 수 없어요", body: "<p>브라우저의 마이크 권한을 허용한 뒤 다시 시도하거나 텍스트로 입력해 주세요.</p>", iconName: "mic", secondary: null });
+    toast("마이크 권한을 확인할 수 없어 데모로 표시돼요. 텍스트로도 대화할 수 있어요.");
   }
 }
 
 function stopVoiceConversation(status = "idle") {
   if (speechRecognition) { speechRecognition.abort(); speechRecognition = null; }
-  if ("speechSynthesis" in window) status === "paused" ? window.speechSynthesis.pause() : window.speechSynthesis.cancel();
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
   state.aiStatus = status;
   render();
+}
+
+function applyChatFontScale() {
+  document.documentElement.style.setProperty("--chat-font-scale", state.chatFontScale);
+}
+
+function openAiSaveConsent() {
+  openModal({
+    title: "대화를 저장할까요?",
+    iconName: "bookmark",
+    body: `<p>대화 내용, 사용한 루나 모드, 대화 시각이 저장돼요. 다음 승차에서 이어서 대화할 수 있어요.</p><p style="margin-top:10px">"저장해줘"라고 말해도 동일하게 처리돼요.</p>`,
+    primary: "저장할게요",
+    secondary: "지금은 안 할게요",
+    onConfirm: () => {
+      state.aiSaveEnabled = true;
+      state.liveSessionKey = Date.now(); // 지금부터 이어지는 대화만 새 기록으로 남긴다.
+      persist(); render(); toast("대화 기록 저장을 켰어요.");
+    },
+  });
+}
+
+function openDeleteThreadConfirm(threadId) {
+  openModal({
+    title: "이 대화를 삭제할까요?",
+    iconName: "trash",
+    body: `<p>삭제하면 되돌릴 수 없어요.</p>`,
+    primary: "삭제할게요",
+    secondary: "취소",
+    onConfirm: () => {
+      state.chatThreads = state.chatThreads.filter((item) => item.id !== threadId);
+      if (state.aiHistoryDetailId === threadId) state.aiHistoryDetailId = null;
+      if (state.activeThreadId === threadId) state.activeThreadId = null;
+      persist(); render(); toast("대화 기록을 삭제했어요.");
+    },
+  });
+}
+
+function notifyRideEndSaveStatus() {
+  if (!state.chatThreads.length) return;
+  toast(state.aiSaveEnabled ? "이번 대화는 저장됐어요. 대화 기록에서 확인할 수 있어요." : "이번 대화는 저장되지 않아 하차와 함께 사라져요.");
 }
 
 function renderSpace() {
@@ -1448,7 +1525,12 @@ function openUsageDetail(id) {
 
 function subtabs(items, active, action) { return `<div class="subtabs" role="tablist">${items.map(([id, label]) => `<button class="${active === id ? "active" : ""}" data-action="${action}" data-value="${id}">${label}</button>`).join("")}</div>`; }
 function choiceGroup(name, values, selected) { return `<div class="choice-group"><h4>${name}</h4><div class="filter-chips">${values.map((value, index) => `<button class="${index === selected ? "selected" : ""}" data-action="chip">${value}</button>`).join("")}</div></div>`; }
-function toggleItem(titleText, desc, on, action = "toggle") { return `<div class="menu-item ${action === "ai-power" ? "ai-master-toggle" : ""}"><span class="menu-icon">${icon("chat")}</span><span><strong>${titleText}</strong><small>${desc}</small></span><button class="switch ${on ? "on" : ""}" data-action="${action}" aria-label="${titleText} 전환"></button></div>`; }
+
+function toggleItem(titleText, desc, on, action = "toggle", iconVariant = null) {
+  const iconHtml = iconVariant === "luna-bot" ? `<img src="${LUNA_BOT_IMAGE}" alt="" />` : icon("chat");
+  return `<div class="menu-item ${action === "ai-power" ? "ai-master-toggle" : ""}"><span class="menu-icon">${iconHtml}</span><span><strong>${titleText}</strong><small>${desc}</small></span><button class="switch ${on ? "on" : ""}" data-action="${action}" aria-label="${titleText} 전환"></button></div>`;
+}
+function toggleItemInner(titleText, desc, on, action) { return `<span><strong>${titleText}</strong><small>${desc}</small></span><button class="switch ${on ? "on" : ""}" data-action="${action}" aria-label="${titleText} 전환"></button>`; }
 function menuItem(iconName, titleText, desc, action = "menu-info", value = titleText) { return `<button class="menu-item" data-action="${action}" data-value="${value}"><span class="menu-icon">${icon(iconName)}</span><span><strong>${titleText}</strong><small>${desc}</small></span>${icon("chevron")}</button>`; }
 function emptyState(iconName, heading, text) { return `<section class="card empty-state">${icon(iconName)}<h4>${heading}</h4><p>${text}</p></section>`; }
 
@@ -1562,22 +1644,33 @@ document.addEventListener("click", (event) => {
   if (action === "switch-to-rent") openModal({ title: "렌트로 전환할까요?", body: "<p>렌트 조건과 결제가 확정될 때까지 현재 택시 이동은 계속됩니다. 안전 정차 후 차량 옵션을 선택합니다.</p>", iconName: "key", primary: "전환 설정", secondary: "취소", onConfirm: () => { state.tripActive = false; state.usageStartedAt = null; state.rentalEndsAt = null; state.homeMode = "rent"; state.homeStep = "setup"; persist(); render(); toast("렌트 조건을 선택해 주세요."); } });
   if (action === "request-rent") { const vehicle = rentalVehicles.find((item) => item.id === state.rentalVehicleType) || rentalVehicles[0]; const optionPrice = rentalOptionCatalog.filter((item) => state.rentalOptions.has(item.id)).reduce((sum, item) => sum + item.price, 0); const total = state.rentalHours * vehicle.price + optionPrice; if (!state.routeStops.at(-1) || state.routeStops.length < 2) return toast("출발지와 목적지를 먼저 설정해 주세요."); openModal({ title: `${vehicle.name} ${state.rentalHours}시간 렌트`, body: `<p>${escapeHtml(state.pickupLocation)}으로 차량을 배정합니다. 예상 요금은 ${total.toLocaleString("ko-KR")}원이며 선택 옵션 ${state.rentalOptions.size}개가 적용됩니다.</p>`, iconName: "key", primary: "예약", onConfirm: () => { state.tripActive = true; state.homeStep = "service"; state.usageStartedAt = Date.now(); state.rentalEndsAt = state.usageStartedAt + state.rentalHours * 3600000; persist(); render(); toast("렌트 차량이 출발지로 이동 중이에요."); } }); }
   if (action === "finish-trip") openEndConfirmation();
-  if (action === "ai-sub") { state.aiSub = value; state.personaMenuOpen = false; render(); }
+  if (action === "ai-sub") { state.aiSub = value; state.personaMenuOpen = false; state.aiHistoryDetailId = null; render(); }
   if (action === "persona-menu") { state.personaMenuOpen = !state.personaMenuOpen; render(); }
   if (action === "persona") setAiPersona(value);
   if (action === "starter-prompt") sendMessage(value || "");
-  if (action === "voice-toggle") { if (Date.now() < aiSwipeSuppressUntil) return; if (state.aiStatus === "listening") { stopVoiceConversation(); toast("음성 입력을 멈췄어요."); } else startVoiceConversation(); }
-  if (action === "ai-pause") { stopVoiceConversation("paused"); toast("대화를 잠시 멈췄어요."); }
-  if (action === "ai-stop") { stopVoiceConversation("off"); persist(); toast("루나를 종료했어요."); }
+  if (action === "voice-toggle") { if (state.aiStatus === "listening") { stopVoiceConversation(); } else startVoiceConversation(); }
   if (action === "ai-restart") { state.aiStatus = "idle"; state.aiVoiceEnabled = true; persist(); render(); toast("루나를 다시 시작했어요."); }
-  if (action === "ai-power") { state.aiStatus = state.aiStatus === "off" ? "idle" : "off"; if (state.aiStatus === "off") stopVoiceConversation("off"); else render(); persist(); toast(state.aiStatus === "off" ? "루나를 종료했어요." : "루나를 다시 시작했어요."); }
+  if (action === "ai-power") {
+    const turningOn = state.aiStatus === "off";
+    state.aiStatus = turningOn ? "idle" : "off";
+    state.aiVoiceEnabled = turningOn; // 루나 on/off와 음성은 기본적으로 함께 움직임
+    if (!turningOn) stopVoiceConversation("off"); else render();
+    persist();
+    toast(turningOn ? "루나를 다시 시작했어요." : "루나를 종료했어요.");
+  }
   if (action === "ai-voice-setting") { state.aiVoiceEnabled = !state.aiVoiceEnabled; if (!state.aiVoiceEnabled && state.aiStatus === "listening") stopVoiceConversation(); persist(); render(); toast(state.aiVoiceEnabled ? "음성으로 대화할 수 있어요." : "음성을 껐어요. 이제 텍스트로만 대화해요."); }
-  if (action === "ai-save-setting") { state.aiSaveEnabled = !state.aiSaveEnabled; persist(); render(); toast(state.aiSaveEnabled ? "대화 기록 저장을 켰어요." : "대화 기록 저장을 껐어요."); }
+  if (action === "ai-autostart-setting") { state.aiAutoStart = !state.aiAutoStart; persist(); render(); toast(state.aiAutoStart ? "승차 후 자동 시작을 켰어요." : "승차 후 자동 시작을 껐어요."); }
+  if (action === "ai-save-setting") {
+    if (!state.aiSaveEnabled) openAiSaveConsent();
+    else { state.aiSaveEnabled = false; persist(); render(); toast("대화 기록 저장을 껐어요."); }
+  }
   if (action === "crisis-close") { state.aiCrisisOpen = false; render(); }
   if (action === "crisis-call") toast("프로토타입에서는 전화 연결 대신 안내만 표시해요. 실제 상황에서는 1393 또는 119에 연락해 주세요.");
-  if (action === "chat-expand") { state.aiInputMode = "text"; state.aiChatExpanded = !state.aiChatExpanded; persist(); render(); }
-  if (action === "ai-mode") { state.aiInputMode = value === "text" ? "text" : "voice"; state.aiChatExpanded = false; persist(); render(); }
-  if (action === "ai-recent-history") { state.aiSub = "history"; render(); }
+  if (action === "chat-expand") { state.aiChatExpanded = !state.aiChatExpanded; persist(); render(); }
+  if (action === "font-size") { state.chatFontScale = Math.min(1.3, Math.max(0.85, state.chatFontScale + Number(value) * 0.12)); persist(); applyChatFontScale(); }
+  if (action === "open-thread-detail") { state.aiHistoryDetailId = value; render(); }
+  if (action === "close-thread-detail") { state.aiHistoryDetailId = null; render(); }
+  if (action === "delete-thread") { openDeleteThreadConfirm(value); }
   if (action === "resume-thread" || action === "open-thread") { state.activeThreadId = value; state.aiSub = "talk"; persist(); render(); toast("최근 대화를 이어갑니다."); }
   if (action === "space-sub") { state.spaceSub = value; render(); }
   if (action === "purchase-sub") { state.purchaseSub = value; render(); }
@@ -1735,6 +1828,7 @@ function runSecureCleanup(mode) {
 }
 
 function completeSecureCleanup(mode) {
+  notifyRideEndSaveStatus();
   const completedAt = new Date();
   const reference = `ZT-${String(completedAt.getTime()).slice(-8)}`;
   state.securityProof = { reference, completedAt: completedAt.toISOString(), mode, wipedTargets: 7, retainedTargets: 3 };
@@ -1846,6 +1940,7 @@ function handleSearchKeydown(event) {
 
 function updateClock() { document.querySelector("#clock").textContent = new Date().toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: false }); }
 updateClock(); setInterval(updateClock, 30000); setInterval(updateUsageTimer, 1000);
+applyChatFontScale();
 splashTimer = setTimeout(() => {
   if (state.isAuthenticated) {
     showScreen("app");
