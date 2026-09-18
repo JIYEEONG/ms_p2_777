@@ -144,6 +144,9 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .app-content:has(.space-content-frame) { overflow-y: auto; padding-bottom: 100px; }
 .app-content:has(.space-content-frame) > .subtabs { flex: none; margin-bottom: 12px; }
 .space-content-frame { display: block; width: 100%; height: 1px; border: 0; background: white; }
+#app:has(.moov-home-frame) > .app-header { display: none; }
+#app:has(.moov-home-frame) > .app-content { display: flex; overflow: hidden; padding: 0 0 88px; }
+.moov-home-frame { display: block; flex: 1; width: 100%; height: 100%; min-height: 0; border: 0; background: white; }
 .bottom-nav { position: absolute; z-index: 15; inset: auto 0 0; height: 88px; display: grid; grid-template-columns: repeat(5, 1fr); align-items: start; padding: 9px 6px 20px; border-top: 1px solid #ececec; border-radius: 18px 18px 0 0; background: rgba(255,255,255,.98); box-shadow: 0 -12px 36px rgba(24,23,37,.07); backdrop-filter: blur(14px); }
 .bottom-nav button { min-width: 0; display: grid; justify-items: center; gap: 5px; padding: 3px 1px; border: 0; background: transparent; color: #8e8e93; }
 .bottom-nav svg { width: 22px; height: 22px; }
@@ -1431,6 +1434,8 @@ const kicker = document.querySelector("#section-kicker");
 const modal = document.querySelector("#modal");
 let splashTimer;
 let toastTimer;
+let pendingHomeCourse = null;
+window.addEventListener("message", handleHomeModuleMessage);
 let speechRecognition;
 let searchDebounceTimer;
 let aiSwipeSuppressUntil = 0;
@@ -1647,6 +1652,7 @@ function setTab(tab) {
 function render() {
   const views = { ai: renderAi, space: renderSpace, home: renderHome, outing: renderOuting, profile: renderProfile };
   content.innerHTML = views[state.activeTab]();
+  content.querySelector(".moov-home-frame")?.addEventListener("load", (event) => sendPendingHomeCourse(event.currentTarget));
   if (state.activeTab === "ai" && state.aiSub === "talk") requestAnimationFrame(scrollChat);
   requestAnimationFrame(enableDragScroll);
   // 요청사항: 좌우 스와이프로 페르소나(모드)가 바뀌면 안 됨 — 드롭다운 선택만 사용. 스와이프 비활성화(주석 처리, 삭제하지 않음)
@@ -1835,6 +1841,44 @@ function syncCabinPreview() {
 }
 
 function renderHome() {
+  if (state.tripActive || (state.homeMode === "taxi" && state.homeStep !== "mode")) return renderLegacyHome();
+  return `<iframe class="moov-home-frame" src="./moov-home/index.html?embed=1&lang=${window.MoovI18n?.getLanguage() === "en" ? "en" : "ko"}" title="MOOV 홈·렌트" allow="geolocation" loading="eager"></iframe>`;
+}
+
+function sendPendingHomeCourse(frame, homeState = frame.contentWindow?.MOOVHome?.getState()) {
+  if (!pendingHomeCourse || !homeState || !frame.contentWindow) return;
+  const pickup = homeState.rentalPickupCoords;
+  if (!Number.isFinite(pickup?.lat) || !Number.isFinite(pickup?.lng)) return toast("렌트 출발 위치를 먼저 확인해 주세요.");
+  const course = pendingHomeCourse;
+  pendingHomeCourse = null;
+  const stops = [
+    { id: "host-pickup", name: homeState.pickupLocation, lat: pickup.lat, lng: pickup.lng, dwell: 0 },
+    ...course.stops.map((name, index) => ({ id: `host-${index}`, name, dwell: Number.parseInt(course.dwell?.[index], 10) || 0 }))
+  ];
+  frame.contentWindow.postMessage({ source: "moov-host", version: 1, type: "set-route", stops }, window.location.origin);
+}
+
+function handleHomeModuleMessage(event) {
+  const frame = content.querySelector(".moov-home-frame");
+  if (event.origin !== window.location.origin || event.source !== frame?.contentWindow) return;
+  const message = event.data;
+  if (message?.source !== "moov-home" || message.version !== 1) return;
+  if (message.type === "ready") sendPendingHomeCourse(frame, message.detail);
+  if (message.type === "error") toast(message.detail?.message || "홈 화면을 연결하지 못했어요.");
+  if (message.type !== "navigate") return;
+  const tab = message.detail?.tab;
+  if (tab === "taxi") {
+    state.homeMode = "taxi";
+    state.homeStep = "setup";
+    persist();
+    setTab("home");
+  } else if (["ai", "space", "outing", "profile"].includes(tab)) {
+    if (tab === "outing") { state.returnToHomeAfterCourse = true; state.outingSub = "recommend"; }
+    setTab(tab);
+  }
+}
+
+function renderLegacyHome() {
   if (!state.tripActive && state.homeStep === "mode") return renderHomeModeChoice();
   const route = state.selectedCourse;
   return `<div class="mobility-screen ${state.homeMode}">
@@ -2654,6 +2698,7 @@ function openCourseDetail(course) {
 function useCourseForHome(course) {
   state.selectedCourse = course;
   state.routeStops = [state.pickupLocation, ...course.stops];
+  if (!state.tripActive) { state.homeMode = "rent"; pendingHomeCourse = course; }
   state.homeStep = state.tripActive ? "service" : state.returnToHomeAfterCourse ? "setup" : "mode";
   const returnsToSetup = state.returnToHomeAfterCourse;
   state.returnToHomeAfterCourse = false;
