@@ -141,14 +141,9 @@ def chat(req: ChatRequest):
     messages.extend(req.history)
     messages.append({"role": "user", "content": req.message})
 
-    response = client.chat.completions.create(
-        model=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],
-        messages=messages,
-    )
-    reply_text = response.choices[0].message.content
-
-    # 추가: 위기 감지 로그 — 저장 동의와 무관하게 항상 기록 (감사·안전 목적)
-    if is_crisis_message(req.message):
+    # 추가: 위기 감지 로그 — API 호출 전에 먼저 기록 (Azure 콘텐츠 필터로 응답 자체가 막혀도 로그는 남아야 함)
+    is_crisis = is_crisis_message(req.message)
+    if is_crisis:
         try:
             db.log_crisis_event(
                 conversation_id=req.session_id,
@@ -158,6 +153,20 @@ def chat(req: ChatRequest):
             )
         except Exception as e:
             print(f"위기 로그 저장 실패: {e}")
+
+    try:
+        response = client.chat.completions.create(
+            model=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],
+            messages=messages,
+        )
+        reply_text = response.choices[0].message.content
+    except Exception as e:
+        print(f"GPT 응답 실패: {e}")
+        if is_crisis:
+            # Azure 콘텐츠 필터 등으로 응답이 막혀도, 위기 상황이면 안전 문구는 반드시 전달
+            reply_text = "지금 많이 힘드신 것 같아요. 혼자 견디기 어려운 순간이라면 1393(자살예방상담전화)으로 연결해서 도움을 받을 수 있어요."
+        else:
+            reply_text = "죄송해요, 지금 답변을 만드는 데 문제가 생겼어요. 다시 한 번 말씀해 주시겠어요?"
 
     # 추가: 일반 대화 저장 — 동의(save_consent)했을 때만
     if req.save_consent and req.session_id:
