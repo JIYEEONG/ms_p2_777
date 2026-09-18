@@ -499,7 +499,7 @@ html[lang="en"] .route-line > span:nth-child(2) { min-width: 0; }
 .resume-thread { min-height: 34px; padding: 7px 10px; border: 0; border-radius: 10px; background: var(--green); color: white; font-size: .65rem; font-weight: 900; }
 .compact-chat { max-height: 150px; margin-top: 10px; }
 
-.luna-live { position: relative; display: flex; flex-direction: column; min-height: calc(100vh - 134px); }
+.luna-live { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 .luna-live .ai-cabin-stage { height: 224px; flex: 0 0 224px; }
 .luna-live > .subtabs { margin: 10px 0 12px; }
 .luna-live.voice-mode { min-height: calc(100vh - 134px); }
@@ -547,6 +547,7 @@ html[lang="en"] .route-line > span:nth-child(2) { min-width: 0; }
 .starter-chat-bubble { max-width: 88%; padding: 10px 12px; border: 0; border-radius: 15px 15px 15px 4px; background: #eefaf2; color: #2a5a3d; font-size: .76rem; line-height: 1.45; text-align: left; box-shadow: inset 0 0 0 1px rgba(83,177,117,.08); }
 .starter-chat-bubble:active { transform: scale(.99); }
 .chat-expand-toggle { position: absolute; z-index: 5; right: 12px; top: 8px; width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.97); box-shadow: 0 6px 16px rgba(24,23,37,.12); color: var(--ink); }
+.chat-font-size-control { position: absolute; z-index: 5; left: 12px; top: 8px; display: flex; gap: 6px; }
 .chat-expand-toggle svg { width: 14px; height: 14px; }
 .ai-status-line { margin: 8px 0 0; color: var(--muted); font-size: .68rem; }
 .ai-status-line.listening { color: var(--green-dark); font-weight: 800; }
@@ -589,8 +590,8 @@ html[lang="en"] .route-line > span:nth-child(2) { min-width: 0; }
 .luna-live.chat-expanded .ai-persona-badge,
 .luna-live.chat-expanded .ai-persona-dropdown,
 .luna-live.chat-expanded .ai-mic-stage { display: none; }
-.luna-live.chat-expanded .luna-chat-panel { min-height: 650px; margin-top: 0; }
-.luna-live.chat-expanded .luna-chat-log { max-height: none; min-height: 560px; }
+.luna-live.chat-expanded .luna-chat-panel { flex: 1 1 auto; min-height: 0; margin-top: 0; }
+.luna-live.chat-expanded .luna-chat-log { flex: 1 1 auto; max-height: none; min-height: 0; }
 
 .luna-resizable-shell { --ai-stage-ratio: 56%; position: relative; display: grid; grid-template-rows: minmax(170px, var(--ai-stage-ratio)) 18px minmax(180px, 1fr); min-height: calc(100vh - 132px); gap: 0; overflow: hidden; border-radius: 20px; background: #f7f8f7; }
 .luna-character-pane { position: relative; min-height: 170px; overflow: hidden; border-radius: 20px 20px 18px 18px; background: #dcebe2; box-shadow: 0 8px 22px rgba(24,23,37,.13); cursor: grab; touch-action: none; user-select: none; }

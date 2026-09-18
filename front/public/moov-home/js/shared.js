@@ -8,10 +8,8 @@ function normalizeSearch(value) {
 function rentalFareForHours(vehicleId, hours) {
   const policy = rentalFarePolicy[vehicleId] || rentalFarePolicy.standard;
   const h = Math.max(3, Math.min(24, Number(hours) || 3));
-  const breakpoints = [3,6,9,12,18];
-  const tier = breakpoints.filter((v) => v <= h).at(-1) || 3;
-  const hourly = policy.packages[tier] / tier;
-  return Math.round(hourly * h / 10) * 10;
+  const total = policy.base3 + policy.hourlyStep * (h - 3);
+  return Math.round(total / 10) * 10;
 }
 function rentalFareDelta(vehicleId, hours) {
   const h = Math.max(3, Math.min(24, Number(hours) || 3));

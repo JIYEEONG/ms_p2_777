@@ -157,7 +157,13 @@ function rentalIdentity(vehicle) {
 function renderRentalJourneyStep(step,v) {
   if(step==='time') {
     const price=rentalTotalFare(), delta=rentalFareDelta(v.id,state.rentalHours);
-    return `<section class="rental-step-card"><h3>얼마나 함께할까요?</h3><p>3~24시간, 일정에 맞게 선택해 주세요.</p><div class="rux-fare" aria-live="polite"><small>${escapeHtml(v.name)} · 총 예상 요금</small><strong>${rentalMoney(price)}</strong><span>시간당 약 ${rentalMoney(Math.round(price/state.rentalHours))}</span></div><div class="rental-time-control aligned"><button data-action="rent-minus" aria-label="이용 시간 1시간 줄이기" ${state.rentalHours<=3?'disabled':''}>−</button><div class="rental-time-control-value"><strong>${state.rentalHours}</strong><span>시간</span></div><button data-action="rent-plus" aria-label="이용 시간 1시간 늘리기" ${state.rentalHours>=24?'disabled':''}>＋</button></div><p class="rux-delta">${state.rentalHours>=24?'최대 24시간까지 선택할 수 있어요.':delta>=0?`1시간 추가 시 ${rentalMoney(delta)} 추가`:`1시간 추가 시 패키지 할인으로 ${rentalMoney(-delta)} 절약`}</p><div class="rental-preset-row" role="group" aria-label="이용 시간 빠른 선택">${[3,6,9,12,18].map(h=>`<button aria-pressed="${state.rentalHours===h}" class="${state.rentalHours===h?'active':''}" data-action="rent-set-hours" data-value="${h}">${h}시간</button>`).join('')}</div><p class="rux-note">주행요금 포함 · 장시간 패키지 할인 자동 적용</p></section>`;
+    return `<section class="rental-step-card"><h3>얼마나 함께할까요?</h3><p>3~24시간, 일정에 맞게 선택해 주세요.</p><div class="rux-fare" aria-live="polite"><small>${escapeHtml(v.name)} · 총 예상 요금</small><strong>${rentalMoney(price)}</strong><span>시간당 약 ${rentalMoney(Math.round(price/state.rentalHours))}</span></div><div class="rental-time-control aligned"><button data-action="rent-minus" aria-label="이용 시간 1시간 줄이기" ${state.rentalHours<=3?'disabled':''}>−</button><div class="rental-time-control-value"><strong>${state.rentalHours}</strong><span>시간</span></div><button data-action="rent-plus" aria-label="이용 시간 1시간 늘리기" ${state.rentalHours>=24?'disabled':''}>＋</button></div><p class="rux-delta">${state.rentalHours>=24?'최대 24시간까지 선택할 수 있어요.':delta>=0?`1시간 추가 시 ${rentalMoney(delta)} 추가`:`1시간 추가 시 패키지 할인으로 ${rentalMoney(-delta)} 절약`}</p><div class="rental-preset-row" role="group" aria-label="이용 시간 빠른 선택">${[
+  {h:RENTAL_MIN_HOURS,label:'최소'},
+  {h:6,label:'6시간'},
+  {h:10,label:'10시간'},
+  {h:15,label:'15시간'},
+  {h:RENTAL_MAX_HOURS,label:'최대'}
+].map(p=>`<button aria-pressed="${state.rentalHours===p.h}" class="${state.rentalHours===p.h?'active':''}" data-action="rent-set-hours" data-value="${p.h}">${p.label}</button>`).join('')}</div><p class="rux-note">주행요금 포함 · 장시간 패키지 할인 자동 적용</p></section>`;
   }
   if(step==='vehicle')return `<section class="rental-step-card vehicle-select-card">${renderRentalVehicleCards(v.id)}</section>`;
   if(step==='pickup')return `<section class="rental-step-card rux-map-card"><div class="rux-card-title"><h3>어디에서 만날까요?</h3><p>위치를 확인하고 차량을 요청해 주세요.</p></div><div id="rental-pickup-osm" class="rental-osm-map" aria-label="픽업 위치 지도"></div><div class="pickup-confirm-sheet"><div class="pickup-location-line"><span class="pickup-location-icon">${icon('pin')}</span><div><small>확정된 픽업 위치</small><strong>${escapeHtml(state.pickupLocation)}</strong></div><button data-action="open-pin-picker">수정</button></div><p class="rux-note">${escapeHtml(v.name)} · ${state.rentalHours}시간 · ${rentalMoney(rentalTotalFare())}</p><div class="pickup-secondary-actions"><button class="ghost-button" data-action="locate-rental">현재 위치</button><button class="ghost-button" data-action="open-pin-picker">검색·최근 위치</button></div><small class="rux-note">체험 배차이며 실제 차량 호출·결제는 발생하지 않습니다.</small></div></section>`;
@@ -322,7 +328,8 @@ function handleRentalAction(button) {
     'rental-stops-list':openRentalStopList, 'rental-add-stop':()=>openRentalDestinationSearch(-1), 'locate-rental':locateRentalUser,
     'rux-open-stop':()=>{closeModal();showRentalStop(Number(value));},
     'rux-select-place':()=>{const p=RENTAL_PLACES.find(p=>p.id===button.dataset.id);if(p)button.dataset.kind==='pickup'?setRentalDraftPickup(p):previewRentalRoute(p);},
-    'rux-recent':()=>{const p=[...state.rentalUX.recent,...RENTAL_PLACES].find(p=>p.id===button.dataset.id);if(p)setRentalDraftPickup(p);}
+    'rux-recent':()=>{const p=[...state.rentalUX.recent,...RENTAL_PLACES].find(p=>p.id===button.dataset.id);if(p)setRentalDraftPickup(p);},
+'rent-set-hours':()=>{state.rentalHours=Math.max(RENTAL_MIN_HOURS,Math.min(RENTAL_MAX_HOURS,Number(value)));persist();render();}
   };
   if(!actions[action])return false;actions[action]();return true;
 }

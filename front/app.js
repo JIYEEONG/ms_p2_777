@@ -892,14 +892,14 @@ function renderAi() {
           ${recording ? `<span class="ai-status-badge recording"><i class="dot"></i>대화를 기록 중입니다</span>` : ""}
           ${voiceOn ? `<span class="ai-status-badge">음성 제어가 가능한 상태입니다</span>` : ""}
         </div>
-        <div class="crisis-overlay ${state.aiCrisisOpen ? "open" : ""}">
-          <div class="crisis-overlay-head">
-            <div class="crisis-overlay-icon">${icon("shield")}</div>
-            <div><h4>혼자 두지 않을게요</h4><p>지금 벅찬 감정, 괜찮다면 조금 더 이야기해줄래요? 필요하면 아래 번호로 언제든 연결할 수 있어요.</p></div>
-            <button class="crisis-overlay-close" type="button" data-action="crisis-close" aria-label="위기 안내 닫기">${icon("x")}</button>
-          </div>
-          <div class="crisis-overlay-actions"><button class="crisis-call-button" type="button" data-action="crisis-call">${icon("shield")}자살예방상담전화 1393 연결</button></div>
+      </div>
+      <div class="crisis-overlay ${state.aiCrisisOpen ? "open" : ""}">
+        <div class="crisis-overlay-head">
+          <div class="crisis-overlay-icon">${icon("shield")}</div>
+          <div><h4>혼자 두지 않을게요</h4><p>지금 벅찬 감정, 괜찮다면 조금 더 이야기해줄래요? 필요하면 아래 번호로 언제든 연결할 수 있어요.</p></div>
+          <button class="crisis-overlay-close" type="button" data-action="crisis-close" aria-label="위기 안내 닫기">${icon("x")}</button>
         </div>
+        <div class="crisis-overlay-actions"><button class="crisis-call-button" type="button" data-action="crisis-call">${icon("shield")}자살예방상담전화 1393 연결</button></div>
       </div>
       <button class="ai-persona-badge ${state.personaMenuOpen ? "open" : ""}" type="button" data-action="persona-menu" aria-label="페르소나 선택">
         <span>${persona.name}</span>${icon("chevron")}
@@ -909,12 +909,12 @@ function renderAi() {
       </div>
     </div>
     <div class="luna-chat-panel">
+      <div class="chat-font-size-control">
+        <button type="button" data-action="font-size" data-value="-1" aria-label="채팅 글자 작게" ${state.chatFontScale <= 0.85 ? "disabled" : ""}>−</button>
+        <button type="button" data-action="font-size" data-value="1" aria-label="채팅 글자 크게" ${state.chatFontScale >= 1.3 ? "disabled" : ""}>＋</button>
+      </div>
+      <button type="button" class="chat-expand-toggle" data-action="chat-expand" aria-label="${state.aiChatExpanded ? "채팅창 축소" : "채팅창 확대"}">${icon(state.aiChatExpanded ? "shrink" : "expand")}</button>
       <div class="luna-chat-log" id="main-chat-log">
-        <div class="chat-font-size-control">
-          <button type="button" data-action="font-size" data-value="-1" aria-label="채팅 글자 작게" ${state.chatFontScale <= 0.85 ? "disabled" : ""}>−</button>
-          <button type="button" data-action="font-size" data-value="1" aria-label="채팅 글자 크게" ${state.chatFontScale >= 1.3 ? "disabled" : ""}>＋</button>
-        </div>
-        <button type="button" class="chat-expand-toggle" data-action="chat-expand" aria-label="${state.aiChatExpanded ? "채팅창 축소" : "채팅창 확대"}">${icon(state.aiChatExpanded ? "shrink" : "expand")}</button>
         <div class="chat-date-divider"><span>${new Date().toLocaleDateString(window.MoovI18n?.locale() || "ko-KR", { month: "long", day: "numeric", weekday: "short" })}</span></div>
         ${thread.messages.map((m) => `<div class="detail-message-row ${m.role === "user" ? "user" : ""}"><div class="detail-message-bubble">${escapeHtml(m.text)}<small>${escapeHtml(m.time || "방금 전")}</small></div></div>`).join("")}
       </div>
@@ -956,7 +956,7 @@ function getOrCreateSavedSession() {
 
 function renderAiHistory() {
   if (state.aiHistoryDetailId) return renderAiHistoryDetail();
-  return `<section class="section-lead"><h3>대화 기록</h3><p>저장에 동의한 대화만 여기 남아요. 카드의 휴지통 아이콘으로 원하는 기록만 골라 지울 수 있어요.</p></section>${state.chatThreads.length ? `<section class="card">${state.chatThreads.map((thread) => `<div class="history-item deletable" data-action="open-thread-detail" data-value="${thread.id}" role="button" tabindex="0"><span class="history-icon">${icon("chat")}</span><span><strong>${escapeHtml(thread.title)}</strong><small>${escapeHtml(thread.updated)} · ${escapeHtml(thread.messages.length)}개 메시지</small></span><span class="badge gray">${escapeHtml(thread.persona)}</span><button class="history-delete" type="button" data-action="delete-thread" data-value="${thread.id}" aria-label="삭제">${icon("trash")}</button></div>`).join("")}</section>` : emptyState("chat", "아직 저장된 대화가 없어요", "설정에서 대화 기록 저장을 켜면 다음 대화부터 여기 남길 수 있어요.")}`;
+  return `<section class="section-lead"><h3>대화 기록</h3><p>저장에 동의한 대화만 여기 남아요. 카드의 휴지통 아이콘으로 원하는 기록만 골라 지울 수 있어요.</p></section>${state.chatThreads.length ? `<section class="card">${state.chatThreads.map((thread) => `<div class="history-item deletable" data-action="open-thread-detail" data-value="${thread.id}" role="button" tabindex="0"><span class="history-icon">${icon("chat")}</span><span><strong>${escapeHtml(thread.title)}</strong><small>${escapeHtml(thread.updated)} · ${escapeHtml(thread.messages.length)}개 메시지</small></span><button class="history-delete" type="button" data-action="delete-thread" data-value="${thread.id}" aria-label="삭제">${icon("trash")}</button></div>`).join("")}</section>` : emptyState("chat", "아직 저장된 대화가 없어요", "설정에서 대화 기록 저장을 켜면 다음 대화부터 여기 남길 수 있어요.")}`;
 }
 
 function renderAiHistoryDetail() {
@@ -1898,8 +1898,6 @@ function completeSecureCleanup(mode) {
   state.returnToHomeAfterCourse = false;
   state.cart = [];
   state.aiStatus = "idle";
-  state.chatThreads = [{ id: `thread-${Date.now()}`, title: "새 대화", updated: "방금 전", persona: state.aiPersona, messages: [{ role: "ai", text: "안녕하세요. 새 차량 세션에서 무엇을 함께 이야기해볼까요?" }] }];
-  state.activeThreadId = state.chatThreads[0].id;
   state.theme = "기본";
   state.themeConfig = { temperature: 22, tint: 60, light: "민트 앰비언트", privacy: true };
   persist();

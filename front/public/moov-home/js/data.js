@@ -7,11 +7,11 @@ const rentalVehicles = [
   { id: "barrierfree", name: "MOOV 배리어프리", seats: "최대 5인", baggage: "2개", category: "배리어프리", desc: "휠체어 승하차를 지원하는 접근성 특화 차량", image: "assets/faa24cc841b99c10.png", about: "경사로와 넓은 승하차 공간을 갖춰 휠체어 이용자도 편하게 탑승할 수 있습니다.", accent: "#49A995" },
 ];
 const rentalFarePolicy = {
-  standard: { label: "컴팩트", packages: {3:10180, 6:18950, 9:27000, 12:34340, 18:45330} },
-  easyfit: { label: "이지핏", packages: {3:12900, 6:24000, 9:34200, 12:43500, 18:57420} },
-  family: { label: "패밀리", packages: {3:29870, 6:55580, 9:79200, 12:100740, 18:132970} },
-  premium: { label: "프리미엄", packages: {3:29870, 6:55580, 9:79200, 12:100740, 18:132970} },
-  barrierfree: { label: "배리어프리", packages: {3:29870, 6:55580, 9:79200, 12:100740, 18:132970} },
+  standard: { label: "컴팩트", base3: 10180, base24: 56380, hourlyStep: 2200 },
+  easyfit: { label: "이지핏", base3: 12900, base24: 69600, hourlyStep: 2700 },
+  family: { label: "패밀리", base3: 29870, base24: 162170, hourlyStep: 6300 },
+  premium: { label: "프리미엄", base3: 29870, base24: 162170, hourlyStep: 6300 },
+  barrierfree: { label: "배리어프리", base3: 29870, base24: 162170, hourlyStep: 6300 },
 };
 const rentalOptionCatalog = [
   { id: "privacy", name: "프라이버시 글라스", price: 3000 },
