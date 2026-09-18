@@ -2374,7 +2374,7 @@ async function sendMessage(text, voice = false, detectedLanguage = null) {
     session.persona = state.aiPersona;
     state.chatThreads = [session, ...state.chatThreads.filter((item) => item.id !== session.id)];
   }
-  persist(); render();
+  persist(); render(); scrollChat();
   speakReply(reply, detectedLanguage);
 }
 
