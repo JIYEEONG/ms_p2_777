@@ -2895,11 +2895,11 @@ function stopEditor(stop, index) {
 
 function renderInterestCourses() {
   const list = getInterestCourses();
-  return `<section class="section-lead"><h3>관심 코스</h3><p>저장한 코스와 직접 등록한 코스를 한곳에서 확인하세요.</p></section>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("bookmark", "관심 코스가 없어요", "AI 코스 추천에서 저장하거나 새 코스를 등록해 주세요.")}`;
+  return `<section class="section-lead"><h3>관심 코스</h3><p>관심 저장한 코스를 한곳에서 확인하세요.</p></section>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("bookmark", "관심 코스가 없어요", "AI 코스 추천에서 저장하거나 새 코스를 등록해 주세요.")}`;
 }
 
 function getCourse(id) { return baseCourses.find((course) => course.id === id) || state.customCourses.find((course) => course.id === id); }
-function getInterestCourses() { return [...baseCourses.filter((course) => state.savedCourseIds.has(course.id)), ...state.customCourses]; }
+function getInterestCourses() { return [...baseCourses, ...state.customCourses].filter((course) => state.savedCourseIds.has(course.id)); }
 
 function renderProfile() {
   if (state.profileView !== "menu") return renderProfileSection();
