@@ -150,11 +150,10 @@ def chat(req: ChatRequest):
     # 추가: 위기 감지 로그 — 저장 동의와 무관하게 항상 기록 (감사·안전 목적)
     if is_crisis_message(req.message):
         try:
-            db.log_crisis(
-                session_id=req.session_id,
+            db.log_crisis_event(
+                conversation_id=req.session_id,
                 user_id="anonymous",  # TODO: 실제 로그인 사용자 식별자 연결 필요
                 persona=active_code,
-                safety_level="high",
                 message_content=req.message,
             )
         except Exception as e:
@@ -164,8 +163,8 @@ def chat(req: ChatRequest):
     if req.save_consent and req.session_id:
         try:
             db.ensure_session(req.session_id, "anonymous", active_code, req.detected_language)
-            db.log_message(req.session_id, "user", req.message)
-            db.log_message(req.session_id, "ai", reply_text)
+            db.log_turn_event(req.session_id, "user", req.message, "anonymous")
+            db.log_turn_event(req.session_id, "ai", reply_text, "anonymous")
         except Exception as e:
             print(f"대화 저장 실패: {e}")
 
