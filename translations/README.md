@@ -1,6 +1,6 @@
 # MOOV English translation work
 
-`moov-ko-en.xlsx` contains Korean strings found in the MOOV web source and the selected English translations. The workbook records a source location for each phrase and merges identical Korean text from multiple files into one row.
+`moov-ko-en.xlsx` contains Korean strings found in the MOOV web source and the selected English translations. The `UI and voice`, `Home rental`, and `Map labels` sheets keep the existing app, integrated home/rental screen, and visible offline map labels separate. Source locations or OSM IDs make each entry traceable.
 
 The `2차변경` column beside `English` records later wording changes shown in the UI. It leaves the original English draft intact. Context-dependent labels, such as featured sounds for each theme, list each display context in one cell. The browser export still reads `English` plus `site-overrides.json`; controls with context-specific wording use `data-i18n-en` in the UI source.
 
@@ -11,6 +11,21 @@ The MOOV pages and browser speech use `front/public/i18n-data.js`, generated fro
 ```sh
 python tools/export_site_translations.py
 ```
+
+The integrated home module uses `front/public/moov-home/js/i18n-home-data.js`, generated from the `Home rental` and `Map labels` sheets. This dictionary loads only inside the home iframe, so home wording can be shortened without changing other tabs. After editing either sheet, run:
+
+```sh
+python tools/export_home_translations.py
+```
+
+To refresh the home inventory while keeping existing translations, run:
+
+```sh
+python tools/extract_home_translations.py
+python tools/extract_home_map_labels.py
+```
+
+The map sheet includes Korean names that the offline map may draw at its supported zoom levels. Names without an existing English form have a draft romanization marked `로마자 표기·감수 필요`. The OSM source names remain intact. The three promotional images have separate `-en.svg` files; edit those SVG text labels too if their English wording changes in the workbook.
 
 If the archived Sanskrit workbook is available locally, repeat the historical comparison with:
 

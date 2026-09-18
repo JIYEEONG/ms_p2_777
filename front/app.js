@@ -250,6 +250,8 @@ const kicker = document.querySelector("#section-kicker");
 const modal = document.querySelector("#modal");
 let splashTimer;
 let toastTimer;
+let pendingHomeCourse = null;
+window.addEventListener("message", handleHomeModuleMessage);
 let speechRecognition;
 let searchDebounceTimer;
 let aiSwipeSuppressUntil = 0;
@@ -466,6 +468,7 @@ function setTab(tab) {
 function render() {
   const views = { ai: renderAi, space: renderSpace, home: renderHome, outing: renderOuting, profile: renderProfile };
   content.innerHTML = views[state.activeTab]();
+  content.querySelector(".moov-home-frame")?.addEventListener("load", (event) => sendPendingHomeCourse(event.currentTarget));
   if (state.activeTab === "ai" && state.aiSub === "talk") requestAnimationFrame(scrollChat);
   requestAnimationFrame(enableDragScroll);
   // 요청사항: 무브 캐릭터 캐빈은 크기 조절이 되면 안 됨 — 스와이프/리사이즈 기능 비활성화(주석 처리, 삭제하지 않음)
@@ -653,6 +656,44 @@ function syncCabinPreview() {
 }
 
 function renderHome() {
+  if (state.tripActive || (state.homeMode === "taxi" && state.homeStep !== "mode")) return renderLegacyHome();
+  return `<iframe class="moov-home-frame" src="./public/moov-home/index.html?embed=1&lang=${window.MoovI18n?.getLanguage() === "en" ? "en" : "ko"}" title="MOOV 홈·렌트" allow="geolocation" loading="eager"></iframe>`;
+}
+
+function sendPendingHomeCourse(frame, homeState = frame.contentWindow?.MOOVHome?.getState()) {
+  if (!pendingHomeCourse || !homeState || !frame.contentWindow) return;
+  const pickup = homeState.rentalPickupCoords;
+  if (!Number.isFinite(pickup?.lat) || !Number.isFinite(pickup?.lng)) return toast("렌트 출발 위치를 먼저 확인해 주세요.");
+  const course = pendingHomeCourse;
+  pendingHomeCourse = null;
+  const stops = [
+    { id: "host-pickup", name: homeState.pickupLocation, lat: pickup.lat, lng: pickup.lng, dwell: 0 },
+    ...course.stops.map((name, index) => ({ id: `host-${index}`, name, dwell: Number.parseInt(course.dwell?.[index], 10) || 0 }))
+  ];
+  frame.contentWindow.postMessage({ source: "moov-host", version: 1, type: "set-route", stops }, window.location.origin);
+}
+
+function handleHomeModuleMessage(event) {
+  const frame = content.querySelector(".moov-home-frame");
+  if (event.origin !== window.location.origin || event.source !== frame?.contentWindow) return;
+  const message = event.data;
+  if (message?.source !== "moov-home" || message.version !== 1) return;
+  if (message.type === "ready") sendPendingHomeCourse(frame, message.detail);
+  if (message.type === "error") toast(message.detail?.message || "홈 화면을 연결하지 못했어요.");
+  if (message.type !== "navigate") return;
+  const tab = message.detail?.tab;
+  if (tab === "taxi") {
+    state.homeMode = "taxi";
+    state.homeStep = "setup";
+    persist();
+    setTab("home");
+  } else if (["ai", "space", "outing", "profile"].includes(tab)) {
+    if (tab === "outing") { state.returnToHomeAfterCourse = true; state.outingSub = "recommend"; }
+    setTab(tab);
+  }
+}
+
+function renderLegacyHome() {
   if (!state.tripActive && state.homeStep === "mode") return renderHomeModeChoice();
   const route = state.selectedCourse;
   return `<div class="mobility-screen ${state.homeMode}">
@@ -1383,6 +1424,7 @@ function openCourseDetail(course) {
 function useCourseForHome(course) {
   state.selectedCourse = course;
   state.routeStops = [state.pickupLocation, ...course.stops];
+  if (!state.tripActive) { state.homeMode = "rent"; pendingHomeCourse = course; }
   state.homeStep = state.tripActive ? "service" : state.returnToHomeAfterCourse ? "setup" : "mode";
   const returnsToSetup = state.returnToHomeAfterCourse;
   state.returnToHomeAfterCourse = false;

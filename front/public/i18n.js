@@ -131,6 +131,8 @@
     if (language !== "en" || typeof source !== "string") return source;
     const direct = dictionaryValue(source);
     if (direct !== null) return direct;
+    const pageTranslation = window.MOOV_PAGE_TRANSLATE?.(source, (part) => dictionaryValue(part) ?? part);
+    if (typeof pageTranslation === "string") return pageTranslation;
 
     // Many cards combine translated labels with changing prices or durations.
     const fragments = source.split(/(\s*[·|]\s*)/);
