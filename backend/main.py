@@ -1,15 +1,18 @@
-import os
-import io
-import re
-from pathlib import Path
+import os                          # 임시 파일 삭제(os.remove) 등 시스템 기능
+import io                          # TTS 오디오를 메모리 스트림으로 다룰 때 사용
+import re                          # TTS 텍스트에서 이모지 제거용 정규식
+import tempfile                    # STT용 업로드 오디오를 임시 파일로 저장
+from pathlib import Path           # .env 파일 경로 지정용
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
-from dotenv import load_dotenv
-from openai import AzureOpenAI
-import azure.cognitiveservices.speech as speechsdk
+import azure.cognitiveservices.speech as speechsdk  # Azure Speech TTS/STT(언어 자동감지 포함) SDK
+from fastapi import FastAPI, UploadFile, File        # FastAPI 앱 및 STT 오디오 업로드(UploadFile) 처리
+from fastapi.middleware.cors import CORSMiddleware   # 프론트(front)에서의 CORS 요청 허용
+from fastapi.responses import StreamingResponse      # TTS 오디오를 스트리밍으로 반환
+from pydantic import BaseModel                       # 요청 바디(ChatRequest, TTSRequest) 스키마 정의
+from dotenv import load_dotenv                       # .env 파일에서 환경변수 로드
+from openai import AzureOpenAI                       # Azure AI Foundry(gpt-5.6-luna) 호출용 클라이언트
+from pydub import AudioSegment                        # STT용 오디오 포맷 변환(webm→wav)
+import db                                              # 대화 로그 저장용 (ai_sessions/ai_messages/ai_crisis_logs)
 
 load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 app = FastAPI()
@@ -58,10 +61,19 @@ PERSONA_PROMPTS = {
 }
 DEFAULT_PERSONA_PROMPT = PERSONA_PROMPTS[DEFAULT_PERSONA_CODE]
 
+# front의 checkCrisisKeywords와 동일한 목록 — 위기 로그 판단용
+CRISIS_KEYWORDS = ["우울해", "우울하", "죽고싶", "죽고 싶", "살기싫", "살기 싫", "힘들어 죽겠", "자살"]
+
+def is_crisis_message(text: str) -> bool:
+    return any(keyword in text for keyword in CRISIS_KEYWORDS)
+
 class ChatRequest(BaseModel):
     message: str
     persona: str = "무브"
     history: list[dict] = []
+    detected_language: str | None = None
+    session_id: str | None = None     # 추가: 프론트에서 생성해 전달하는 세션 식별자
+    save_consent: bool = False        # 추가: 대화 기록 저장 동의 여부 (front의 aiSaveEnabled)
 
 # 사용자 발화 안에서 페르소나 "이름"을 찾을 때는 한글 그대로 매칭 (사용자가 한글로 말하니까)
 PERSONA_NAMES_KR = ["무브", "토닥이", "척척박사", "링고"]
@@ -106,10 +118,14 @@ def search_local_knowledge(query: str, persona: str) -> dict | None:
 
 @app.post("/api/luna/chat")
 def chat(req: ChatRequest):
-    persona_code = get_persona_code(req.persona)  # 프론트가 보낸 한글/영문 값을 내부 표준 코드로 변환
+    persona_code = get_persona_code(req.persona)
     switched_to_code = detect_persona_switch(req.message, persona_code)
     active_code = switched_to_code or persona_code
     system_prompt = PERSONA_PROMPTS.get(active_code, DEFAULT_PERSONA_PROMPT)
+
+    # 추가: 감지된 언어로 응답하도록 지시 (설계서의 response_language 규칙)
+    if req.detected_language and not req.detected_language.startswith("ko"):
+        system_prompt += f"\n\n사용자가 {req.detected_language} 언어로 말했다. 이번 답변은 반드시 그 언어로 자연스럽게 작성해."
 
     # RAG 검색 결과가 있으면 시스템 프롬프트에 컨텍스트로 추가
     # TODO: ai_sessions.rag_used / rag_source_ids 로깅은 실제 검색 연동 시 함께 구현
@@ -129,12 +145,35 @@ def chat(req: ChatRequest):
         model=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],
         messages=messages,
     )
-    return {"reply": response.choices[0].message.content, "switched_persona": switched_to_kr}
+    reply_text = response.choices[0].message.content
+
+    # 추가: 위기 감지 로그 — 저장 동의와 무관하게 항상 기록 (감사·안전 목적)
+    if is_crisis_message(req.message):
+        try:
+            db.log_crisis(
+                session_id=req.session_id,
+                user_id="anonymous",  # TODO: 실제 로그인 사용자 식별자 연결 필요
+                persona=active_code,
+                safety_level="high",
+                message_content=req.message,
+            )
+        except Exception as e:
+            print(f"위기 로그 저장 실패: {e}")
+
+    # 추가: 일반 대화 저장 — 동의(save_consent)했을 때만
+    if req.save_consent and req.session_id:
+        try:
+            db.ensure_session(req.session_id, "anonymous", active_code, req.detected_language)
+            db.log_message(req.session_id, "user", req.message)
+            db.log_message(req.session_id, "ai", reply_text)
+        except Exception as e:
+            print(f"대화 저장 실패: {e}")
+
+    return {"reply": reply_text, "switched_persona": switched_to_kr}
 
 
 # --- 음성 응답(TTS) — Azure AI Speech ---
-# 페르소나별 목소리 매핑 (지금은 한국어 고정)
-# TODO: 언어 전환 브랜치 머지 후, (persona, language) 튜플 키로 확장 필요
+# 페르소나별 목소리 매핑 (한국어 기본)
 VOICE_MAP = {
     "moove": "ko-KR-SeoHyeonNeural",
     "todaki": "ko-KR-YuJinNeural",
@@ -143,13 +182,29 @@ VOICE_MAP = {
 }
 DEFAULT_VOICE = "ko-KR-SunHiNeural"
 
+# 감지된 언어가 영어일 때 쓸 대체 목소리 — 톤(성별·분위기)을 최대한 맞춤
+VOICE_MAP_EN = {
+    "moove": "en-US-AriaNeural",
+    "todaki": "en-US-JennyNeural",
+    "expert": "en-US-GuyNeural",
+    "lingo": "en-US-AndrewMultilingualNeural",
+}
+
 class TTSRequest(BaseModel):
     text: str
     persona: str = "무브"
+    detected_language: str | None = None
 
 @app.post("/api/luna/tts")
 def tts(req: TTSRequest):
-    voice_name = VOICE_MAP.get(get_persona_code(req.persona), DEFAULT_VOICE)
+    persona_code = get_persona_code(req.persona)
+    # 감지된 언어가 영어면 영어 전용 목소리로, 아니면 기존 한국어 목소리로
+    if req.detected_language and req.detected_language.startswith("en"):
+        voice_name = VOICE_MAP_EN.get(persona_code, DEFAULT_VOICE)
+        ssml_lang = "en-US"
+    else:
+        voice_name = VOICE_MAP.get(persona_code, DEFAULT_VOICE)
+        ssml_lang = "ko-KR"
 
     # 이모지 제거 (TTS가 이상하게 읽는 것 방지)
     emoji_pattern = re.compile(
@@ -172,7 +227,7 @@ def tts(req: TTSRequest):
     )
 
     ssml = f"""
-    <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="ko-KR">
+    <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="{ssml_lang}">
         <voice name="{voice_name}">
             <prosody rate="+30%">{clean_text}</prosody>
         </voice>
@@ -187,3 +242,49 @@ def tts(req: TTSRequest):
 
     audio_stream = io.BytesIO(result.audio_data)
     return StreamingResponse(audio_stream, media_type="audio/mpeg")
+
+# --- 음성 인식(STT) — Azure AI Speech, 언어 자동감지 ---
+SUPPORTED_STT_LANGUAGES = ["ko-KR", "en-US"]
+
+@app.post("/api/luna/stt")
+async def stt(audio: UploadFile = File(...)):
+    # 1) 브라우저에서 온 오디오(webm 등)를 Azure Speech가 요구하는 WAV(16kHz, mono, PCM)로 변환
+    raw_bytes = await audio.read()
+    src_tmp = tempfile.NamedTemporaryFile(suffix=".webm", delete=False)
+    src_tmp.write(raw_bytes)
+    src_tmp.close()  # Windows에서는 닫아야 다른 프로세스(pydub/ffmpeg)가 열 수 있음
+
+    sound = AudioSegment.from_file(src_tmp.name)
+    sound = sound.set_frame_rate(16000).set_channels(1)
+    wav_path = src_tmp.name + ".wav"
+    sound.export(wav_path, format="wav")
+    os.remove(src_tmp.name)  # 원본 webm 임시파일 정리
+
+    # 2) Azure Speech STT + 언어 자동감지(한국어/영어 후보)
+    speech_config = speechsdk.SpeechConfig(
+        subscription=os.environ["AZURE_SPEECH_KEY"],
+        region=os.environ["AZURE_SPEECH_REGION"],
+    )
+    auto_detect_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(
+        languages=SUPPORTED_STT_LANGUAGES
+    )
+    audio_config = speechsdk.AudioConfig(filename=wav_path)
+
+    recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config,
+        auto_detect_source_language_config=auto_detect_config,
+        audio_config=audio_config,
+    )
+    result = recognizer.recognize_once()
+    del recognizer  # Windows에서 wav 파일 핸들을 명시적으로 놓아줌
+    del audio_config
+    try:
+        os.remove(wav_path)
+    except PermissionError:
+        pass  # 삭제 실패해도 인식 결과 반환에는 지장 없음
+
+    if result.reason != speechsdk.ResultReason.RecognizedSpeech:
+        return {"error": f"STT 실패: {result.reason}"}
+
+    detected_language = speechsdk.AutoDetectSourceLanguageResult(result).language
+    return {"text": result.text, "detected_language": detected_language}

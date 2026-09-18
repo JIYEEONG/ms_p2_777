@@ -2230,7 +2230,7 @@ async function sendMessage(text, voice = false, detectedLanguage = null) {
     state.chatThreads = [session, ...state.chatThreads.filter((item) => item.id !== session.id)];
   }
   persist(); render();
-  speakReply(reply);
+  speakReply(reply, detectedLanguage);
 }
 
 function pickLunaReply(text) {
@@ -2258,7 +2258,7 @@ function scrollChat() {
 
 let currentTtsAudio = null;
 
-async function speakReply(text) {
+async function speakReply(text, detectedLanguage = null) {
   try {
     // 이전에 재생 중이던 음성이 있으면 먼저 멈춤
     if (currentTtsAudio) {
@@ -2270,7 +2270,7 @@ async function speakReply(text) {
     const res = await fetch("http://127.0.0.1:8000/api/luna/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, persona: state.aiPersona }),
+      body: JSON.stringify({ text, persona: state.aiPersona, detected_language: detectedLanguage }),
     });
     if (!res.ok) throw new Error("TTS 요청 실패");
     const audioBlob = await res.blob();
