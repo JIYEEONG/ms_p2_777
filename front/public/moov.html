@@ -1410,6 +1410,7 @@ const state = {
   recommendationResultIds: outingSaved.recommendationResultIds || [],
   recommendationRequestId: outingSaved.recommendationRequestId || null,
   outingTestMode: outingSaved.outingTestMode || "free",
+  tasteGroup: outingSaved.tasteGroup || "감성 탐험형",
   outingActionIds: outingSaved.outingActionIds || { likes: {}, saves: {} },
   popularityCounts: {},
   popularityAt: null,
@@ -1716,6 +1717,7 @@ function persist() {
     outingFilters: state.outingFilters, recommendationPrefs: state.recommendationPrefs,
     recommendationResultIds: state.recommendationResultIds, recommendationRequestId: state.recommendationRequestId,
     outingTestMode: state.outingTestMode,
+    tasteGroup: state.tasteGroup,
     outingActionIds: state.outingActionIds,
     likedCourseIds: [...state.likedCourseIds], savedCourseIds: [...state.savedCourseIds], customCourses: state.customCourses,
   };
@@ -1732,6 +1734,7 @@ function loadOutingForUser(userId) {
   state.recommendationResultIds = user.recommendationResultIds || [];
   state.recommendationRequestId = user.recommendationRequestId || null;
   state.outingTestMode = user.outingTestMode || "free";
+  state.tasteGroup = user.tasteGroup || "감성 탐험형";
   state.outingActionIds = user.outingActionIds || { likes: {}, saves: {} };
   state.likedCourseIds = new Set(user.likedCourseIds || []);
   state.savedCourseIds = new Set(user.savedCourseIds || []);
@@ -2629,11 +2632,11 @@ function renderOtt() {
 function serviceCard(letter, name, desc, color, on) { return `<article class="card service-card"><span class="service-logo ${color}">${letter}</span><div style="flex:1"><h4>${name}</h4><p>${desc}</p></div><button class="switch ${on ? "on" : ""}" data-action="toggle" aria-label="${name} 연결"></button></article>`; }
 
 function renderOuting() {
-  const tabs = [["community", "커뮤니티", "Community"], ["recommend", "AI 코스 추천", "AI picks"], ["register", "코스 공유", "Share trips"], ["interest", "저장 코스", "Saved trips"]];
-  const bodies = { community: renderCommunityFeed, recommend: renderRecommendation, register: renderRegisterCourse, interest: renderInterestCourses };
+  const tabs = [["community", "커뮤니티", "Community"], ["similar", "취향 친구", "Taste matches"], ["register", "코스 공유", "Share trips"], ["interest", "저장 코스", "Saved trips"]];
+  const bodies = { community: renderCommunityFeed, similar: renderSimilarTaste, recommend: renderRecommendation, register: renderRegisterCourse, interest: renderInterestCourses };
   if (!bodies[state.outingSub]) state.outingSub = "community";
   const searchZone = ["community", "recommend"].includes(state.outingSub) ? renderOutingSearchZone() : "";
-  return `${searchZone}<div class="subtabs outing-tabs" role="tablist">${tabs.map(([id, label, english]) => `<button class="${state.outingSub === id ? "active" : ""}" data-action="outing-sub" data-value="${id}" data-i18n-en="${english}">${label}</button>`).join("")}</div>${bodies[state.outingSub]()}`;
+  return `${searchZone}<div class="subtabs outing-tabs" role="tablist">${tabs.map(([id, label, english]) => `<button class="${state.outingSub === id || (id === "similar" && state.outingSub === "recommend") ? "active" : ""}" data-action="outing-sub" data-value="${id}" data-i18n-en="${english}">${label}</button>`).join("")}</div>${bodies[state.outingSub]()}`;
 }
 
 function renderOutingSearchZone() {
@@ -2842,6 +2845,38 @@ function useCourseForHome(course) {
 
 function renderCommunityFeed() {
   return `<section class="community-hero"><h3 data-i18n-en="Discover shared trips">사람들의 코스를 발견해 보세요</h3><p data-i18n-en="Browse demo trips, save your favorites, or share your own route.">공유된 데모 코스를 둘러보고, 마음에 드는 코스를 저장하거나 나만의 코스를 공유할 수 있어요.</p></section><div class="community-share-bar"><span data-i18n-en="Share your route and tips.">나만의 코스와 방문 팁을 공유해 보세요.</span><button class="secondary-button" data-action="outing-sub" data-value="register" data-i18n-en="Share a trip">코스 공유</button></div><button class="course-entry-card" data-action="community-ai"><span>${icon("compass")}</span><span><strong data-i18n-en="Find trips for your taste">내 취향으로 코스 추천받기</strong><small data-i18n-en="Compare demo trips against your choices.">선택한 조건에 맞춰 데모 코스를 비교해요.</small></span>${icon("chevron")}</button>${renderCourseBrowse()}`;
+}
+
+const tasteGroups = [
+  { name: "감성 탐험형", english: "Culture & cafes", categories: ["카페", "전시"], moods: ["감성"] },
+  { name: "맛집 집중형", english: "Food trips", categories: ["음식점"], moods: [] },
+  { name: "힐링 산책형", english: "Relaxing walks", categories: ["관광"], moods: ["조용함"] },
+  { name: "액티비티형", english: "Activities", categories: ["체험"], moods: ["활기참"] },
+];
+
+function currentTasteSignals() {
+  const history = [];
+  for (const [ids, weight] of [[state.savedCourseIds, 2], [state.likedCourseIds, 1]]) {
+    for (const id of ids) {
+      const course = getCourse(id);
+      if (course) history.push({ tags: getCourseTags(course), weight });
+    }
+  }
+  return MoovOutingData.tasteSignals(state.recommendationPrefs, history);
+}
+
+function renderSimilarTaste() {
+  const group = tasteGroups.find((item) => item.name === state.tasteGroup) || tasteGroups[0];
+  const signals = currentTasteSignals();
+  const list = baseCourses.filter((course) => {
+    const tags = getCourseTags(course);
+    return group.categories.some((value) => tags.category.includes(value)) ||
+      group.moods.some((value) => tags.mood.includes(value));
+  }).map((course) => ({ course, match: MoovOutingData.tasteMatch(getCourseTags(course), signals) }))
+    .sort((a, b) => (b.match.percent ?? -1) - (a.match.percent ?? -1) ||
+      String(b.course.createdAt || "").localeCompare(String(a.course.createdAt || "")));
+  const cards = list.map(({ course, match }) => `<div class="taste-course"><span class="taste-match" data-i18n-en="${match.percent === null ? "No taste data" : `Taste match ${match.percent}%`}">${icon("user")} ${match.percent === null ? "취향 정보 없음" : `내 취향 ${match.percent}% 일치`}</span><small class="taste-basis" data-i18n-en="${match.matched}/${match.total} demo tags matched">${match.matched}/${match.total}개 취향 태그 일치 · 데모 기준</small>${courseCard(course)}</div>`).join("");
+  return `<section class="community-hero"><span class="taste-match" data-i18n-en="Taste profile · ${group.english}">취향 분석 · ${escapeHtml(group.name)}</span><h3 data-i18n-en="Trips matching your taste">나와 취향이 비슷한 코스</h3><p data-i18n-en="We compare your choices, saved trips, and likes with demo trip tags. This is not a match with other users.">선택한 조건과 저장·좋아요 기록을 데모 코스 태그와 비교합니다. 실제 다른 이용자와의 유사도는 아닙니다.</p></section><div class="community-filter">${tasteGroups.map((item) => `<button class="${state.tasteGroup === item.name ? "selected" : ""}" data-action="taste-group" data-value="${item.name}" data-i18n-en="${item.english}">${item.name}</button>`).join("")}</div>${signals.length ? `<div class="stack">${cards}</div>` : emptyState("heart", "취향 기록이 없어요", "AI 코스 추천에서 조건을 선택하거나 코스를 저장해 주세요.")}`;
 }
 
 function renderRecommendation() {
@@ -3165,6 +3200,7 @@ document.addEventListener("click", (event) => {
   if (action === "toggle") { button.classList.toggle("on"); toast(button.classList.contains("on") ? "연결했어요." : "연결을 해제했어요."); }
   if (action === "play-ott") toast("차량 디스플레이에서 재생을 시작했어요.");
   if (action === "outing-sub") { state.outingSub = value; render(); }
+  if (action === "taste-group") { state.tasteGroup = value; persist(); render(); }
   if (action === "community-ai") { state.outingSub = "recommend"; render(); }
   if (action === "toggle-outing-map") { state.outingMapOpen = !state.outingMapOpen; persist(); render(); }
   if (action === "outing-map-reset") { state.outingMapOpen = true; render(); requestAnimationFrame(() => initOutingMap()); }

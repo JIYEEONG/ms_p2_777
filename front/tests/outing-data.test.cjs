@@ -33,3 +33,14 @@ test('unknown places never receive fabricated coordinates', () => {
   assert.equal(outing.pointForStop(courses[2], 0).lat, null);
   assert.equal(outing.pointForStop(courses[2], 0).source, 'unverified');
 });
+
+test('taste match uses selected preferences and saved course tags instead of fixed percentages', () => {
+  const preference = { category: '카페', mood: '전체', companion: '전체', time: '전체' };
+  const before = outing.tasteSignals(preference);
+  assert.equal(outing.tasteMatch(tags.cafe, before).percent, 100);
+  assert.equal(outing.tasteMatch(tags.museum, before).percent, 0);
+  const after = outing.tasteSignals(preference, [{ tags: tags.museum, weight: 2 }]);
+  assert.ok(outing.tasteMatch(tags.museum, after).percent > 0);
+  assert.ok(outing.tasteMatch(tags.cafe, after).percent < 100);
+  assert.equal(outing.tasteMatch(tags.cafe, []).percent, null);
+});

@@ -48,6 +48,36 @@
     return points;
   }
 
+  function tasteSignals(preference, history = []) {
+    const signals = new Map();
+    const add = (field, value, weight) => {
+      if (!value || value === "전체") return;
+      const key = `${field}:${value}`;
+      const current = signals.get(key);
+      signals.set(key, { field, value, weight: Math.min(4, (current?.weight || 0) + weight) });
+    };
+    for (const [field, weight] of [["category", 4], ["mood", 3], ["companion", 2], ["time", 2]]) {
+      add(field, preference[field], weight);
+    }
+    for (const item of history) {
+      const weight = Number(item.weight) || 0;
+      if (weight <= 0) continue;
+      for (const [field, share] of [["category", 1], ["mood", 0.5], ["purpose", 0.5]]) {
+        const values = item.tags?.[field] || [];
+        for (const value of values) add(field, value, weight * share / values.length);
+      }
+    }
+    return [...signals.values()];
+  }
+
+  function tasteMatch(tags, signals) {
+    const totalWeight = signals.reduce((sum, signal) => sum + signal.weight, 0);
+    if (!totalWeight) return { percent: null, matched: 0, total: 0 };
+    const matching = signals.filter(({ field, value }) => (tags[field] || []).includes(value));
+    const matchedWeight = matching.reduce((sum, signal) => sum + signal.weight, 0);
+    return { percent: Math.round(100 * matchedWeight / totalWeight), matched: matching.length, total: signals.length };
+  }
+
   function tieBreak(a, b) {
     const dates = String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
     return dates || String(a.id).localeCompare(String(b.id));
@@ -76,7 +106,7 @@
     return root.crypto?.randomUUID?.() || `moov-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  const api = { RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, rank, sort, newId };
+  const api = { RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, tasteSignals, tasteMatch, rank, sort, newId };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.MoovOutingData = api;
 })(typeof window !== "undefined" ? window : globalThis);

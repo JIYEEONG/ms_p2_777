@@ -1229,3 +1229,6 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .leaflet-shell { position:relative; }
 .leaflet-shell .rental-drive-topbar,.leaflet-shell .rental-course-pin,.leaflet-shell .rental-current-pin,.leaflet-shell .rental-stop-popover { z-index:500; }
 .leaflet-control-attribution { font-size:8px !important; }
+.taste-course { min-width: 0; }
+.taste-course > .taste-match { margin: 0 0 4px 12px; }
+.taste-basis { display: block; margin: 0 0 8px 12px; color: var(--muted); font-size: .56rem; }
