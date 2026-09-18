@@ -845,6 +845,7 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
 .no-stop-photo svg { width: 20px; height: 20px; }
 .registered-stops small { display: block; margin-top: 5px; overflow: hidden; color: #777; font-size: .58rem; text-overflow: ellipsis; white-space: nowrap; }
 .preference-panel { padding: 16px; }
+.preference-panel select { display: block; width: 100%; margin: 6px 0 18px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; }
 .choice-group { margin-bottom: 17px; }
 .choice-group h4 { margin: 0 0 9px; font-size: .81rem; }
 .choice-group .filter-chips { flex-wrap: wrap; overflow: visible; }
@@ -1182,8 +1183,13 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="./i18n-data.js"></script>
     <script src="./i18n.js"></script>
+    <script src="./outing-data.js"></script>
     <script>
 const STORAGE_KEY = "moov-app-v2";
+const OUTING_STORAGE_PREFIX = "moov-outing-v1:";
+const OUTING_LOG_PREFIX = "moov-outing-pending-v1:";
+const OUTING_API = window.MOOV_OUTING_API_BASE ||
+  (["localhost", "127.0.0.1"].includes(location.hostname) ? "http://127.0.0.1:8000/api/outing" : "/api/outing");
 const APP_VERSION = "2.6.2";
 const DEFAULT_PROFILE_PHOTO = "./assets/profile-male-user.png";
 
@@ -1327,8 +1333,27 @@ function readSaved() {
 }
 
 const saved = readSaved();
+function outingStorageKey(userId) { return `${OUTING_STORAGE_PREFIX}${encodeURIComponent(userId)}`; }
+function readUserOuting(userId) {
+  try {
+    const scoped = localStorage.getItem(outingStorageKey(userId));
+    if (scoped) return JSON.parse(scoped) || {};
+    // Assign pre-migration browser data only to the account that was signed in.
+    if ((saved.userId || saved.username) === userId) return {
+      outingSort: saved.outingSort, outingMapOpen: saved.outingMapOpen, outingFilters: saved.outingFilters,
+      likedCourseIds: saved.likedCourseIds, savedCourseIds: saved.savedCourseIds,
+      customCourses: saved.customCourses,
+    };
+    return {};
+  }
+  catch { return {}; }
+}
+const outingSaved = readUserOuting(saved.userId || saved.username || "지영");
+const defaultRecommendationPrefs = () => ({ category: "카페", mood: "전체", companion: "전체", time: "전체", budget: 100000 });
+const defaultOutingFilters = () => ({ category: "전체", mood: "전체", companion: "전체", purpose: "전체", time: "전체", budget: 100000 });
 const state = {
   isAuthenticated: saved.isAuthenticated || false,
+  userId: saved.userId || saved.username || "지영",
   activeTab: "home",
   homeMode: saved.homeMode || "taxi",
   homeStep: saved.tripActive ? "service" : "mode",
@@ -1376,14 +1401,21 @@ const state = {
   cart: (saved.cart || [{ id: "bottled-water", qty: 1 }]).filter((line) => products.some((product) => product.id === line.id)),
   orders: saved.orders || [],
   outingSub: "recommend",
-  outingSort: saved.outingSort || "popular",
-  outingQuery: "",
-  outingMapOpen: saved.outingMapOpen || false,
-  outingFilters: saved.outingFilters || { category: "전체", mood: "전체", companion: "전체", purpose: "전체", time: "전체", budget: 70000 },
+  outingSort: outingSaved.outingSort || "latest",
+  outingQuery: outingSaved.outingQuery || "",
+  outingMapOpen: outingSaved.outingMapOpen || false,
+  outingFilters: { ...defaultOutingFilters(), ...outingSaved.outingFilters },
+  recommendationPrefs: { ...defaultRecommendationPrefs(), ...outingSaved.recommendationPrefs },
+  recommendationResultIds: outingSaved.recommendationResultIds || [],
+  recommendationRequestId: outingSaved.recommendationRequestId || null,
+  outingTestMode: outingSaved.outingTestMode || "free",
+  outingActionIds: outingSaved.outingActionIds || { likes: {}, saves: {} },
+  popularityCounts: {},
+  popularityAt: null,
   locationReady: saved.locationReady || false,
-  likedCourseIds: new Set(saved.likedCourseIds || []),
-  savedCourseIds: new Set((saved.savedCourseIds || ["seongsu"]).filter((id) => id !== "cheomseongdae")),
-  customCourses: saved.customCourses || [],
+  likedCourseIds: new Set(outingSaved.likedCourseIds || []),
+  savedCourseIds: new Set((outingSaved.savedCourseIds || []).filter((id) => id !== "cheomseongdae")),
+  customCourses: outingSaved.customCourses || [],
   selectedCourse: saved.selectedCourse?.id === "cheomseongdae" ? null : saved.selectedCourse || null,
   routeStops: (saved.routeStops || ["현재 위치 · 서울 성수동", "한강공원 반포지구"]).map((stop) => String(stop).replace(/^지도 핀\s*·\s*/, "")),
   courseSource: "manual",
@@ -1422,6 +1454,74 @@ const tabMeta = {
 };
 
 const content = document.querySelector("#app-content");
+let outingLogSending = false;
+function outingQueueKey(userId = state.userId) { return `${OUTING_LOG_PREFIX}${encodeURIComponent(userId)}`; }
+function readOutingQueue(key = outingQueueKey()) {
+  try { return JSON.parse(localStorage.getItem(key) || "[]"); }
+  catch { return []; }
+}
+function outingSessionId() {
+  const key = `moov-outing-session:${encodeURIComponent(state.userId)}`;
+  try {
+    let id = sessionStorage.getItem(key);
+    if (!id) { id = MoovOutingData.newId(); sessionStorage.setItem(key, id); }
+    return id;
+  } catch { return MoovOutingData.newId(); }
+}
+function enqueueOuting(path, payload, id) {
+  const key = outingQueueKey();
+  const queue = readOutingQueue(key);
+  queue.push({ path, payload, id });
+  try { localStorage.setItem(key, JSON.stringify(queue)); }
+  catch { toast("기록 저장 공간이 부족해요. 불필요한 사진을 정리해 주세요."); return; }
+  void flushOutingQueue();
+}
+async function flushOutingQueue() {
+  if (outingLogSending) return;
+  outingLogSending = true;
+  const key = outingQueueKey();
+  try {
+    while (readOutingQueue(key).length) {
+      const entry = readOutingQueue(key)[0];
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      let response;
+      try {
+        response = await fetch(`${OUTING_API}/${entry.path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(entry.payload), signal: controller.signal });
+      } finally { clearTimeout(timeout); }
+      if (!response.ok) break;
+      const remaining = readOutingQueue(key).filter((item) => item.id !== entry.id);
+      localStorage.setItem(key, JSON.stringify(remaining));
+    }
+  } catch { /* offline: keep event IDs and retry unchanged */ }
+  finally { outingLogSending = false; }
+}
+function logOutingEvent(eventType, targetType, targetId, details = {}) {
+  const eventId = MoovOutingData.newId();
+  enqueueOuting("events", { event_id: eventId, user_id: state.userId, session_id: outingSessionId(),
+    request_id: state.recommendationRequestId, event_type: eventType, target_type: targetType,
+    target_id: String(targetId), occurred_at: new Date().toISOString(), rule_version: MoovOutingData.RULE_VERSION,
+    test_mode: state.outingTestMode, details }, eventId);
+  return eventId;
+}
+function recordOutingRecommendation(data) {
+  enqueueOuting("recommendations", { ...data, user_id: state.userId, session_id: outingSessionId(),
+    occurred_at: new Date().toISOString(), rule_version: MoovOutingData.RULE_VERSION,
+    test_mode: state.outingTestMode }, data.request_id);
+}
+async function loadOutingPopularity() {
+  try {
+    const response = await fetch(`${OUTING_API}/popularity`);
+    if (!response.ok) return;
+    const data = await response.json();
+    state.popularityCounts = data.counts || {};
+    state.popularityAt = data.aggregated_at || null;
+    if (state.activeTab === "outing") render();
+  } catch { /* backend offline: do not use example likes as real popularity */ }
+}
+setInterval(flushOutingQueue, 15000);
+window.addEventListener("online", flushOutingQueue);
+void flushOutingQueue();
 window.addEventListener("message", (event) => {
   if (event.origin !== location.origin || event.data?.type !== "moov:space-content-height") return;
   const frame = content.querySelector(".space-content-frame");
@@ -1435,6 +1535,7 @@ const modal = document.querySelector("#modal");
 let splashTimer;
 let toastTimer;
 let pendingHomeCourse = null;
+let routeTransferCourseId = null;
 window.addEventListener("message", handleHomeModuleMessage);
 let speechRecognition;
 let searchDebounceTimer;
@@ -1480,8 +1581,8 @@ function courseSearchCandidates() {
     { id: "region-insadong", name: "인사동", category: "지역", area: "서울", search_count: 62000, queryValue: "인사", tags: ["전통", "문화", "공예"] },
     { id: "region-jamsil", name: "잠실", category: "지역", area: "서울", search_count: 58000, queryValue: "잠실", tags: ["석촌호수", "롯데월드"] },
   ];
-  const places = baseCourses.flatMap((course) => {
-    const baseScore = Number(course.likes || 0) * 100;
+  const places = [...baseCourses, ...state.customCourses].flatMap((course) => {
+    const baseScore = Number(state.popularityCounts[course.id] || 0) * 100;
     const courseItem = {
       id: `course-${course.id}`,
       name: course.name,
@@ -1489,7 +1590,7 @@ function courseSearchCandidates() {
       sub_category: "나들이",
       area: "서울",
       search_count: baseScore,
-      blue_ribbon: Number(course.likes || 0) >= 900,
+      blue_ribbon: false,
       itemId: course.id,
       tags: [course.desc, ...(course.stops || [])],
     };
@@ -1500,7 +1601,7 @@ function courseSearchCandidates() {
       sub_category: course.name,
       area: "서울",
       search_count: Math.max(1000, baseScore - index * 500),
-      blue_ribbon: Number(course.likes || 0) >= 900,
+      blue_ribbon: false,
       queryValue: stop,
       itemId: course.id,
       tags: [course.name, course.desc],
@@ -1576,6 +1677,7 @@ function courseMatchesQuery(course, query) {
 function persist() {
   const data = {
     isAuthenticated: state.isAuthenticated,
+    userId: state.userId,
     username: state.username,
     profilePhoto: state.profilePhoto,
     theme: state.theme,
@@ -1593,15 +1695,9 @@ function persist() {
     taxiVehicleType: state.taxiVehicleType,
     rentalVehicleType: state.rentalVehicleType,
     rentalOptions: [...state.rentalOptions],
-    outingSort: state.outingSort,
     locationReady: state.locationReady,
-    likedCourseIds: [...state.likedCourseIds],
-    savedCourseIds: [...state.savedCourseIds],
-    customCourses: state.customCourses,
     selectedCourse: state.selectedCourse,
     routeStops: state.routeStops,
-    outingMapOpen: state.outingMapOpen,
-    outingFilters: state.outingFilters,
     aiPersona: state.aiPersona,
     aiVoiceEnabled: state.aiVoiceEnabled,
     aiSaveEnabled: state.aiSaveEnabled,
@@ -1614,6 +1710,31 @@ function persist() {
     securityProof: state.securityProof,
   };
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch { /* prototype storage can be full after large photos */ }
+  const outing = {
+    outingSort: state.outingSort, outingQuery: state.outingQuery, outingMapOpen: state.outingMapOpen,
+    outingFilters: state.outingFilters, recommendationPrefs: state.recommendationPrefs,
+    recommendationResultIds: state.recommendationResultIds, recommendationRequestId: state.recommendationRequestId,
+    outingTestMode: state.outingTestMode,
+    outingActionIds: state.outingActionIds,
+    likedCourseIds: [...state.likedCourseIds], savedCourseIds: [...state.savedCourseIds], customCourses: state.customCourses,
+  };
+  try { localStorage.setItem(outingStorageKey(state.userId), JSON.stringify(outing)); } catch { /* large user photos may exceed quota */ }
+}
+
+function loadOutingForUser(userId) {
+  const user = readUserOuting(userId);
+  state.outingSort = user.outingSort || "latest";
+  state.outingQuery = user.outingQuery || "";
+  state.outingMapOpen = Boolean(user.outingMapOpen);
+  state.outingFilters = { ...defaultOutingFilters(), ...user.outingFilters };
+  state.recommendationPrefs = { ...defaultRecommendationPrefs(), ...user.recommendationPrefs };
+  state.recommendationResultIds = user.recommendationResultIds || [];
+  state.recommendationRequestId = user.recommendationRequestId || null;
+  state.outingTestMode = user.outingTestMode || "free";
+  state.outingActionIds = user.outingActionIds || { likes: {}, saves: {} };
+  state.likedCourseIds = new Set(user.likedCourseIds || []);
+  state.savedCourseIds = new Set(user.savedCourseIds || []);
+  state.customCourses = user.customCourses || [];
 }
 
 function showScreen(id) {
@@ -1628,7 +1749,14 @@ function login() {
     openModal({ title: "로그인 정보를 입력해 주세요", body: "체험용 앱이므로 어떤 아이디와 비밀번호든 사용할 수 있습니다.", iconName: "user", primary: "확인", secondary: null });
     return;
   }
+  state.userId = id.slice(0, 64);
   state.username = id.slice(0, 12);
+  loadOutingForUser(state.userId);
+  state.selectedCourse = null;
+  state.activeDetailCourse = null;
+  pendingHomeCourse = null;
+  routeTransferCourseId = null;
+  state.outingSub = "recommend";
   state.isAuthenticated = true;
   if (!state.profilePhoto) state.profilePhoto = DEFAULT_PROFILE_PHOTO;
   state.homeStep = state.tripActive ? "service" : "mode";
@@ -1646,6 +1774,7 @@ function setTab(tab) {
   title.textContent = nextTitle;
   document.querySelectorAll(".bottom-nav button").forEach((button) => button.classList.toggle("nav-active", button.dataset.tab === tab));
   render();
+  if (tab === "outing") void loadOutingPopularity();
   content.scrollTop = 0;
 }
 
@@ -1851,9 +1980,13 @@ function sendPendingHomeCourse(frame, homeState = frame.contentWindow?.MOOVHome?
   if (!Number.isFinite(pickup?.lat) || !Number.isFinite(pickup?.lng)) return toast("렌트 출발 위치를 먼저 확인해 주세요.");
   const course = pendingHomeCourse;
   pendingHomeCourse = null;
+  routeTransferCourseId = course.id;
   const stops = [
     { id: "host-pickup", name: homeState.pickupLocation, lat: pickup.lat, lng: pickup.lng, dwell: 0 },
-    ...course.stops.map((name, index) => ({ id: `host-${index}`, name, dwell: Number.parseInt(course.dwell?.[index], 10) || 0 }))
+    ...course.stops.map((name, index) => {
+      const point = MoovOutingData.pointForStop(course, index);
+      return { id: point.id, name, lat: point.lat, lng: point.lng, dwell: Number.parseInt(course.dwell?.[index], 10) || 0 };
+    })
   ];
   frame.contentWindow.postMessage({ source: "moov-host", version: 1, type: "set-route", stops }, window.location.origin);
 }
@@ -1864,7 +1997,15 @@ function handleHomeModuleMessage(event) {
   const message = event.data;
   if (message?.source !== "moov-home" || message.version !== 1) return;
   if (message.type === "ready") sendPendingHomeCourse(frame, message.detail);
-  if (message.type === "error") toast(message.detail?.message || "홈 화면을 연결하지 못했어요.");
+  if (message.type === "route-applied" && routeTransferCourseId) {
+    logOutingEvent("follow_route_applied", "course", routeTransferCourseId);
+    routeTransferCourseId = null;
+  }
+  if (message.type === "error") {
+    if (routeTransferCourseId) logOutingEvent("follow_route_failed", "course", routeTransferCourseId, { reason: message.detail?.message });
+    routeTransferCourseId = null;
+    toast(message.detail?.message || "홈 화면을 연결하지 못했어요.");
+  }
   if (message.type !== "navigate") return;
   const tab = message.detail?.tab;
   if (tab === "taxi") {
@@ -2498,8 +2639,8 @@ function renderOutingSearchZone() {
   return `<section class="outing-search-zone">${renderSearchField({ inputId: "course-search", stateKey: "outingQuery", className: "course-search", placeholder: "지역명, 음식점, 카페를 입력하세요", label: "코스 검색" })}<div class="outing-search-actions"><button class="mini-action" data-action="locate-outing">${icon("pin")} ${state.locationReady ? "내 위치 다시 찾기" : "내 위치 찾기"}</button><button class="mini-action ${state.outingMapOpen ? "active" : ""}" data-action="toggle-outing-map">${icon("compass")} 지도로 보기</button></div></section>`;
 }
 
-function renderOutingMap() {
-  const courses = getFilteredOutingCourses().slice(0, 12);
+function renderOutingMap(courses = getVisibleOutingCourses()) {
+  const unknownCount = courses.filter((course) => course.stops.some((_, index) => !Number.isFinite(MoovOutingData.pointForStop(course, index).lat))).length;
   return `<section class="outing-map-shell">
     ${renderOutingFilterBar(courses.length)}
     <section class="card outing-map-card">
@@ -2511,27 +2652,25 @@ function renderOutingMap() {
     </section>
     <section class="card map-data-panel">
       <div class="section-row"><strong>필터 결과</strong><span class="small muted">${courses.length}개 코스</span></div>
-      ${courses.length ? courses.map((course) => `<button class="map-data-row" data-action="map-course-focus" data-value="${course.id}"><span class="history-icon">${icon("pin")}</span><span><strong>${escapeHtml(course.name)}</strong><small>${escapeHtml(getCourseTags(course).category.join(" · "))} · ${escapeHtml(course.stops.join(" · "))}</small></span>${icon("chevron")}</button>`).join("") : emptyState("search", "조건에 맞는 코스가 없어요", "필터를 넓히거나 예산 범위를 올려 보세요.")}
+      <p class="small muted">${unknownCount}개 코스는 일부 장소의 좌표가 없어 지도 경로가 표시되지 않아요. 지도에 표시된 좌표는 검수 전 데모 위치입니다.</p>
+      ${courses.length ? courses.map((course) => `<button class="map-data-row" data-action="map-course-focus" data-value="${course.id}"><span class="history-icon">${icon("pin")}</span><span><strong>${escapeHtml(course.name)}</strong><small>${escapeHtml(getCourseTags(course).category.join(" · "))} · ${escapeHtml(course.stops.join(" · "))}</small></span>${icon("chevron")}</button>`).join("") : emptyState("search", "조건에 맞는 코스가 없어요", "조건을 직접 바꾼 뒤 다시 확인해 주세요.")}
     </section>
   </section>`;
 }
 
 function getCourseTags(course) {
-  const fallback = { category: ["관광"], mood: ["감성"], companion: ["친구"], purpose: ["휴식"], time: ["오후"], price: 30000 };
+  const fallback = { category: [], mood: [], companion: [], purpose: [], time: [], price: null };
   return courseTagProfiles[course.id] || course.tagProfile || fallback;
 }
 
 function getFilteredOutingCourses() {
-  const query = normalizeSearch(state.outingQuery);
-  return [...baseCourses, ...state.customCourses].filter((course) => {
-    if (query && !courseMatchesQuery(course, query)) return false;
-    const tags = getCourseTags(course);
-    return outingFilterConfig.every(({ key }) => {
-      const selected = state.outingFilters?.[key] || "전체";
-      if (selected === "전체") return true;
-      return (tags[key] || []).includes(selected);
-    }) && Number(tags.price || 0) <= Number(state.outingFilters?.budget || 70000);
-  });
+  return [...baseCourses, ...state.customCourses].filter((course) =>
+    MoovOutingData.matches(course, state.outingQuery, state.outingFilters, getCourseTags(course)));
+}
+
+function getVisibleOutingCourses() {
+  return MoovOutingData.sort(getFilteredOutingCourses(), state.outingSort, state.recommendationPrefs,
+    getCourseTags, (course) => state.popularityCounts[course.id] || 0);
 }
 
 function renderOutingFilterBar(count) {
@@ -2543,15 +2682,8 @@ function renderOutingFilterBar(count) {
   </section>`;
 }
 
-function getCourseMapPoints(course, courseIndex = 0) {
-  const seed = course.id.split("").reduce((sum, char) => sum + char.charCodeAt(0), courseIndex * 17);
-  const baseLat = 37.5421 + ((seed % 9) - 4) * 0.006;
-  const baseLng = 126.9360 + (((seed / 7) % 11) - 5) * 0.009;
-  return course.stops.map((stop, index) => ({
-    name: stop,
-    lat: baseLat + index * 0.006 + Math.sin(seed + index) * 0.002,
-    lng: baseLng + index * 0.009 + Math.cos(seed + index) * 0.003,
-  }));
+function getCourseMapPoints(course) {
+  return course.stops.map((_, index) => MoovOutingData.pointForStop(course, index));
 }
 
 function initOutingMap(focusCourseId = null) {
@@ -2569,13 +2701,17 @@ function initOutingMap(focusCourseId = null) {
   }
   if (outingLeafletLayer) outingLeafletLayer.remove();
   outingLeafletLayer = L.layerGroup().addTo(outingLeafletMap);
-  const courses = getFilteredOutingCourses().slice(0, 12);
+  const courses = getVisibleOutingCourses();
   const bounds = [];
-  courses.forEach((course, courseIndex) => {
-    const points = getCourseMapPoints(course, courseIndex);
+  courses.forEach((course) => {
+    const allPoints = getCourseMapPoints(course);
+    const points = allPoints.filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lng));
+    if (!points.length) return;
     const latLngs = points.map((point) => [point.lat, point.lng]);
     const selected = focusCourseId === course.id;
-    L.polyline(latLngs, { color: selected ? "#111111" : "#53B175", weight: selected ? 5 : 3, opacity: selected ? 0.9 : 0.55 }).addTo(outingLeafletLayer);
+    if (points.length === allPoints.length && points.length > 1) {
+      L.polyline(latLngs, { color: selected ? "#111111" : "#53B175", weight: selected ? 5 : 3, opacity: selected ? 0.9 : 0.55 }).addTo(outingLeafletLayer);
+    }
     points.forEach((point, index) => {
       const marker = L.circleMarker([point.lat, point.lng], {
         radius: selected ? 7 : 5,
@@ -2590,18 +2726,19 @@ function initOutingMap(focusCourseId = null) {
   });
   if (focusCourseId) {
     const course = courses.find((item) => item.id === focusCourseId);
-    if (course) outingLeafletMap.fitBounds(getCourseMapPoints(course).map((point) => [point.lat, point.lng]), { padding: [30, 30] });
+    if (course) {
+      const points = getCourseMapPoints(course).filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lng));
+      if (points.length) outingLeafletMap.fitBounds(points.map((point) => [point.lat, point.lng]), { padding: [30, 30] });
+    }
   } else if (bounds.length) {
     outingLeafletMap.fitBounds(bounds, { padding: [24, 24] });
   }
 }
 
 function renderCourseBrowse() {
-  const query = normalizeSearch(state.outingQuery);
-  const filtered = baseCourses.filter((course) => courseMatchesQuery(course, query));
-  const list = [...filtered].sort((a, b) => state.outingSort === "latest" ? b.createdAt.localeCompare(a.createdAt) : state.outingSort === "nearby" ? a.distance - b.distance : b.likes - a.likes);
-  const sorts = [["popular", "인기순"], ["latest", "최신순"], ["nearby", "가까운 순"]];
-  return `${state.outingMapOpen ? renderOutingMap() : ""}<div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div><div class="course-result-count">총 ${list.length}개 코스</div>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "앞글자가 일치하는 다른 지역이나 장소로 검색해 보세요.")}`;
+  const list = getVisibleOutingCourses();
+  const sorts = [["preference", "취향순"], ["popular", "최근 7일 인기순"], ["latest", "등록일순(데모)"], ["nearby", "거리 참고순"]];
+  return `${state.outingMapOpen ? renderOutingMap(list) : ""}<div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div><div class="course-result-count">총 ${list.length}개 코스 · 예산과 거리는 데모 참고값 · 인기 집계 ${state.popularityAt ? "연결됨" : "연결 대기"}</div>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "조건을 직접 넓히거나 예산을 조정해 주세요.")}`;
 }
 
 function courseCard(course) {
@@ -2609,7 +2746,7 @@ function courseCard(course) {
   const likedCourse = state.likedCourseIds.has(course.id);
   const visual = course.image ? `<button class="course-visual" data-action="course-detail" data-value="${course.id}" aria-label="${escapeHtml(course.name)} 상세 보기"><img src="${course.image}" alt="${escapeHtml(course.name)} 코스 이미지" /><span class="photo-detail-hint">${icon("search")} 상세 보기</span></button>` : `<button class="course-visual no-image" data-action="course-detail" data-value="${course.id}">${icon("image")}<span class="small">장소 이미지 없음</span></button>`;
   const stopPhotos = course.stopDetails ? `<div class="registered-stops">${course.stopDetails.map((stop) => `<div>${stop.photo ? `<img src="${stop.photo}" alt="${escapeHtml(stop.name)} 사진" />` : `<span class="no-stop-photo">${icon("image")}</span>`}<small>${escapeHtml(stop.type)} · ${escapeHtml(stop.name)}</small></div>`).join("")}</div>` : "";
-  return `<article class="course-card">${visual}<div class="course-body"><div class="row"><span class="small muted">${escapeHtml(course.author || state.username)}님의 코스 · ${Number(course.distance || 0).toLocaleString("ko-KR")}km</span><span class="badge orange">${escapeHtml(course.time || `${course.stops.length}곳`)}</span></div><h4>${escapeHtml(course.name)}</h4><p>${escapeHtml(course.desc)}</p>${stopPhotos}<div class="course-stats"><span>${icon("heart")} ${(course.likes || 0) + (likedCourse ? 1 : 0)}</span><span>${icon("chat")} ${Math.max(12, Math.round((course.likes || 100) / 9))}</span><span>${icon("compass")} ${course.stops.length}개 장소</span></div><div class="course-actions"><button class="${likedCourse ? "liked" : ""}" data-action="course-like" data-value="${course.id}">${icon("heart")}<span>${likedCourse ? "좋아요 취소" : "좋아요"}</span></button><button class="${savedCourse ? "saved" : ""}" data-action="course-save" data-value="${course.id}">${icon("bookmark")}<span>${savedCourse ? "저장됨" : "관심 저장"}</span></button><button class="follow" data-action="follow-course" data-value="${course.id}">${icon("pin")}<span>따라가기</span></button></div></div></article>`;
+  return `<article class="course-card">${visual}<div class="course-body"><div class="row"><span class="small muted">${escapeHtml(course.author || state.username)}님의 코스 · ${course.distance == null ? "거리 미확인" : `${Number(course.distance).toLocaleString("ko-KR")}km`}</span><span class="badge orange">${escapeHtml(course.time || `${course.stops.length}곳`)}</span></div><h4>${escapeHtml(course.name)}</h4><p>${escapeHtml(course.desc)}</p>${stopPhotos}<div class="course-stats"><span>${icon("heart")} 최근 7일 ${state.popularityAt ? (state.popularityCounts[course.id] || 0) : "—"}</span><span>${icon("compass")} ${course.stops.length}개 장소</span><span>가격·시간 확인 필요</span></div><div class="course-actions"><button class="${likedCourse ? "liked" : ""}" data-action="course-like" data-value="${course.id}">${icon("heart")}<span>${likedCourse ? "좋아요 취소" : "좋아요"}</span></button><button class="${savedCourse ? "saved" : ""}" data-action="course-save" data-value="${course.id}">${icon("bookmark")}<span>${savedCourse ? "저장됨" : "관심 저장"}</span></button><button class="follow" data-action="follow-course" data-value="${course.id}">${icon("pin")}<span>따라가기</span></button></div></div></article>`;
 }
 
 function getCourseStopRole(index, count) {
@@ -2660,14 +2797,9 @@ function getCourseStopTip(stop) {
 }
 
 function buildCourseMap(course) {
-  const count = Math.max(course.stops.length, 1);
-  const points = course.stops.map((stop, index) => {
-    const ratio = count === 1 ? .5 : index / (count - 1);
-    return { x: 11 + ratio * 78, y: 60 - ratio * 36 + Math.sin(ratio * Math.PI) * 15 };
-  });
-  const line = points.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
-  const markers = points.map((point, index) => `<button class="course-map-marker ${index === 0 ? "start" : index === count - 1 ? "destination" : "waypoint"}" style="left:${point.x}%;top:${point.y}%" data-action="course-stop-detail" data-value="${index}" aria-label="${getCourseStopRole(index, count)} ${escapeHtml(course.stops[index])} 상세 보기"><span>${index + 1}</span><small>${getCourseStopRole(index, count)}</small></button>`).join("");
-  return `<div class="course-detail-map"><img src="./assets/map-seoul.jpg" alt="서울시 코스 이동 지도" /><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="${line}" /></svg>${markers}<span>예상 이동 경로 · ${Number(course.distance || 0).toLocaleString("ko-KR")}km</span></div>`;
+  const points = getCourseMapPoints(course);
+  const known = points.filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lng)).length;
+  return `<div class="card padded"><strong>장소 위치 ${known}/${points.length}개 확인 가능</strong><p class="small muted">확인 가능한 좌표는 검수 전 데모 위치입니다. 위치가 없는 장소는 임의로 지도에 찍지 않습니다.</p></div>`;
 }
 
 function openCourseStopDetail(course, index) {
@@ -2696,6 +2828,7 @@ function openCourseDetail(course) {
 }
 
 function useCourseForHome(course) {
+  logOutingEvent("follow_intent", "course", course.id);
   state.selectedCourse = course;
   state.routeStops = [state.pickupLocation, ...course.stops];
   if (!state.tripActive) { state.homeMode = "rent"; pendingHomeCourse = course; }
@@ -2707,33 +2840,30 @@ function useCourseForHome(course) {
 }
 
 function renderRecommendation() {
-  return `<section class="section-lead"><h3>어떤 나들이를 원하세요?</h3><p>${escapeHtml(state.username)}님의 취향과 예산으로 코스를 만들고, 기존 코스도 함께 추천합니다.</p></section><section class="card preference-panel">${choiceGroup("나들이 관심사", ["맛집 투어", "감성 카페", "쇼핑", "관광 명소", "야경 힐링"], 1)}${choiceGroup("선호하는 분위기", ["활기찬", "여유로운", "로맨틱", "가족과 함께"], 1)}<div class="choice-group"><div class="row"><h4>예산 설정</h4><strong class="green">약 10만원</strong></div><input class="budget" type="range" min="3" max="30" value="10" /></div>${choiceGroup("누구와 함께 하나요?", ["혼자", "커플", "친구", "가족"], 0)}<button class="primary-button full" data-action="recommend-course">코스 추천받기</button></section><section class="section-lead compact"><h3>추천 코스 둘러보기</h3><p>검색과 지도 필터로 원하는 코스를 골라 직접 만들 수 있어요.</p></section>${renderCourseBrowse()}`;
+  const prefs = state.recommendationPrefs;
+  const recommended = state.recommendationResultIds.map((id) => getCourse(id)).filter(Boolean);
+  const result = state.recommendationRequestId
+    ? `<section class="section-lead compact"><h3>추천 결과</h3><p>선택 CATEGORY와 데모 태그를 비교한 임시 순위입니다. 실제 장소 운영시간·가격·동선은 검증되지 않았어요.</p></section>${recommended.length ? `<div class="stack">${recommended.map((course, index) => `<div><p class="small muted">${index + 1}순위 · 규칙 일치 점수 ${MoovOutingData.score(course, prefs, getCourseTags(course))}점</p>${courseCard(course)}</div>`).join("")}</div>` : emptyState("search", "조건에 맞는 코스가 없어요", "CATEGORY나 참고 예산을 직접 바꾼 뒤 다시 추천받아 주세요.")}`
+    : "";
+  return `<section class="section-lead"><h3>어떤 나들이를 원하세요?</h3><p>${escapeHtml(state.username)}님의 선택을 바탕으로 검수 전 데모 코스를 비교합니다.</p></section><section class="card preference-panel"><label class="small">기록 구분 <select id="outing-test-mode"><option value="free" ${state.outingTestMode === "free" ? "selected" : ""}>자유 사용</option><option value="guided" ${state.outingTestMode === "guided" ? "selected" : ""}>지정 시나리오</option></select></label>${choiceGroup("CATEGORY", "category", ["전체", "음식점", "카페", "전시", "쇼핑", "관광", "체험"])}${choiceGroup("분위기", "mood", ["전체", "조용함", "활기참", "감성", "트렌디", "로맨틱"])}${choiceGroup("동행", "companion", ["전체", "혼자", "연인", "친구", "가족", "동료"])}${choiceGroup("시간대", "time", ["전체", "아침", "점심", "오후", "저녁", "야간"])}<div class="choice-group"><div class="row"><h4>참고 예산</h4><strong class="green">${Number(prefs.budget).toLocaleString("ko-KR")}원 이하</strong></div><input class="budget" type="range" min="30000" max="300000" step="10000" value="${prefs.budget}" data-action="recommend-budget" aria-label="추천 참고 예산" /><p class="small muted">데모 비용 기준입니다. 실제 가격·이동비·영업시간 충족을 보장하지 않습니다.</p></div><button class="primary-button full" data-action="recommend-course">코스 추천받기</button><p class="small muted">전송 대기 기록 ${readOutingQueue().length}건 · 백엔드가 켜지면 같은 ID로 재시도합니다.</p></section>${result}<section class="section-lead compact"><h3>추천 코스 둘러보기</h3><p>검색과 지도 필터로 원하는 코스를 골라 직접 만들 수 있어요.</p></section>${renderCourseBrowse()}`;
 }
 
-function buildAiRecommendedCourse() {
-  const selected = [...document.querySelectorAll(".preference-panel .choice-chip.selected")].map((button) => button.dataset.value).filter(Boolean);
-  const budget = Number(document.querySelector(".preference-panel .budget")?.value || 10);
-  const mood = selected.includes("로맨틱") || selected.includes("야경 힐링") ? "노을과 야경" : selected.includes("가족과 함께") ? "가족 휴식" : "감성 산책";
-  const name = selected.includes("야경 힐링") || selected.includes("로맨틱") ? "AI 추천 한강 노을·남산 야경 코스" : selected.includes("관광 명소") ? "AI 추천 서울 명소 반나절 코스" : "AI 추천 성수 감성 카페 코스";
-  const stops = selected.includes("관광 명소")
-    ? ["서울숲 메타세쿼이아길", "석촌호수 서호", "롯데월드타워 전망광장"]
-    : selected.includes("야경 힐링") || selected.includes("로맨틱")
-      ? ["뚝섬 한강공원", "반포대교 달빛광장", "남산 서울타워"]
-      : ["어니언 성수", "대림창고 갤러리", "서울숲 카페거리"];
-  return {
-    id: "ai-recommend",
-    author: "MOOV AI",
-    name,
-    desc: `${state.username}님의 선택 취향을 반영해 ${mood} 중심으로 구성한 추천 코스입니다.`,
-    image: selected.includes("야경 힐링") || selected.includes("로맨틱") ? "./assets/course-hangang-sunset.jpg" : "./assets/course-cafe.jpg",
-    time: selected.includes("관광 명소") ? "3곳 · 약 4.5시간" : "3곳 · 약 4시간",
-    stops,
-    dwell: selected.includes("야경 힐링") || selected.includes("로맨틱") ? ["45분", "55분", "60분"] : ["70분", "60분", "80분"],
-    distance: selected.includes("관광 명소") ? 8.4 : selected.includes("야경 힐링") || selected.includes("로맨틱") ? 4.6 : 1.8,
-    likes: 0,
-    createdAt: new Date().toISOString().slice(0, 10),
-    recommend: `예산 약 ${budget}만원 안에서 이동 시간과 체류 시간을 맞췄어요. 운영시간과 혼잡도를 확인한 뒤 출발 20분 전에 차량을 호출하는 것을 추천합니다.`,
-  };
+function runOutingRecommendation() {
+  const prefs = { ...state.recommendationPrefs };
+  const candidates = [...baseCourses, ...state.customCourses].filter((course) => {
+    const tags = getCourseTags(course);
+    return (prefs.category === "전체" || (tags.category || []).includes(prefs.category)) &&
+      (prefs.time === "전체" || (tags.time || []).includes(prefs.time));
+  });
+  const ranked = MoovOutingData.rank(candidates, prefs, getCourseTags).slice(0, 3);
+  const previousRequestId = state.recommendationRequestId;
+  state.recommendationRequestId = MoovOutingData.newId();
+  state.recommendationResultIds = ranked.map((item) => item.course.id);
+  persist(); render();
+  recordOutingRecommendation({ request_id: state.recommendationRequestId, previous_request_id: previousRequestId,
+    conditions: prefs, results: ranked.map((item, index) => ({ course_id: item.course.id, rank: index + 1, score: item.score })) });
+  logOutingEvent("recommendation_exposure", "recommendation", state.recommendationRequestId,
+    { conditions: prefs, shown_course_ids: state.recommendationResultIds });
 }
 
 function renderRegisterCourse() {
@@ -2852,7 +2982,7 @@ function openUsageDetail(id) {
 }
 
 function subtabs(items, active, action) { return `<div class="subtabs" role="tablist">${items.map(([id, label]) => `<button class="${active === id ? "active" : ""}" data-action="${action}" data-value="${id}">${label}</button>`).join("")}</div>`; }
-function choiceGroup(name, values, selected) { return `<div class="choice-group"><h4>${name}</h4><div class="filter-chips">${values.map((value, index) => `<button class="choice-chip ${index === selected ? "selected" : ""}" data-action="chip" data-value="${escapeHtml(value)}">${value}</button>`).join("")}</div></div>`; }
+function choiceGroup(name, key, values) { return `<div class="choice-group"><h4>${name}</h4><div class="filter-chips">${values.map((value) => `<button class="choice-chip ${state.recommendationPrefs[key] === value ? "selected" : ""}" data-action="chip" data-pref="${key}" data-value="${escapeHtml(value)}">${value}</button>`).join("")}</div></div>`; }
 function toggleItemInner(titleText, desc, on, action) { return `<span><strong>${titleText}</strong><small>${desc}</small></span><button class="switch ${on ? "on" : ""}" data-action="${action}" aria-label="${titleText} 전환"></button>`; }
 function toggleItem(titleText, desc, on, action = "toggle", iconVariant = null) { const iconHtml = iconVariant === "luna-bot" ? `<img src="${LUNA_BOT_IMAGE}" alt="" />` : icon("chat"); return `<div class="menu-item ${action === "ai-power" ? "ai-master-toggle" : ""}"><span class="menu-icon">${iconHtml}</span>${toggleItemInner(titleText, desc, on, action)}</div>`; }
 function menuItem(iconName, titleText, desc, action = "menu-info", value = titleText) { return `<button class="menu-item" data-action="${action}" data-value="${value}"><span class="menu-icon">${icon(iconName)}</span><span><strong>${titleText}</strong><small>${desc}</small></span>${icon("chevron")}</button>`; }
@@ -2886,7 +3016,16 @@ document.addEventListener("input", (event) => {
   if (event.target.dataset.action === "outing-budget") {
     state.outingFilters.budget = Number(event.target.value);
     persist();
-    render();
+    const label = event.target.closest(".budget-filter")?.querySelector("strong");
+    if (label) label.textContent = `${state.outingFilters.budget.toLocaleString("ko-KR")}원 이하`;
+  }
+  if (event.target.dataset.action === "recommend-budget") {
+    state.recommendationPrefs.budget = Number(event.target.value);
+    state.recommendationResultIds = [];
+    state.recommendationRequestId = null;
+    persist();
+    const label = event.target.closest(".choice-group")?.querySelector("strong");
+    if (label) label.textContent = `${state.recommendationPrefs.budget.toLocaleString("ko-KR")}원 이하`;
   }
   if (event.target.id === "home-search") handleSearchInput(event, "homeQuery", "home-search");
   if (event.target.id === "product-search") handleSearchInput(event, "productQuery", "product-search");
@@ -2909,6 +3048,7 @@ document.addEventListener("compositionend", (event) => {
 function handleSearchInput(event, stateKey, inputId, forceRender = false) {
   if (!stateKey) return;
   state[stateKey] = event.target.value;
+  if (stateKey === "outingQuery") persist();
   searchUi.inputId = inputId;
   searchUi.activeIndex = 0;
   if (!forceRender && (event.isComposing || event.target.dataset.composing === "true")) return;
@@ -2923,6 +3063,8 @@ function handleSearchInput(event, stateKey, inputId, forceRender = false) {
 }
 
 document.addEventListener("change", (event) => {
+  if (["outing-budget", "recommend-budget"].includes(event.target.dataset.action)) render();
+  if (event.target.id === "outing-test-mode") { state.outingTestMode = event.target.value === "guided" ? "guided" : "free"; persist(); }
   if (event.target.dataset.stopType !== undefined) state.courseDraft.stops[Number(event.target.dataset.stopType)].type = event.target.value;
   if (event.target.dataset.stopPhoto !== undefined && event.target.files?.[0]) {
     const index = Number(event.target.dataset.stopPhoto); const reader = new FileReader();
@@ -3021,15 +3163,38 @@ document.addEventListener("click", (event) => {
   if (action === "toggle-outing-map") { state.outingMapOpen = !state.outingMapOpen; state.outingSub = "recommend"; persist(); render(); }
   if (action === "outing-map-reset") { state.outingMapOpen = true; render(); requestAnimationFrame(() => initOutingMap()); }
   if (action === "outing-filter") { state.outingFilters[button.dataset.filter] = value; state.outingMapOpen = true; persist(); render(); }
-  if (action === "map-course-focus") { const course = getCourse(value); if (course) { state.courseDraft.title = course.name; state.courseDraft.desc = course.desc; state.courseDraft.stops = course.stops.map((name, index) => ({ type: index === course.stops.length - 1 ? "목적지" : "경유지", name, photo: course.stopDetails?.[index]?.photo || null })); state.outingSub = "register"; persist(); render(); toast("선택한 코스를 코스 등록 화면에 불러왔어요."); } }
+  if (action === "map-course-focus") { const course = getCourse(value); if (course) { logOutingEvent("course_select", "course", course.id, { surface: "map" }); openCourseDetail(course); } }
   if (action === "course-sort") { state.outingSort = value; persist(); render(); }
-  if (action === "course-detail") { const course = getCourse(value); if (course) openCourseDetail(course); }
+  if (action === "course-detail") { const course = getCourse(value); if (course) { logOutingEvent("course_select", "course", course.id, { surface: "list" }); openCourseDetail(course); } }
   if (action === "course-stop-detail") { const course = state.activeDetailCourse; if (course) openCourseStopDetail(course, Number(value)); }
-  if (action === "course-save") { state.savedCourseIds.has(value) ? state.savedCourseIds.delete(value) : state.savedCourseIds.add(value); persist(); render(); toast(state.savedCourseIds.has(value) ? "관심 코스에 저장했어요." : "관심 코스에서 삭제했어요."); }
-  if (action === "course-like") { state.likedCourseIds.has(value) ? state.likedCourseIds.delete(value) : state.likedCourseIds.add(value); persist(); render(); toast(state.likedCourseIds.has(value) ? "코스에 좋아요를 남겼어요." : "좋아요를 취소했어요."); }
+  if (action === "course-save") {
+    const wasSaved = state.savedCourseIds.has(value);
+    if (wasSaved) {
+      state.savedCourseIds.delete(value);
+      logOutingEvent("course_unsave", "course", value, { reverts_event_id: state.outingActionIds.saves[value] || null });
+      delete state.outingActionIds.saves[value];
+    } else {
+      state.savedCourseIds.add(value);
+      state.outingActionIds.saves[value] = logOutingEvent("course_save", "course", value);
+    }
+    persist(); render(); toast(wasSaved ? "관심 코스에서 삭제했어요." : "관심 코스에 저장했어요.");
+  }
+  if (action === "course-like") {
+    const wasLiked = state.likedCourseIds.has(value);
+    if (wasLiked) {
+      state.likedCourseIds.delete(value);
+      logOutingEvent("course_unlike", "course", value, { reverts_event_id: state.outingActionIds.likes[value] || null });
+      delete state.outingActionIds.likes[value];
+    } else {
+      state.likedCourseIds.add(value);
+      state.outingActionIds.likes[value] = logOutingEvent("course_like", "course", value);
+    }
+    persist(); render(); setTimeout(loadOutingPopularity, 500);
+    toast(wasLiked ? "좋아요를 취소했어요." : "코스에 좋아요를 남겼어요.");
+  }
   if (action === "follow-course") { const course = getCourse(value); if (course) useCourseForHome(course); }
-  if (action === "chip") { button.parentElement.querySelectorAll("button").forEach((item) => item.classList.remove("selected")); button.classList.add("selected"); }
-  if (action === "recommend-course") openCourseDetail(buildAiRecommendedCourse());
+  if (action === "chip") { state.recommendationPrefs[button.dataset.pref] = value; state.recommendationResultIds = []; state.recommendationRequestId = null; persist(); render(); }
+  if (action === "recommend-course") runOutingRecommendation();
   if (action === "course-source") { state.courseSource = value; render(); }
   if (action === "use-history-route") { const route = historyRoutes.find((item) => item.id === value); if (route) { state.courseDraft.title = route.name; state.courseDraft.desc = `${route.meta} 이동 기록에서 만든 코스입니다.`; state.courseDraft.stops = route.stops.map((name, index) => ({ type: index === route.stops.length - 1 ? "목적지" : "경유지", name, photo: null })); render(); toast("이용 기록을 불러왔어요."); } }
   if (action === "add-course-stop") { const destinationIndex = state.courseDraft.stops.findIndex((stop) => stop.type === "목적지"); state.courseDraft.stops.splice(destinationIndex < 0 ? state.courseDraft.stops.length : destinationIndex, 0, { type: "경유지", name: "", photo: null }); render(); }
@@ -3108,8 +3273,8 @@ function publishCourse() {
   const draft = getDraftCourse();
   if (!draft) return;
   const { titleText, validStops } = draft;
-  const course = { id: `mine-${Date.now()}`, author: state.username, name: titleText, desc: state.courseDraft.desc.trim() || "내 이동 경험으로 등록한 코스", image: validStops.find((stop) => stop.photo)?.photo || null, time: `${validStops.length}곳 · 나의 코스`, stops: validStops.map((stop) => stop.name), dwell: validStops.map(() => "60분"), distance: 0, likes: 0, createdAt: new Date().toISOString().slice(0, 10), recommend: "각 장소의 운영시간을 확인하고 여유 있게 이동해 보세요.", stopDetails: validStops.map((stop) => ({ type: stop.type, name: stop.name, photo: stop.photo || null })), tagProfile: { category: [state.outingFilters.category].filter((item) => item && item !== "전체"), mood: [state.outingFilters.mood].filter((item) => item && item !== "전체"), companion: [state.outingFilters.companion].filter((item) => item && item !== "전체"), purpose: [state.outingFilters.purpose].filter((item) => item && item !== "전체"), time: [state.outingFilters.time].filter((item) => item && item !== "전체"), price: Number(state.outingFilters.budget || 30000) }, visual: "" };
-  state.customCourses.unshift(course); state.savedCourseIds.add(course.id); state.courseDraft = { title: "", desc: "", stops: [{ type: "경유지", name: "", photo: null }, { type: "목적지", name: "", photo: null }] }; state.outingSub = "interest"; persist(); render(); toast("내 코스를 관심 코스에 등록했어요.");
+  const course = { id: `mine-${MoovOutingData.newId()}`, author: state.username, name: titleText, desc: state.courseDraft.desc.trim() || "내 이동 경험으로 등록한 코스", image: validStops.find((stop) => stop.photo)?.photo || null, time: `${validStops.length}곳 · 나의 코스`, stops: validStops.map((stop) => stop.name), dwell: validStops.map(() => "60분"), distance: null, likes: 0, createdAt: new Date().toISOString(), recommend: "각 장소의 운영시간과 가격을 확인한 뒤 이동해 주세요.", stopDetails: validStops.map((stop) => ({ type: stop.type, name: stop.name, photo: stop.photo || null })), tagProfile: { category: [state.outingFilters.category].filter((item) => item && item !== "전체"), mood: [state.outingFilters.mood].filter((item) => item && item !== "전체"), companion: [state.outingFilters.companion].filter((item) => item && item !== "전체"), purpose: [state.outingFilters.purpose].filter((item) => item && item !== "전체"), time: [state.outingFilters.time].filter((item) => item && item !== "전체"), price: null }, visual: "" };
+  state.customCourses.unshift(course); state.savedCourseIds.add(course.id); logOutingEvent("course_publish", "course", course.id); state.courseDraft = { title: "", desc: "", stops: [{ type: "경유지", name: "", photo: null }, { type: "목적지", name: "", photo: null }] }; state.outingSub = "interest"; persist(); render(); toast("내 코스를 관심 코스에 등록했어요.");
 }
 
 function currentUsageFee() {
@@ -3201,6 +3366,7 @@ function applySearchSuggestion(button) {
   const stateKey = getSearchStateKey(inputId);
   if (!stateKey) return;
   state[stateKey] = button.dataset.value || "";
+  if (inputId === "course-search") { persist(); logOutingEvent("search_confirm", "query", state.outingQuery, { selected_course_id: button.dataset.item || null }); }
   searchUi.inputId = null;
   searchUi.activeIndex = 0;
   render();
@@ -3245,6 +3411,11 @@ function handleSearchKeydown(event) {
     } else closeModal();
     return;
   }
+  if (event.key === "Enter" && inputId === "course-search" && !suggestions.length) {
+    event.preventDefault();
+    logOutingEvent("search_confirm", "query", state.outingQuery || "[empty]", { result_count: getFilteredOutingCourses().length });
+    return;
+  }
   if (!suggestions.length) return;
   if (event.key === "ArrowDown" || event.key === "ArrowUp") {
     event.preventDefault();
@@ -3261,6 +3432,7 @@ function handleSearchKeydown(event) {
     const suggestion = suggestions[Math.min(searchUi.activeIndex, suggestions.length - 1)];
     if (!suggestion) return;
     state[getSearchStateKey(inputId)] = suggestion.queryValue || suggestion.name;
+    if (inputId === "course-search") { persist(); logOutingEvent("search_confirm", "query", state.outingQuery, { selected_course_id: suggestion.itemId || null }); }
     searchUi.inputId = null;
     if (inputId === "home-search") {
       applyHomeSearchSelection(suggestion, state.homeQuery);

@@ -10,14 +10,19 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from openai import AzureOpenAI
 import azure.cognitiveservices.speech as speechsdk
+if __package__:
+    from .outing_api import router as outing_router
+else:
+    from outing_api import router as outing_router
 
 load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 app = FastAPI()
+app.include_router(outing_router)
 
 # 로컬 프론트 개발 서버 주소로 제한 (배포 시 실제 도메인으로 교체)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:5173"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

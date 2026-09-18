@@ -1,11 +1,12 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
-import { createServer } from "node:http";
+import { createServer, request as httpRequest } from "node:http";
 
 const port = Number(process.env.PORT || 3000);
 const root = process.cwd();
 const publicDir = join(root, "public");
 const fallbackFile = join(publicDir, "moov.html");
+const backendUrl = process.env.MOOV_BACKEND_URL || "http://127.0.0.1:8000";
 
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
@@ -27,6 +28,19 @@ function sendFile(res, filePath) {
 createServer((req, res) => {
   const url = new URL(req.url || "/", `http://localhost:${port}`);
   const requestedPath = decodeURIComponent(url.pathname);
+  if (requestedPath.startsWith("/api/outing/")) {
+    const upstream = new URL(requestedPath + url.search, backendUrl);
+    const proxy = httpRequest(upstream, { method: req.method, headers: { ...req.headers, host: upstream.host } }, (upstreamResponse) => {
+      res.writeHead(upstreamResponse.statusCode || 502, upstreamResponse.headers);
+      upstreamResponse.pipe(res);
+    });
+    proxy.on("error", () => {
+      if (!res.headersSent) res.writeHead(502, { "Content-Type": "application/json; charset=utf-8" });
+      res.end('{"error":"outing backend unavailable"}');
+    });
+    req.pipe(proxy);
+    return;
+  }
   const normalizedPath = normalize(requestedPath).replace(/^(\.\.[/\\])+/, "");
   const publicFile = join(publicDir, normalizedPath);
 
