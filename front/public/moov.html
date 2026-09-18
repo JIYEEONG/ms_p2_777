@@ -1436,7 +1436,9 @@ let splashTimer;
 let toastTimer;
 let pendingHomeCourse = null;
 window.addEventListener("message", handleHomeModuleMessage);
-let speechRecognition;
+let mediaRecorder;
+let audioStream;
+let audioChunks = [];
 let searchDebounceTimer;
 let aiSwipeSuppressUntil = 0;
 let aiPersonaMotionClass = "";
@@ -2160,7 +2162,7 @@ function renderAiSettings() {
   return `<p class="settings-group-label">대화 방식</p><section class="card">${toggleItem("루나", "끄면 루나 전체 기능이 종료돼요. \"그만 대화하고 싶어\"라고 말해도 동일하게 꺼져요.", state.aiStatus !== "off", "ai-power", "luna-bot")}<div class="menu-item settings-sub-item">${toggleItemInner("음성으로 대화하기", "기본적으로 루나 on/off와 같이 움직여요. 필요하면 이것만 따로 켜고 끌 수 있어요.", state.aiVoiceEnabled, "ai-voice-setting")}</div></section><p class="settings-group-label" style="margin-top:18px;">이용 설정</p><section class="card">${toggleItem("승차 후 자동 시작", "차량 탑승이 확인되면 먼저 인사해요. 인사말에서 \"루나야\"라고 부르면 언제든 대화를 시작할 수 있다고 안내해요.", state.aiAutoStart, "ai-autostart-setting")}${toggleItem("대화 기록 저장", "동의해야만 대화 내용이 남아요 (기본 꺼짐)", state.aiSaveEnabled, "ai-save-setting")}</section>`;
 }
 
-async function sendMessage(text, voice = false) {
+async function sendMessage(text, voice = false, detectedLanguage = null) {
   const clean = text.trim();
   if (!clean) return;
   const now = () => new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
@@ -2190,7 +2192,14 @@ async function sendMessage(text, voice = false) {
     const res = await fetch("http://127.0.0.1:8000/api/luna/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: clean, persona: state.aiPersona, history }),
+      body: JSON.stringify({
+        message: clean,
+        persona: state.aiPersona,
+        history,
+        detected_language: detectedLanguage,
+        session_id: state.liveSessionKey ? String(state.liveSessionKey) : null,
+        save_consent: state.aiSaveEnabled,
+      }),
     });
     if (!res.ok) throw new Error(`서버 응답 오류: ${res.status}`);
     const data = await res.json();
@@ -2275,78 +2284,106 @@ async function speakReply(text) {
   }
 }
 
-function startVoiceConversation() {
-    if (!state.aiVoiceEnabled) {
+async function startVoiceConversation() {
+  if (!state.aiVoiceEnabled) {
     toast("음성 대화가 꺼져 있어요. 설정에서 다시 켤 수 있어요.");
     return;
   }
   // 기획서 B-11 정책: 마이크를 누르면 즉시 듣는 중 상태(빨간 버튼 + 파형)로 전환한다.
-  // 실제 브라우저 음성 인식 성공 여부와 무관하게 UI 상태를 먼저 반영한다(원본 목업과 동일).
   state.aiStatus = "listening";
   render();
 
-  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!Recognition) {
-    toast("이 브라우저는 음성 인식을 지원하지 않아요. 화면은 데모로 표시돼요.");
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch {
+    state.aiStatus = "idle";
+    render();
+    toast("마이크 권한을 확인할 수 없어 데모로 표시돼요. 텍스트로도 대화할 수 있어요.");
     return;
   }
-  if (speechRecognition) {
-  speechRecognition.onresult = null;
-  speechRecognition.onerror = null;
-  speechRecognition.onend = null;
-  speechRecognition.abort();
-  }
 
-  speechRecognition = new Recognition();
-  speechRecognition.lang = window.MoovI18n?.locale() || "ko-KR";
-  speechRecognition.interimResults = true;
-  speechRecognition.continuous = true;
+  audioStream = stream;
+  audioChunks = [];
+  mediaRecorder = new MediaRecorder(stream);
+  mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
 
-  let finalTranscript = "";
+  // B-11: 무음 임계값(800ms) 감지 — 음량을 측정해 조용한 상태가 이어지면 자동 종료
+  const audioContext = new AudioContext();
+  const source = audioContext.createMediaStreamSource(stream);
+  const analyser = audioContext.createAnalyser();
+  analyser.fftSize = 512;
+  source.connect(analyser);
+  const dataArray = new Uint8Array(analyser.frequencyBinCount);
+  const SILENCE_THRESHOLD = 8;
+  const SILENCE_MS = 800;
   let silenceTimer = null;
+  let stopped = false;
+
+  const checkSilence = () => {
+    if (stopped) return;
+    analyser.getByteFrequencyData(dataArray);
+    const volume = dataArray.reduce((sum, v) => sum + v, 0) / dataArray.length;
+    if (volume < SILENCE_THRESHOLD) {
+      if (!silenceTimer) silenceTimer = setTimeout(finishRecording, SILENCE_MS);
+    } else if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      silenceTimer = null;
+    }
+    requestAnimationFrame(checkSilence);
+  };
 
   // B-11: 무한 듣기 상태 방지 — 최대 발화 시간(20초) 초과 시 강제 종료
   const MAX_LISTEN_MS = 20000;
   const maxListenTimer = setTimeout(() => {
     toast("최대 발화 시간을 초과해 자동으로 종료했어요.");
-    speechRecognition.stop();
+    finishRecording();
   }, MAX_LISTEN_MS);
 
-  speechRecognition.onresult = (event) => {
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      if (event.results[i].isFinal) {
-        finalTranscript += event.results[i][0].transcript;
-      }
-    }
-    clearTimeout(silenceTimer);
-    silenceTimer = setTimeout(() => {
-      speechRecognition.stop();
-    }, 800);
-  };
-  speechRecognition.onerror = () => {
+  function finishRecording() {
+    if (stopped) return;
+    stopped = true;
     clearTimeout(silenceTimer);
     clearTimeout(maxListenTimer);
+    audioContext.close();
+    if (mediaRecorder.state !== "inactive") mediaRecorder.stop();
+  }
+
+  mediaRecorder.onstop = async () => {
+    audioStream?.getTracks().forEach((track) => track.stop());
     state.aiStatus = "idle";
     render();
-    toast("음성을 확인하지 못했어요. 다시 말하거나 텍스트로 입력해 주세요.");
-  };
-  speechRecognition.onend = () => {
-    clearTimeout(silenceTimer);
-    clearTimeout(maxListenTimer);
-    state.aiStatus = "idle";
-    const transcript = finalTranscript.trim();
-    if (transcript) sendMessage(transcript, true);
+
+    const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+    if (audioBlob.size < 1000) return; // 너무 짧으면(무음 등) 전송하지 않음
+
+    let text = "";
+    let detectedLanguage = null;
+    try {
+      const formData = new FormData();
+      formData.append("audio", audioBlob, "speech.webm");
+      const res = await fetch("http://127.0.0.1:8000/api/luna/stt", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.error) {
+        toast("음성을 확인하지 못했어요. 다시 말하거나 텍스트로 입력해 주세요.");
+        return;
+      }
+      text = data.text;
+      detectedLanguage = data.detected_language;
+    } catch {
+      toast("음성 인식 서버에 연결할 수 없어요.");
+      return;
+    }
+    if (text.trim()) sendMessage(text.trim(), true, detectedLanguage);
   };
 
-  try {
-    speechRecognition.start();
-  } catch {
-    toast("마이크 권한을 확인할 수 없어 데모로 표시돼요. 텍스트로도 대화할 수 있어요.");
-  }
+  mediaRecorder.start();
+  requestAnimationFrame(checkSilence);
 }
 
 function stopVoiceConversation(status = "idle") {
-  if (speechRecognition) { speechRecognition.abort(); speechRecognition = null; }
+  if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+  if (audioStream) { audioStream.getTracks().forEach((track) => track.stop()); audioStream = null; }
   if ("speechSynthesis" in window) status === "paused" ? window.speechSynthesis.pause() : window.speechSynthesis.cancel();
   state.aiStatus = status;
   render();
@@ -3150,7 +3187,8 @@ function setSecurityProgress(titleText, percent, activeIndex, message) {
 function runSecureCleanup(mode) {
   if (!state.tripActive && !state.securityEnding) return;
   state.securityEnding = true;
-  if (speechRecognition) { speechRecognition.abort(); speechRecognition = null; }
+  if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+  if (audioStream) { audioStream.getTracks().forEach((track) => track.stop()); audioStream = null; }
   if ("speechSynthesis" in window) window.speechSynthesis.cancel();
   setSecurityProgress("차량 기록을 정리하고 있어요", 18, 0, "신규 인증과 외부 연결을 차단했습니다.");
   setTimeout(() => setSecurityProgress("차량 기록을 정리하고 있어요", 56, 1, "개인 데이터와 연결 정보를 삭제하고 있습니다."), 700);
