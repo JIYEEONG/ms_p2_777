@@ -745,11 +745,29 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
 .switch.on { background: var(--green); }
 .switch.on::after { transform: translateX(20px); }
 
-.outing-tabs { width: 100%; box-sizing: border-box; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: row; overflow: visible; }
-.outing-tabs button { width: 100%; min-width: 0; min-height: 46px; padding: 10px 4px; font-size: .78rem; letter-spacing: -.01em; }
+.outing-tabs { width: 100%; box-sizing: border-box; display: flex; overflow: visible; }
+.outing-tabs > button { flex: 1 1 0; width: auto; min-width: 0; min-height: 46px; padding: 10px 4px; font-size: .78rem; letter-spacing: -.01em; }
 .outing-tab-label { position: relative; display: inline-flex; align-items: center; justify-content: center; }
 .outing-tab-dot { position: absolute; top: -3px; right: -8px; width: 7px; height: 7px; border: 2px solid #f2f3f2; border-radius: 50%; background: #ef4444; box-sizing: content-box; }
 .outing-search-zone { margin-bottom: 12px; }
+.course-entry-card { width: 100%; display: grid; grid-template-columns: 42px minmax(0, 1fr) 24px; align-items: center; gap: 11px; padding: 13px 14px; border: 1px solid rgba(83,177,117,.32); border-radius: 16px; background: linear-gradient(135deg, #f0faf3, #fff); color: var(--ink); text-align: left; box-shadow: 0 6px 18px rgba(24,23,37,.05); transition: border-radius .28s ease, border-color .28s ease, box-shadow .28s ease, background .28s ease; }
+.course-entry-card > span:first-child { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px; background: var(--green); color: white; }
+.course-entry-card > span:first-child svg { width: 20px; height: 20px; }
+.course-entry-card > span:nth-child(2) { min-width: 0; }
+.course-entry-card strong, .course-entry-card small { display: block; }
+.course-entry-card strong { font-size: .82rem; }
+.course-entry-card small { margin-top: 4px; color: var(--muted); font-size: .65rem; line-height: 1.4; }
+.course-entry-card > svg { width: 20px; height: 20px; color: var(--green-dark); transition: transform .32s cubic-bezier(.22, 1, .36, 1); }
+.course-entry-card.active { border-bottom-color: transparent; border-radius: 16px 16px 0 0; background: #eef9f2; box-shadow: none; }
+.course-entry-card.active > svg { transform: rotate(90deg); }
+.community-recommendation { display: grid; grid-template-rows: 0fr; opacity: 0; pointer-events: none; transition: grid-template-rows .38s cubic-bezier(.22, 1, .36, 1), opacity .22s ease; }
+.community-recommendation.open { grid-template-rows: 1fr; opacity: 1; pointer-events: auto; }
+.community-recommendation-inner { min-height: 0; overflow: hidden; }
+.community-recommendation-surface { margin: 0 0 16px; padding: 16px 13px 13px; border: 1px solid rgba(83,177,117,.32); border-top: 0; border-radius: 0 0 16px 16px; background: linear-gradient(180deg, #f7fcf8, #fff); transform: translateY(-10px); transition: transform .38s cubic-bezier(.22, 1, .36, 1); }
+.community-recommendation.open .community-recommendation-surface { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .course-entry-card, .course-entry-card > svg, .community-recommendation, .community-recommendation-surface { transition: none; }
+}
 .outing-search-actions { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
 .outing-search-actions .mini-action { min-height: 36px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .outing-search-actions .mini-action.active { border-color: var(--green); background: var(--green); color: white; }
@@ -848,7 +866,6 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
 .no-stop-photo svg { width: 20px; height: 20px; }
 .registered-stops small { display: block; margin-top: 5px; overflow: hidden; color: #777; font-size: .58rem; text-overflow: ellipsis; white-space: nowrap; }
 .preference-panel { padding: 16px; }
-.preference-panel select { display: block; width: 100%; margin: 6px 0 18px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; }
 .choice-group { margin-bottom: 17px; }
 .choice-group h4 { margin: 0 0 9px; font-size: .81rem; }
 .choice-group .filter-chips { flex-wrap: wrap; overflow: visible; }
@@ -1412,7 +1429,6 @@ const state = {
   recommendationPrefs: { ...defaultRecommendationPrefs(), ...outingSaved.recommendationPrefs },
   recommendationResultIds: outingSaved.recommendationResultIds || [],
   recommendationRequestId: outingSaved.recommendationRequestId || null,
-  outingTestMode: outingSaved.outingTestMode || "free",
   tasteGroup: outingSaved.tasteGroup || "감성 탐험형",
   communityRecommendationOpen: false,
   hasUnseenInterestCourse: Boolean(outingSaved.hasUnseenInterestCourse),
@@ -1508,13 +1524,12 @@ function logOutingEvent(eventType, targetType, targetId, details = {}) {
   enqueueOuting("events", { event_id: eventId, user_id: state.userId, session_id: outingSessionId(),
     request_id: state.recommendationRequestId, event_type: eventType, target_type: targetType,
     target_id: String(targetId), occurred_at: new Date().toISOString(), rule_version: MoovOutingData.RULE_VERSION,
-    test_mode: state.outingTestMode, details }, eventId);
+    details }, eventId);
   return eventId;
 }
 function recordOutingRecommendation(data) {
   enqueueOuting("recommendations", { ...data, user_id: state.userId, session_id: outingSessionId(),
-    occurred_at: new Date().toISOString(), rule_version: MoovOutingData.RULE_VERSION,
-    test_mode: state.outingTestMode }, data.request_id);
+    occurred_at: new Date().toISOString(), rule_version: MoovOutingData.RULE_VERSION }, data.request_id);
 }
 async function loadOutingPopularity() {
   try {
@@ -1723,7 +1738,6 @@ function persist() {
     outingSort: state.outingSort, outingQuery: state.outingQuery, outingMapOpen: state.outingMapOpen,
     outingFilters: state.outingFilters, recommendationPrefs: state.recommendationPrefs,
     recommendationResultIds: state.recommendationResultIds, recommendationRequestId: state.recommendationRequestId,
-    outingTestMode: state.outingTestMode,
     tasteGroup: state.tasteGroup,
     hasUnseenInterestCourse: state.hasUnseenInterestCourse,
     outingActionIds: state.outingActionIds,
@@ -1741,7 +1755,6 @@ function loadOutingForUser(userId) {
   state.recommendationPrefs = { ...defaultRecommendationPrefs(), ...user.recommendationPrefs };
   state.recommendationResultIds = user.recommendationResultIds || [];
   state.recommendationRequestId = user.recommendationRequestId || null;
-  state.outingTestMode = user.outingTestMode || "free";
   state.tasteGroup = user.tasteGroup || "감성 탐험형";
   state.communityRecommendationOpen = false;
   state.hasUnseenInterestCourse = Boolean(user.hasUnseenInterestCourse);
@@ -2912,7 +2925,8 @@ function useCourseForHome(course) {
 }
 
 function renderCommunityFeed() {
-  return `<section class="community-hero"><h3 data-i18n-en="Discover shared trips">사람들의 코스를 발견해 보세요</h3><p data-i18n-en="Browse demo trips and save your favorites.">공유된 데모 코스를 둘러보고 마음에 드는 코스를 관심코스로 저장해 보세요.</p></section>${renderOutingSearchZone()}<button class="course-entry-card ${state.communityRecommendationOpen ? "active" : ""}" data-action="community-ai" aria-expanded="${state.communityRecommendationOpen}"><span>${icon("compass")}</span><span><strong data-i18n-en="Find trips for your taste">내 취향으로 코스 추천받기</strong><small data-i18n-en="Compare demo trips against your choices.">선택한 조건에 맞춰 데모 코스를 비교해요.</small></span>${icon("chevron")}</button>${state.communityRecommendationOpen ? renderRecommendation() : renderCourseBrowse()}`;
+  const open = state.communityRecommendationOpen;
+  return `<section class="community-hero"><h3 data-i18n-en="Discover shared trips">사람들의 코스를 발견해 보세요</h3><p data-i18n-en="Browse demo trips and save your favorites.">공유된 데모 코스를 둘러보고 마음에 드는 코스를 관심코스로 저장해 보세요.</p></section>${renderOutingSearchZone()}<button class="course-entry-card ${open ? "active" : ""}" data-action="community-ai" aria-controls="community-recommendation" aria-expanded="${open}"><span>${icon("compass")}</span><span><strong data-i18n-en="Find trips for your taste">내 취향으로 코스 추천받기</strong><small data-i18n-en="Compare demo trips against your choices.">선택한 조건에 맞춰 데모 코스를 비교해요.</small></span>${icon("chevron")}</button><div id="community-recommendation" class="community-recommendation ${open ? "open" : ""}" aria-hidden="${!open}" ${open ? "" : "inert"}><div class="community-recommendation-inner"><div class="community-recommendation-surface">${renderRecommendation()}</div></div></div>${renderCourseBrowse()}`;
 }
 
 const tasteGroups = [
@@ -2953,7 +2967,7 @@ function renderRecommendation() {
   const result = state.recommendationRequestId
     ? `<section class="section-lead compact"><h3>추천 결과</h3><p>선택 CATEGORY와 데모 태그를 비교한 임시 순위입니다. 실제 장소 운영시간·가격·동선은 검증되지 않았어요.</p></section>${recommended.length ? `<div class="stack">${recommended.map((course, index) => `<div><p class="small muted">${index + 1}순위 · 규칙 일치 점수 ${MoovOutingData.score(course, prefs, getCourseTags(course))}점</p>${courseCard(course)}</div>`).join("")}</div>` : emptyState("search", "조건에 맞는 코스가 없어요", "CATEGORY나 참고 예산을 직접 바꾼 뒤 다시 추천받아 주세요.")}`
     : "";
-  return `<section class="section-lead"><h3>어떤 나들이를 원하세요?</h3><p>${escapeHtml(state.username)}님의 선택을 바탕으로 검수 전 데모 코스를 비교합니다.</p></section><section class="card preference-panel"><label class="small">기록 구분 <select id="outing-test-mode"><option value="free" ${state.outingTestMode === "free" ? "selected" : ""}>자유 사용</option><option value="guided" ${state.outingTestMode === "guided" ? "selected" : ""}>지정 시나리오</option></select></label>${choiceGroup("CATEGORY", "category", ["전체", "음식점", "카페", "전시", "쇼핑", "관광", "체험"])}${choiceGroup("분위기", "mood", ["전체", "조용함", "활기참", "감성", "트렌디", "로맨틱"])}${choiceGroup("동행", "companion", ["전체", "혼자", "연인", "친구", "가족", "동료"])}${choiceGroup("시간대", "time", ["전체", "아침", "점심", "오후", "저녁", "야간"])}<div class="choice-group"><div class="row"><h4>참고 예산</h4><strong class="green">${Number(prefs.budget).toLocaleString("ko-KR")}원 이하</strong></div><input class="budget" type="range" min="30000" max="300000" step="10000" value="${prefs.budget}" data-action="recommend-budget" aria-label="추천 참고 예산" /><p class="small muted">데모 비용 기준입니다. 실제 가격·이동비·영업시간 충족을 보장하지 않습니다.</p></div><button class="primary-button full" data-action="recommend-course">코스 추천받기</button><p class="small muted">전송 대기 기록 ${readOutingQueue().length}건 · 백엔드가 켜지면 같은 ID로 재시도합니다.</p></section>${result}<section class="section-lead compact"><h3>추천 코스 둘러보기</h3><p>검색과 지도 필터로 원하는 코스를 골라 직접 만들 수 있어요.</p></section>${renderCourseBrowse()}`;
+  return `<section class="section-lead"><h3>어떤 나들이를 원하세요?</h3><p>${escapeHtml(state.username)}님의 선택을 바탕으로 검수 전 데모 코스를 비교합니다.</p></section><section class="card preference-panel">${choiceGroup("CATEGORY", "category", ["전체", "음식점", "카페", "전시", "쇼핑", "관광", "체험"])}${choiceGroup("분위기", "mood", ["전체", "조용함", "활기참", "감성", "트렌디", "로맨틱"])}${choiceGroup("동행", "companion", ["전체", "혼자", "연인", "친구", "가족", "동료"])}${choiceGroup("시간대", "time", ["전체", "아침", "점심", "오후", "저녁", "야간"])}<div class="choice-group"><div class="row"><h4>참고 예산</h4><strong class="green">${Number(prefs.budget).toLocaleString("ko-KR")}원 이하</strong></div><input class="budget" type="range" min="30000" max="300000" step="10000" value="${prefs.budget}" data-action="recommend-budget" aria-label="추천 참고 예산" /><p class="small muted">데모 비용 기준입니다. 실제 가격·이동비·영업시간 충족을 보장하지 않습니다.</p></div><button class="primary-button full" data-action="recommend-course">코스 추천받기</button><p class="small muted">전송 대기 기록 ${readOutingQueue().length}건 · 백엔드가 켜지면 같은 ID로 재시도합니다.</p></section>${result}`;
 }
 
 function runOutingRecommendation() {
@@ -3178,7 +3192,6 @@ function handleSearchInput(event, stateKey, inputId, forceRender = false) {
 
 document.addEventListener("change", (event) => {
   if (["outing-budget", "recommend-budget"].includes(event.target.dataset.action)) render();
-  if (event.target.id === "outing-test-mode") { state.outingTestMode = event.target.value === "guided" ? "guided" : "free"; persist(); }
   if (event.target.dataset.stopType !== undefined) state.courseDraft.stops[Number(event.target.dataset.stopType)].type = event.target.value;
   if (event.target.dataset.stopPhoto !== undefined && event.target.files?.[0]) {
     const index = Number(event.target.dataset.stopPhoto); const reader = new FileReader();
@@ -3279,7 +3292,18 @@ document.addEventListener("click", (event) => {
     persist(); render();
   }
   if (action === "taste-group") { state.tasteGroup = value; persist(); render(); }
-  if (action === "community-ai") { state.communityRecommendationOpen = !state.communityRecommendationOpen; render(); }
+  if (action === "community-ai") {
+    state.communityRecommendationOpen = !state.communityRecommendationOpen;
+    button.classList.toggle("active", state.communityRecommendationOpen);
+    button.setAttribute("aria-expanded", String(state.communityRecommendationOpen));
+    const accordion = document.querySelector("#community-recommendation");
+    if (accordion) {
+      accordion.classList.toggle("open", state.communityRecommendationOpen);
+      accordion.setAttribute("aria-hidden", String(!state.communityRecommendationOpen));
+      accordion.toggleAttribute("inert", !state.communityRecommendationOpen);
+    }
+    if (state.communityRecommendationOpen && state.outingMapOpen) requestAnimationFrame(initOutingMap);
+  }
   if (action === "toggle-outing-map") { state.outingMapOpen = !state.outingMapOpen; persist(); render(); }
   if (action === "outing-map-reset") { state.outingMapOpen = true; render(); requestAnimationFrame(() => initOutingMap()); }
   if (action === "outing-filter") { state.outingFilters[button.dataset.filter] = value; state.outingMapOpen = true; persist(); render(); }
