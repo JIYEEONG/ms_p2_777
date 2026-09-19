@@ -747,6 +747,8 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
 
 .outing-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: initial; grid-auto-columns: auto; overflow: visible; }
 .outing-tabs button { min-width: 0; padding: 7px 2px; font-size: .6rem; letter-spacing: 0; }
+.outing-tab-label { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.outing-tab-dot { position: absolute; top: -3px; right: -8px; width: 7px; height: 7px; border: 2px solid #f2f3f2; border-radius: 50%; background: #ef4444; box-sizing: content-box; }
 .outing-search-zone { margin-bottom: 12px; }
 .outing-search-actions { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
 .outing-search-actions .mini-action { min-height: 36px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
@@ -1412,6 +1414,8 @@ const state = {
   recommendationRequestId: outingSaved.recommendationRequestId || null,
   outingTestMode: outingSaved.outingTestMode || "free",
   tasteGroup: outingSaved.tasteGroup || "감성 탐험형",
+  communityRecommendationOpen: false,
+  hasUnseenInterestCourse: Boolean(outingSaved.hasUnseenInterestCourse),
   outingActionIds: outingSaved.outingActionIds || { likes: {}, saves: {} },
   popularityCounts: {},
   popularityAt: null,
@@ -1721,6 +1725,7 @@ function persist() {
     recommendationResultIds: state.recommendationResultIds, recommendationRequestId: state.recommendationRequestId,
     outingTestMode: state.outingTestMode,
     tasteGroup: state.tasteGroup,
+    hasUnseenInterestCourse: state.hasUnseenInterestCourse,
     outingActionIds: state.outingActionIds,
     likedCourseIds: [...state.likedCourseIds], savedCourseIds: [...state.savedCourseIds], customCourses: state.customCourses,
   };
@@ -1738,6 +1743,8 @@ function loadOutingForUser(userId) {
   state.recommendationRequestId = user.recommendationRequestId || null;
   state.outingTestMode = user.outingTestMode || "free";
   state.tasteGroup = user.tasteGroup || "감성 탐험형";
+  state.communityRecommendationOpen = false;
+  state.hasUnseenInterestCourse = Boolean(user.hasUnseenInterestCourse);
   state.outingActionIds = user.outingActionIds || { likes: {}, saves: {} };
   state.likedCourseIds = new Set(user.likedCourseIds || []);
   state.savedCourseIds = new Set(user.savedCourseIds || []);
@@ -2670,11 +2677,10 @@ function renderOtt() {
 function serviceCard(letter, name, desc, color, on) { return `<article class="card service-card"><span class="service-logo ${color}">${letter}</span><div style="flex:1"><h4>${name}</h4><p>${desc}</p></div><button class="switch ${on ? "on" : ""}" data-action="toggle" aria-label="${name} 연결"></button></article>`; }
 
 function renderOuting() {
-  const tabs = [["community", "커뮤니티", "Community"], ["similar", "취향 친구", "Taste matches"], ["register", "코스 공유", "Share trips"], ["interest", "저장 코스", "Saved trips"]];
-  const bodies = { community: renderCommunityFeed, similar: renderSimilarTaste, recommend: renderRecommendation, register: renderRegisterCourse, interest: renderInterestCourses };
+  const tabs = [["community", "커뮤니티", "Community"], ["register", "코스등록", "Register trip"], ["interest", "관심코스", "Saved trips"]];
+  const bodies = { community: renderCommunityFeed, register: renderRegisterCourse, interest: renderInterestCourses };
   if (!bodies[state.outingSub]) state.outingSub = "community";
-  const searchZone = ["community", "recommend"].includes(state.outingSub) ? renderOutingSearchZone() : "";
-  return `${searchZone}<div class="subtabs outing-tabs" role="tablist">${tabs.map(([id, label, english]) => `<button class="${state.outingSub === id || (id === "similar" && state.outingSub === "recommend") ? "active" : ""}" data-action="outing-sub" data-value="${id}" data-i18n-en="${english}">${label}</button>`).join("")}</div>${bodies[state.outingSub]()}`;
+  return `<div class="subtabs outing-tabs" role="tablist">${tabs.map(([id, label, english]) => `<button class="${state.outingSub === id ? "active" : ""}" data-action="outing-sub" data-value="${id}" data-i18n-en="${english}"><span class="outing-tab-label">${label}${id === "interest" && state.hasUnseenInterestCourse ? '<i class="outing-tab-dot" aria-label="새 관심코스 있음"></i>' : ""}</span></button>`).join("")}</div>${bodies[state.outingSub]()}`;
 }
 
 function renderOutingSearchZone() {
@@ -2711,7 +2717,15 @@ function getFilteredOutingCourses() {
 }
 
 function getVisibleOutingCourses() {
-  return MoovOutingData.sort(getFilteredOutingCourses(), state.outingSort, state.recommendationPrefs,
+  let courses = getFilteredOutingCourses();
+  if (state.outingSort === "preference") {
+    const group = tasteGroups.find((item) => item.name === state.tasteGroup) || tasteGroups[0];
+    courses = courses.filter((course) => {
+      const tags = getCourseTags(course);
+      return group.categories.some((value) => tags.category.includes(value)) || group.moods.some((value) => tags.mood.includes(value));
+    });
+  }
+  return MoovOutingData.sort(courses, state.outingSort, state.recommendationPrefs,
     getCourseTags, (course) => state.popularityCounts[course.id] || 0);
 }
 
@@ -2778,9 +2792,25 @@ function initOutingMap(focusCourseId = null) {
 }
 
 function renderCourseBrowse() {
-  const list = getVisibleOutingCourses();
-  const sorts = [["preference", "취향순"], ["popular", "최근 7일 인기순"], ["latest", "등록일순(데모)"], ["nearby", "거리 참고순"]];
-  return `${state.outingMapOpen ? renderOutingMap(list) : ""}<div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div><div class="course-result-count">총 ${list.length}개 코스 · 예산과 거리는 데모 참고값 · 인기 집계 ${state.popularityAt ? "연결됨" : "연결 대기"}</div>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("search", "검색 결과가 없어요", "조건을 직접 넓히거나 예산을 조정해 주세요.")}`;
+  const visible = getVisibleOutingCourses();
+  const sorts = [["preference", "취향순"], ["popular", "인기순"], ["latest", "최신순"], ["nearby", "거리순"]];
+  let list = visible;
+  let cards = "";
+  let tasteFilters = "";
+  if (state.outingSort === "preference") {
+    const group = tasteGroups.find((item) => item.name === state.tasteGroup) || tasteGroups[0];
+    const signals = currentTasteSignals();
+    list = visible.filter((course) => {
+      const tags = getCourseTags(course);
+      return group.categories.some((value) => tags.category.includes(value)) || group.moods.some((value) => tags.mood.includes(value));
+    }).map((course) => ({ course, match: MoovOutingData.tasteMatch(getCourseTags(course), signals) }))
+      .sort((a, b) => (b.match.percent ?? -1) - (a.match.percent ?? -1) || String(b.course.createdAt || "").localeCompare(String(a.course.createdAt || "")));
+    tasteFilters = `<div class="community-filter" aria-label="취향 유형">${tasteGroups.map((item) => `<button class="${state.tasteGroup === item.name ? "selected" : ""}" data-action="taste-group" data-value="${item.name}" data-i18n-en="${item.english}">${item.name}</button>`).join("")}</div>`;
+    cards = list.map(({ course, match }) => `<div class="taste-course"><span class="taste-match">${icon("user")} ${match.percent === null ? "취향 정보 없음" : `내 취향 ${match.percent}% 일치`}</span><small class="taste-basis">${match.matched}/${match.total}개 취향 태그 일치 · 데모 기준</small>${courseCard(course)}</div>`).join("");
+  } else {
+    cards = list.map(courseCard).join("");
+  }
+  return `${state.outingMapOpen ? renderOutingMap(state.outingSort === "preference" ? list.map((item) => item.course) : list) : ""}<div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div>${tasteFilters}${cards ? `<div class="stack">${cards}</div>` : emptyState("search", "검색 결과가 없어요", "조건을 직접 넓히거나 다른 취향 유형을 선택해 주세요.")}`;
 }
 
 function courseCard(course) {
@@ -2882,7 +2912,7 @@ function useCourseForHome(course) {
 }
 
 function renderCommunityFeed() {
-  return `<section class="community-hero"><h3 data-i18n-en="Discover shared trips">사람들의 코스를 발견해 보세요</h3><p data-i18n-en="Browse demo trips, save your favorites, or share your own route.">공유된 데모 코스를 둘러보고, 마음에 드는 코스를 저장하거나 나만의 코스를 공유할 수 있어요.</p></section><div class="community-share-bar"><span data-i18n-en="Share your route and tips.">나만의 코스와 방문 팁을 공유해 보세요.</span><button class="secondary-button" data-action="outing-sub" data-value="register" data-i18n-en="Share a trip">코스 공유</button></div><button class="course-entry-card" data-action="community-ai"><span>${icon("compass")}</span><span><strong data-i18n-en="Find trips for your taste">내 취향으로 코스 추천받기</strong><small data-i18n-en="Compare demo trips against your choices.">선택한 조건에 맞춰 데모 코스를 비교해요.</small></span>${icon("chevron")}</button>${renderCourseBrowse()}`;
+  return `<section class="community-hero"><h3 data-i18n-en="Discover shared trips">사람들의 코스를 발견해 보세요</h3><p data-i18n-en="Browse demo trips and save your favorites.">공유된 데모 코스를 둘러보고 마음에 드는 코스를 관심코스로 저장해 보세요.</p></section>${renderOutingSearchZone()}<button class="course-entry-card ${state.communityRecommendationOpen ? "active" : ""}" data-action="community-ai" aria-expanded="${state.communityRecommendationOpen}"><span>${icon("compass")}</span><span><strong data-i18n-en="Find trips for your taste">내 취향으로 코스 추천받기</strong><small data-i18n-en="Compare demo trips against your choices.">선택한 조건에 맞춰 데모 코스를 비교해요.</small></span>${icon("chevron")}</button>${state.communityRecommendationOpen ? renderRecommendation() : renderCourseBrowse()}`;
 }
 
 const tasteGroups = [
@@ -2953,8 +2983,14 @@ function renderHistoryRoutes() {
   const cutoff = new Date();
   cutoff.setFullYear(cutoff.getFullYear() - 1);
   const query = normalizeSearch(state.historyQuery);
-  const rankedHistoryIds = query ? new Set(policyRankCandidates(query, historySearchCandidates(), historyRoutes.length).map((item) => item.itemId)) : null;
-  const recent = historyRoutes.filter((route) => new Date(route.date) >= cutoff && (!rankedHistoryIds || rankedHistoryIds.has(route.id)));
+  const numericQuery = /^\d+$/.test(query);
+  const rankedHistoryIds = query && !numericQuery ? new Set(policyRankCandidates(query, historySearchCandidates(), historyRoutes.length).map((item) => item.itemId)) : null;
+  const recent = historyRoutes.filter((route) => {
+    if (new Date(route.date) < cutoff) return false;
+    if (!query) return true;
+    if (numericQuery) return normalizeSearch([route.date, route.name, route.meta, ...route.stops].join(" ")).includes(query);
+    return rankedHistoryIds.has(route.id);
+  });
   return `<section class="history-picker">${renderSearchField({ inputId: "history-search", stateKey: "historyQuery", className: "course-search", placeholder: "날짜, 장소, 코스 검색", label: "이용 기록 검색" })}<div class="row history-summary"><span>최근 1년 전체 이용 기록</span><strong>${recent.length}건</strong></div><div class="stack">${recent.length ? recent.map((route) => `<button class="history-route" data-action="use-history-route" data-value="${route.id}"><span class="history-icon">${icon("clock")}</span><span><strong>${route.name}</strong><small>${route.meta}</small></span>${icon("chevron")}</button>`).join("") : emptyState("search", "검색 결과가 없어요", "최근 1년 내 앞글자가 일치하는 장소나 코스를 검색해 보세요.")}</div><p class="history-retention">이용 기록은 이용일로부터 최대 1년간 보관 후 자동 삭제됩니다.</p></section>`;
 }
 
@@ -3237,9 +3273,13 @@ document.addEventListener("click", (event) => {
   if (action === "order-detail") openOrderDetail(value);
   if (action === "toggle") { button.classList.toggle("on"); toast(button.classList.contains("on") ? "연결했어요." : "연결을 해제했어요."); }
   if (action === "play-ott") toast("차량 디스플레이에서 재생을 시작했어요.");
-  if (action === "outing-sub") { state.outingSub = value; render(); }
+  if (action === "outing-sub") {
+    state.outingSub = value;
+    if (value === "interest") state.hasUnseenInterestCourse = false;
+    persist(); render();
+  }
   if (action === "taste-group") { state.tasteGroup = value; persist(); render(); }
-  if (action === "community-ai") { state.outingSub = "recommend"; render(); }
+  if (action === "community-ai") { state.communityRecommendationOpen = !state.communityRecommendationOpen; render(); }
   if (action === "toggle-outing-map") { state.outingMapOpen = !state.outingMapOpen; persist(); render(); }
   if (action === "outing-map-reset") { state.outingMapOpen = true; render(); requestAnimationFrame(() => initOutingMap()); }
   if (action === "outing-filter") { state.outingFilters[button.dataset.filter] = value; state.outingMapOpen = true; persist(); render(); }
@@ -3256,6 +3296,7 @@ document.addEventListener("click", (event) => {
     } else {
       state.savedCourseIds.add(value);
       state.outingActionIds.saves[value] = logOutingEvent("course_save", "course", value);
+      state.hasUnseenInterestCourse = true;
     }
     persist(); render(); toast(wasSaved ? "관심 코스에서 삭제했어요." : "관심 코스에 저장했어요.");
   }
@@ -3286,7 +3327,7 @@ document.addEventListener("click", (event) => {
   if (action === "edit-profile") openProfileEditor();
   if (action === "open-theme") openThemeSettings();
   if (action === "theme-choice") { state.pendingTheme = value; document.querySelectorAll('[data-action="theme-choice"]').forEach((item) => item.classList.toggle("active", item === button)); const preview = document.querySelector("#theme-example-image"); const label = document.querySelector("#theme-example-label"); const livePreview = document.querySelector("#cabin-live-image"); const liveLabel = document.querySelector("#cabin-live-label"); if (preview) { preview.src = themeAssets[value]; preview.alt = `${value} 공간 테마 예시`; } if (label) label.textContent = `${value} 모드 미리보기`; if (livePreview) livePreview.src = themeAssets[value]; if (liveLabel) liveLabel.textContent = `${value} 모드 미리보기`; }
-  if (action === "open-interest") { state.outingSub = "interest"; setTab("outing"); }
+  if (action === "open-interest") { state.outingSub = "interest"; state.hasUnseenInterestCourse = false; persist(); setTab("outing"); }
   if (action === "profile-section") { state.profileView = value; render(); content.scrollTop = 0; }
   if (action === "profile-back") { state.profileView = "menu"; render(); }
   if (action === "home-notices") { state.profileView = "notices"; setTab("profile"); }
@@ -3354,7 +3395,7 @@ function publishCourse() {
   if (!draft) return;
   const { titleText, validStops } = draft;
   const course = { id: `mine-${MoovOutingData.newId()}`, author: state.username, name: titleText, desc: state.courseDraft.desc.trim() || "내 이동 경험으로 등록한 코스", image: validStops.find((stop) => stop.photo)?.photo || null, time: `${validStops.length}곳 · 나의 코스`, stops: validStops.map((stop) => stop.name), dwell: validStops.map(() => "60분"), distance: null, likes: 0, createdAt: new Date().toISOString(), recommend: "각 장소의 운영시간과 가격을 확인한 뒤 이동해 주세요.", stopDetails: validStops.map((stop) => ({ type: stop.type, name: stop.name, photo: stop.photo || null })), tagProfile: { category: [state.outingFilters.category].filter((item) => item && item !== "전체"), mood: [state.outingFilters.mood].filter((item) => item && item !== "전체"), companion: [state.outingFilters.companion].filter((item) => item && item !== "전체"), purpose: [state.outingFilters.purpose].filter((item) => item && item !== "전체"), time: [state.outingFilters.time].filter((item) => item && item !== "전체"), price: null }, visual: "" };
-  state.customCourses.unshift(course); state.savedCourseIds.add(course.id); logOutingEvent("course_publish", "course", course.id); state.courseDraft = { title: "", desc: "", stops: [{ type: "경유지", name: "", photo: null }, { type: "목적지", name: "", photo: null }] }; state.outingSub = "interest"; persist(); render(); toast("내 코스를 관심 코스에 등록했어요.");
+  state.customCourses.unshift(course); state.savedCourseIds.add(course.id); state.hasUnseenInterestCourse = true; logOutingEvent("course_publish", "course", course.id); state.courseDraft = { title: "", desc: "", stops: [{ type: "경유지", name: "", photo: null }, { type: "목적지", name: "", photo: null }] }; persist(); render(); toast("내 코스를 등록했어요. 관심코스에서 확인해 주세요.");
 }
 
 function currentUsageFee() {
