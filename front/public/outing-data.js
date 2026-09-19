@@ -40,13 +40,103 @@
     return !Number.isFinite(price) || price <= 0 || price <= Number(filters.budget || Infinity);
   }
 
-  function score(course, preference, tags) {
-    let points = 0;
-    if (preference.category !== "전체" && (tags.category || []).includes(preference.category)) points += 100;
-    if (preference.mood !== "전체" && (tags.mood || []).includes(preference.mood)) points += 20;
-    if (preference.companion !== "전체" && (tags.companion || []).includes(preference.companion)) points += 10;
-    return points;
+  // course_points의 좌표들(현재는 START/END 2개) 평균을 코스의 대표 위치로 삼는다.
+  function courseCentroid(points) {
+    const lat = points.reduce((sum, p) => sum + p.latitude, 0) / points.length;
+    const lng = points.reduce((sum, p) => sum + p.longitude, 0) / points.length;
+    return { lat, lng };
   }
+
+  // 두 좌표 간 거리(km), 하버사인 공식.
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371.0088;
+    const toRad = (deg) => (deg * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.asin(Math.sqrt(a));
+  }
+
+  // 사용자/차량 위치가 없으면 계산하지 않는다(geo_score 미반영, 다른 점수만 사용).
+  function calcGeoScore(points, userLat, userLon) {
+    if (userLat == null || userLon == null) return null;
+    const center = courseCentroid(points);
+    const distanceKm = haversineKm(userLat, userLon, center.lat, center.lng);
+    return Math.max(0, 1 - distanceKm / 20);
+  }
+
+  // courses.duration_seconds(초)와 남은 이용 시간(ms)을 비교한다.
+  // 남은 시간보다 코스가 더 길면 못 끝내는 거니까 0점.
+  // 남은 시간 안에서는, 그 시간을 알차게 쓸수록(코스 시간이 남은 시간에 가까울수록) 높은 점수.
+  function calcDurationScore(course, remainingMs) {
+    if (remainingMs == null) return null; // 택시 모드 등 "남은 시간" 개념이 없을 때는 계산 안 함
+    const remainingSeconds = remainingMs / 1000;
+    if (remainingSeconds <= 0) return 0;
+    if (course.duration_seconds > remainingSeconds) return 0;
+    return course.duration_seconds / remainingSeconds;
+  }
+ 
+  // 양지영님 기획서 기준 시간대 구간 (분 단위, 자정 기준)
+const TIME_RANGES = {
+  아침: [6 * 60, 10 * 60],
+  점심: [10 * 60, 14 * 60],
+  오후: [14 * 60, 18 * 60],
+  저녁: [18 * 60, 22 * 60],
+  야간: [22 * 60, 24 * 60],
+};
+
+// "09:30" 같은 문자열을 자정 기준 분(minutes)으로 변환
+function timeToMinutes(hhmm) {
+  const [h, m] = String(hhmm).split(":").map(Number);
+  return h * 60 + m;
+}
+
+// 지점 하나가 선택한 시간대에 열려 있는지
+function isOpenDuring(point, timeSlot) {
+  if (!point.open_time || !point.close_time) return null; // 영업시간 정보가 없으면 판단 불가
+  const range = TIME_RANGES[timeSlot];
+  if (!range) return null; // "전체" 선택 시에는 계산 안 함
+  const open = timeToMinutes(point.open_time);
+  const close = timeToMinutes(point.close_time);
+  return open <= range[1] && close >= range[0]; // 구간이 겹치는지
+}
+
+// 코스 지점들 중 선택한 시간대에 열려 있는 비율
+function calcTimeScore(points, timeSlot) {
+  if (!timeSlot || timeSlot === "전체") return null;
+  const checkable = points.filter((p) => p.open_time && p.close_time);
+  if (checkable.length === 0) return null; // 영업시간 정보가 하나도 없으면 계산 안 함
+  const openCount = checkable.filter((p) => isOpenDuring(p, timeSlot)).length;
+  return openCount / checkable.length;
+}
+function calcTagScore(preference, tags) {
+  let score = 0;
+  if (preference.category !== "전체" && (tags.category || []).includes(preference.category)) score += 0.7;
+  if (preference.mood !== "전체" && (tags.mood || []).includes(preference.mood)) score += 0.2;
+  if (preference.companion !== "전체" && (tags.companion || []).includes(preference.companion)) score += 0.1;
+  return score;
+}
+
+function score(course, preference, tags, context = {}) {
+  const tagScore = calcTagScore(preference, tags);
+  const geoScore = calcGeoScore(context.points || [], context.userLat, context.userLon);
+  const durationScore = calcDurationScore(course, context.remainingMs);
+  const timeScore = calcTimeScore(context.points || [], preference.time);
+
+  // null인 항목(위치/시간 정보 없음)은 빼고, 있는 것끼리만 가중 평균
+  const weighted = [
+    [tagScore, 0.5],
+    [geoScore, 0.2],
+    [durationScore, 0.2],
+    [timeScore, 0.1],
+  ].filter(([value]) => value != null);
+
+  if (weighted.length === 0) return 0;
+  const weightSum = weighted.reduce((sum, [, w]) => sum + w, 0);
+  return weighted.reduce((sum, [value, w]) => sum + value * w, 0) / weightSum;
+}
 
   function tasteSignals(preference, history = []) {
     const signals = new Map();
@@ -83,19 +173,19 @@
     return dates || String(a.id).localeCompare(String(b.id));
   }
 
-  function rank(courses, preference, tagsFor) {
+  function rank(courses, preference, tagsFor, context = {}) {
     const eligible = courses.filter((course) => {
       const tags = tagsFor(course);
       const price = Number(tags.price);
       return !Number.isFinite(price) || price <= 0 || price <= Number(preference.budget || Infinity);
     });
-    return eligible.map((course) => ({ course, score: score(course, preference, tagsFor(course)) }))
+    return eligible.map((course) => ({ course, score: score(course, preference, tagsFor(course), context) }))
       .sort((a, b) => b.score - a.score || tieBreak(a.course, b.course));
   }
 
-  function sort(courses, sortBy, preference, tagsFor, likesFor) {
+  function sort(courses, sortBy, preference, tagsFor, likesFor, context = {}) {
     return [...courses].sort((a, b) => {
-      if (sortBy === "preference") return score(b, preference, tagsFor(b)) - score(a, preference, tagsFor(a)) || tieBreak(a, b);
+      if (sortBy === "preference") return score(b, preference, tagsFor(b), context) - score(a, preference, tagsFor(a), context) || tieBreak(a, b);
       if (sortBy === "popular") return likesFor(b) - likesFor(a) || tieBreak(a, b);
       if (sortBy === "nearby") return (Number(a.distance) || Infinity) - (Number(b.distance) || Infinity) || tieBreak(a, b);
       return tieBreak(a, b);
@@ -106,7 +196,7 @@
     return root.crypto?.randomUUID?.() || `moov-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  const api = { RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, tasteSignals, tasteMatch, rank, sort, newId };
+  const api = { RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, tasteSignals, tasteMatch, rank, sort, newId, courseCentroid, haversineKm, calcGeoScore };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.MoovOutingData = api;
 })(typeof window !== "undefined" ? window : globalThis);
