@@ -87,6 +87,12 @@ const appNotices = [
   { id: "notice-2", tag: "업데이트", title: "관심 상품과 구매 내역 기능 추가", date: "2026.09.12", text: "차량별 재고 확인, 관심 목록 저장과 전자 영수증 조회 기능이 추가되었습니다." },
 ];
 
+const homePromotions = [
+  { id: "food", tag: "프로모션", title: "특별한 오늘, 더 특별한 한 끼", desc: "근처 프리미엄 다이닝 코스를 추천해요.", image: "./assets/promo-food.png", action: "browse-courses-home" },
+  { id: "exhibit", tag: "추천 코스", title: "큐비스트: 시각의 혁신가들", desc: "전시와 산책을 잇는 문화 나들이.", image: "./assets/promo-exhibit.png", action: "browse-courses-home" },
+  { id: "movie", tag: "광고", title: "스파이더맨 브랜드 뉴 데이", desc: "극장가 이벤트와 주변 코스를 함께 확인하세요.", image: "./assets/promo-movie.webp", action: "browse-courses-home" },
+];
+
 const historyRoutes = [
   { id: "ride-1", date: "2026-09-10", name: "성수 → 한강 야경", meta: "2026.09.10 · 렌트 3시간 12분", stops: ["성수연방", "뚝섬 한강공원", "반포대교 달빛광장"] },
   { id: "ride-2", date: "2026-09-07", name: "북촌 산책 코스", meta: "2026.09.07 · 택시 2시간 5분", stops: ["안국역", "북촌한옥마을", "삼청동 카페거리"] },
