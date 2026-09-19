@@ -19,9 +19,9 @@ const rentalOptionCatalog = [
   { id: "ott", name: "OTT 엔터테인먼트", price: 4000 },
 ];
 const homePromotions = [
-  { id: "food", tag: "프로모션", title: "특별한 오늘, 더 특별한 한 끼", desc: "근처 프리미엄 다이닝 코스를 추천해요.", image: "assets/7b6bdf8819edd612.svg", imageEn: "assets/7b6bdf8819edd612-en.svg", action: "browse-courses-home" },
-  { id: "exhibit", tag: "추천 코스", title: "큐비스트: 시각의 혁신가들", desc: "전시와 산책을 잇는 문화 나들이.", image: "assets/8979930f4b10b98d.svg", imageEn: "assets/8979930f4b10b98d-en.svg", action: "browse-courses-home" },
-  { id: "movie", tag: "광고", title: "스파이더맨 브랜드 뉴 데이", desc: "극장가 이벤트와 주변 코스를 함께 확인하세요.", image: "assets/181d0e69cc874d8b.svg", imageEn: "assets/181d0e69cc874d8b-en.svg", action: "browse-courses-home" },
+  { id: "food", tag: "프로모션", title: "특별한 오늘, 더 특별한 한 끼", desc: "근처 프리미엄 다이닝 코스를 추천해요.", image: "../assets/배너_음식점.png", imageEn:"../assets/배너_음식점.png", action: "browse-courses-home" },
+  { id: "exhibit", tag: "추천 코스", title: "큐비스트: 시각의 혁신가들", desc: "전시와 산책을 잇는 문화 나들이.", image: "../assets/배너_전시.png", imageEn: "../assets/배너_전시.png", action: "browse-courses-home" },
+  { id: "movie", tag: "광고", title: "스파이더맨 브랜드 뉴 데이", desc: "극장가 이벤트와 주변 코스를 함께 확인하세요.", image: "../assets/배너_스파이더맨.webp", imageEn: "../assets/배너_스파이더맨.webp", action: "browse-courses-home" },
 ];
 const appNotices = [
   { id: "notice-1", tag: "공지", title: "차량 내부 개인정보 자동 삭제 안내", date: "2026.09.12", text: "하차가 확인되면 OTT 로그인 토큰, 음성 원본과 차량 디스플레이 기록을 자동으로 삭제합니다." },
