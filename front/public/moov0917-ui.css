@@ -679,8 +679,6 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .switch.on { background: var(--green); }
 .switch.on::after { transform: translateX(20px); }
 
-.outing-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-flow: initial; grid-auto-columns: auto; overflow: visible; }
-.outing-tabs button { min-width: 0; padding: 7px 2px; font-size: .6rem; letter-spacing: 0; }
 .outing-search-zone { margin-bottom: 12px; }
 .outing-search-actions { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
 .outing-search-actions .mini-action { min-height: 36px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
