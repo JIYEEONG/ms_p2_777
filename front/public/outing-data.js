@@ -31,7 +31,7 @@
   function matches(course, query, filters, tags) {
     const q = normalized(query);
     if (q && ![course.name, course.desc, ...(course.stops || [])].some((field) => normalized(field).includes(q))) return false;
-    for (const key of ["category", "mood", "companion", "purpose", "time"]) {
+    for (const key of ["category", "mood", "companion", "purpose"]) {
       const selected = filters[key] || "전체";
       if (selected !== "전체" && !(tags[key] || []).includes(selected)) return false;
     }
@@ -110,22 +110,56 @@ function calcTimeScore(points, timeSlot) {
   if (checkable.length === 0) return null; // 영업시간 정보가 하나도 없으면 계산 안 함
   const openCount = checkable.filter((p) => isOpenDuring(p, timeSlot)).length;
   return openCount / checkable.length;
+
+// 렌트 요금 정책(moov-home/js/shared.js의 rentalFareForHours)으로 예상 렌트비를 계산해서
+// 사용자 참고 예산과 비교한다. 지금은 코스가 전부 3시간 미만이라 값이 항상 똑같이 나오는
+// 상태라 score()에는 아직 연결하지 않고, 함수만 준비해둔다.
+function calcPriceFit(course, vehicleId, budget) {
+  if (!budget || typeof rentalFareForHours !== "function") return null;
+  const hours = Math.max(3, Math.ceil(course.duration_seconds / 3600));
+  const estimatedFare = rentalFareForHours(vehicleId, hours);
+  return Math.max(0, 1 - Math.abs(estimatedFare - budget) / budget);
+}
+
 }
 function calcTagScore(preference, tags) {
-  let score = 0;
-  if (preference.category !== "전체" && (tags.category || []).includes(preference.category)) score += 0.7;
-  if (preference.mood !== "전체" && (tags.mood || []).includes(preference.mood)) score += 0.2;
-  if (preference.companion !== "전체" && (tags.companion || []).includes(preference.companion)) score += 0.1;
-  return score;
+  const weights = { category: 0.7, mood: 0.2, companion: 0.1 };
+  let earned = 0, possible = 0;
+  for (const [key, w] of Object.entries(weights)) {
+    if (!preference[key] || preference[key] === "전체") continue;
+    possible += w;
+    if ((tags[key] || []).includes(preference[key])) earned += w;
+  }
+  return possible ? earned / possible : null; // 아무것도 안 골랐으면 태그 점수 제외
+}
+
+function scoreBreakdown(course, preference, tags, context = {}) {
+  const rawPoints = (course.stops || []).map((_, i) => pointForStop(course, i));
+  const geoPoints = rawPoints
+    .filter((p) => p.lat != null && p.lng != null)
+    .map((p) => ({ latitude: p.lat, longitude: p.lng }));
+  return {
+    tagScore: calcTagScore(preference, tags),
+    geoScore: geoPoints.length ? calcGeoScore(geoPoints, context.userLat, context.userLon) : null,
+    durationScore: calcDurationScore(course, context.remainingMs),
+    timeScore: calcTimeScore(rawPoints, preference.time),
+  };
 }
 
 function score(course, preference, tags, context = {}) {
-  const tagScore = calcTagScore(preference, tags);
-  const geoScore = calcGeoScore(context.points || [], context.userLat, context.userLon);
-  const durationScore = calcDurationScore(course, context.remainingMs);
-  const timeScore = calcTimeScore(context.points || [], preference.time);
+  const geoPoints = course._dbPoints
+    ? course._dbPoints.filter((p) => p.latitude != null && p.longitude != null)
+    : (course.stops || []).map((_, i) => pointForStop(course, i))
+        .filter((p) => p.lat != null && p.lng != null)
+        .map((p) => ({ latitude: p.lat, longitude: p.lng }));
 
-  // null인 항목(위치/시간 정보 없음)은 빼고, 있는 것끼리만 가중 평균
+  const timePoints = course._dbPoints || (course.stops || []).map((_, i) => pointForStop(course, i));
+
+  const tagScore = calcTagScore(preference, tags);
+  const geoScore = geoPoints.length ? calcGeoScore(geoPoints, context.userLat, context.userLon) : null;
+  const durationScore = calcDurationScore(course, context.remainingMs);
+  const timeScore = calcTimeScore(timePoints, preference.time);
+
   const weighted = [
     [tagScore, 0.5],
     [geoScore, 0.2],
@@ -136,6 +170,23 @@ function score(course, preference, tags, context = {}) {
   if (weighted.length === 0) return 0;
   const weightSum = weighted.reduce((sum, [, w]) => sum + w, 0);
   return weighted.reduce((sum, [value, w]) => sum + value * w, 0) / weightSum;
+}
+
+function scoreBreakdown(course, preference, tags, context = {}) {
+  const geoPoints = course._dbPoints
+    ? course._dbPoints.filter((p) => p.latitude != null && p.longitude != null)
+    : (course.stops || []).map((_, i) => pointForStop(course, i))
+        .filter((p) => p.lat != null && p.lng != null)
+        .map((p) => ({ latitude: p.lat, longitude: p.lng }));
+
+  const timePoints = course._dbPoints || (course.stops || []).map((_, i) => pointForStop(course, i));
+
+  return {
+    tagScore: calcTagScore(preference, tags),
+    geoScore: geoPoints.length ? calcGeoScore(geoPoints, context.userLat, context.userLon) : null,
+    durationScore: calcDurationScore(course, context.remainingMs),
+    timeScore: calcTimeScore(timePoints, preference.time),
+  };
 }
 
   function tasteSignals(preference, history = []) {
@@ -187,16 +238,24 @@ function score(course, preference, tags, context = {}) {
     return [...courses].sort((a, b) => {
       if (sortBy === "preference") return score(b, preference, tagsFor(b), context) - score(a, preference, tagsFor(a), context) || tieBreak(a, b);
       if (sortBy === "popular") return likesFor(b) - likesFor(a) || tieBreak(a, b);
-      if (sortBy === "nearby") return (Number(a.distance) || Infinity) - (Number(b.distance) || Infinity) || tieBreak(a, b);
+      if (sortBy === "nearby") return (Number(a.distance_m) || Infinity) - (Number(b.distance_m) || Infinity) || tieBreak(a, b);
       return tieBreak(a, b);
     });
+  }
+// 위경도를 OpenStreetMap 타일 이미지 URL로 변환 (코스 카드 썸네일용, 인터랙티브 지도 아님)
+  function staticMapUrl(lat, lng, zoom = 15) {
+    const n = 2 ** zoom;
+    const x = Math.floor(((lng + 180) / 360) * n);
+    const y = Math.floor(
+      ((1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2) * n
+    );
+    return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`;
   }
 
   function newId() {
     return root.crypto?.randomUUID?.() || `moov-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  const api = { RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, tasteSignals, tasteMatch, rank, sort, newId, courseCentroid, haversineKm, calcGeoScore };
-  if (typeof module !== "undefined" && module.exports) module.exports = api;
-  else root.MoovOutingData = api;
-})(typeof window !== "undefined" ? window : globalThis);
+  const api = { RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, scoreBreakdown, tasteSignals, tasteMatch, rank, sort, newId, courseCentroid, haversineKm, calcGeoScore, calcDurationScore, calcTimeScore, staticMapUrl};  if (typeof module !== "undefined" && module.exports) module.exports = api;
+    else root.MoovOutingData = api;
+  })(typeof window !== "undefined" ? window : globalThis);
