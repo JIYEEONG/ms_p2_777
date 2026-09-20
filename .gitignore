@@ -17,3 +17,6 @@ pnpm-debug.log*
 node_modules
 __pycache__/
 *.pyc
+
+front/public/assets/courses/
+front/public/data/
