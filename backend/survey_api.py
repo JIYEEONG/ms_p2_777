@@ -1,5 +1,6 @@
 """Account-owned onboarding survey. Raw answers and recommendation inputs are separate."""
 import json
+import hashlib
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -16,6 +17,7 @@ else:
 
 router = APIRouter(prefix='/api/outing/survey', tags=['survey'])
 DB_PATH = Path(__file__).with_name('.user-surveys.sqlite3')
+SNAPSHOT_DIR = Path(__file__).with_name('account_snapshots')
 SCHEMA = json.loads((Path(__file__).resolve().parents[1] / 'front/public/survey-schema.json').read_text(encoding='utf-8'))
 
 
@@ -68,6 +70,17 @@ class LocationConsentInput(BaseModel):
     version: Literal['1'] = '1'
 
 
+def account_snapshot(user_id: str):
+    account_hash = hashlib.sha256(user_id.encode('utf-8')).hexdigest()
+    path = SNAPSHOT_DIR / f'{account_hash}.json'
+    if not path.is_file():
+        return None
+    snapshot = json.loads(path.read_text(encoding='utf-8'))
+    if snapshot.get('schemaVersion') != 1 or snapshot.get('accountHash') != account_hash:
+        raise ValueError('Invalid account snapshot')
+    return snapshot
+
+
 def derive_profile(answers: Answers):
     # Unselected categories remain unknown, not negative preferences.
     return {
@@ -103,14 +116,19 @@ def database():
 @router.get('')
 def get_survey(response: Response, user: dict = Depends(require_auth_user)):
     response.headers['Cache-Control'] = 'no-store'
+    backup = account_snapshot(user['id'])
     with database() as conn:
         row = conn.execute('''SELECT s.*, p.profile_json FROM user_survey s
             JOIN user_preference p USING(user_id) WHERE user_id=?''', (user['id'],)).fetchone()
         consent = conn.execute('SELECT version, agreed_at FROM location_consent WHERE user_id=?', (user['id'],)).fetchone()
     location_consent = {'version': consent['version'], 'agreedAt': consent['agreed_at']} if consent else None
     if row is None:
-        return {'survey': None, 'locationConsent': location_consent}
-    return {'locationConsent': location_consent, 'survey': {'version': row['version'], 'status': row['status'],
+        survey = None
+        if backup and backup.get('survey'):
+            saved = SurveyInput.model_validate(backup['survey'])
+            survey = {**saved.model_dump(), 'profile': derive_profile(saved.answers), 'updatedAt': backup['exportedAt']}
+        return {'survey': survey, 'locationConsent': location_consent, 'accountBackup': backup}
+    return {'accountBackup': backup, 'locationConsent': location_consent, 'survey': {'version': row['version'], 'status': row['status'],
                        'answers': json.loads(row['answers_json']), 'profile': json.loads(row['profile_json']),
                        'updatedAt': row['updated_at']}}
 

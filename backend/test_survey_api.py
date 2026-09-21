@@ -1,4 +1,5 @@
 import json
+import hashlib
 import sqlite3
 import tempfile
 import unittest
@@ -107,6 +108,27 @@ class SurveyTests(unittest.TestCase):
         self.app.dependency_overrides.clear()
         with patch.object(google_auth_api,'_session_user',return_value=None):
             self.assertEqual(self.client.put(url,json={'agreed': True}).status_code,401)
+
+    def test_repository_snapshot_is_account_scoped_and_live_survey_takes_priority(self):
+        self.user()
+        directory = Path(self.tmp.name) / 'snapshots'
+        directory.mkdir()
+        account_hash = hashlib.sha256(b'google:one').hexdigest()
+        backup = {'schemaVersion':1, 'accountHash':account_hash, 'exportedAt':'2026-09-21T00:00:00Z',
+                  'outing':{'customCourses':[{'id':'mine-one','name':'Saved course'}]},
+                  'survey':self.payload}
+        (directory / f'{account_hash}.json').write_text(json.dumps(backup),encoding='utf-8')
+        with patch.object(survey_api,'SNAPSHOT_DIR',directory):
+            result = self.client.get('/api/outing/survey').json()
+            self.assertEqual(result['accountBackup'],backup)
+            self.assertEqual(result['survey']['profile']['categories'],{'카페':1})
+            self.assertIsNone(result['locationConsent'])
+            self.client.put('/api/outing/survey',json={'status':'skipped','answers':{}})
+            self.assertEqual(self.client.get('/api/outing/survey').json()['survey']['status'],'skipped')
+            self.user('google:two')
+            result = self.client.get('/api/outing/survey').json()
+            self.assertIsNone(result['accountBackup'])
+            self.assertIsNone(result['survey'])
 
 
 if __name__ == '__main__':

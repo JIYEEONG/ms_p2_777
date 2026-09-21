@@ -1232,6 +1232,7 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
     <script src="./taxi-fare-ui.js"></script>
     <script src="./google-auth.js"></script>
     <script src="./survey-profile.js"></script>
+    <script src="./account-snapshot.js"></script>
     <script src="./login-survey.js"></script>
     <script>
 const STORAGE_KEY = "moov-app-v3:";
@@ -1792,7 +1793,7 @@ function courseMatchesQuery(course, query) {
 }
 
 function persist() {
-  if (!state.isAuthenticated || !state.userId) return;
+  if (!state.isAuthenticated || !state.userId || state.backupPending) return;
   const data = {
     userId: state.userId,
     username: state.username,
@@ -1915,7 +1916,10 @@ function applyAuthenticatedUser(user) {
     return;
   }
   clearAccountUi();
+  const snapshotMissing = MoovAccountSnapshot.missing(localStorage, user.id);
   Object.assign(state, createAppState(readSaved(user.id), user));
+  state.snapshotMissing = snapshotMissing;
+  state.backupPending = true;
   restoreAuthenticatedTrip();
   applyChatFontScale();
   persist();
@@ -4018,6 +4022,17 @@ applyChatFontScale();
 MoovLoginSurvey.configure({
   getUserId: () => state.isAuthenticated ? state.userId : null,
   showSurvey: () => { disposeTaxiMap(); showScreen("survey"); },
+  onBackup: backup => {
+    if(!state.isAuthenticated)return;
+    const restored=MoovAccountSnapshot.restore(backup,localStorage,state.userId,state.snapshotMissing);
+    if(restored.changed){
+      const user={id:state.userId,name:state.username,picture:state.profilePhoto};
+      Object.assign(state,createAppState(readSaved(user.id),user));
+      restoreAuthenticatedTrip();applyChatFontScale();
+    }
+    state.snapshotMissing={};state.backupPending=false;persist();
+    if(restored.language&&!new URLSearchParams(location.search).has('lang'))MoovI18n.setLanguage(restored.language);
+  },
   onRecord: record => { state.surveyRecord = record; state.recommendationResultIds = []; state.recommendationRequestId = null; },
   enterApp: () => { if (state.isAuthenticated) { showScreen("app"); setTab(state.activeTab || "home"); } },
 });

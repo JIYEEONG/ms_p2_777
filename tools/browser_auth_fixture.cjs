@@ -13,6 +13,7 @@ async function installBrowserAuthFixture(client, base, options = {}) {
   } };
   client.authFixture = fixture;
   fixture.locationConsent = Object.hasOwn(options,'consent') ? options.consent : {version:'1',agreedAt:'2026-09-21T00:00:00Z'};
+  fixture.accountBackup = options.backup || null;
   client.socket.addEventListener('message', event => {
     const message = JSON.parse(event.data);
     if (message.method !== 'Fetch.requestPaused') return;
@@ -36,7 +37,7 @@ async function installBrowserAuthFixture(client, base, options = {}) {
           const a = saved.answers;
           fixture.survey = {...saved,profile:{categories:Object.fromEntries(a.categories.map(c=>[c,1])),subcategories:a.subcategories,preferredRegions:a.preferredRegions,excludedRegions:a.avoidedRegions,excludedTags:Object.values(a.avoidances).flat()}};
         }
-        body = {survey: fixture.survey,locationConsent:fixture.locationConsent};
+        body = {survey: fixture.survey,locationConsent:fixture.locationConsent,accountBackup:fixture.accountBackup};
       }
     }
     else { status = 400; body = { error: 'This fixture only supplies session verification.' }; }

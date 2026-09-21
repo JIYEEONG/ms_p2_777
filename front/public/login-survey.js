@@ -40,6 +40,7 @@
         const [loadedSchema,result]=await Promise.all([schema||request('./survey-schema.json'),request('/api/outing/survey')]);
         if(!current(token,id))return;
         schema=loadedSchema;record=result.survey;consent=result.locationConsent;
+        config.onBackup?.(result.accountBackup);
         config.onRecord(record);
         if(!consent){mode='consent';render(true);return;}
         if(record){config.enterApp();return;}
