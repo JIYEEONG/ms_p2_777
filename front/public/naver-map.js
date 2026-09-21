@@ -12,6 +12,7 @@
       point: ['유효한 위치를 선택해 주세요.', 'Please select a valid location.'],
       query: ['주소를 2~200자로 입력해 주세요.', 'Enter an address between 2 and 200 characters.'],
       waypoints: ['경유지는 최대 5개까지 선택할 수 있어요.', 'You can select up to five stops.'],
+      stops: ['출발지와 목적지를 포함해 2~20개 장소를 선택해 주세요.', 'Choose 2–20 locations including pickup and destination.'],
       config: ['지도 연결 설정을 확인해 주세요.', 'Please check the map connection settings.'],
       auth: ['지도 인증을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.', 'Map authorization failed. Please try again later.'],
       timeout: ['지도 응답이 지연되고 있어요. 다시 시도해 주세요.', 'The map request timed out. Please try again.'],
@@ -32,11 +33,11 @@
   }
   async function api(path, options = {}) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 16000);
+    const timer = setTimeout(() => controller.abort(), path === 'approach' ? 26000 : 16000);
     try {
       const response = await fetch('/api/maps/' + path, { ...options, signal: controller.signal });
       if (!response.ok) {
-        if (response.status === 422 && path === 'directions') throw failure('route');
+        if (response.status === 422 && ['directions','approach'].includes(path)) throw failure('route');
         if (response.status === 401 || response.status === 403) throw failure('auth');
         throw failure('service');
       }
@@ -104,8 +105,12 @@
   function createMap(element, center, zoom = 15) {
     const maps = sdk();
     element.dataset.mapProvider = 'naver';
-    return new maps.Map(element, {
-      center: latLng(center), zoom, zoomControl: true, scrollWheel: false,
+    // Touch gestures inside the map belong to NAVER, including two-finger zoom.
+    element.style.touchAction = 'none';
+    const map = new maps.Map(element, {
+      center: latLng(center), zoom, zoomControl: true, scrollWheel: true,
+      draggable: true, pinchZoom: true, disableDoubleTapZoom: false,
+      disableTwoFingerTapZoom: false,
       zoomControlOptions: { position: maps.Position.LEFT_CENTER, style: maps.ZoomControlStyle.SMALL },
       logoControl: true, mapDataControl: true,
       // Keep NAVER attribution in the native map controls.
@@ -113,9 +118,42 @@
       mapDataControlOptions: { position: maps.Position.BOTTOM_LEFT },
       scaleControl: true,
     });
+    element.addEventListener('pointerdown', () => { map.moovInteracted = true; }, { passive: true });
+    element.addEventListener('touchstart', () => { map.moovInteracted = true; }, { passive: true });
+    element.addEventListener('wheel', () => { map.moovInteracted = true; }, { passive: true, capture: true });
+    return map;
   }
   function eventFor(event) {
     return event?.coord ? { ...event, latlng: { lat: event.coord.lat(), lng: event.coord.lng() } } : event;
+  }
+  function fitPoints(native, points, options = {}) {
+    if (!points.length) return;
+    const coordinates = points.map(latLng);
+    const bounds = new (sdk().LatLngBounds)(coordinates[0], coordinates[0]);
+    for (const coordinate of coordinates.slice(1)) bounds.extend(coordinate);
+    const padding = options.padding || [0, 0];
+    const tl = options.paddingTopLeft || padding, br = options.paddingBottomRight || padding;
+    const margin = {
+      top: options.top ?? tl[1], left: options.left ?? tl[0],
+      bottom: options.bottom ?? br[1], right: options.right ?? br[0],
+    };
+    if (Number.isFinite(options.maxZoom)) margin.maxZoom = options.maxZoom;
+    native.fitBounds(bounds, margin);
+  }
+  function fitRoute(map, points, options = {}) {
+    if (!map || !points.length) return map;
+    // The SDK selects the closest zoom that contains every real route coordinate.
+    // Keep room for the marker icons and attribution, even on the short map panel.
+    const padding = options.padding || [36, 40];
+    const margins = {
+      paddingTopLeft: options.paddingTopLeft || padding,
+      paddingBottomRight: options.paddingBottomRight || options.padding || [36, 50],
+      maxZoom: 18,
+      ...options,
+    };
+    if (map.native) map.fitBounds(points, margins);
+    else fitPoints(map, points, margins);
+    return map;
   }
   function createView(element, center, zoom = 15) {
     const native = createMap(element, center, zoom);
@@ -129,11 +167,7 @@
       panTo(value, options = {}) { if (!removed) options.animate === false ? native.setCenter(latLng(value)) : native.panTo(latLng(value)); return view; },
       fitBounds(points, options = {}) {
         if (removed || !points.length) return view;
-        const padding = options.padding || [0, 0];
-        const tl = options.paddingTopLeft || padding, br = options.paddingBottomRight || padding;
-        const bounds = { top: tl[1], left: tl[0], bottom: br[1], right: br[0] };
-        if (Number.isFinite(options.maxZoom)) bounds.maxZoom = options.maxZoom;
-        native.fitBounds(points.map(latLng), bounds);
+        fitPoints(native, points, options);
         return view;
       },
       on(type, handler) { if (!removed) listeners.push(sdk().Event.addListener(native, type, event => handler(eventFor(event)))); return view; },
@@ -161,7 +195,7 @@
     const wrapper = {
       native,
       addTo(view) {
-        owner?._layers.delete(wrapper);
+        owner?._layers?.delete(wrapper);
         owner = view;
         view._layers?.add(wrapper);
         native.setMap(view.native || view);
@@ -171,7 +205,7 @@
       remove() {
         listeners.splice(0).forEach(listener => sdk().Event.removeListener(listener));
         native.setMap(null);
-        owner?._layers.delete(wrapper);
+        owner?._layers?.delete(wrapper);
         owner = null;
         wrapper._cleanup?.();
         return wrapper;
@@ -186,7 +220,7 @@
     const size = options.size || [44, 44];
     const anchor = options.anchor || [size[0] / 2, size[1] / 2];
     const native = new maps.Marker({
-      position: latLng(value), title: options.title || '', clickable: true,
+      position: latLng(value), title: options.title || '', clickable: true, draggable: options.draggable === true,
       icon: { content: element, size: new maps.Size(...size), anchor: new maps.Point(...anchor) },
     });
     const wrapper = layer(native);
@@ -194,6 +228,7 @@
     let keyboardHandler = null;
     const elementListeners = [];
     wrapper.setLatLng = next => { native.setPosition(latLng(next)); return wrapper; };
+    wrapper.getLatLng = () => { const p = native.getPosition(); return { lat: p.lat(), lng: p.lng() }; };
     wrapper.getElement = () => element;
     const on = wrapper.on;
     wrapper.on = (type, handler) => {
@@ -257,6 +292,59 @@
     if (!Array.isArray(data.results)) throw failure('response');
     return data;
   }
+  async function searchPlaces(query) {
+    query = String(query || '').trim();
+    if (query.length < 2 || query.length > 200) throw failure('query');
+    const data = await api('search?query=' + encodeURIComponent(query));
+    if (!Array.isArray(data.places)) throw failure('response');
+    data.places.forEach(point);
+    return data.places;
+  }
+  function matchPlace(query, places) {
+    const normalize=value=>String(value||'').normalize('NFKC').replace(/\s+/g,'').toLocaleLowerCase();
+    const valid=places.filter(item=>Number.isFinite(item.lat)&&Number.isFinite(item.lng));
+    const exact=valid.filter(item=>normalize(item.name)===normalize(query));
+    const distinct=items=>[...new Map(items.map(item=>[`${item.lat},${item.lng}`,item])).values()];
+    const matches=distinct(exact);
+    if(matches.length)return matches.length===1?matches[0]:null;
+    // A single geocoded street/parcel address is usable, but never guess a POI
+    // from search ranking when several similarly named businesses exist.
+    const addresses=distinct(valid.filter(item=>item.category==='주소'));
+    return addresses.length===1?addresses[0]:null;
+  }
+  async function describePoint(value) {
+    const p = point(value);
+    let name = `${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}`;
+    let address = '', landmark = '', landmarkDistance = null;
+    try {
+      const data = await reverseGeocode(p.lat, p.lng);
+      const r = data.results.find(item => item.name === 'roadaddr') || data.results[0];
+      if (r) {
+        const region = ['area1', 'area2', 'area3', 'area4'].map(key => r.region?.[key]?.name).filter(Boolean);
+        const land = r.land || {};
+        const number = [land.number1, land.number2].filter(Boolean).join('-');
+        address = [...region, land.name, number].filter(Boolean).join(' ');
+        name = address || name;
+        const building = Object.values(land).find(item => item?.type === 'building' && item.value?.trim());
+        if (building) landmark = building.value.trim();
+        else if (address) {
+          // Local Search has no radius parameter. Verify distance ourselves and
+          // never replace the passenger's selected coordinate with a POI point.
+          try {
+            const candidates = await searchPlaces(address);
+            const nearest = candidates.filter(item => item.name && item.category !== '주소').map(item => {
+              const rad = Math.PI / 180;
+              const a = Math.sin((item.lat - p.lat) * rad / 2) ** 2 + Math.cos(p.lat * rad) * Math.cos(item.lat * rad) * Math.sin((item.lng - p.lng) * rad / 2) ** 2;
+              return { ...item, meters: 6371000 * 2 * Math.asin(Math.min(1, Math.sqrt(a))) };
+            }).filter(item => item.meters <= 80).sort((a, b) => a.meters - b.meters)[0];
+            if (nearest) { landmark = nearest.name; landmarkDistance = Math.round(nearest.meters); }
+          } catch { /* Address remains available if Local Search is unavailable. */ }
+        }
+        if (landmark) name = landmark;
+      }
+    } catch { /* The selected coordinates remain usable without an address. */ }
+    return { ...p, name, address, landmark, landmarkDistance, id: `map-${p.lat}-${p.lng}`, category: message('지도 선택', 'Map selection'), dwell: 0 };
+  }
   async function directions({ start, goal, waypoints = [] }) {
     if (!Array.isArray(waypoints) || waypoints.length > 5) throw failure('waypoints');
     const body = JSON.stringify({ start: point(start), goal: point(goal), waypoints: waypoints.map(point) });
@@ -274,5 +362,47 @@
     routes.set(body, entry);
     return entry.promise;
   }
-  window.MoovNaverMap = { ready, createMap, createView, marker, polyline, circle, geocode, reverseGeocode, directions };
+  async function directionsForStops(stops) {
+    if(!Array.isArray(stops)||stops.length<2||stops.length>20)throw failure('stops');
+    stops.forEach(point);
+    const route={points:[],distanceMeters:0,durationSeconds:0};
+    for(let i=0;i<stops.length-1;i+=6){
+      const part=stops.slice(i,i+7);
+      const leg=await window.MoovNaverMap.directions({start:part[0],goal:part.at(-1),waypoints:part.slice(1,-1)});
+      route.points.push(...(route.points.length?leg.points.slice(1):leg.points));
+      route.distanceMeters+=leg.distanceMeters;route.durationSeconds+=leg.durationSeconds;
+    }
+    return route;
+  }
+  const metersBetween=(a,b)=>{
+    const r=Math.PI/180,h=Math.sin((b.lat-a.lat)*r/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin((b.lng-a.lng)*r/2)**2;
+    return 6371000*2*Math.asin(Math.min(1,Math.sqrt(h)));
+  };
+  async function approachRoute({start,goal}){
+    const route=await api('approach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({start:point(start),goal:point(goal)})});
+    if(!Array.isArray(route.points)||route.points.length<2||!Number.isFinite(route.distanceMeters)||route.distanceMeters<0||!Number.isFinite(route.durationSeconds)||route.durationSeconds<0)throw failure('response');
+    route.points.forEach(point);return route;
+  }
+  async function pickupApproach(pickup,vehiclePosition=null){
+    pickup=point(pickup);
+    // There is no live fleet in this demo. Compare nearby simulated vehicles;
+    // a real vehicle position, when supplied, is never replaced or relocated.
+    const starts=vehiclePosition?[point(vehiclePosition)]:[[.003,.003],[-.003,-.003],[.003,-.003],[-.003,.003]].map(([lat,lng])=>({lat:pickup.lat+lat,lng:pickup.lng+lng}));
+    const results=await Promise.allSettled(starts.map(start=>window.MoovNaverMap.approachRoute({start,goal:pickup})));
+    const candidates=results.filter(r=>r.status==='fulfilled').map(r=>r.value).sort((a,b)=>a.distanceMeters-b.distanceMeters||a.durationSeconds-b.durationSeconds);
+    if(!candidates.length)throw results.find(r=>r.status==='rejected')?.reason||failure('route');
+    const route=candidates[0],cumulative=[0];
+    for(let i=1;i<route.points.length;i++)cumulative.push(cumulative.at(-1)+metersBetween(point(route.points[i-1]),point(route.points[i])));
+    const last=point(route.points.at(-1));
+    return {...route,cumulative,totalMeters:cumulative.at(-1),pickupSnap:{...last,distanceMeters:Math.round(metersBetween(pickup,last))},durationMs:18000,provider:'naver',demo:!vehiclePosition};
+  }
+  function approachPosition(route,progress){
+    progress=Math.max(0,Math.min(1,progress));
+    const distance=progress*route.totalMeters,c=route.cumulative;
+    let i=1;while(i<c.length-1&&c[i]<distance)i++;
+    const a=route.points[i-1],b=route.points[i],t=(distance-c[i-1])/(c[i]-c[i-1]||1);
+    const lat=a[0]+(b[0]-a[0])*t,lng=a[1]+(b[1]-a[1])*t;
+    return {lat,lng,remainingMeters:Math.max(0,route.distanceMeters*(1-progress)),remainingPoints:[[lat,lng],...route.points.slice(i)]};
+  }
+  window.MoovNaverMap = { ready, createMap, createView, fitRoute, marker, polyline, circle, geocode, searchPlaces, matchPlace, describePoint, reverseGeocode, directions, directionsForStops, approachRoute, pickupApproach, approachPosition };
 })();

@@ -10,6 +10,83 @@ from backend import naver_maps_api as maps
 
 
 class MapsTests(unittest.TestCase):
+    def test_approach_compares_all_options_and_never_sends_passenger_waypoints(self):
+        body = maps.ApproachRequest(start={'lat': 37.5, 'lng': 127}, goal={'lat': 37.6, 'lng': 127.1})
+        def route(distance, duration):
+            return {'path': [[127, 37.5], [127.1, 37.6]], 'summary': {'distance': distance, 'duration': duration}}
+        answers = [{'code': 0, 'route': {'traoptimal': [route(3300, 660000)], 'trafast': [route(1500, 60000)], 'tracomfort': [route(1400, 90000)]}},
+                   {'code': 0, 'route': {'traavoidtoll': [route(500, 100000)], 'traavoidcaronly': [route(500, 80000)]}}]
+        with patch.object(maps, 'naver_get', side_effect=answers) as request:
+            result = maps.approach(body)
+        self.assertEqual(result['distanceMeters'], 500)
+        self.assertEqual(result['durationSeconds'], 80)
+        self.assertEqual(result['points'], [[37.5, 127], [37.6, 127.1]])
+        self.assertEqual(result['candidateCount'], 5)
+        self.assertEqual(result['strategy'], 'shortest-returned')
+        self.assertEqual(request.call_count, 2)
+        options = set()
+        for call in request.call_args_list:
+            params = call.args[1]
+            self.assertEqual(set(params), {'start', 'goal', 'option'})
+            self.assertEqual(params['goal'], '127.1,37.6')
+            self.assertLessEqual(len(params['option'].split(':')), 3)
+            options.update(params['option'].split(':'))
+        self.assertEqual(options, {'traoptimal', 'trafast', 'tracomfort', 'traavoidtoll', 'traavoidcaronly'})
+
+    def test_approach_without_drivable_routes_fails_without_fabricated_geometry(self):
+        body = maps.ApproachRequest(start={'lat': 37.5, 'lng': 127}, goal={'lat': 37.6, 'lng': 127.1})
+        with patch.object(maps, 'naver_get', return_value={'code': 1}):
+            with self.assertRaises(HTTPException) as error:
+                maps.approach(body)
+        self.assertEqual(error.exception.status_code, 422)
+
+    def test_address_search_works_without_search_api_credentials(self):
+        address = {'roadAddress': '서울특별시 중구 세종대로 110', 'jibunAddress': '', 'englishAddress': 'Seoul', 'lat': 37.566, 'lng': 126.978}
+        with patch.dict(os.environ, {'NAVER_SEARCH_CLIENT_ID': '', 'NAVER_SEARCH_CLIENT_SECRET': ''}), patch.object(maps, 'geocode', return_value={'addresses': [address]}), patch.object(maps, 'urlopen') as network:
+            result = maps.search_places('세종대로 110')
+        self.assertEqual(result['places'][0]['lat'], 37.566)
+        self.assertEqual(result['places'][0]['name'], address['roadAddress'])
+        network.assert_not_called()
+
+    def test_business_search_decodes_coordinates_and_strips_html(self):
+        import json
+        data = {'items': [{'title': '<b>카페</b> &amp; 티', 'mapx': '1269780000', 'mapy': '375660000', 'roadAddress': '서울'}]}
+        with patch.dict(os.environ, {'NAVER_SEARCH_CLIENT_ID': 'search-id', 'NAVER_SEARCH_CLIENT_SECRET': 'secret-sentinel'}), patch.object(maps, 'geocode', return_value={'addresses': []}), patch.object(maps, 'urlopen', return_value=io.BytesIO(json.dumps(data).encode())) as network:
+            result = maps.search_places('카페')
+        request = network.call_args.args[0]
+        self.assertTrue(request.full_url.startswith('https://naverapihub.apigw.ntruss.com/search/v1/local?'))
+        self.assertIn('format=json', request.full_url)
+        headers = {key.lower(): value for key, value in request.header_items()}
+        self.assertEqual(headers['x-ncp-apigw-api-key-id'], 'search-id')
+        self.assertEqual(headers['x-ncp-apigw-api-key'], 'secret-sentinel')
+        self.assertNotIn('x-naver-client-id', headers)
+        self.assertEqual(result['places'][0]['name'], '카페 & 티')
+        self.assertEqual((result['places'][0]['lat'], result['places'][0]['lng']), (37.566, 126.978))
+        self.assertNotIn('secret-sentinel', str(result))
+
+    def test_api_hub_accepts_decimal_wgs84_and_ignores_invalid_points(self):
+        import json
+        data = {'items': [{'title': 'Place', 'mapx': '126.978', 'mapy': '37.566'},
+                          {'title': 'Bad', 'mapx': 'nan', 'mapy': 'nan'}]}
+        with patch.dict(os.environ, {'NAVER_SEARCH_CLIENT_ID': 'id', 'NAVER_SEARCH_CLIENT_SECRET': 'secret'}), patch.object(maps, 'geocode', return_value={'addresses': []}), patch.object(maps, 'urlopen', return_value=io.BytesIO(json.dumps(data).encode())):
+            result = maps.search_places('Place')
+        self.assertEqual(len(result['places']), 1)
+        self.assertEqual(result['places'][0]['lat'], 37.566)
+
+    def test_api_hub_auth_failure_does_not_leak_credentials(self):
+        failure = HTTPError(maps.SEARCH_URL, 401, 'secret-sentinel', {}, io.BytesIO(b'secret-sentinel'))
+        with patch.dict(os.environ, {'NAVER_SEARCH_CLIENT_ID': 'id', 'NAVER_SEARCH_CLIENT_SECRET': 'secret-sentinel'}), patch.object(maps, 'geocode', return_value={'addresses': []}), patch.object(maps, 'urlopen', side_effect=failure):
+            with self.assertRaises(HTTPException) as error:
+                maps.search_places('Place')
+        self.assertEqual(error.exception.status_code, 503)
+        self.assertNotIn('secret-sentinel', str(error.exception.detail))
+
+    def test_search_failure_does_not_discard_address_results(self):
+        address = {'roadAddress': '서울', 'lat': 37.5, 'lng': 127}
+        with patch.dict(os.environ, {'NAVER_SEARCH_CLIENT_ID': 'search-id', 'NAVER_SEARCH_CLIENT_SECRET': 'secret'}), patch.object(maps, 'geocode', return_value={'addresses': [address]}), patch.object(maps, 'urlopen', side_effect=TimeoutError):
+            result = maps.search_places('서울')
+        self.assertEqual(len(result['places']), 1)
+
     def test_public_config_does_not_expose_secret(self):
         with patch.dict(os.environ, {'NAVER_MAP_CLIENT_ID': 'public-id', 'NAVER_MAP_CLIENT_SECRET': 'secret-sentinel'}):
             result = maps.maps_config(Response())

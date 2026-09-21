@@ -51,8 +51,8 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .cabin-live-head strong { font-size: .7rem; }
 .cabin-live img { width: 100%; height: 174px; display: block; object-fit: cover; transition: opacity .2s ease; }
 
-.phone-shell { position: relative; z-index: 2; width: 414px; height: min(896px, calc(100vh - 28px)); min-height: 690px; overflow: hidden; border: 9px solid #171720; border-radius: 45px; background: white; box-shadow: 0 24px 80px rgba(24,23,37,.18); }
-.phone-top { position: absolute; z-index: 20; inset: 0 0 auto; height: 42px; display: flex; align-items: center; justify-content: space-between; padding: 0 22px; background: rgba(255,255,255,.96); color: #111; font-size: .75rem; font-weight: 800; }
+.phone-shell { position: relative; z-index: 2; width: 414px; height: min(896px, calc(100vh - 28px)); min-height: 690px; overflow: clip; border: 9px solid #171720; border-radius: 45px; background: white; box-shadow: 0 24px 80px rgba(24,23,37,.18); }
+.phone-top { position: absolute; z-index: 20; inset: 0 0 auto; height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 6px 22px 0; background: rgba(255,255,255,.96); color: #111; font-size: .75rem; font-weight: 800; }
 .phone-status { display: inline-flex; align-items: center; gap: 7px; }
 .signal-bars { height: 13px; display: inline-flex; align-items: flex-end; gap: 2px; }
 .signal-bars i { width: 3px; border-radius: 3px; background: #111; }
@@ -69,7 +69,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .battery-ui b { width: 78%; height: 100%; border-radius: 2px; background: #36c56f; }
 .battery-ui i { position: absolute; left: 50%; top: 50%; width: 7px; height: 9px; background: #111; clip-path: polygon(42% 0, 100% 0, 61% 44%, 100% 44%, 33% 100%, 47% 55%, 0 55%); transform: translate(-50%, -50%); }
 .home-indicator { position: absolute; z-index: 30; left: 50%; bottom: 7px; width: 128px; height: 5px; border-radius: 99px; background: #171720; transform: translateX(-50%); }
-.screen { display: none; height: 100%; padding-top: 42px; }
+.screen { display: none; height: 100%; padding-top: 48px; }
 .screen-active { display: flex; }
 
 .splash-screen { flex-direction: column; align-items: center; justify-content: center; background: white; }
@@ -261,7 +261,6 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .mode-reset { padding: 7px 4px; border: 0; background: transparent; color: var(--muted); font-size: .68rem; font-weight: 850; }
 .mobility-map { position: relative; height: 286px; overflow: hidden; border-radius: 18px; background: #dcebe2; box-shadow: 0 10px 26px rgba(24,23,37,.1); }
 .mobility-map > img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.72) contrast(.96); }
-.mobility-map > img.virtual-gps-map { object-position: center 47%; filter: none; }
 .map-route-line { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .map-route-line path { fill: none; stroke: var(--green); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 4 5; filter: drop-shadow(0 1px 1px white); }
 .map-shade { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(20,35,28,.14), transparent 40%, rgba(16,29,23,.62)); pointer-events: none; }
@@ -476,13 +475,13 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .vehicle-compare-strip{display:grid;grid-auto-flow:column;grid-auto-columns:154px;gap:9px;overflow-x:auto;padding:0 16px 12px;scroll-snap-type:x proximity;scrollbar-width:none}.vehicle-compare-strip::-webkit-scrollbar{display:none}.vehicle-compare-card{min-width:0;overflow:hidden;padding:10px;border:1px solid #e7ebe8;border-radius:16px;background:#fff;text-align:left;scroll-snap-align:start;transition:.16s ease}.vehicle-compare-card:active{transform:scale(.98)}.vehicle-compare-card.selected{border-color:var(--green);background:#f7fcf9;box-shadow:0 0 0 1px rgba(83,177,117,.14)}.vehicle-compare-image{height:84px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(160deg,#f8fbf9,#eef5f1)}.vehicle-compare-image img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 7px 7px rgba(24,23,37,.1))}.vehicle-compare-card small,.vehicle-compare-card strong,.vehicle-compare-card em{display:block}.vehicle-compare-card small{margin-top:8px;color:var(--green-dark);font-size:.54rem;font-weight:900}.vehicle-compare-card strong{margin-top:3px;font-size:.72rem}.vehicle-compare-card em{margin-top:6px;color:var(--ink);font-size:.68rem;font-style:normal;font-weight:900}.vehicle-compare-card span{display:block;margin-top:3px;color:var(--muted);font-size:.54rem}
 .vehicle-detail-hero.refined{min-height:205px}.vehicle-detail-hero.refined img{height:190px;width:90%}.vehicle-choice-reason{margin:10px 0 0;padding:10px 11px;border-radius:11px;background:#f4f7f5;color:#555;font-size:.6rem;line-height:1.45}.vehicle-choice-reason b{color:var(--green-dark)}
 .vehicle-price-cta{z-index:4}.vehicle-price-cta button{min-height:52px}
-.pickup-map-shell{position:relative;overflow:hidden;border-radius:20px;background:#dcebe2}.pickup-map-shell .rental-osm-map{height:365px;border-radius:20px}.pickup-map-tip{position:absolute;z-index:500;top:12px;left:12px;right:12px;display:flex;align-items:center;gap:7px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 6px 18px rgba(24,23,37,.12);color:#4f5552;font-size:.6rem;font-weight:850;pointer-events:none}.pickup-map-tip svg{width:15px;height:15px;color:var(--green-dark)}
+.pickup-map-shell{position:relative;overflow:hidden;border-radius:20px;background:#dcebe2}.pickup-map-shell .rental-naver-map{height:365px;border-radius:20px}.pickup-map-tip{position:absolute;z-index:500;top:12px;left:12px;right:12px;display:flex;align-items:center;gap:7px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 6px 18px rgba(24,23,37,.12);color:#4f5552;font-size:.6rem;font-weight:850;pointer-events:none}.pickup-map-tip svg{width:15px;height:15px;color:var(--green-dark)}
 .pickup-confirm-sheet{position:relative;margin:-72px 10px 0;z-index:550;padding:14px;border-radius:18px;background:#fff;box-shadow:0 14px 34px rgba(24,23,37,.16)}.pickup-location-line{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:9px}.pickup-location-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:var(--green-soft);color:var(--green-dark)}.pickup-location-line small,.pickup-location-line strong{display:block}.pickup-location-line small{color:var(--muted);font-size:.55rem}.pickup-location-line strong{margin-top:2px;max-width:220px;overflow:hidden;font-size:.69rem;text-overflow:ellipsis;white-space:nowrap}.pickup-location-line button{min-height:40px;padding:0 10px;border:0;border-radius:10px;background:#f3f5f4;color:var(--green-dark);font-size:.6rem;font-weight:900}.pickup-secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}.pickup-secondary-actions button{min-height:44px}
-.matching-card.refined,.approaching-card.refined{padding:0;overflow:hidden}.matching-card.refined .rental-osm-map,.approaching-card.refined .rental-osm-map{border-radius:0;height:330px}.system-status-sheet{position:relative;margin:-42px 10px 10px;z-index:520;padding:16px;border-radius:20px;background:#fff;box-shadow:0 15px 35px rgba(24,23,37,.16)}.system-status-sheet h3{margin:5px 0 5px}.system-status-sheet p{margin:0;color:var(--muted);font-size:.66rem;line-height:1.5}.system-status-kicker{display:flex;align-items:center;gap:7px;color:var(--green-dark);font-size:.58rem;font-weight:950}.system-status-kicker i{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(83,177,117,.12)}.matching-progress{height:5px;overflow:hidden;margin:14px 0 10px;border-radius:99px;background:#edf0ee}.matching-progress span{display:block;width:58%;height:100%;border-radius:inherit;background:var(--green);animation:matching-sweep 1.3s ease-in-out infinite alternate}@keyframes matching-sweep{to{width:86%}}
+.matching-card.refined,.approaching-card.refined{padding:0;overflow:hidden}.matching-card.refined .rental-naver-map,.approaching-card.refined .rental-naver-map{border-radius:0;height:330px}.system-status-sheet{position:relative;margin:-42px 10px 10px;z-index:520;padding:16px;border-radius:20px;background:#fff;box-shadow:0 15px 35px rgba(24,23,37,.16)}.system-status-sheet h3{margin:5px 0 5px}.system-status-sheet p{margin:0;color:var(--muted);font-size:.66rem;line-height:1.5}.system-status-kicker{display:flex;align-items:center;gap:7px;color:var(--green-dark);font-size:.58rem;font-weight:950}.system-status-kicker i{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(83,177,117,.12)}.matching-progress{height:5px;overflow:hidden;margin:14px 0 10px;border-radius:99px;background:#edf0ee}.matching-progress span{display:block;width:58%;height:100%;border-radius:inherit;background:var(--green);animation:matching-sweep 1.3s ease-in-out infinite alternate}@keyframes matching-sweep{to{width:86%}}
 .vehicle-identity-card{display:grid;grid-template-columns:80px 1fr;gap:11px;align-items:center;margin:12px 0;padding:10px;border:1px solid #e8ece9;border-radius:15px;background:#fbfcfb}.vehicle-identity-card img{width:80px;height:62px;object-fit:contain}.vehicle-identity-card small,.vehicle-identity-card strong,.vehicle-identity-card span{display:block}.vehicle-identity-card small{color:var(--muted);font-size:.54rem}.vehicle-identity-card strong{margin-top:2px;font-size:.75rem}.vehicle-identity-card span{margin-top:3px;color:#555;font-size:.59rem}.identity-plate{display:inline-flex!important;width:max-content;margin-top:6px!important;padding:4px 7px;border-radius:7px;background:#161719;color:#fff!important;font-size:.56rem!important;font-weight:900;letter-spacing:.04em}
 .arrival-hero{display:flex;align-items:end;justify-content:space-between;gap:10px}.arrival-hero strong{font-size:1.65rem}.arrival-hero span{color:var(--muted);font-size:.62rem}.arrival-hero b{color:var(--green-dark)}.safety-note{display:flex;gap:7px;align-items:flex-start;margin:10px 0;padding:9px 10px;border-radius:11px;background:#f4f7f5;color:#5e6461;font-size:.58rem;line-height:1.45}.safety-note svg{width:15px;height:15px;flex:0 0 auto;color:var(--green-dark)}
 .rental-drive-map.refined{height:385px}.drive-bottom-sheet{position:relative;margin:-56px 10px 0;z-index:520;padding:14px;border-radius:20px;background:#fff;box-shadow:0 15px 35px rgba(24,23,37,.16)}.drive-next-stop{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:9px}.drive-next-stop>span:first-child{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:var(--green-soft);color:var(--green-dark)}.drive-next-stop small,.drive-next-stop strong{display:block}.drive-next-stop small{color:var(--muted);font-size:.54rem}.drive-next-stop strong{margin-top:2px;font-size:.72rem}.drive-next-stop em{font-style:normal;color:var(--green-dark);font-size:.6rem;font-weight:900}.drive-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:11px 0}.drive-summary-grid span{padding:9px;border-radius:11px;background:#f6f8f7;text-align:center}.drive-summary-grid small,.drive-summary-grid strong{display:block}.drive-summary-grid small{color:var(--muted);font-size:.51rem}.drive-summary-grid strong{margin-top:3px;font-size:.66rem}.drive-edit-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.drive-edit-row button{min-height:44px}.danger-text-button{width:100%;margin-top:10px;padding:10px;border:0;background:transparent;color:var(--danger);font-size:.61rem;font-weight:900}
-@media (max-height:760px){.pickup-map-shell .rental-osm-map{height:300px}.rental-drive-map.refined{height:320px}.vehicle-detail-hero.refined{min-height:175px}.vehicle-detail-hero.refined img{height:160px}}
+@media (max-height:760px){.pickup-map-shell .rental-naver-map{height:300px}.rental-drive-map.refined{height:320px}.vehicle-detail-hero.refined{min-height:175px}.vehicle-detail-hero.refined img{height:160px}}
 
 /* ===== MOOV 렌터카 단계형 배차/주행 플로우 ===== */
 .rental-journey { display:grid; gap:12px; margin:-7px -6px 0; }
@@ -597,11 +596,11 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .rental-car-specs { display:flex; gap:8px; margin-top:11px; padding-top:10px; border-top:1px solid #eee; color:#777; font-size:.57rem; font-weight:800; }
 .rental-car-specs span { display:inline-flex; align-items:center; gap:4px; }
 .rental-car-specs svg { width:14px; height:14px; color:#b56618; }
-.rental-osm-map { position:relative; width:100%; height:300px; overflow:hidden; border-radius:18px; background:#eef2ef; z-index:1; }
-.rental-osm-map.tall { height:360px; }
-.rental-osm-map.assigned-map { height:245px; border-radius:0; }
-.rental-osm-map.route-map { height:350px; }
-.rental-osm-map.picker { height:260px; margin:10px 0 7px; }
+.rental-naver-map { position:relative; width:100%; height:300px; overflow:hidden; border-radius:18px; background:#eef2ef; z-index:1; }
+.rental-naver-map.tall { height:360px; }
+.rental-naver-map.assigned-map { height:245px; border-radius:0; }
+.rental-naver-map.route-map { height:350px; }
+.rental-naver-map.picker { height:260px; margin:10px 0 7px; }
 .rental-pickup-card { position:relative; }
 .rental-pickup-floating { position:absolute; z-index:500; left:12px; right:12px; bottom:116px; display:grid; grid-template-columns:34px 1fr auto; align-items:center; gap:8px; padding:10px; border-radius:14px; background:rgba(255,255,255,.96); box-shadow:0 8px 24px rgba(24,23,37,.16); backdrop-filter:blur(8px); }
 .rental-pickup-floating > span { width:34px; height:34px; display:grid; place-items:center; border-radius:11px; background:#fff2e4; color:#b56618; }
@@ -647,9 +646,6 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .sparkle-burst i { position:absolute; width:8px; height:8px; border-radius:2px; background:#f8a44c; animation:sparkle 1.2s ease-in-out infinite alternate; }
 .sparkle-burst i:nth-child(1){left:18%;top:22%}.sparkle-burst i:nth-child(2){left:76%;top:18%;background:#53B175;animation-delay:.2s}.sparkle-burst i:nth-child(3){left:84%;top:55%;animation-delay:.4s}.sparkle-burst i:nth-child(4){left:14%;top:62%;background:#53B175;animation-delay:.6s}.sparkle-burst i:nth-child(5){left:30%;top:12%;animation-delay:.1s}.sparkle-burst i:nth-child(6){left:68%;top:70%;background:#53B175;animation-delay:.5s}
 @keyframes sparkle { to { transform:translateY(-10px) rotate(35deg) scale(1.5); opacity:.25; } }
-.leaflet-shell { position:relative; }
-.leaflet-shell .rental-drive-topbar,.leaflet-shell .rental-course-pin,.leaflet-shell .rental-stop-popover { z-index:500; }
-.leaflet-control-attribution { font-size:8px !important; }
 
 
 .vehicle-detail-hero { position:relative; min-height:235px; display:grid; place-items:center; overflow:hidden; background:linear-gradient(180deg,#f8fbf9 0%,#eef6f1 100%); }
@@ -721,7 +717,7 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .rux .rux-map-card { padding:0;overflow:hidden; }
 .rux-card-title { padding:18px 16px 8px; }
 .rux-card-title p { margin:5px 0;color:#5c6d63; }
-.rux .rental-osm-map { height:340px;border-radius:0; }
+.rux .rental-naver-map { height:340px;border-radius:0; }
 .rux .pickup-confirm-sheet,.rux .system-status-sheet,.rux .drive-bottom-sheet { margin:0;box-shadow:none;border-radius:0;padding:16px;z-index:auto; }
 .rux .pickup-location-line { grid-template-columns:32px minmax(0,1fr) 48px;gap:8px; }
 .rux .pickup-location-line strong { max-width:100%;font-size:14px;white-space:normal;overflow-wrap:anywhere; }
@@ -745,7 +741,7 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .rux .boarded-check { font-size:14px;margin:20px 0; }
 .rux .rental-drive-map.refined { height:430px;border-radius:0; }
 .rux .rental-drive-map::after { display:none; }
-.rux .rental-drive-map .rental-osm-map { height:100%; }
+.rux .rental-drive-map .rental-naver-map { height:100%; }
 .rux .rental-drive-topbar { top:12px;left:64px;right:12px;pointer-events:none; }
 .rux .rental-drive-topbar span { background:white;color:#234631;font-size:12px;padding:8px 10px; }
 .rux .drive-next-stop { grid-template-columns:32px minmax(0,1fr); }
@@ -765,18 +761,12 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .rux-map-marker span { display:grid;place-items:center;width:34px;height:34px;border:3px solid white;box-shadow:0 2px 6px #0005;background:#28754e;color:white;border-radius:50%;font-size:11px;font-weight:800; }
 .rux-map-status { max-width:215px;padding:7px 9px;border-radius:8px;background:white;color:#40594a;font-size:11px;box-shadow:0 1px 5px #0002; }
 .rux-map-status[hidden] { display:none; }
-.rux .leaflet-control-attribution,.rux-modal .leaflet-control-attribution { font-size:10px!important;line-height:1.6;background:rgba(255,255,255,.96); }
-.rux .leaflet-control-zoom a,.rux-modal .leaflet-control-zoom a { width:44px;height:44px;line-height:44px; }
-/* Global image/SVG presentation rules must not distort Leaflet tiles or vector panes. */
-.leaflet-container img.leaflet-tile { width:256px;height:256px;max-width:none!important;max-height:none!important;filter:none;object-fit:fill; }
-.leaflet-container img.leaflet-marker-icon,.leaflet-container img.leaflet-marker-shadow { filter:none;object-fit:fill; }
-.leaflet-container .leaflet-pane > svg { width:inherit;height:inherit;fill:initial;stroke:initial; }
 .rux-modal { max-width:440px; }
 .rux-modal .modal-close { width:44px;height:44px; }
 .rux-modal .rental-search-results button { padding:10px 12px; }
 .rux-modal .rental-search-results strong { font-size:14px; }
 .rux-modal .rental-search-results small { font-size:12px; }
-.rux-modal .rental-osm-map.picker { height:230px;border-radius:14px; }
+.rux-modal .rental-naver-map.picker { height:230px;border-radius:14px; }
 .rux-modal .rux-draft-label { color:#236442;font-weight:700;padding:10px;background:#edf6f0;border-radius:10px;font-size:13px; }
 .rux-modal .rux-search-form { display:flex;gap:8px; }
 .rux-search-form input { min-width:0;font-size:14px; }
@@ -794,7 +784,7 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .rux-setup-footer {position:absolute;bottom:calc(76px + env(safe-area-inset-bottom));left:0;right:0;z-index:22;padding:10px 16px 12px;background:#fff;border-top:1px solid #dce5df;box-shadow:0 -4px 12px #19382808;}
 .rux-setup-footer > span {display:block;margin-bottom:8px;font-size:12px;color:#5c6d63;}
 .rux-setup-footer > span b {color:#236442;}
-.rux .rental-osm-map,.rux-modal .rental-osm-map {background-color:#eef2ef;background-image:linear-gradient(#dce5df55 1px,transparent 1px),linear-gradient(90deg,#dce5df55 1px,transparent 1px);background-size:32px 32px;}
+.rux .rental-naver-map,.rux-modal .rental-naver-map {background-color:#eef2ef;background-image:linear-gradient(#dce5df55 1px,transparent 1px),linear-gradient(90deg,#dce5df55 1px,transparent 1px);background-size:32px 32px;}
 .rux .rux-map-card {isolation:isolate;}
 .rux-search-form button {flex:0 0 64px;padding:10px;white-space:nowrap;}
 
@@ -802,11 +792,6 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 
 .rux-driving [data-action="rental-add-stop"]{min-height:44px;margin-top:4px}
 
-.moov-local-map-tile { border:0!important;border-radius:0!important;box-shadow:none!important;filter:none!important;max-width:none!important;max-height:none!important; }
-.moov-map-status {font-size:11px;max-width:180px;background:#fffffff0;color:#486054;padding:6px 8px;}
-.moov-map-status.outside{color:#79531f;background:#fff7e8;}
-.rux-driving .moov-map-status{margin-top:35px;}
-.leaflet-control-attribution{white-space:normal;line-height:1.5;}
 
 /* Home module layout: reference MOOV10 shell + policy rental flow. */
 :root { font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR","NanumGothic",system-ui,sans-serif;font-synthesis:weight; }
@@ -814,7 +799,7 @@ html,body { height:100%; }
 .stage { min-height:100dvh;padding:8px; }
 .phone-shell { height:min(896px,calc(100dvh - 16px));min-height:500px; }
 .app-header { flex:0 0 70px; }
-.home-logo { text-decoration:none; margin:0; }
+.home-logo { text-decoration:none; margin:0; font-size:1.4rem; line-height:1.1; font-weight:900; letter-spacing:-.035em; }
 .rux-heading:focus { outline:none; }
 .app-content { padding:18px 22px 116px; }
 .bottom-nav button { min-height:44px; }
@@ -828,12 +813,6 @@ html,body { height:100%; }
 .home-live-map { height:100%;width:100%;z-index:0; }
 .mobility-map .map-mode-chip,.mobility-map .map-locate { z-index:450; }
 .mobility-map .map-safety { z-index:450;bottom:26px;pointer-events:none; }
-.mobility-map .leaflet-control-zoom { margin-top:66px; }
-.mobility-map .leaflet-control-zoom a { width:32px;height:32px;line-height:32px; }
-.mobility-map .leaflet-control-attribution { font-size:9px;max-width:100%; }
-.mobility-map .moov-map-status { font-size:10px; }
-.mobility-map .moov-map-status:not(.outside) { display:none; }
-.mobility-map .moov-map-status.outside { margin-top:66px;max-width:190px; }
 .rux-map-marker.home-pin span { background:#f8a44c;color:#382c19; }
 .rux-map-marker.home-pin.start span { background:#28754e;color:white; }
 .rux-map-marker.home-car span { background:#3f83f8;color:#fff; }
@@ -886,13 +865,12 @@ html,body { height:100%; }
 .rental-flow-head { display:flex; }
 .rux-setup-footer { bottom:88px; }
 #app:has(.rux-setup-footer) .app-content { padding-bottom:214px; }
-.rux .rental-osm-map { height:286px; }
+.rux .rental-naver-map { height:286px; }
 .rux .rental-step-card h3 { font-size:19px; }
 .rux .rux-card-title { padding-top:16px; }
-.rux .leaflet-control-zoom a { min-width:36px;min-height:36px;width:36px;height:36px;line-height:36px; }
 .rux-driving { --ink:#181725;--muted:#7c7c7c; }
 .rux-driving .mobility-map { height:286px; }
-.rux-driving .mobility-map .rental-osm-map { height:100%; }
+.rux-driving .mobility-map .rental-naver-map { height:100%; }
 .rux-driving .sheet-title h3 { font-size:17px; }
 .rux-driving .active-route-line { width:100%;min-height:58px;border:0;background:transparent;text-align:left;padding:8px 0; }
 .rux-driving .active-route-line small { font-size:11px; }
@@ -913,7 +891,7 @@ html,body { height:100%; }
 .modal-actions { flex-shrink:0; }
 .modal-actions button,.modal-close { min-height:44px; }
 .modal-backdrop:has(.rux-modal) { padding-top:46px; }
-.rux-modal .rental-osm-map.picker { height:230px; }
+.rux-modal .rental-naver-map.picker { height:230px; }
 .rux-modal .modal-head { flex-shrink:0; }
 .phone-shell #toast { z-index:1100;bottom:106px; }
 .phone-shell:has(.rux-setup-footer) #toast { bottom:204px; }

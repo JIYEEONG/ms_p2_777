@@ -16,10 +16,17 @@
 
   function pointForStop(course, index) {
     const detail = course.stopDetails?.[index];
-    if (detail && Number.isFinite(detail.lat) && Number.isFinite(detail.lng) && detail.placeId) {
-      return { id: detail.placeId, name: course.stops[index], lat: detail.lat, lng: detail.lng, source: detail.source || "provided" };
+    if (detail && Number.isFinite(detail.lat) && Number.isFinite(detail.lng)) {
+      return { id: detail.placeId || `${course.id}-stop-${index}`, name: course.stops[index], lat: detail.lat, lng: detail.lng, source: detail.source || "provided" };
     }
     const name = course.stops[index];
+    const stored = course._dbPoints?.[index];
+    if (stored?.latitude != null && stored?.longitude != null && String(stored.latitude).trim() && String(stored.longitude).trim()) {
+      const lat = Number(stored.latitude), lng = Number(stored.longitude);
+      if (Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+        return { id: stored.id || `${course.id}-stop-${index}`, name, lat, lng, source: "provided" };
+      }
+    }
     const demo = DEMO_PLACES[name];
     return demo ? { ...demo, name, source: "bundled-demo" } : { id: `${course.id}-stop-${index}`, name, lat: null, lng: null, source: "unverified" };
   }
@@ -242,20 +249,10 @@ function scoreBreakdown(course, preference, tags, context = {}) {
       return tieBreak(a, b);
     });
   }
-// 위경도를 OpenStreetMap 타일 이미지 URL로 변환 (코스 카드 썸네일용, 인터랙티브 지도 아님)
-  function staticMapUrl(lat, lng, zoom = 15) {
-    const n = 2 ** zoom;
-    const x = Math.floor(((lng + 180) / 360) * n);
-    const y = Math.floor(
-      ((1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2) * n
-    );
-    return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`;
-  }
-
   function newId() {
     return root.crypto?.randomUUID?.() || `moov-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  const api = { RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, scoreBreakdown, tasteSignals, tasteMatch, rank, sort, newId, courseCentroid, haversineKm, calcGeoScore, calcDurationScore, calcTimeScore, staticMapUrl};  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  const api = { RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, scoreBreakdown, tasteSignals, tasteMatch, rank, sort, newId, courseCentroid, haversineKm, calcGeoScore, calcDurationScore, calcTimeScore};  if (typeof module !== "undefined" && module.exports) module.exports = api;
     else root.MoovOutingData = api;
   })(typeof window !== "undefined" ? window : globalThis);

@@ -24,6 +24,13 @@
 .taxi-vehicle-rate > strong { display: block; margin: 2px 0 5px; font-size: 24px; color: #236442; }
 .taxi-vehicle-rate > span, .taxi-vehicle-rate .section-row > span { color: #5c6d63; font-size: 12px; line-height: 1.5; }
 .taxi-fare-card { margin: 12px 0; padding: 15px; border: 1px solid #dae8de; border-radius: 15px; background: #f6faf7; }
+.taxi:has([data-taxi-approach]) .naver-mobility-map { height: clamp(180px, calc(100dvh - 520px), 260px); }
+[data-taxi-approach] > .taxi-fare-card { margin-top: 0; padding: 12px; }
+[data-taxi-approach] h2 { margin: 4px 0; font-size: 1.5rem; line-height: 1.2; }
+[data-taxi-approach] p { margin: 6px 0; font-size: .78rem; line-height: 1.4; }
+[data-taxi-approach] .taxi-fare-note { font-size: .65rem; }
+[data-taxi-arrival-distance] { display: block; font-size: .78rem; line-height: 1.4; }
+[data-taxi-approach] [data-action="taxi-boarded"] { min-height: 44px; margin-top: 8px; }
 .taxi-estimate-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 9px; }
 .taxi-estimate-head > span { font-size: .75rem; font-weight: 750; color: #38503f; }
 .taxi-estimate-head > strong { font-size: 1.55rem; letter-spacing: -.05em; color: #1f643c; }

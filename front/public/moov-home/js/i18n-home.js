@@ -50,20 +50,4 @@
     return null;
   };
 
-  // The geographic source data stays unchanged; translate known place names
-  // and romanize other Hangul map labels only when the English UI is active.
-  const initial = ["g", "kk", "n", "d", "tt", "r", "m", "b", "pp", "s", "ss", "", "j", "jj", "ch", "k", "t", "p", "h"];
-  const medial = ["a", "ae", "ya", "yae", "eo", "e", "yeo", "ye", "o", "wa", "wae", "oe", "yo", "u", "wo", "we", "wi", "yu", "eu", "ui", "i"];
-  const final = ["", "k", "k", "k", "n", "n", "n", "t", "l", "k", "m", "l", "l", "l", "p", "l", "m", "p", "p", "t", "t", "ng", "t", "t", "k", "t", "p", "t"];
-  function romanize(name) {
-    return Array.from(name, (character) => {
-      const code = character.charCodeAt(0) - 0xac00;
-      if (code < 0 || code > 11171) return character;
-      return initial[Math.floor(code / 588)] + medial[Math.floor((code % 588) / 28)] + final[code % 28];
-    }).join("").replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
-  }
-  window.MOOV_HOME_MAP_NAME = (name) => {
-    if (document.documentElement.lang !== "en") return name;
-    return lookup(name) !== name ? lookup(name) : romanize(name);
-  };
 })();

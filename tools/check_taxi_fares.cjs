@@ -337,6 +337,7 @@ async function checkBookingAndReceipt() {
   await client.screenshot('taxi-booking-detail', '#modal-title');
   await client.click('[data-modal-confirm]');
   await client.wait('state.tripActive && !!state.taxiTrip', 'demo booking snapshot');
+  assert.equal(await client.evaluate('content.scrollTop'), 0, 'The approaching taxi map is visible after calling from the bottom of the form');
   const snapshot = await client.evaluate('state.taxiTrip');
   assert.equal(snapshot.quote.total, booked.total);
   assert.equal(snapshot.quote.vehicleId, 'easyfit');
@@ -345,6 +346,14 @@ async function checkBookingAndReceipt() {
   await client.wait("!!document.querySelector('#taxi-active-fare')", 'active trip fare');
   await client.screenshot('taxi-active-ko', '#taxi-active-fare');
   passed('booking stores the reviewed fare as a trip snapshot');
+
+  await client.wait("state.taxiDispatch?.route && taxiMapSession?.dispatch === state.taxiDispatch", 'taxi arrival route');
+  assert.equal(await client.evaluate('state.taxiDispatch.route.strategy'), 'shortest-returned');
+  assert.equal(await client.evaluate('taxiMapSession.markers.length'), 2, 'Only the vehicle and starting point are shown before boarding');
+  assert.equal(await client.evaluate('taxiMapSession.points.length'), 2);
+  assert.equal(await client.evaluate('currentUsageFee()'), booked.total, 'Arrival distance must not change the passenger fare');
+  await client.screenshot('taxi-approach-ko', '#taxi-naver-map');
+  passed('taxi approach uses a separate shortest-candidate road route without passenger waypoints');
 
   await client.evaluate("state.usageStartedAt=Date.now()-12*3600000;state.taxiVehicleType='premium';state.routeStops=['서울 성수동','서울숲'];persist();render();updateUsageTimer()");
   assert.equal(await client.evaluate('currentUsageFee()'), booked.total);
@@ -356,6 +365,17 @@ async function checkBookingAndReceipt() {
   assert.deepEqual(await client.evaluate('state.taxiTrip'), snapshot);
   assert.equal(await client.evaluate('currentUsageFee()'), booked.total);
   passed('booked fare snapshot survives reload');
+
+  await client.wait("!!state.taxiDispatch?.route && taxiMapSession?.dispatch === state.taxiDispatch", 'restored approach map');
+  await client.evaluate('state.taxiDispatch.startedAt=Date.now()-60000;tickTaxiApproach()');
+  assert.equal(await client.evaluate('state.taxiDispatch.status'), 'arrived');
+  assert.equal(await client.evaluate("document.querySelector('[data-action=\"taxi-boarded\"]').disabled"), false);
+  await client.screenshot('taxi-arrived-board-button', '[data-action="taxi-boarded"]');
+  await client.click('[data-action="taxi-boarded"]');
+  await client.wait("state.taxiDispatch.status==='driving' && taxiMapSession?.line && !taxiMapSession.dispatch", 'passenger route after boarding');
+  assert.equal(await client.evaluate('taxiMapSession.points.length'), snapshot.stops.length);
+  assert.deepEqual(await client.evaluate('state.taxiTrip'), snapshot);
+  passed('boarding restores the passenger route and preserves the reviewed fare');
 
   const beforeCount = await client.evaluate('state.taxiReceipts.length');
   await client.click('[data-action="finish-trip"]');
@@ -414,7 +434,10 @@ async function main() {
   await client.send('Page.navigate', { url: base + '/moov.html?lang=ko' });
   await client.wait("typeof state==='object' && typeof currentTaxiQuote==='function' && !!window.MoovTaxiFare", 'taxi fare UI boot');
   await waitForVerifiedSmokeUser(client);
-  await client.evaluate("enterAuthenticatedScreen();state.paymentCards=[{id:'card-smoke',name:'Smoke Test Card',number:'•••• 4242',primary:true}];state.activeTab='home';state.homeMode='taxi';state.homeStep='setup';state.tripActive=false;persist();render()");
+  await client.evaluate("enterAuthenticatedScreen();state.activeTab='home';state.homeMode='taxi';state.homeStep='setup';state.tripActive=false;persist();render()");
+  assert.equal(await client.evaluate('state.paymentCards.length'), 2);
+  assert.equal(await client.evaluate('taxiPrimaryCard().simulated'), true);
+  passed('fresh account includes selectable demo payment cards without fixture injection');
   await quote();
   await checkPolicyAndCalculator();
   await checkQuotesAndLanguage();

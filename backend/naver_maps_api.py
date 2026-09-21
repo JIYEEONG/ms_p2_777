@@ -1,5 +1,7 @@
 """NAVER Maps setup endpoints. Credentials remain on the server."""
 import json
+import html
+import re
 import os
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -13,6 +15,7 @@ from pydantic import BaseModel, Field
 load_dotenv(Path(__file__).with_name('.env'))
 router = APIRouter(prefix='/api/maps', tags=['maps'])
 BASE_URL = 'https://maps.apigw.ntruss.com'
+SEARCH_URL = 'https://naverapihub.apigw.ntruss.com/search/v1/local'
 
 
 def naver_get(path, params):
@@ -58,6 +61,53 @@ def geocode(query: str = Query(min_length=2, max_length=200)):
     } for item in data.get('addresses', [])]}
 
 
+@router.get('/search')
+def search_places(query: str = Query(min_length=2, max_length=200)):
+    """Address search uses Maps; business search uses NAVER API HUB credentials."""
+    places = []
+    address_error = None
+    try:
+        for item in geocode(query)['addresses']:
+            name = item['roadAddress'] or item['jibunAddress'] or item['englishAddress']
+            places.append({**item, 'id': f"address-{item['lat']}-{item['lng']}",
+                           'name': name, 'address': '', 'category': '주소', 'dwell': 0})
+    except HTTPException as exc:
+        address_error = exc
+    client = os.getenv('NAVER_SEARCH_CLIENT_ID', '').strip()
+    secret = os.getenv('NAVER_SEARCH_CLIENT_SECRET', '').strip()
+    if client and secret:
+        request = Request(SEARCH_URL + '?' + urlencode({'query': query, 'display': 5, 'format': 'json'}), headers={
+            'X-NCP-APIGW-API-KEY-ID': client, 'X-NCP-APIGW-API-KEY': secret,
+        })
+        try:
+            with urlopen(request, timeout=12) as upstream:
+                data = json.load(upstream)
+            if not isinstance(data, dict) or not isinstance(data.get('items'), list):
+                raise ValueError('Invalid search response')
+            for item in data['items']:
+                try:
+                    lat, lng = float(item['mapy']), float(item['mapx'])
+                    # Search responses use WGS84, commonly scaled by 10^7.
+                    if abs(lat) > 90 and abs(lng) > 180:
+                        lat, lng = lat / 10000000, lng / 10000000
+                    p = Point(lat=lat, lng=lng)
+                except (KeyError, TypeError, ValueError):
+                    continue
+                # Reject legacy/non-WGS84 coordinates instead of routing to the wrong country.
+                if not (33 <= p.lat <= 39 and 124 <= p.lng <= 132):
+                    continue
+                places.append({'id': f'place-{p.lat}-{p.lng}', 'lat': p.lat, 'lng': p.lng,
+                               'name': html.unescape(re.sub(r'<[^>]*>', '', str(item.get('title', '')))),
+                               'address': item.get('roadAddress') or item.get('address', ''),
+                               'category': item.get('category', ''), 'dwell': 0})
+        except (HTTPError, URLError, TimeoutError, ValueError):
+            if not places:
+                raise HTTPException(503, '장소 검색을 완료하지 못했습니다. 주소로 검색하거나 지도에서 선택하세요.') from None
+    if not places and address_error:
+        raise address_error
+    return {'places': places}
+
+
 @router.get('/reverse')
 def reverse(lat: float = Query(ge=-90, le=90), lng: float = Query(ge=-180, le=180)):
     data = naver_get('/map-reversegeocode/v2/gc', {
@@ -79,6 +129,33 @@ class RouteRequest(BaseModel):
     start: Point
     goal: Point
     waypoints: list[Point] = Field(default_factory=list, max_length=5)
+
+
+class ApproachRequest(BaseModel):
+    start: Point
+    goal: Point
+
+
+@router.post('/approach')
+def approach(body: ApproachRequest):
+    """Compare NAVER's supported routes without passenger waypoints."""
+    candidates = []
+    for options in [('traoptimal', 'trafast', 'tracomfort'), ('traavoidtoll', 'traavoidcaronly')]:
+        data = naver_get('/map-direction/v1/driving', {
+            'start': f'{body.start.lng},{body.start.lat}',
+            'goal': f'{body.goal.lng},{body.goal.lat}', 'option': ':'.join(options),
+        })
+        if data.get('code') != 0:
+            continue
+        for option in options:
+            candidates.extend(data.get('route', {}).get(option, []))
+    if not candidates:
+        raise HTTPException(422, '차량에서 출발지까지 자동차 경로를 찾지 못했습니다.')
+    route = min(candidates, key=lambda r: (r['summary']['distance'], r['summary']['duration']))
+    return {'points': [[lat, lng] for lng, lat in route['path']],
+            'distanceMeters': route['summary']['distance'],
+            'durationSeconds': route['summary']['duration'] / 1000,
+            'strategy': 'shortest-returned', 'candidateCount': len(candidates)}
 
 
 @router.post('/directions')

@@ -1,0 +1,49 @@
+.map-location-search { display:flex; align-items:end; gap:8px; margin-bottom:10px; }
+.map-location-search label { flex:1; min-width:0; font-size:13px; }
+.map-location-search input { display:block; box-sizing:border-box; width:100%; margin-top:6px; padding:10px; border:1px solid #ccd8ce; border-radius:10px; }
+.map-location-search button,.map-location-results button,.map-location-role { padding:10px; border:1px solid #ccd8ce; border-radius:10px; background:white; color:#235b3d; }
+.map-location-results { max-height:150px; overflow:auto; font-size:13px; }
+.map-location-results button { display:block; width:100%; text-align:left; margin-bottom:6px; }
+.map-location-canvas { height:280px; margin-top:10px; border-radius:12px; overflow:hidden; }
+.map-location-picker p { font-size:13px; }
+.map-location-pin { background:#28754e; color:white; border:2px solid white; border-radius:20px; padding:8px; white-space:nowrap; cursor:grab; }
+.route-location-form { margin:0; border-bottom:1px solid #edf0ed; }
+.route-location-form:last-child { border-bottom:0; }
+.route-location-form .route-line { display:flex; align-items:center; gap:10px; width:100%; box-sizing:border-box; min-height:76px; padding:12px 14px; }
+.route-location-form .route-line label { flex:1; min-width:0; text-align:left; }
+.route-location-form .route-line input { display:block; width:100%; min-width:0; box-sizing:border-box; padding:7px 0; border:0; border-radius:0; background:transparent; color:inherit; font:inherit; font-size:16px; line-height:1.4; font-weight:700; outline-offset:2px; }
+.route-location-form .route-line input:focus { outline:none; }
+.route-location-form .route-line small { display:block; font-size:12px; color:#68776c; }
+.route-location-form .route-line button { flex:none; width:auto; padding:6px 2px; border:0; background:transparent; font-size:11px; font-weight:700; color:#28754e; }
+.route-location-form .route-line .route-map-select { color:#68776c; }
+.route-location-results { padding:4px 12px 12px; font-size:14px; color:#59645c; }
+.route-location-results button { display:block; width:100%; padding:12px; margin-top:6px; border:1px solid #dce4dd; border-radius:8px; text-align:left; font-size:14px; line-height:1.5; background:#f7fbf8; color:#24382b; }
+.mobility-sheet .route-tools { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin:0 0 12px; }
+.mobility-sheet .route-tools button { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:5px; min-height:46px; padding:8px 4px; font-size:13px; line-height:1.35; font-weight:700; }
+.mobility-sheet .route-tools button svg { width:17px; height:17px; flex:none; }
+.naver-map-canvas,.home-live-map,.rental-naver-map { touch-action:none; }
+.map-safety.map-route-status { position:static; margin:8px 0 0; min-height:0; padding:9px 11px; pointer-events:auto; }
+.map-safety.map-route-status span { font-size:12px; line-height:1.5; }
+.inplace-map-selection { margin:10px 0; padding:12px; border:1px solid #cbe3d2; border-radius:12px; background:#f5fbf7; display:flex; flex-wrap:wrap; gap:8px; }
+.inplace-map-selection p { flex-basis:100%; margin:0 0 4px; font-size:13px; color:#28563b; }
+.inplace-map-selection button { padding:9px 12px; font-size:12px; }
+.route-location-form .route-map-select[aria-pressed="true"] { color:#176b39; text-decoration:underline; }
+.course-detail-naver-map { width:100%; height:260px; margin-top:12px; border-radius:12px; overflow:hidden; background:#eef2ef; }
+.naver-course-marker { display:grid; place-items:center; box-sizing:border-box; width:30px; height:30px; border:2px solid white; border-radius:50%; color:white; background:#28754e; box-shadow:0 2px 6px #0004; font-size:12px; font-weight:700; }
+.naver-course-marker.destination { background:#b46719; }
+.course-map-status { margin:10px; line-height:1.5; }
+.pickup-selecting { position:relative; }
+.pickup-center-pin { position:absolute; left:50%; top:50%; z-index:100; transform:translate(-50%,-100%); pointer-events:none; display:flex; flex-direction:column; align-items:center; }
+.pickup-center-pin span { display:grid; place-items:center; min-width:48px; height:42px; padding:0 8px; border:3px solid white; border-radius:24px; background:#247b4e; color:white; font-size:15px; font-weight:800; box-shadow:0 3px 10px #0003; }
+.pickup-center-pin i { width:3px; height:16px; background:#247b4e; }
+.pickup-center-pin::after { content:''; width:8px; height:4px; margin-bottom:-2px; border-radius:50%; background:#164e33; }
+.pickup-selection { background:white; border-color:#e1e5e2; padding:16px; }
+.pickup-selection h3 { flex-basis:100%; margin:0; font-size:18px; color:#202622; }
+.pickup-selection .pickup-place { flex-basis:100%; font-size:18px; line-height:1.5; color:#202622; }
+.pickup-selection .pickup-address { font-size:14px; color:#637067; overflow-wrap:anywhere; }
+.pickup-selection .pickup-instruction,.pickup-selection .pickup-guidance { font-size:13px; line-height:1.5; color:#637067; }
+.pickup-selection button { min-height:44px; font-size:14px; }
+.pickup-selection .primary-button { flex:1; background:#247b4e; color:white; }
+.pickup-selecting .home-pin.start,.pickup-selecting .taxi-map-marker.start,.pickup-selecting .pickup-origin { visibility:hidden; }
+.route-pickup-address { margin:-8px 14px 12px 34px; font-size:12px; line-height:1.5; color:#637067; overflow-wrap:anywhere; }
+.map-route-status .route-overview { flex:none; margin-left:auto; padding:8px; border:1px solid currentColor; border-radius:8px; background:transparent; color:inherit; font-size:12px; font-weight:700; white-space:nowrap; }

@@ -26,7 +26,7 @@ function activeTaxiTrip() {
 function taxiTripLocked() { return state.tripActive && state.homeMode === 'taxi'; }
 function preventTaxiTripChange() { if (!taxiTripLocked()) return false; toast(taxiText('택시 이용을 종료한 뒤 차량·경로를 변경해 주세요.', 'End the taxi trip before changing the vehicle or route.')); return true; }
 function taxiRouteKey() {
-  return JSON.stringify([state.userId, state.pickupLocation, state.taxiPickupCoords, state.routeStops, state.selectedCourse?.id || null, state.selectedCourse?.stopDetails || null, state.selectedCourse?._dbPoints || null]);
+  return JSON.stringify([state.userId, state.pickupLocation, state.taxiPickupCoords, state.routeStops, state.taxiSearchPlaces, state.selectedCourse?.id || null, state.selectedCourse?.stopDetails || null, state.selectedCourse?._dbPoints || null]);
 }
 function taxiQuoteKey() { return JSON.stringify([taxiRouteKey(), state.taxiVehicleType, MoovTaxiFare.policy.version]); }
 function currentTaxiQuote() {
@@ -64,7 +64,7 @@ function taxiFareBreakdown(quote) {
   return `<dl class="taxi-fare-breakdown"><div><dt>${taxiText('기본요금', 'Base fare')} <small>(${taxiDistance(quote.includedMeters)} ${taxiText('포함', 'included')})</small></dt><dd>${taxiMoney(quote.baseFare)}</dd></div><div><dt>${taxiText('추가 거리', 'Extra distance')} <small>${taxiDistance(quote.extraMeters)} × ${taxiMoney(quote.perKm)}/km</small></dt><dd>${taxiMoney(quote.extraFare)}</dd></div></dl>${taxiFareRoundingNote()}`;
 }
 function taxiFareEstimate(quote, active = false) {
-  return `<div class="taxi-estimate-head"><span>${taxiText(active ? '이동 경로 예상 요금' : '전체 경로 예상 요금', active ? 'Trip fare estimate' : 'Estimated route fare')}</span><strong data-taxi-fare-total="${quote.total}">${taxiMoney(quote.total)}</strong></div><p class="taxi-route-metrics">${taxiDistance(quote.distanceMeters)} · ${taxiText(`예상 ${Math.ceil(quote.durationSeconds / 60)}분`, `About ${Math.ceil(quote.durationSeconds / 60)} min`)} · ${taxiClassName(quote.fareClass)}</p>${taxiFareBreakdown(quote)}<p class="taxi-fare-note">${taxiText('거리 기준 주간 예상 요금 · 시간·심야할증·통행료 미포함', 'Daytime distance estimate · excludes time charges, night surcharges and tolls')}</p>`;
+  return `<div class="taxi-estimate-head"><span>${taxiText(active ? '이동 경로 예상 요금' : '전체 경로 예상 요금', active ? 'Trip fare estimate' : 'Estimated route fare')}</span><strong data-taxi-fare-total="${quote.total}">${taxiMoney(quote.total)}</strong></div><p class="taxi-route-metrics">${taxiDistance(quote.distanceMeters)} · <span data-taxi-duration-seconds="${quote.durationSeconds}">${taxiText(`예상 소요시간 ${Math.max(1, Math.ceil(quote.durationSeconds / 60))}분`, `Estimated travel time ${Math.max(1, Math.ceil(quote.durationSeconds / 60))} min`)}</span> · ${taxiClassName(quote.fareClass)}</p>${taxiFareBreakdown(quote)}<p class="taxi-fare-note">${taxiText('거리 기준 주간 예상 요금 · 시간·심야할증·통행료 미포함', 'Daytime distance estimate · excludes time charges, night surcharges and tolls')}</p>`;
 }
 function renderTaxiFareCard() {
   const quote = currentTaxiQuote();
@@ -132,12 +132,13 @@ function requestTaxiBooking() {
   if (!quote || quote.distanceMeters <= 0) { refreshTaxiFareUi(); toast(taxiText('경로와 예상 요금 계산이 완료된 뒤 호출해 주세요.', 'Wait for the route and fare estimate before requesting a taxi.')); return; }
   if (!card) { toast(taxiText('결제수단을 먼저 등록해 주세요.', 'Register a payment method first.')); return; }
   const key = taxiQuoteKey(), vehicle = taxiVehicle(), cardId = card.id;
-  openModal({ title: taxiText('택시 호출 확인', 'Confirm taxi request'), iconName: 'car', body: `<div data-i18n-skip><p>${escapeHtml(taxiVehicleName(vehicle))} · ${escapeHtml(state.pickupLocation)}</p><section class="taxi-fare-card">${taxiFareEstimate(quote)}</section><p>${escapeHtml(card.name)} ${escapeHtml(card.number)}</p></div>`, primary: taxiText('호출하기', 'Request taxi'), secondary: taxiText('취소', 'Cancel'), onConfirm: () => {
+  openModal({ title: taxiText('택시 호출 확인', 'Confirm taxi request'), iconName: 'car', body: `<div data-i18n-skip><p>${escapeHtml(taxiVehicleName(vehicle))} · ${escapeHtml(state.pickupLocation)}</p><section class="taxi-fare-card">${taxiFareEstimate(quote)}</section><p>${escapeHtml(card.name)} ${escapeHtml(card.number)}</p><p class="taxi-fare-note">${taxiText('테스트 호출이며 실제 결제는 진행되지 않습니다.', 'This is a test booking. No payment will be charged.')}</p></div>`, primary: taxiText('호출하기', 'Request taxi'), secondary: taxiText('취소', 'Cancel'), onConfirm: () => {
     const current = currentTaxiQuote();
     if (state.tripActive || !current || key !== taxiQuoteKey() || current.total !== quote.total || taxiPrimaryCard()?.id !== cardId) { toast(taxiText('호출 정보가 바뀌었어요. 예상 요금을 다시 확인해 주세요.', 'Request details changed. Check the estimate again.')); return false; }
     state.usageStartedAt = Date.now(); state.taxiTrip = createTaxiTripSnapshot(current);
+    state.taxiDispatch = { tripId: state.taxiTrip.id, status: 'loading', route: null, startedAt: null };
     state.tripActive = true; state.homeMode = 'taxi'; state.homeStep = 'service'; state.rentalEndsAt = null;
-    persist(); render(); toast(taxiText('택시 호출을 요청했어요.', 'Taxi requested.'));
+    persist(); render(); content.scrollTo({top:0,behavior:'instant'}); toast(taxiText('택시 호출을 요청했어요.', 'Taxi requested.'));
   } });
 }
 function openTaxiFareCalculator() {
@@ -180,3 +181,85 @@ function openTaxiReceipt(id) {
   openModal({ title: taxiText('택시 요금 내역', 'Taxi fare receipt'), iconName: 'car', body: `<div data-i18n-skip><p>${escapeHtml(taxiVehicleName(receipt.vehicle))}</p><p>${receipt.stops.map(escapeHtml).join(' → ')}</p><section class="taxi-fare-card">${taxiFareEstimate(receipt.quote, true)}</section><small>${escapeHtml(receipt.id)}</small></div>`, primary: taxiText('닫기', 'Close'), secondary: null });
 }
 document.addEventListener('input', event => { if (event.target.id === 'taxi-fare-distance') updateTaxiFareCalculator(); });
+
+// Approach distance is deliberately separate from the passenger's frozen fare.
+const taxiApproachRequests = new WeakMap();
+function taxiApproachPending() {
+  const d = state.taxiDispatch;
+  return Boolean(d && state.tripActive && state.homeMode === 'taxi' && activeTaxiTrip()?.id === d.tripId && d.status !== 'driving');
+}
+function taxiApproachProgress(dispatch) {
+  return dispatch.status === 'arrived' ? 1 : Math.max(0, Math.min(1, (Date.now() - dispatch.startedAt) / dispatch.route.durationMs));
+}
+function renderTaxiApproach() {
+  const d = state.taxiDispatch, arrived = d.status === 'arrived';
+  return `<div class="active-route" data-taxi-approach data-i18n-skip><section class="taxi-fare-card" aria-live="polite"><small>${taxiText('출발지까지 도착 예상', 'Arrival at your starting point')}</small><h2 data-taxi-arrival-eta>${arrived ? taxiText('도착했어요', 'Arrived') : d.route ? `${Math.max(1, Math.ceil(d.route.durationSeconds * (1-taxiApproachProgress(d)) / 60))}${taxiText('분', ' min')}` : taxiText('경로 확인 중', 'Finding a route')}</h2><span data-taxi-arrival-distance></span><p>${escapeHtml(activeTaxiTrip()?.pickupLocation || state.pickupLocation)}</p><p class="taxi-fare-note">${taxiText('차량 접근을 약 18초로 줄여 보여주는 체험입니다.', 'This demo shows the vehicle approaching in about 18 seconds.')}</p>${d.status === 'error' ? `<p role="alert">${escapeHtml(d.error)}</p><button class="ghost-button full" data-action="taxi-retry-approach">${taxiText('접근 경로 다시 찾기', 'Retry arrival route')}</button>` : ''}<button class="primary-button full" data-action="taxi-boarded" ${arrived ? '' : 'disabled'}>${arrived ? taxiText('탑승하기', 'Board taxi') : taxiText('차량 도착을 기다리는 중', 'Waiting for your taxi')}</button><button class="ghost-button full" data-action="taxi-cancel-approach">${taxiText('배차 취소', 'Cancel taxi')}</button></section>${renderActiveTaxiFare()}</div>`;
+}
+function refreshTaxiApproachPanel() {
+  const panel = document.querySelector('[data-taxi-approach]');
+  if (panel && taxiApproachPending()) panel.outerHTML = renderTaxiApproach();
+}
+async function initTaxiApproachMap(session, pickup, current, status) {
+  const d = state.taxiDispatch, maps = window.naver.maps;
+  taxiMapMarker(session, pickup, 'start', taxiText('출발', 'Start'));
+  status.textContent = taxiText('차량에서 출발지까지 경로를 확인하는 중…', 'Finding the route from your taxi to your starting point…');
+  try {
+    if (!d.route && d.status !== 'error') {
+      let request = taxiApproachRequests.get(d);
+      if (!request) {
+        request = MoovNaverMap.pickupApproach(pickup).then(route => {
+          if (!taxiApproachPending() || state.taxiDispatch !== d) return;
+          d.route = route; d.startedAt = Date.now(); d.status = 'approaching'; persist();
+        }).catch(error => {
+          if (!taxiApproachPending() || state.taxiDispatch !== d) return;
+          d.status = 'error'; d.error = error.message; persist();
+        });
+        taxiApproachRequests.set(d, request);
+      }
+      await request;
+    }
+    if (!current() || state.taxiDispatch !== d || !taxiApproachPending()) return;
+    refreshTaxiApproachPanel();
+    if (!d.route) { status.textContent = d.error || taxiText('접근 경로를 다시 확인해 주세요.', 'Please retry the arrival route.'); return; }
+    const position = MoovNaverMap.approachPosition(d.route, taxiApproachProgress(d));
+    session.dispatch = d;
+    session.vehicle = taxiMapMarker(session, position, 'vehicle', taxiText('차량', 'Taxi'));
+    session.points = [position, pickup]; session.routePoints = d.route.points;
+    session.line = new maps.Polyline({ map: session.map, path: position.remainingPoints.map(([lat,lng]) => new maps.LatLng(lat,lng)), strokeColor: '#246f48', strokeWeight: 5, strokeOpacity: .9 });
+    if (!session.map.moovInteracted) MoovNaverMap.fitRoute(session.map, [...d.route.points, pickup]);
+    tickTaxiApproach();
+  } catch (error) {
+    if (current()) status.textContent = error.message;
+  }
+}
+function tickTaxiApproach() {
+  if (!taxiApproachPending()) return;
+  const d = state.taxiDispatch;
+  if (!d.route || !['approaching', 'arrived'].includes(d.status)) return;
+  const progress = taxiApproachProgress(d), position = MoovNaverMap.approachPosition(d.route, progress);
+  if (progress >= 1 && d.status !== 'arrived') { d.status = 'arrived'; persist(); refreshTaxiApproachPanel(); }
+  const session = taxiMapSession;
+  if (session?.dispatch !== d) return;
+  const maps = window.naver.maps;
+  session.vehicle.setPosition(new maps.LatLng(position.lat, position.lng));
+  session.line.setPath(position.remainingPoints.map(([lat,lng]) => new maps.LatLng(lat,lng)));
+  const eta = document.querySelector('[data-taxi-arrival-eta]'), distance = document.querySelector('[data-taxi-arrival-distance]');
+  if (eta) eta.textContent = d.status === 'arrived' ? taxiText('도착했어요', 'Arrived') : `${Math.max(1, Math.ceil(d.route.durationSeconds*(1-progress)/60))}${taxiText('분', ' min')}`;
+  if (distance) distance.textContent = d.status === 'arrived' ? taxiText('차량을 확인한 뒤 탑승해 주세요.', 'Check your vehicle before boarding.') : `${(position.remainingMeters/1000).toFixed(1)} km ${taxiText('남음', 'remaining')}`;
+  const status = document.querySelector('#taxi-map-status');
+  if (status) status.textContent = d.status === 'arrived' ? taxiText('차량이 출발지에 도착했어요.', 'Your taxi has arrived at your starting point.') : taxiText('차량이 출발지로 이동 중이에요.', 'Your taxi is heading to your starting point.');
+}
+function handleTaxiApproachAction(action) {
+  if (!taxiApproachPending()) return;
+  const d = state.taxiDispatch;
+  if (action === 'taxi-boarded') {
+    if (d.status !== 'arrived') return;
+    d.status = 'driving'; state.usageStartedAt = Date.now();
+  } else if (action === 'taxi-cancel-approach') {
+    state.taxiDispatch = null; state.taxiTrip = null; state.tripActive = false; state.usageStartedAt = null; state.homeStep = 'setup';
+  } else if (action === 'taxi-retry-approach') {
+    if (d.status !== 'error') return;
+    state.taxiDispatch = { tripId: d.tripId, status: 'loading', route: null, startedAt: null };
+  } else return;
+  persist(); render();
+}

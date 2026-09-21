@@ -22,7 +22,7 @@ SHEET_NAME = "Home rental"
 SOURCE_FILES = [
     MODULE / "index.html",
     *(MODULE / "js" / name for name in (
-        "data.js", "home.js", "rental-policy.js", "road-routing.js",
+        "data.js", "home.js", "rental-policy.js",
         "secure-cleanup.js", "shared.js", "state.js",
     )),
     *sorted((MODULE / "assets").glob("*.svg")),
@@ -74,14 +74,6 @@ def inventory():
     for phrase, source in dynamic_phrases.items():
         entries[phrase].add(f"{(MODULE / source).relative_to(ROOT).as_posix()} (dynamic)")
 
-    # The large OSM JSON is source data, not app copy. Only inventory labels
-    # in the small UI code following it; the geographic names remain in OSM.
-    path = MODULE / "js" / "local-map.js"
-    source = path.read_text(encoding="utf-8")
-    tail = source.split("const MOOV_MAP_BOUNDS", 1)[1]
-    for match in re.finditer(r"['\"]([^'\"\n]*[가-힣][^'\"\n]*)['\"]", tail):
-        for phrase in fragments(match.group(1)):
-            entries[phrase].add(f"{path.relative_to(ROOT).as_posix()}:{source.count(chr(10), 0, source.index('const MOOV_MAP_BOUNDS')) + tail.count(chr(10), 0, match.start()) + 1}")
     return entries
 
 

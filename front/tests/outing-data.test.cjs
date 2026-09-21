@@ -24,7 +24,7 @@ test('category and budget change the candidate set without relaxing conditions',
 test('rule ranking is deterministic and does not use example likes', () => {
   const preference = { category: '카페', mood: '감성', companion: '혼자', budget: 100000 };
   assert.deepEqual(outing.rank(courses, preference, tagsFor).map((item) => item.course.id), ['cafe', 'unknown', 'museum']);
-  assert.equal(outing.score(courses[0], preference, tags.cafe), 130);
+  assert.equal(outing.score(courses[0], preference, tags.cafe), 1);
   assert.deepEqual(outing.sort(courses, 'popular', preference, tagsFor, () => 0).map((course) => course.id), ['unknown', 'museum', 'cafe']);
 });
 
@@ -32,6 +32,17 @@ test('unknown places never receive fabricated coordinates', () => {
   assert.equal(outing.pointForStop(courses[0], 0).id, 'demo-onion');
   assert.equal(outing.pointForStop(courses[2], 0).lat, null);
   assert.equal(outing.pointForStop(courses[2], 0).source, 'unverified');
+});
+
+test('database coordinates survive course map and rental handoff without demo replacements', () => {
+  const course = { id: 'database', stops: ['어니언 성수', 'Stored place'], _dbPoints: [
+    { latitude: '37.5501', longitude: '127.0611' }, { latitude: null, longitude: '' },
+  ] };
+  assert.equal(outing.pointForStop(course, 0).lat, 37.5501);
+  assert.equal(outing.pointForStop(course, 0).lng, 127.0611);
+  assert.equal(outing.pointForStop(course, 0).source, 'provided');
+  assert.equal(outing.pointForStop(course, 1).lat, null);
+  assert.equal(typeof outing.newId(), 'string');
 });
 
 test('taste match uses selected preferences and saved course tags instead of fixed percentages', () => {
