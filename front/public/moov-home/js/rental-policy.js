@@ -296,6 +296,8 @@ function showRentalStop(index) {
 
 function rentalMarker(map,p,label,click,draggable=false) {
   const element=document.createElement('div');element.className='rux-map-marker';
+  if(label==='도착')element.classList.add('goal');
+  else if(/^\d+$/.test(label))element.classList.add('waypoint');
   const shortEnglish={'출발':'Start','도착':'End','차량':'Car','후보':'Pin'};
   const text=document.createElement('span');text.textContent=window.MoovI18n?.getLanguage()==='en'?(shortEnglish[label]||window.MoovI18n.translate(label)):label;element.append(text);
   const marker=MoovNaverMap.marker([p.lat,p.lng],{element,title:p.name||label,draggable}).addTo(map);
@@ -322,7 +324,7 @@ async function initRentalFlowMap() {
   if(step==='driving') {
     const route=ensureRentalRoute();
     if(!route.unresolved)MoovNaverMap.polyline(route.points,{color:'#22744c',weight:5,opacity:.9,dashArray:'8 5'}).addTo(map);
-    route.stops.forEach((p,i)=>{if(p.lat==null)return;rentalMarker(map,p,i===0?'출발':String(i),i===0?null:()=>showRentalStop(i));});
+    route.stops.forEach((p,i)=>{if(p.lat==null)return;rentalMarker(map,p,i===0?'출발':i===route.stops.length-1?'도착':String(i),i===0?null:()=>showRentalStop(i));});
     fitRentalRoute(map,route);
   } else {
     const pickupMarker=rentalMarker(map,c,'출발',step==='pickup'?()=>selectRentalPointOnMap(0):null,step==='pickup');
@@ -412,14 +414,13 @@ function locateRentalUser() {
     finish();if(token!==rentalLocationToken||!rentalCanEditRoute())return;
     toast(error?.code===1?rentalMapText('위치 권한을 허용하거나 출발지를 직접 입력해 주세요.','Allow location access or enter your pickup location.'):rentalMapText('내 위치를 찾지 못했어요. 출발지를 입력하거나 지도에서 선택해 주세요.','Could not find your location. Enter a pickup location or choose it on the map.'));
   };
-  if(!navigator.geolocation)return fail();
   buttons.forEach(button=>{button.disabled=true;button.setAttribute('aria-busy','true');});
   toast(rentalMapText('내 위치를 확인하고 있어요…','Finding your location…'));
-  navigator.geolocation.getCurrentPosition(pos=>{
+  MoovNaverMap.getCurrentPosition(pos=>{
     finish();if(token!==rentalLocationToken||!rentalCanEditRoute())return;
     const point=rentalPoint(pos.coords.latitude,pos.coords.longitude);
     point.name=`${rentalMapText('내 위치','My location')} · ${point.lat.toFixed(4)}, ${point.lng.toFixed(4)}`;
-    selectRentalPointOnMap(0,{lat:point.lat,lng:point.lng});
+    selectRentalPointOnMap(0,{...pos.place,lat:point.lat,lng:point.lng});
     toast(rentalMapText('지도에서 승차 위치를 확인해 주세요.','Check your pickup point on the map.'));
   },fail,{enableHighAccuracy:true,maximumAge:30000,timeout:10000});
 }

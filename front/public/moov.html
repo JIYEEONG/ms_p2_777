@@ -308,8 +308,9 @@ html[lang="en"] .home-notice-row > span:nth-child(2) { min-width: 0; }
 .naver-mobility-map .map-mode-chip, .naver-mobility-map .map-locate { z-index: 2; }
 .naver-mobility-map .map-safety { bottom: 28px; pointer-events: none; }
 .taxi-map-marker { display: flex; align-items: center; gap: 5px; width: max-content; max-width: 150px; padding: 7px 9px; border: 2px solid white; border-radius: 12px; background: #246f48; color: white; box-shadow: 0 2px 8px #0003; font-size: 11px; font-weight: 800; }
-.taxi-map-marker.goal { background: #b46719; }
-.taxi-map-marker.waypoint { background: #756233; }
+.taxi-map-marker.goal { min-width:36px;height:34px;justify-content:center;padding:0 8px;border-width:3px;border-radius:9px;background:#7351b5; }
+.taxi-map-marker.waypoint { display:grid;place-items:center;width:44px;height:44px;max-width:none;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none; }
+.taxi-map-marker.waypoint span { display:grid;place-items:center;width:26px;height:26px;border:2px solid white;border-radius:50%;background:#f8a44c;color:#382c19;font-size:11px;box-shadow:0 2px 6px #0005; }
 .taxi-map-marker.vehicle { background: #3271ce; }
 .taxi-map-marker span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .taxi-map-marker svg { width: 18px; height: 18px; flex: none; }
@@ -1081,6 +1082,7 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
     <link rel="stylesheet" href="./moov0917-ui.css" />
     <link rel="stylesheet" href="./taxi-fare-ui.css" />
     <link rel="stylesheet" href="./google-auth.css" />
+    <link rel="stylesheet" href="./login-survey.css" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -1179,6 +1181,7 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
           <p class="legal-note">로그인 시 서비스 이용약관과 개인정보 처리방침에 동의합니다.</p>
         </section>
 
+        <section id="survey" class="screen survey-screen" aria-label="취향 설문" data-i18n-skip></section>
         <section id="app" class="screen app-screen" aria-label="MOOV 서비스">
           <header class="app-header">
             <div>
@@ -1228,6 +1231,8 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
     <script src="./taxi-fare.js"></script>
     <script src="./taxi-fare-ui.js"></script>
     <script src="./google-auth.js"></script>
+    <script src="./survey-profile.js"></script>
+    <script src="./login-survey.js"></script>
     <script>
 const STORAGE_KEY = "moov-app-v3:";
 const OUTING_STORAGE_PREFIX = "moov-outing-v1:";
@@ -1354,6 +1359,21 @@ const courseTagProfiles = {
   library: { category: ["관광", "체험"], mood: ["조용함"], companion: ["혼자", "동료"], purpose: ["휴식", "미팅"], time: ["아침", "오후"], price: 12000 },
 };
 
+// Manually tagged demo content. Live courses supply their own tags; unknown details stay unknown.
+const demoSurveyDetails = {
+  seongsu: { '카페': ['커피'] },
+  hangang: { '관광': ['공원·산책'] },
+  camping: { '관광': ['공원·산책'] },
+  bugak: { '관광': ['자연', '랜드마크'] },
+  insadong: { '관광': ['역사', '건축'], '카페': ['차'] },
+  pottery: { '체험': ['공예'], '관광': ['공원·산책'] },
+  seokchon: { '관광': ['공원·산책', '랜드마크'] },
+  seoulforest: { '관광': ['자연', '공원·산책'] },
+  artscenter: { '전시': ['미술'], '체험': ['문화'] },
+  naengmyeon: { '음식점': ['한식'] },
+  tonkatsu: { '음식점': ['양식'], '관광': ['랜드마크'] },
+};
+
 const rentalOptionCatalog = [
   { id: "privacy", name: "프라이버시 글라스", price: 3000 },
   { id: "wellness", name: "웰니스 온도·조명", price: 2000 },
@@ -1417,7 +1437,7 @@ function readUserOuting(userId) {
   }
   catch { return {}; }
 }
-const defaultRecommendationPrefs = () => ({ category: "카페", mood: "전체", companion: "전체", time: "전체", budget: 100000 });
+const defaultRecommendationPrefs = () => ({ category: "전체", mood: "전체", companion: "전체", time: "전체", budget: 100000 });
 const defaultOutingFilters = () => ({ category: "전체", mood: "전체", companion: "전체", purpose: "전체", time: "전체", budget: 100000 });
 function createAppState(saved = {}, user = null) {
 const outingSaved = readUserOuting(user?.id);
@@ -1851,11 +1871,12 @@ function showScreen(id) {
 function enterAuthenticatedScreen() {
   splashFinished = true;
   clearTimeout(splashTimer);
-  if (state.isAuthenticated) { showScreen("app"); setTab(state.activeTab || "home"); }
+  if (state.isAuthenticated) { void MoovLoginSurvey.ensure(state.userId); }
   else showScreen("login");
 }
 
 function clearAccountUi() {
+  MoovLoginSurvey.reset();
   persist();
   authGeneration += 1;
   disposeTaxiMap();
@@ -2223,7 +2244,7 @@ function renderHomeNoticePreview() {
 }
 
 function renderMobilityMap() {
-  return `<section class="mobility-map naver-mobility-map" aria-label="${taxiMapText("네이버 배차 지도", "Naver pickup map")}"><div id="taxi-naver-map" class="naver-map-canvas" data-i18n-skip></div><div class="map-mode-chip">${icon(state.homeMode === "taxi" ? "car" : "key")} ${state.homeMode === "taxi" ? "MOOV 택시" : "MOOV 렌트"}</div><button class="map-locate" data-action="locate-home" aria-label="현재 위치 찾기">${icon("pin")}</button></section><div class="map-safety map-route-status"><span id="taxi-map-status" role="status" data-i18n-skip>${taxiMapText("네이버 지도를 불러오는 중…", "Loading Naver map…")}</span><button type="button" class="route-overview" data-action="taxi-center-route" data-i18n-skip>${taxiMapText("전체 경로","Full route")}</button></div>`;
+  return `<section class="mobility-map naver-mobility-map" aria-label="${taxiMapText("네이버 배차 지도", "Naver pickup map")}"><div id="taxi-naver-map" class="naver-map-canvas" data-i18n-skip></div><button class="map-locate" data-action="locate-taxi-map" aria-label="현재 위치 찾기">${icon("pin")}</button></section><div class="map-safety map-route-status"><span id="taxi-map-status" role="status" data-i18n-skip>${taxiMapText("네이버 지도를 불러오는 중…", "Loading Naver map…")}</span><button type="button" class="route-overview" data-action="taxi-center-route" data-i18n-skip>${taxiMapText("전체 경로","Full route")}</button></div>`;
 }
 
 function taxiMapText(ko, en) { return window.MoovI18n?.getLanguage() === "en" ? en : ko; }
@@ -2265,8 +2286,8 @@ async function resolveTaxiPoint(label, pickup = false) {
 
 function taxiMapMarker(session, point, kind, label, draggable = false) {
   const maps = window.naver.maps;
-  const displayLabel = kind === "start" ? taxiMapText("출발", "Start") : kind === "goal" ? taxiMapText("도착", "Destination") : kind === "waypoint" ? label.split(" · ")[0] : label;
-  const marker = new maps.Marker({ map: session.map, draggable, position: new maps.LatLng(point.lat, point.lng), title: label, icon: { content: `<div class="taxi-map-marker ${kind}" style="transform:translateX(-50%)" data-i18n-skip>${kind === "vehicle" ? icon("car") : ""}<span>${escapeHtml(displayLabel)}</span></div>`, anchor: new maps.Point(0, 18) } });
+  const displayLabel = kind === "start" ? taxiMapText("출발", "Start") : kind === "goal" ? taxiMapText("도착", "End") : kind === "waypoint" ? label.split(" · ")[0] : label;
+  const marker = new maps.Marker({ map: session.map, draggable, position: new maps.LatLng(point.lat, point.lng), title: label, icon: { content: `<div class="taxi-map-marker ${kind}" style="transform:translateX(-50%)" data-i18n-skip>${kind === "vehicle" ? icon("car") : ""}<span>${escapeHtml(displayLabel)}</span></div>`, anchor: new maps.Point(0, kind === "waypoint" ? 22 : kind === "goal" ? 17 : 18) } });
   session.markers.push(marker);
   return marker;
 }
@@ -2492,10 +2513,10 @@ function locateUser(source = "home") {
   const current = () => state.isAuthenticated && generation === authGeneration && token === taxiLocationToken && !state.tripActive;
   const complete = async (position) => {
     if (!current()) return;
-    const coordinates = position?.coords ? { lat: position.coords.latitude, lng: position.coords.longitude } : taxiDefaultPoint();
+    const coordinates = position?.coords ? { ...position.place, lat: position.coords.latitude, lng: position.coords.longitude } : taxiDefaultPoint();
     if(source==='home'&&document.querySelector('#taxi-naver-map'))return openTaxiLocationPicker('pickup',false,0,coordinates);
-    let label = position?.coords ? `${coordinates.lat.toFixed(5)}, ${coordinates.lng.toFixed(5)}` : "현재 위치 · 서울 성수동";
-    if (position?.coords) {
+    let label = position?.place?.name || (position?.coords ? `${coordinates.lat.toFixed(5)}, ${coordinates.lng.toFixed(5)}` : "현재 위치 · 서울 성수동");
+    if (position?.coords && !position.place?.name) {
       try { label = taxiReverseAddress(await window.MoovNaverMap.reverseGeocode(coordinates.lat, coordinates.lng)) || label; }
       catch { /* keep the actual coordinates when reverse geocoding is unavailable */ }
     }
@@ -2505,8 +2526,7 @@ function locateUser(source = "home") {
     toast(source === "outing" ? "내 위치를 기준으로 가까운 코스를 정렬했어요." : "현재 위치를 출발지로 설정했어요.");
   };
   const unavailable = () => { if (current()) openModal({ title: "위치 권한이 필요해요", iconName: "pin", body: "<p>기기의 위치 권한을 허용하면 현재 위치를 출발지로 사용할 수 있어요. 성수동 기준 위치를 사용하거나 지도에서 직접 출발지를 선택할 수 있습니다.</p>", primary: "성수동 기준 사용", secondary: "취소", onConfirm: () => { void complete(); } }); };
-  if (!navigator.geolocation) return unavailable();
-  navigator.geolocation.getCurrentPosition(position => void complete(position), unavailable, { enableHighAccuracy: true, timeout: 5000 });
+  MoovNaverMap.getCurrentPosition(position => void complete(position), unavailable);
 }
 
 function chooseSavedCourse() {
@@ -3043,7 +3063,7 @@ function renderOutingMap(courses = getVisibleOutingCourses()) {
 function getCourseTags(course) {
   if (course._dbTags) return { ...course._dbTags, price: null };
   const fallback = { category: [], mood: [], companion: [], purpose: [], time: [], price: null };
-  return courseTagProfiles[course.id] || course.tagProfile || fallback;
+  return courseTagProfiles[course.id] ? { ...courseTagProfiles[course.id], subcategories: demoSurveyDetails[course.id] || {} } : course.tagProfile || fallback;
 }
 
 function getFilteredOutingCourses() {
@@ -3054,6 +3074,7 @@ function getFilteredOutingCourses() {
 
 function getVisibleOutingCourses() {
   let courses = getFilteredOutingCourses();
+  if (state.outingSort === "preference" && state.surveyRecord) return rankSurveyCourses(courses).map(item => item.course);
   if (state.outingSort === "preference") {
     const group = tasteGroups.find((item) => item.name === state.tasteGroup) || tasteGroups[0];
     courses = courses.filter((course) => {
@@ -3096,7 +3117,11 @@ function renderCourseBrowse() {
   let list = visible;
   let cards = "";
   let tasteFilters = "";
-  if (state.outingSort === "preference") {
+  if (state.outingSort === "preference" && state.surveyRecord) {
+    list = rankSurveyCourses(visible);
+    tasteFilters = renderSurveyNote();
+    cards = list.map(({course, match}) => `<div class="taste-course">${renderSurveyMatch(match)}${courseCard(course)}</div>`).join("");
+  } else if (state.outingSort === "preference") {
     const group = tasteGroups.find((item) => item.name === state.tasteGroup) || tasteGroups[0];
     const signals = currentTasteSignals();
     list = visible.filter((course) => {
@@ -3281,12 +3306,22 @@ function renderSimilarTaste() {
   return `<section class="community-hero"><span class="taste-match" data-i18n-en="Taste profile · ${group.english}">취향 분석 · ${escapeHtml(group.name)}</span><h3 data-i18n-en="Trips matching your taste">나와 취향이 비슷한 코스</h3><p data-i18n-en="We compare your choices, saved trips, and likes with demo trip tags. This is not a match with other users.">선택한 조건과 저장·좋아요 기록을 데모 코스 태그와 비교합니다. 실제 다른 이용자와의 유사도는 아닙니다.</p></section><div class="community-filter">${tasteGroups.map((item) => `<button class="${state.tasteGroup === item.name ? "selected" : ""}" data-action="taste-group" data-value="${item.name}" data-i18n-en="${item.english}">${item.name}</button>`).join("")}</div>${signals.length ? `<div class="stack">${cards}</div>` : emptyState("heart", "취향 기록이 없어요", "AI 코스 추천에서 조건을 선택하거나 코스를 저장해 주세요.")}`;
 }
 
+function rankSurveyCourses(courses) {
+  return MoovSurveyProfile.rank(courses, state.surveyRecord?.profile, getCourseTags, course => state.popularityCounts[course.id] || 0);
+}
+function renderSurveyMatch(match) {
+  return `<p class="small green" data-i18n-skip>${escapeHtml(match.total ? taxiText(`선호 활동 ${match.matched}/${match.total}개 일치`, `${match.matched}/${match.total} preferred activities matched`) : taxiText("활동 취향 미설정 · 기본 추천", "No activity preferences · general recommendations"))}${match.region ? " · " + taxiText("선호 지역 포함", "Preferred area included") : ""}</p>`;
+}
+function renderSurveyNote() {
+  return `<div class="survey-profile-note" data-i18n-skip><strong>${taxiText("내 취향을 반영한 코스", "Trips based on your preferences")}</strong><div>${taxiText("제외 조건을 먼저 적용하고 활동, 세부 취향, 선호 지역 순서로 비교해요. 정보가 없는 장소는 제외 여부를 확인할 수 없어요.", "We apply exclusions first, then compare activities, details and preferred areas. Places with missing information cannot be checked for exclusions.")}</div><button class="mini-action" data-action="edit-taste-survey">${taxiText("취향 설문 수정", "Edit preferences")}</button></div>`;
+}
 function renderRecommendation() {
   const prefs = state.recommendationPrefs;
   const recommended = state.recommendationResultIds.map((id) => getCourse(id)).filter(Boolean);
   const result = state.recommendationRequestId
-    ? `<section class="section-lead compact"><h3>추천 결과</h3><p>선택 CATEGORY와 데모 태그를 비교한 임시 순위입니다. 실제 장소 운영시간·가격·동선은 검증되지 않았어요.</p></section>${recommended.length ? `<div class="stack">${recommended.map((course, index) => {
+    ? `<section class="section-lead compact"><h3>추천 결과</h3><p>설문 취향과 선택 조건을 코스 태그와 비교합니다. 실제 장소 운영시간·가격·동선은 확인이 필요해요.</p></section>${recommended.length ? `<div class="stack">${recommended.map((course, index) => {
   const context = { userLat: 37.5445, userLon: 127.0557, remainingMs: getHomeRentalRemaining() };
+  if (state.surveyRecord) return `<div>${renderSurveyMatch(MoovSurveyProfile.match(course, state.surveyRecord.profile, getCourseTags(course)))}${courseCard(course)}</div>`;
   const breakdown = MoovOutingData.scoreBreakdown(course, prefs, getCourseTags(course), context);
   const finalScore = MoovOutingData.score(course, prefs, getCourseTags(course), context);
   const percent = Math.round(finalScore * 100);
@@ -3294,7 +3329,7 @@ function renderRecommendation() {
   return `<div><p class="small muted">${index + 1}순위 · 매칭 ${percent}%</p>${courseCard(course)}<div class="score-breakdown">${bar("취향 매칭", breakdown.tagScore)}${bar("거리 근접", breakdown.geoScore)}${bar("시간 여유", breakdown.durationScore)}${bar("영업시간", breakdown.timeScore)}</div></div>`;
 }).join("")}</div>` : emptyState("search", "조건에 맞는 코스가 없어요", "CATEGORY나 참고 예산을 직접 바꾼 뒤 다시 추천받아 주세요.")}`
     : "";
-  return `<section class="section-lead"><h3>어떤 나들이를 원하세요?</h3><p>${escapeHtml(state.username)}님의 선택을 바탕으로 검수 전 데모 코스를 비교합니다.</p></section><section class="card preference-panel">${choiceGroup("CATEGORY", "category", ["전체", "음식점", "카페", "전시", "쇼핑", "관광", "체험"])}${choiceGroup("분위기", "mood", ["전체", "조용함", "활기참", "감성", "트렌디", "로맨틱"])}${choiceGroup("동행", "companion", ["전체", "혼자", "연인", "친구", "가족", "동료"])}${choiceGroup("시간대", "time", ["전체", "아침", "점심", "오후", "저녁", "야간"])}<div class="choice-group"><div class="row"><h4>참고 예산</h4><strong class="green">${Number(prefs.budget).toLocaleString("ko-KR")}원 이하</strong></div><input class="budget" type="range" min="30000" max="300000" step="10000" value="${prefs.budget}" data-action="recommend-budget" aria-label="추천 참고 예산" /><p class="small muted">데모 비용 기준입니다. 실제 가격·이동비·영업시간 충족을 보장하지 않습니다.</p></div><button class="primary-button full" data-action="recommend-course">코스 추천받기</button><p class="small muted">전송 대기 기록 ${readOutingQueue().length}건 · 백엔드가 켜지면 같은 ID로 재시도합니다.</p></section>${result}`;
+  return `${renderSurveyNote()}<section class="section-lead"><h3>어떤 나들이를 원하세요?</h3><p>${escapeHtml(state.username)}님의 선택을 바탕으로 검수 전 데모 코스를 비교합니다.</p></section><section class="card preference-panel">${choiceGroup("CATEGORY", "category", ["전체", "음식점", "카페", "전시", "쇼핑", "관광", "체험"])}${choiceGroup("분위기", "mood", ["전체", "조용함", "활기참", "감성", "트렌디", "로맨틱"])}${choiceGroup("동행", "companion", ["전체", "혼자", "연인", "친구", "가족", "동료"])}${choiceGroup("시간대", "time", ["전체", "아침", "점심", "오후", "저녁", "야간"])}<div class="choice-group"><div class="row"><h4>참고 예산</h4><strong class="green">${Number(prefs.budget).toLocaleString("ko-KR")}원 이하</strong></div><input class="budget" type="range" min="30000" max="300000" step="10000" value="${prefs.budget}" data-action="recommend-budget" aria-label="추천 참고 예산" /><p class="small muted">데모 비용 기준입니다. 실제 가격·이동비·영업시간 충족을 보장하지 않습니다.</p></div><button class="primary-button full" data-action="recommend-course">코스 추천받기</button><p class="small muted">전송 대기 기록 ${readOutingQueue().length}건 · 백엔드가 켜지면 같은 ID로 재시도합니다.</p></section>${result}`;
 }
 
 function runOutingRecommendation() {
@@ -3303,7 +3338,7 @@ function runOutingRecommendation() {
     MoovOutingData.matches(course, "", prefs, getCourseTags(course))
   );
   const context = { userLat: 37.5445, userLon: 127.0557, remainingMs: getHomeRentalRemaining() };
-  const rankedAll = MoovOutingData.rank(candidates, prefs, getCourseTags, context);
+  const rankedAll = state.surveyRecord ? rankSurveyCourses(candidates) : MoovOutingData.rank(candidates, prefs, getCourseTags, context);
   const seenNames = new Set();
   const ranked = [];
   for (const item of rankedAll) {
@@ -3364,7 +3399,9 @@ function renderProfile() {
   if (state.profileView !== "menu") return renderProfileSection();
   const avatar = `<img src="${state.profilePhoto || DEFAULT_PROFILE_PHOTO}" alt="프로필 사진" />`;
   const primaryCard = state.paymentCards.find((card) => card.primary) || state.paymentCards[0];
-  return `<div class="stack"><section class="card profile-card"><div class="avatar">${avatar}</div><div style="flex:1"><h3>${escapeHtml(state.username)}님</h3><p>MOOV Explorer · 누적 이동 128km</p></div><button class="mini-action" data-action="edit-profile">${icon("edit")} 편집</button></section><section class="card mode-hero"><div class="mode-hero-visual"><img src="${themeAssets[state.theme]}" alt="${escapeHtml(state.theme)} 공간 테마가 적용된 차량 내부" /><span class="badge">공간 모드</span></div><div class="mode-hero-body"><h3>${escapeHtml(state.theme)} 모드 적용 중</h3><p class="small">${state.themeConfig.temperature}℃ · 창문 농도 ${state.themeConfig.tint}% · ${escapeHtml(state.themeConfig.light)}</p><button class="secondary-button full" data-action="open-theme">공간 테마 상세 설정</button></div></section><section class="card menu-list">${menuItem("bell", "공지·이벤트", "새로운 MOOV 소식과 혜택", "profile-section", "notices")}${menuItem("clock", "이용 기록", "택시·렌트·공간·구매 내역", "profile-section", "usage")}${menuItem("bookmark", "관심 코스", `저장·등록한 코스 ${getInterestCourses().length}개`, "profile-section", "courses")}${menuItem("card", "결제수단 관리", primaryCard ? `${primaryCard.name} ${primaryCard.number}` : "등록된 결제수단 없음", "profile-section", "payments")}${menuItem("shield", "약관 및 정책", "개인정보·차량 보안 정책", "profile-section", "policies")}${menuItem("space", "버전 정보", `MOOV ${APP_VERSION}`, "profile-section", "version")}${menuItem("user", "로그아웃", "로그인 화면으로 돌아가기", "logout", "logout")}</section><button class="card security-summary" data-action="open-security-proof">${icon("shield")}<span><strong>차량 보안 상태</strong><small>${state.securityProof ? `삭제 검증 완료 · ${escapeHtml(state.securityProof.reference)}` : "배차 전 이전 이용 데이터 삭제 확인"}</small></span><span class="badge">안전</span></button></div>`;
+  const english = window.MoovI18n?.getLanguage() === "en";
+  const languageSwitch = `<div class="profile-language-corner"><div class="profile-language-switch" role="group" aria-label="Language / 언어" data-i18n-skip><button type="button" data-language="ko" lang="ko" aria-label="한국어" title="한국어" aria-pressed="${!english}">한</button><button type="button" data-language="en" lang="en" aria-label="English" title="English" aria-pressed="${english}">E</button></div></div>`;
+  return `<div class="stack">${languageSwitch}<section class="card profile-card"><div class="avatar">${avatar}</div><div style="flex:1"><h3>${escapeHtml(state.username)}님</h3><p>MOOV Explorer · 누적 이동 128km</p></div><button class="mini-action" data-action="edit-profile">${icon("edit")} 편집</button></section><section class="card mode-hero"><div class="mode-hero-visual"><img src="${themeAssets[state.theme]}" alt="${escapeHtml(state.theme)} 공간 테마가 적용된 차량 내부" /><span class="badge">공간 모드</span></div><div class="mode-hero-body"><h3>${escapeHtml(state.theme)} 모드 적용 중</h3><p class="small">${state.themeConfig.temperature}℃ · 창문 농도 ${state.themeConfig.tint}% · ${escapeHtml(state.themeConfig.light)}</p><button class="secondary-button full" data-action="open-theme">공간 테마 상세 설정</button></div></section><section class="card menu-list">${menuItem("bell", "공지·이벤트", "새로운 MOOV 소식과 혜택", "profile-section", "notices")}${menuItem("clock", "이용 기록", "택시·렌트·공간·구매 내역", "profile-section", "usage")}${menuItem("bookmark", "관심 코스", `저장·등록한 코스 ${getInterestCourses().length}개`, "profile-section", "courses")}${menuItem("heart", taxiText("취향 설문", "Taste preferences"), taxiText("활동 · 세부 취향 · 지역 · 제외 항목 수정", "Edit activities, areas and exclusions"), "edit-taste-survey")}${menuItem("card", "결제수단 관리", primaryCard ? `${primaryCard.name} ${primaryCard.number}` : "등록된 결제수단 없음", "profile-section", "payments")}${menuItem("shield", "약관 및 정책", "개인정보·차량 보안 정책", "profile-section", "policies")}${menuItem("space", "버전 정보", `MOOV ${APP_VERSION}`, "profile-section", "version")}${menuItem("user", "로그아웃", "로그인 화면으로 돌아가기", "logout", "logout")}</section><button class="card security-summary" data-action="open-security-proof">${icon("shield")}<span><strong>차량 보안 상태</strong><small>${state.securityProof ? `삭제 검증 완료 · ${escapeHtml(state.securityProof.reference)}` : "배차 전 이전 이용 데이터 삭제 확인"}</small></span><span class="badge">안전</span></button></div>`;
 }
 
 function renderProfileSection() {
@@ -3572,6 +3609,7 @@ document.addEventListener("click", (event) => {
   if (action === "header-profile") setTab("profile");
   if (action === "select-home-mode") { state.homeMode = value; state.homeStep = "setup"; persist(); render(); }
   if (action === "return-mode-choice") { state.homeStep = "mode"; render(); }
+  if (action === "locate-taxi-map") { MoovNaverMap.locateOnMap(taxiMapSession?.map, button, toast); return; }
   if (action === "locate-home") locateUser("home");
   if (action === "locate-outing") locateUser("outing");
   if (action === "open-pin-picker") openMapPinPicker();
@@ -3977,6 +4015,12 @@ window.addEventListener("moov:language-change", () => {
 function updateClock() { document.querySelector("#clock").textContent = new Date().toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: false }); }
 updateClock(); setInterval(updateClock, 30000); setInterval(updateUsageTimer, 1000);
 applyChatFontScale();
+MoovLoginSurvey.configure({
+  getUserId: () => state.isAuthenticated ? state.userId : null,
+  showSurvey: () => { disposeTaxiMap(); showScreen("survey"); },
+  onRecord: record => { state.surveyRecord = record; state.recommendationResultIds = []; state.recommendationRequestId = null; },
+  enterApp: () => { if (state.isAuthenticated) { showScreen("app"); setTab(state.activeTab || "home"); } },
+});
 splashTimer = setTimeout(enterAuthenticatedScreen, 1200);
 void MoovGoogleAuth.init({
   onAuthenticated: applyAuthenticatedUser,

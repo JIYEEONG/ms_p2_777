@@ -212,7 +212,7 @@ function mapReady(selector) {
   })()`;
 }
 
-async function openPage(url) {
+async function openPage(url, authOptions) {
   const response = await fetch(`http://127.0.0.1:${debuggingPort}/json/new?about:blank`, { method: 'PUT' });
   const target = await response.json();
   const client = await CDP.connect(target.webSocketDebuggerUrl);
@@ -221,7 +221,7 @@ async function openPage(url) {
   await client.send('Runtime.enable');
   await client.send('Network.enable');
   const hostPage = ['/', '/moov.html', '/index.html'].includes(new URL(url).pathname);
-  if (hostPage) await installBrowserAuthFixture(client, base);
+  if (hostPage) await installBrowserAuthFixture(client, base, authOptions);
   await client.send('Emulation.setDeviceMetricsOverride', { width: 1100, height: 950, deviceScaleFactor: 1, mobile: false });
   await client.send('Page.navigate', { url });
   if (hostPage) await waitForVerifiedSmokeUser(client);
@@ -597,7 +597,7 @@ async function testRouteControls(rental) {
 
   const beforeLocation = await client.evaluate(config.points);
   const current = { latitude: 37.5435, longitude: 127.0550, accuracy: 12 };
-  await client.evaluate(`Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition(success){success({coords:${JSON.stringify(current)},timestamp:Date.now()})}}})`);
+  await client.evaluate(`MoovNaverMap.getCurrentPosition=success=>success({coords:${JSON.stringify(current)},timestamp:Date.now()})`);
   await client.click(config.locate);
   await client.wait("!!document.querySelector('.pickup-selection .primary-button:not(:disabled)')", 'GPS pickup candidate ready');
   await client.click('.pickup-selection .primary-button');
@@ -779,8 +779,8 @@ async function testTaxiLocationRace(existingClient) {
   await setControlRoute(client, false, controlStops);
   const fixturePosition = { coords: { latitude: 37.5435, longitude: 127.0550, accuracy: 12 }, timestamp: Date.now() };
   await client.evaluate(`(() => {
-    window.__locationRace={callbacks:[],reverseCalls:0,originalReverse:MoovNaverMap.describePoint,geoDescriptor:Object.getOwnPropertyDescriptor(navigator,'geolocation')};
-    Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition(success,error){window.__locationRace.callbacks.push({success,error})}}});
+    window.__locationRace={callbacks:[],reverseCalls:0,originalReverse:MoovNaverMap.describePoint,originalPosition:MoovNaverMap.getCurrentPosition};
+    MoovNaverMap.getCurrentPosition=(success,error)=>window.__locationRace.callbacks.push({success,error});
     MoovNaverMap.describePoint=async point=>{window.__locationRace.reverseCalls++;return {...point,name:'Test pickup'}};
   })()`);
   try {
@@ -809,7 +809,7 @@ async function testTaxiLocationRace(existingClient) {
   } finally {
     await client.evaluate(`(() => {
       const fixture=window.__locationRace;MoovNaverMap.describePoint=fixture.originalReverse;
-      if(fixture.geoDescriptor)Object.defineProperty(navigator,'geolocation',fixture.geoDescriptor);else delete navigator.geolocation;
+      MoovNaverMap.getCurrentPosition=fixture.originalPosition;
       delete window.__locationRace;
     })()`);
   }
@@ -1003,7 +1003,9 @@ async function main() {
   }
   assert.ok(fs.existsSync(portFile), 'Edge debugging port did not start');
   debuggingPort = Number(fs.readFileSync(portFile, 'utf8').split('\n')[0]);
-  if(process.argv.includes('--taxi-shared')){await testTaxiSharedRoute();await testCourseRouteControls();}
+  if(process.argv.includes('--map-location'))await require('./map_location_browser_checks.cjs')({openPage,base,mapReady,passed});
+  else if(process.argv.includes('--login-survey'))await require('./login_survey_browser_checks.cjs')({openPage,base,passed});
+  else if(process.argv.includes('--taxi-shared')){await testTaxiSharedRoute();await testCourseRouteControls();}
   else if(process.argv.includes('--course-return'))await testCourseReturnHistory();
   else if(process.argv.includes('--name-only-route'))await testNameOnlyRentalCourse();
   else if(process.argv.includes('--pickup-drag-cancel')){await testPickupDragCancel(true);await testPickupDragCancel(false);}

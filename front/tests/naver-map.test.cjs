@@ -60,6 +60,14 @@ function setup({ fetch: respond, loaded = true, lang = 'ko' } = {}) {
   return { provider: window.MoovNaverMap, window, document, maps, calls, scripts, removedListeners };
 }
 const tick = () => new Promise(resolve => setImmediate(resolve));
+test('current location uses the named Seongsu Station demo fixture without browser GPS', async () => {
+  const {provider}=setup();
+  const position=await new Promise(resolve=>provider.getCurrentPosition(resolve));
+  assert.equal(position.simulated,true);
+  assert.equal(position.place.name,'성수역 3번 출구');
+  assert.equal(position.coords.latitude,37.5446);
+  assert.equal(position.coords.longitude,127.0557);
+});
 const route = () => ({ points: [[37.5, 127], [37.6, 127.1]], distanceMeters: 1200, durationSeconds: 180 });
 const request = () => ({ start: [37.5, 127], goal: [37.6, 127.1], waypoints: [[37.55, 127.03], [37.57, 127.05]] });
 

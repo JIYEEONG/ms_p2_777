@@ -200,21 +200,25 @@
     if(initial)void choose(initial);
   }
 
-  // A screen-fixed pin lets the passenger move the map beneath the pickup point.
+  // The pickup can be adjusted by dragging its marker or by moving the map.
   // The draft never changes the journey until the explicit confirmation button.
   function selectPickup({ element, map, initial }) {
     map.stop();
     const oldCenter = map.getCenter(), oldZoom = map.getZoom();
-    let closed = false, version = 0, timer = null, selected = null, lastKey = '', locating = 0;
+    let closed = false, version = 0, timer = null, selected = null, lastKey = '', locating = 0, pinDragging = false;
     const listeners = [];
     const host = element.closest('.mobility-map') || element;
     const panel = document.createElement('section');
     panel.className = 'inplace-map-selection pickup-selection';
     panel.setAttribute('data-i18n-skip', '');
-    panel.innerHTML = `<h3>${text('어디서 탑승하시나요?', 'Where should we pick you up?')}</h3><p class="pickup-instruction">${text('지도를 움직여 도로 옆 승차 위치에 핀을 맞춰 주세요.', 'Move the map to place the pin at your roadside pickup point.')}</p><strong class="pickup-place" role="status"></strong><p class="pickup-address"></p><p class="pickup-guidance">${text('건물 출입구와 도로 방향을 확인해 주세요.', 'Check the entrance and the side of the road.')}</p><button type="button" class="pickup-current ghost-button">${text('내 위치', 'My location')}</button><button type="button" class="primary-button" disabled>${text('여기서 탑승', 'Confirm pickup')}</button><button type="button" class="pickup-cancel ghost-button">${text('취소', 'Cancel')}</button>`;
-    const pin = document.createElement('div'); pin.className = 'pickup-center-pin'; pin.setAttribute('aria-hidden', 'true');
-    pin.innerHTML = `<span>${text('탑승', 'Pickup')}</span><i></i>`;
-    element.classList.add('pickup-selecting'); element.append(pin); host.after(panel);
+    panel.innerHTML = `<h3>${text('어디서 탑승하시나요?', 'Where should we pick you up?')}</h3><p class="pickup-instruction">${text('출발 핀을 드래그하거나 지도를 움직여 승차 위치를 조정해 주세요.', 'Drag the start pin or move the map to adjust your pickup point.')}</p><strong class="pickup-place" role="status"></strong><p class="pickup-address"></p><p class="pickup-guidance">${text('건물 출입구와 도로 방향을 확인해 주세요.', 'Check the entrance and the side of the road.')}</p><button type="button" class="pickup-current ghost-button">${text('내 위치', 'My location')}</button><button type="button" class="primary-button" disabled>${text('여기서 탑승', 'Confirm pickup')}</button><button type="button" class="pickup-cancel ghost-button">${text('취소', 'Cancel')}</button>`;
+    const pin = document.createElement('div'); pin.className = 'pickup-center-pin draggable';
+    pin.innerHTML = `<span>${text('출발', 'Start')}</span><i></i>`;
+    pin.setAttribute('aria-label',text('드래그하여 출발 위치 조정','Drag to adjust pickup'));
+    const pinMarker = MoovNaverMap.marker(initial || {lat:oldCenter.lat(),lng:oldCenter.lng()}, {
+      element:pin,title:text('출발 위치 조정','Adjust pickup'),size:[60,62],anchor:[30,62],draggable:true,
+    }).addTo(map);
+    element.classList.add('pickup-selecting'); host.after(panel);
     const status = panel.querySelector('.pickup-place'), address = panel.querySelector('.pickup-address');
     const confirm = panel.querySelector('.primary-button');
     const current = () => !closed && element.isConnected && panel.isConnected;
@@ -224,7 +228,7 @@
       if (closed) return;
       closed = true; version++; locating++; clearTimeout(timer); observer.disconnect();
       listeners.forEach(listener => naver.maps.Event.removeListener(listener));
-      element.classList.remove('pickup-selecting'); pin.remove(); panel.remove();
+      element.classList.remove('pickup-selecting'); pinMarker.remove(); panel.remove();
       if (restore && element.isConnected) map.updateBy(oldCenter, oldZoom);
       if (cancelMapSelection === cancel) { cancelMapSelection = null; chooseExistingPoint = null; }
       document.dispatchEvent(new CustomEvent('moov:pickup-selection-end'));
@@ -250,11 +254,16 @@
     function move(point) {
       if (!current()) return;
       locating++; clearTimeout(timer); lastKey = ''; busy();
+      pinMarker.setLatLng(point);
       map.updateBy(new naver.maps.LatLng(point.lat, point.lng), Math.max(17, map.getZoom()));
       clearTimeout(timer); void describe(point);
     }
     chooseExistingPoint = move;
+    pinMarker.on('dragstart',()=>{pinDragging=true;locating++;clearTimeout(timer);lastKey='';busy();});
+    pinMarker.on('dragend',()=>{pinDragging=false;move(pinMarker.getLatLng());});
     listeners.push(naver.maps.Event.addListener(map, 'center_changed', () => {
+      if(pinDragging)return;
+      pinMarker.setLatLng(centerPoint());
       locating++; panel.querySelector('.pickup-current').disabled = false;
       clearTimeout(timer); lastKey = ''; busy();
       timer = setTimeout(() => void describe(), 450);
@@ -265,10 +274,9 @@
       const ticket = ++locating, button = panel.querySelector('.pickup-current');
       button.disabled = true;
       const fail = () => { if (current() && ticket === locating) { button.disabled = false; address.textContent = text('내 위치를 찾지 못했어요. 지도를 움직여 선택해 주세요.', 'Could not locate you. Move the map to choose your pickup.'); } };
-      if (!navigator.geolocation) return fail();
-      navigator.geolocation.getCurrentPosition(position => {
+      MoovNaverMap.getCurrentPosition(position => {
         if (!current() || ticket !== locating) return;
-        button.disabled = false; move({ lat: position.coords.latitude, lng: position.coords.longitude });
+        button.disabled = false; move({ ...position.place, lat: position.coords.latitude, lng: position.coords.longitude });
       }, fail, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
     };
     confirm.onclick = async () => {

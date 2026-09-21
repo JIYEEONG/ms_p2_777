@@ -133,6 +133,10 @@ async function respond(requestId, status, data, html = false) {
 async function intercept({ requestId, request }) {
   const pathname = new URL(request.url).pathname;
   mock.requests.push({ path: pathname, method: request.method });
+  if (pathname === '/api/outing/survey') return respond(requestId, mock.user ? 200 : 401, { locationConsent:{version:'1',agreedAt:'2026-09-21T00:00:00Z'}, survey: {
+    version:'1.8', status:'skipped', answers:{categories:[],subcategories:{},preferredRegions:[],avoidedRegions:[],avoidances:{foodRestrictions:[],foods:[],other:[]}},
+    profile:{categories:{},subcategories:{},preferredRegions:[],excludedRegions:[],excludedTags:[]},
+  }});
   if (pathname === '/api/auth/config') return respond(requestId, mock.configStatus, { configured: mock.configured, loginUrl: '/api/auth/google/start' });
   if (pathname === '/api/auth/me') {
     const body = { authenticated: !!mock.user, user: mock.user ? { ...mock.user } : null };
@@ -323,7 +327,7 @@ async function main() {
   await client.send('Runtime.enable');
   await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   client.onRequest = intercept;
-  await client.send('Fetch.enable', { patterns: [{ urlPattern: new URL(base).origin + '/api/auth/*', requestStage: 'Request' }] });
+  await client.send('Fetch.enable', { patterns: [{ urlPattern: new URL(base).origin + '/api/auth/*', requestStage: 'Request' }, { urlPattern: new URL(base).origin + '/api/outing/survey', requestStage: 'Request' }] });
   const stale = { isAuthenticated: true, username: 'Stale Local Login', userId: users.a.id, theme: 'Legacy Shared Theme', paymentCards: [{ id: 'legacy-shared-card', name: 'Legacy Test Card', number: '•••• 9999', primary: true }] };
   await client.send('Page.addScriptToEvaluateOnNewDocument', { source: `if(location.origin===${JSON.stringify(new URL(base).origin)}&&!sessionStorage.getItem('auth-check-seeded')){sessionStorage.setItem('auth-check-seeded','1');localStorage.setItem('moov-app-v2',${JSON.stringify(JSON.stringify(stale))});localStorage.setItem(${JSON.stringify(accountKey(users.a))},${JSON.stringify(JSON.stringify({ isAuthenticated: true, userId: users.a.id }))})}` });
   await checkLogin();

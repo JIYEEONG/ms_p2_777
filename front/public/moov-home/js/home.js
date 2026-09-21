@@ -29,7 +29,7 @@ function renderRentalJourney(){
 function renderHomeMap(driving=false){
   const r=ensureRentalRoute(),end=r.stops.at(-1);
   const notice=driving?`${end.name} 방면 · 다음 지점 약 ${r.nextMinutes??'—'}분`:state.locationReady?'차량이 정차할 수 있는 승차 지점을 확인해 주세요.':'출발지를 확인하면 가까운 무인차를 찾을게요.';
-  return `<section class="mobility-map" aria-label="${driving?'이용 중인 코스':'예약 코스'} 지도"><div id="${driving?'rental-driving-naver':'home-booking-map'}" class="home-live-map rental-naver-map"></div><span class="map-mode-chip">${icon('key')} MOOV 렌트</span><button class="map-locate" data-action="${driving?'center-route':'locate-rental'}" aria-label="${driving?'전체 코스 보기':'현재 위치 찾기'}">${icon('pin')}</button>${driving?`<div id="rux-stop-popover">${rentalStopPopover()}</div>`:''}</section><div class="map-safety map-route-status ${driving||state.locationReady?'ready':''}">${icon(driving?'shield':'pin')}<span>${escapeHtml(notice)}</span><button type="button" class="route-overview" data-action="center-route" data-i18n-skip>${rentalMapText('전체 경로','Full route')}</button></div>${renderRentalRouteRetry(r)}`;
+  return `<section class="mobility-map" aria-label="${driving?'이용 중인 코스':'예약 코스'} 지도"><div id="${driving?'rental-driving-naver':'home-booking-map'}" class="home-live-map rental-naver-map"></div><button class="map-locate" data-action="locate-rental-map" aria-label="현재 위치 찾기">${icon('pin')}</button>${driving?`<div id="rux-stop-popover">${rentalStopPopover()}</div>`:''}</section><div class="map-safety map-route-status ${driving||state.locationReady?'ready':''}">${icon(driving?'shield':'pin')}<span>${escapeHtml(notice)}</span><button type="button" class="route-overview" data-action="center-route" data-i18n-skip>${rentalMapText('전체 경로','Full route')}</button></div>${renderRentalRouteRetry(r)}`;
 }
 function renderRoutePlanner(){
   const route=ensureRentalRoute();
@@ -49,7 +49,7 @@ function renderBooking(){
   {h:10,label:'10시간'},
   {h:15,label:'15시간'},
   {h:RENTAL_MAX_HOURS,label:'최대'}
-].map(p=>`<button class="${p.h===state.rentalHours?'active':''}" aria-pressed="${p.h===state.rentalHours}" data-action="rent-set-hours" data-value="${p.h}">${p.label}</button>`).join('')}</div><div class="section-row option-heading"><strong>공간 옵션</strong><span>선택 사항 · 복수 선택</span></div><div class="rental-options">${rentalOptionCatalog.map(x=>`<button class="rental-option ${state.rentalOptions.has(x.id)?'selected':''}" data-action="rental-option" data-value="${x.id}" aria-pressed="${state.rentalOptions.has(x.id)}">${icon(state.rentalOptions.has(x.id)?'bookmark':'plus')}<span>${escapeHtml(x.name)}</span><strong>+${rentalMoney(x.price)}</strong></button>`).join('')}</div><div class="rent-total" aria-live="polite"><span><small>총 예상 요금</small><strong>${rentalMoney(rentalTotalFare())}</strong></span><span>${state.rentalHours}시간</span></div><p class="fare-breakdown">차량 ${rentalMoney(rentalFareForHours(v.id,state.rentalHours))} + 옵션 ${rentalMoney(rentalOptionFee())}<br/>주행요금 포함 · 장시간 패키지 할인 자동 적용</p><button class="primary-button full call-button" data-action="setup-next">출발 위치 확인</button><p class="source-demo-note">체험 화면 · 실제 차량 호출·결제는 발생하지 않아요.</p></div></section></div>`;
+].map(p=>`<button class="${p.h===state.rentalHours?'active':''}" aria-pressed="${p.h===state.rentalHours}" data-action="rent-set-hours" data-value="${p.h}">${p.label}</button>`).join('')}</div><div class="section-row option-heading"><strong>공간 옵션</strong><span>선택 사항 · 복수 선택</span></div><div class="rental-options">${rentalOptionCatalog.map(x=>`<button class="rental-option ${state.rentalOptions.has(x.id)?'selected':''}" data-action="rental-option" data-value="${x.id}" aria-pressed="${state.rentalOptions.has(x.id)}">${icon(state.rentalOptions.has(x.id)?'bookmark':'plus')}<span>${escapeHtml(x.name)}</span><strong>+${rentalMoney(x.price)}</strong></button>`).join('')}</div><div class="rent-total" aria-live="polite"><span><small>총 예상 요금</small><strong>${rentalMoney(rentalTotalFare())}</strong></span><span>${state.rentalHours}시간</span></div><p class="fare-breakdown">차량 ${rentalMoney(rentalFareForHours(v.id,state.rentalHours))} + 옵션 ${rentalMoney(rentalOptionFee())}<br/>주행요금 포함 · 장시간 패키지 할인 자동 적용</p><button class="primary-button full call-button" data-action="setup-next" data-i18n-skip>${rentalMapText('렌트 시작','Start rental')}</button></div></section></div>`;
 }
 function renderRentalDrivingScreen(){
   const r=ensureRentalRoute(),m=rentalRouteMetrics(),v=rentalVehicles.find(x=>x.id===state.rentalVehicleType);
@@ -153,6 +153,7 @@ function handleHomeClick(event){
   if(action==='edit-route-stop')return selectRentalPointOnMap(Number(value));
   if(action==='rental-change-stop')return openRentalDestinationSearch(Number(value));
   if(action==='rental-search-destination')return openRentalDestinationSearch();
+  if(action==='locate-rental-map'){MoovNaverMap.locateOnMap(rentalMapView,button,toast);return;}
   if(action==='center-route'){MoovLocationPicker.cancelSelection();resetRentalRouteCamera();if(rentalMapView)fitRentalRoute(rentalMapView,ensureRentalRoute());return;}
   if(action==='select-home-mode'){
     if(value==='taxi')return navigateHost('taxi');

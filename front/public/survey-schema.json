@@ -1,0 +1,25 @@
+{
+  "version": "1.8",
+  "categories": ["음식점", "카페", "전시", "쇼핑", "관광", "체험"],
+  "subcategories": {
+    "음식점": ["한식", "일식", "중식", "양식", "동남아", "기타"],
+    "카페": ["커피", "디저트", "베이커리", "브런치", "차"],
+    "전시": ["미술", "사진", "디자인", "미디어아트", "역사·문화"],
+    "쇼핑": ["패션", "뷰티", "리빙·소품", "책·문구", "식품"],
+    "관광": ["자연", "역사", "건축", "랜드마크", "공원·산책"],
+    "체험": ["공예", "요리", "문화", "스포츠·레저", "기타"]
+  },
+  "regions": ["성수", "이태원", "종로", "홍대·연남", "강남", "잠실", "여의도", "한남", "북촌·서촌"],
+  "foodRestrictions": ["육류", "해산물", "유제품", "견과류", "달걀", "밀"],
+  "english": {
+    "음식점": "Food", "카페": "Cafes", "전시": "Exhibitions", "쇼핑": "Shopping", "관광": "Sightseeing", "체험": "Activities",
+    "한식": "Korean", "일식": "Japanese", "중식": "Chinese", "양식": "Western", "동남아": "Southeast Asian", "기타": "Other",
+    "커피": "Coffee", "디저트": "Desserts", "베이커리": "Bakeries", "브런치": "Brunch", "차": "Tea",
+    "미술": "Fine art", "사진": "Photography", "디자인": "Design", "미디어아트": "Media art", "역사·문화": "History & culture",
+    "패션": "Fashion", "뷰티": "Beauty", "리빙·소품": "Home & decor", "책·문구": "Books & stationery", "식품": "Food products",
+    "자연": "Nature", "역사": "History", "건축": "Architecture", "랜드마크": "Landmarks", "공원·산책": "Parks & walks",
+    "공예": "Crafts", "요리": "Cooking", "문화": "Culture", "스포츠·레저": "Sports & leisure",
+    "성수": "Seongsu", "이태원": "Itaewon", "종로": "Jongno", "홍대·연남": "Hongdae · Yeonnam", "강남": "Gangnam", "잠실": "Jamsil", "여의도": "Yeouido", "한남": "Hannam", "북촌·서촌": "Bukchon · Seochon",
+    "육류": "Meat", "해산물": "Seafood", "유제품": "Dairy", "견과류": "Nuts", "달걀": "Eggs", "밀": "Wheat"
+  }
+}

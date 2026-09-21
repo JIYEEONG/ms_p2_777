@@ -815,6 +815,8 @@ html,body { height:100%; }
 .mobility-map .map-safety { z-index:450;bottom:26px;pointer-events:none; }
 .rux-map-marker.home-pin span { background:#f8a44c;color:#382c19; }
 .rux-map-marker.home-pin.start span { background:#28754e;color:white; }
+.rux-map-marker.waypoint span { width:26px;height:26px;border-width:2px;border-radius:50%;background:#f8a44c;color:#382c19;font-size:11px; }
+.rux-map-marker.goal span { width:36px;height:34px;border-radius:9px;background:#7351b5;color:white; }
 .rux-map-marker.home-car span { background:#3f83f8;color:#fff; }
 .rux-map-marker { width:44px;height:44px;cursor:pointer; }
 .mobility-map [data-map-error] { padding-top:65px; }

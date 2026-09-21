@@ -5,8 +5,18 @@
   let sdkFailed = false;
   const routes = new Map();
   const views = new Set();
+  const deviceLocations = new WeakMap();
   const english = () => document.documentElement.lang === 'en';
   const message = (ko, en) => english() ? en : ko;
+  // Current-location demo fixture shared by taxi, rental and pickup selection.
+  // Uses the existing Seongsu Station exit 3 test coordinates, never device GPS.
+  function getCurrentPosition(success) {
+    const place = { name: '성수역 3번 출구', category: '지하철역', lat: 37.5446, lng: 127.0557 };
+    Promise.resolve().then(() => success({
+      coords: { latitude: place.lat, longitude: place.lng, accuracy: 0 },
+      place, simulated: true, timestamp: Date.now(),
+    }));
+  }
   function failure(code) {
     const messages = {
       point: ['유효한 위치를 선택해 주세요.', 'Please select a valid location.'],
@@ -121,7 +131,62 @@
     element.addEventListener('pointerdown', () => { map.moovInteracted = true; }, { passive: true });
     element.addEventListener('touchstart', () => { map.moovInteracted = true; }, { passive: true });
     element.addEventListener('wheel', () => { map.moovInteracted = true; }, { passive: true, capture: true });
+    const location = { token: 0, removed: false, marker: null };
+    deviceLocations.set(map, location);
+    const destroy = map.destroy.bind(map);
+    map.destroy = () => {
+      location.removed = true;
+      location.token++;
+      location.marker?.setMap(null);
+      destroy();
+    };
     return map;
+  }
+  function locateOnMap(view, button, notify = () => {}) {
+    const map = view?.native || view;
+    const location = map && deviceLocations.get(map);
+    if (!location || location.removed) {
+      notify(message('지도를 불러오는 중이에요. 잠시 후 다시 눌러 주세요.', 'The map is loading. Please try again shortly.'));
+      return;
+    }
+    const token = ++location.token;
+    const current = () => !location.removed && location.token === token && button?.isConnected;
+    const finish = () => { if (button) { button.disabled = false; button.removeAttribute('aria-busy'); } };
+    const fail = error => {
+      finish();
+      if (!current()) return;
+      notify(error?.code === 1
+        ? message('브라우저와 기기의 위치 권한을 허용한 뒤 다시 눌러 주세요.', 'Allow location access in your browser and device, then try again.')
+        : message('현재 위치를 찾지 못했어요. 기기의 위치 기능을 켜고 다시 시도해 주세요.', 'Could not find your location. Enable device location and try again.'));
+    };
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    notify(message('테스트 위치를 표시하고 있어요…', 'Showing the demo location…'));
+    window.MoovNaverMap.getCurrentPosition(position => {
+      finish();
+      if (!current()) return;
+      const coordinates = { lat: position.coords.latitude, lng: position.coords.longitude };
+      if (!Number.isFinite(coordinates.lat) || !Number.isFinite(coordinates.lng)) { fail(); return; }
+      window.MoovLocationPicker?.cancelSelection();
+      const title = position.simulated ? message('성수역 · 테스트 위치', 'Seongsu Station · Demo') : message('내 위치', 'My location');
+      const content = document.createElement('div');
+      content.className = 'moov-current-location';
+      content.setAttribute('role', 'img');
+      content.setAttribute('aria-label', title);
+      content.style.cssText = 'position:relative;width:22px;height:22px;border:3px solid white;border-radius:50%;background:#287bea;box-shadow:0 0 0 8px rgba(40,123,234,.18),0 2px 8px #0003;';
+      const label = document.createElement('span');
+      label.textContent = title;
+      label.style.cssText = 'position:absolute;top:28px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:3px 7px;border-radius:8px;background:white;color:#2364b7;font-size:12px;font-weight:800;box-shadow:0 1px 5px #0002;';
+      content.append(label);
+      location.marker?.setMap(null);
+      const maps = sdk();
+      location.marker = new maps.Marker({ map, position: latLng(coordinates), title, zIndex: 1000,
+        icon: { content, size: new maps.Size(22,22), anchor: new maps.Point(11,11) } });
+      // A route request may still be running; it must not recenter over the GPS action.
+      map.moovInteracted = true;
+      map.updateBy(latLng(coordinates), Math.max(16, map.getZoom()));
+      notify(position.simulated ? message('성수역을 테스트용 내 위치로 표시했어요.', 'Seongsu Station is shown as your demo location.') : message('파란 점이 현재 위치예요.', 'The blue dot shows your current location.'));
+    }, fail, { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 });
   }
   function eventFor(event) {
     return event?.coord ? { ...event, latlng: { lat: event.coord.lat(), lng: event.coord.lng() } } : event;
@@ -404,5 +469,5 @@
     const lat=a[0]+(b[0]-a[0])*t,lng=a[1]+(b[1]-a[1])*t;
     return {lat,lng,remainingMeters:Math.max(0,route.distanceMeters*(1-progress)),remainingPoints:[[lat,lng],...route.points.slice(i)]};
   }
-  window.MoovNaverMap = { ready, createMap, createView, fitRoute, marker, polyline, circle, geocode, searchPlaces, matchPlace, describePoint, reverseGeocode, directions, directionsForStops, approachRoute, pickupApproach, approachPosition };
+  window.MoovNaverMap = { ready, createMap, createView, fitRoute, locateOnMap, getCurrentPosition, marker, polyline, circle, geocode, searchPlaces, matchPlace, describePoint, reverseGeocode, directions, directionsForStops, approachRoute, pickupApproach, approachPosition };
 })();

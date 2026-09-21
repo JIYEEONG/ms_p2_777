@@ -34,6 +34,8 @@
 .course-map-status { margin:10px; line-height:1.5; }
 .pickup-selecting { position:relative; }
 .pickup-center-pin { position:absolute; left:50%; top:50%; z-index:100; transform:translate(-50%,-100%); pointer-events:none; display:flex; flex-direction:column; align-items:center; }
+.pickup-center-pin.draggable { position:relative; left:auto; top:auto; transform:none; width:60px; pointer-events:auto; cursor:grab; touch-action:none; }
+.pickup-center-pin.draggable:active { cursor:grabbing; }
 .pickup-center-pin span { display:grid; place-items:center; min-width:48px; height:42px; padding:0 8px; border:3px solid white; border-radius:24px; background:#247b4e; color:white; font-size:15px; font-weight:800; box-shadow:0 3px 10px #0003; }
 .pickup-center-pin i { width:3px; height:16px; background:#247b4e; }
 .pickup-center-pin::after { content:''; width:8px; height:4px; margin-bottom:-2px; border-radius:50%; background:#164e33; }
