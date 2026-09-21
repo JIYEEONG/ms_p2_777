@@ -103,3 +103,58 @@ def log_crisis_event(conversation_id: str | None, user_id: str, persona: str, me
         conn.commit()
     finally:
         release_conn(conn)
+
+
+def query_lingo_courses() -> list[dict]:
+    """링고 D#: 이름 있는 공개 코스 + 경유지/목적지 정보.
+    영문 이름·주소는 juso로 검증된 지점(address_source='juso_verified')만 포함한다.
+    검증 안 된 영문명(romanized_fallback)은 뺀다 -> 링고가 로마자 표기법으로 직접 음차하고 근거 ID에서 제외."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT c.course_id, c.title, c.duration_seconds, c.distance_m,
+                       cp.sequence_no, cp.point_type, cp.place_name_kr,
+                       cp.place_name_en, cp.address_en, cp.address_source, cp.category
+                FROM moov.courses c
+                JOIN moov.course_points cp ON cp.course_id = c.course_id
+                WHERE c.visibility = 'public'
+                  AND cp.place_name_kr IS NOT NULL
+                ORDER BY c.course_id, cp.sequence_no
+                """
+            )
+            rows = cur.fetchall()
+    finally:
+        release_conn(conn)
+
+    courses = {}
+    for course_id, title, duration, distance, seq, point_type, name_kr, name_en, address_en, source, category in rows:
+        course = courses.setdefault(course_id, {
+            "course_id": course_id,
+            "title": title,
+            "duration_min": round(float(duration) / 60) if duration else None,
+            "distance_km": round(float(distance) / 1000, 1) if distance else None,
+            "points": [],
+        })
+        point = {"order": seq + 1, "type": point_type, "name_kr": name_kr, "category": category}
+        if source == "juso_verified":
+            point["name_en"] = name_en
+            point["address_en"] = address_en
+        course["points"].append({k: v for k, v in point.items() if v is not None})
+    return [{k: v for k, v in c.items() if v is not None} for c in courses.values()]
+
+
+def log_rag_usage(conversation_id: str, source_ids: str):
+    """ai_sessions에 RAG 근거 제공 기록 (rag_used=true, rag_source_ids=최근 턴의 근거 ID).
+    실제로 답변에 쓴 근거가 아니라 프롬프트에 제공된 근거 ID다 (모델 출력이 아직 JSON 계약이 아니라서)."""
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE ai_sessions SET rag_used = true, rag_source_ids = %s WHERE conversation_id = %s",
+                (source_ids, conversation_id),
+            )
+        conn.commit()
+    finally:
+        release_conn(conn)
