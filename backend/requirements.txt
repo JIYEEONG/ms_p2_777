@@ -13,3 +13,5 @@ pydub                           # STT용 오디오 포맷 변환(webm→wav) —
 audioop-lts                     # Python 3.13에서 pydub가 필요로 하는 audioop 대체 (3.13이 표준 audioop 모듈을 제거함)
 python-multipart                # FastAPI가 UploadFile(오디오 파일)을 받으려면 필요
 azure-storage-blob              # 코스 등록 사진을 Azure Blob Storage(course-images 컨테이너)에 업로드하기 위한 라이브러리
+google-auth>=2.38,<3            # Google ID 토큰 서명·audience·issuer·만료 검증
+requests>=2.32,<3               # Google OAuth 코드 교환 및 공개 인증서 조회 (서버 전용)

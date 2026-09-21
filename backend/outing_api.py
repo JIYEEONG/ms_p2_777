@@ -12,13 +12,15 @@ from typing import Any
 from uuid import uuid4
 from pathlib import Path
 
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
 if __package__:
     from .db import get_conn, release_conn
+    from .google_auth_api import require_auth_user
 else:
     from db import get_conn, release_conn
+    from google_auth_api import require_auth_user
 
 router = APIRouter(prefix="/api/outing", tags=["outing"])
 
@@ -41,7 +43,9 @@ class OutingEvent(BaseModel):
 
 
 @router.post("/events")
-def record_event(event: OutingEvent):
+def record_event(event: OutingEvent, user: dict = Depends(require_auth_user)):
+    if event.user_id != user['id']:
+        raise HTTPException(403, 'The event must belong to the signed-in account.')
     conn = get_conn()
     try:
         with conn.cursor() as cur:
@@ -51,7 +55,7 @@ def record_event(event: OutingEvent):
                 SELECT %s, %s, %s, %s, %s, %s, %s, %s, false
                 WHERE NOT EXISTS (SELECT 1 FROM moov.app_events WHERE idempotency_key = %s)
             """, (
-                event.event_id, event.user_id, event.event_type, event.occurred_at,
+                event.event_id, user['id'], event.event_type, event.occurred_at,
                 event.target_type, event.target_id, event.event_id,
                 json.dumps({
                     "session_id": event.session_id,
@@ -104,7 +108,7 @@ def outing_health():
 
 
 @router.post("/upload-image")
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(file: UploadFile = File(...), user: dict = Depends(require_auth_user)):
     from azure.storage.blob import BlobServiceClient
     import os
     conn_str = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
@@ -129,7 +133,9 @@ class CourseRegisterInput(BaseModel):
 
 
 @router.post("/courses")
-def register_course(payload: CourseRegisterInput):
+def register_course(payload: CourseRegisterInput, user: dict = Depends(require_auth_user)):
+    if payload.user_id != user['id']:
+        raise HTTPException(403, 'The course must belong to the signed-in account.')
     course_id = f"user-{uuid4().hex}"
     conn = get_conn()
     try:
@@ -137,7 +143,7 @@ def register_course(payload: CourseRegisterInput):
             cur.execute("""
                 INSERT INTO moov.courses (course_id, user_id, title, image_url, visibility, is_synthetic, created_at)
                 VALUES (%s, %s, %s, %s, 'public', false, now())
-            """, (course_id, payload.user_id, payload.title, payload.image_url))
+            """, (course_id, user['id'], payload.title, payload.image_url))
             for i, stop in enumerate(payload.stops):
                 cur.execute("""
                     INSERT INTO moov.course_points (course_id, sequence_no, place_name_kr, point_type, is_synthetic)

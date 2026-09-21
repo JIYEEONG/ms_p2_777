@@ -837,6 +837,11 @@ html,body { height:100%; }
 .rux-map-marker.home-pin span { background:#f8a44c;color:#382c19; }
 .rux-map-marker.home-pin.start span { background:#28754e;color:white; }
 .rux-map-marker.home-car span { background:#3f83f8;color:#fff; }
+.rux-map-marker { width:44px;height:44px;cursor:pointer; }
+.mobility-map [data-map-error] { padding-top:65px; }
+.mobility-map [data-map-error] .rux-map-status { margin:8px 16px; }
+/* Keep NAVER attribution visible beneath the approach map. */
+.matching-card.refined .system-status-sheet,.approaching-card.refined .system-status-sheet { margin:12px 10px 10px; }
 .home-map-label { border:0;box-shadow:0 2px 8px #0002;border-radius:7px;font-size:10px;font-weight:700; }
 .vehicle-type-list { touch-action:auto; }
 .vehicle-type { position:relative; }

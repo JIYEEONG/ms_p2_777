@@ -7,11 +7,17 @@ from routers import chat, tts, stt
 
 if __package__:
     from .outing_api import router as outing_router
+    from .naver_maps_api import router as maps_router
+    from .google_auth_api import router as auth_router
 else:
     from outing_api import router as outing_router
+    from naver_maps_api import router as maps_router
+    from google_auth_api import router as auth_router
 
 app = FastAPI()
 app.include_router(outing_router)
+app.include_router(maps_router)
+app.include_router(auth_router)
 
 # 로컬 프론트 개발 서버 주소로 제한 (배포 시 실제 도메인으로 교체)
 app.add_middleware(

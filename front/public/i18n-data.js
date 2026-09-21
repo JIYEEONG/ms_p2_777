@@ -750,6 +750,7 @@ window.MOOV_EN = Object.freeze({
   "오픈 시간에 맞춰 입장하고 인기 시설을 먼저 이용하면 동선을 줄일 수 있어요.": "Arrive at opening time and visit popular attractions first to reduce backtracking.",
   "오픈소스 라이선스": "Open-source licenses",
   "오후": "Afternoon",
+  "완료": "Done",
   "완료 시각": "Completion time",
   "완료 확인": "Confirm completion",
   "외": "and others",

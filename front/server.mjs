@@ -28,7 +28,7 @@ function sendFile(res, filePath) {
 createServer((req, res) => {
   const url = new URL(req.url || "/", `http://localhost:${port}`);
   const requestedPath = decodeURIComponent(url.pathname);
-  if (requestedPath.startsWith("/api/outing/")) {
+  if (requestedPath.startsWith("/api/outing/") || requestedPath.startsWith("/api/maps/") || requestedPath.startsWith("/api/auth/")) {
     const upstream = new URL(requestedPath + url.search, backendUrl);
     const proxy = httpRequest(upstream, { method: req.method, headers: { ...req.headers, host: upstream.host } }, (upstreamResponse) => {
       res.writeHead(upstreamResponse.statusCode || 502, upstreamResponse.headers);
@@ -36,7 +36,7 @@ createServer((req, res) => {
     });
     proxy.on("error", () => {
       if (!res.headersSent) res.writeHead(502, { "Content-Type": "application/json; charset=utf-8" });
-      res.end('{"error":"outing backend unavailable"}');
+      res.end(JSON.stringify({ error: "backend unavailable", detail: "백엔드 서버 연결을 확인하세요 (기본 포트 8000)." }));
     });
     req.pipe(proxy);
     return;

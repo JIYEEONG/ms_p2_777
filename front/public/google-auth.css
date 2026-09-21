@@ -1,0 +1,11 @@
+.login-screen .language-switch { margin: -28px 0 28px; }
+.google-auth-panel { display: grid; gap: 15px; margin: 40px 0 32px; }
+.google-signin-button { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 48px; width: 100%; border: 1px solid #747775; border-radius: 24px; background: #fff; color: #1f1f1f; padding: 12px 20px; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600; letter-spacing: .25px; cursor: pointer; }
+.google-signin-button svg { width: 20px; height: 20px; flex: 0 0 20px; stroke: none; }
+.google-signin-button:hover:not(:disabled) { background: #f8faff; box-shadow: 0 1px 2px #3c40431a; }
+.google-signin-button:focus-visible, .google-auth-retry:focus-visible { outline: 3px solid #8ab4f8; outline-offset: 3px; }
+.google-signin-button:disabled { opacity: .58; cursor: default; }
+.google-auth-status { margin: 0; min-height: 42px; font-size: .8rem; line-height: 1.55; color: #62646b; text-align: center; }
+.google-auth-status[data-state="unavailable"], .google-auth-status[data-state="failed"] { color: #a3372e; }
+.google-auth-retry { justify-self: center; border: 0; background: transparent; color: #1d594c; text-decoration: underline; font: inherit; font-size: .8rem; cursor: pointer; padding: 8px 16px; }
+.google-auth-retry[hidden] { display: none; }

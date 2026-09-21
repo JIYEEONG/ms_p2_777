@@ -23,6 +23,28 @@ state.rentalUX = Object.assign({dispatch:{status:'idle'}, route:null, recent:[],
 state.rentalUX.draftPickup = null;
 state.rentalUX.routeEdit = null;
 let rentalPickerMap = null, rentalPickerMarker = null, rentalCarMarker = null, rentalApproachLine = null;
+let rentalMapLoadId = 0;
+const rentalRouteRequests = new WeakSet();
+function rentalMapText(ko,en) { return window.MoovI18n?.getLanguage()==='en'?en:ko; }
+async function readyRentalMap(el) {
+  const id=String(++rentalMapLoadId);el.dataset.mapLoadId=id;
+  delete el.dataset.mapError;
+  el.setAttribute('data-i18n-skip','');
+  if(!window.naver?.maps?.Map)el.textContent=rentalMapText('지도를 불러오는 중…','Loading map…');
+  try {
+    await MoovNaverMap.ready();
+    return el.isConnected&&el.dataset.mapLoadId===id;
+  } catch(error) {
+    el.dataset.mapError=error.code||'unavailable';
+    if(el.isConnected&&el.dataset.mapLoadId===id){
+      el.replaceChildren();const message=document.createElement('p'),retry=document.createElement('button');
+      message.className='rux-map-status';message.textContent=rentalMapText('지도를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.','Could not load the map. Please try again.');
+      retry.type='button';retry.className='ghost-button';retry.textContent=rentalMapText('지도 다시 불러오기','Reload map');
+      retry.onclick=()=>{if(rentalModalKind==='pickup')initRentalPickerMap();else if(rentalModalKind==='route')initRentalRoutePickerMap();else render();};el.append(message,retry);
+    }
+    return false;
+  }
+}
 let rentalRequestToken = 0, rentalSearchToken = 0;
 let rentalModalKind = null, rentalModalFocus = null;
 let rentalLastRenderedStep = null;
@@ -48,9 +70,56 @@ function calculateRentalRoute(stops) {
 const rentalServices = {
   // Bundled search intentionally uses known demo locations, never fabricated geocodes.
   async search(query) { await new Promise(resolve=>setTimeout(resolve,180)); const q=normalizeSearch(query); return RENTAL_PLACES.filter(p=>!q||normalizeSearch(p.name+' '+p.category).includes(q)).slice(0,5).map(rentalClone); },
-  async calculateRoute(stops) { await new Promise(resolve=>setTimeout(resolve,250)); return calculateRentalRoute(stops); },
+  async calculateRoute(stops) { return calculateNaverRentalRoute(stops); },
   async requestVehicle(id) { return {id,plate:'MOOV 24',color:'화이트',battery:78}; }
 };
+async function calculateNaverRentalRoute(stops) {
+  const route=calculateRentalRoute(stops);
+  if(route.unresolved)return route;
+  let points=[],meters=0,seconds=0,firstSeconds=null;
+  // Directions 5 accepts five intermediate stops; longer user courses are split.
+  for(let i=0;i<stops.length-1;i+=6){
+    const part=stops.slice(i,i+7);
+    const result=await MoovNaverMap.directions({start:part[0],goal:part.at(-1),waypoints:part.slice(1,-1)});
+    points.push(...(points.length?result.points.slice(1):result.points));meters+=result.distanceMeters;seconds+=result.durationSeconds;
+    if(stops.length===2)firstSeconds=result.durationSeconds;
+  }
+  return {...route,points,distance:Number((meters/1000).toFixed(1)),minutes:Math.max(1,Math.ceil(seconds/60)),nextMinutes:firstSeconds===null?null:Math.max(1,Math.ceil(firstSeconds/60)),provider:'naver',demo:false,routeError:false};
+}
+function updateRentalRoadRoute(route) {
+  if(route.unresolved||route.provider==='naver'||route.routeError||rentalRouteRequests.has(route))return;
+  rentalRouteRequests.add(route);
+  rentalServices.calculateRoute(route.stops).then(next=>{
+    if(state.rentalUX.route!==route)return;
+    state.rentalUX.route=next;persist();render();
+  }).catch(()=>{
+    if(state.rentalUX.route!==route)return;
+    route.routeError=true;render();
+  });
+}
+function retryRentalRoadRoute() {
+  const route=ensureRentalRoute();
+  if(!route.routeError)return;
+  route.routeError=false;
+  rentalRouteRequests.delete(route);
+  persist();render();updateRentalRoadRoute(route);
+}
+function renderRentalRouteRetry(route) {
+  if(!route.routeError)return '';
+  return `<div class="rux-note" role="status" data-i18n-skip><p>${rentalRouteNote(route)}</p><button class="ghost-button" data-action="retry-rental-route">${rentalMapText('도로 경로 다시 조회','Retry driving route')}</button></div>`;
+}
+async function naverRentalApproach(pickup) {
+  // A simulated vehicle starts nearby; this is not a live fleet location.
+  let start;
+  try {const old=roadNetwork.buildApproach(pickup);start={lat:old.points[0][0],lng:old.points[0][1]};}
+  catch {start={lat:pickup.lat+.006,lng:pickup.lng+.006};}
+  const route=await MoovNaverMap.directions({start,goal:pickup});
+  if(route.points.length<2)throw Error('이 위치로 접근하는 차량 경로를 찾지 못했어요. 도로 근처를 선택해 주세요.');
+  const cumulative=[0];
+  for(let i=1;i<route.points.length;i++)cumulative.push(cumulative.at(-1)+rentalDistance({lat:route.points[i-1][0],lng:route.points[i-1][1]},{lat:route.points[i][0],lng:route.points[i][1]})*1000);
+  const last=route.points.at(-1);
+  return {...route,cumulative,totalMeters:cumulative.at(-1),pickupSnap:{lat:last[0],lng:last[1],distanceMeters:Math.round(rentalDistance(pickup,{lat:last[0],lng:last[1]})*1000)},durationMs:18000,demo:true};
+}
 function ensureRentalRoute() {
   const u=state.rentalUX, current=u.route;
   const names=state.routeStops;
@@ -66,6 +135,11 @@ function ensureRentalRoute() {
   return u.route;
 }
 function rentalRouteMetrics() { const r=ensureRentalRoute(); return {distance:r.distance==null?'—':r.distance.toFixed(1),minutes:r.minutes??'—'}; }
+function rentalRouteNote(route=ensureRentalRoute()) {
+  if(route.provider==='naver')return rentalMapText('네이버 자동차 경로 · 체류 시간 제외','NAVER driving route · stopover time excluded');
+  if(route.unresolved)return rentalMapText('장소의 위치를 먼저 확인해 주세요.','Confirm the locations of your stops first.');
+  return route.routeError?rentalMapText('도로 경로 조회 실패 · 직선거리 기반 예상값','Road route unavailable · estimates based on straight-line distance'):rentalMapText('도로 경로 조회 중 · 현재는 직선거리 기반 예상값','Loading road route · currently showing straight-line estimates');
+}
 function rentalSetStep(step) {
   if (state.rentalFlowStep===step) return;
   state.rentalFlowStep=step;
@@ -90,7 +164,9 @@ async function requestRentalVehicle() {
   state.rentalUX.dispatch={status:'requesting',enteredAt:Date.now(),deadline:Date.now()+15000,vehicle:null};
   rentalSetStep('matching');
   try {
-    state.rentalUX.dispatch.approachRoute=roadNetwork.buildApproach(rentalPickup());
+    const approachRoute=await naverRentalApproach(rentalPickup());
+    if(token!==rentalRequestToken||state.rentalFlowStep!=='matching')return;
+    state.rentalUX.dispatch.approachRoute=approachRoute;
     const result=await rentalServices.requestVehicle(state.rentalVehicleType);
     if (token!==rentalRequestToken || state.rentalFlowStep!=='matching') return;
     if (result.id!==state.rentalVehicleType) throw Error('선택한 차량을 배정하지 못했어요.');
@@ -184,18 +260,18 @@ function showRentalStop(index) {
 }
 
 function rentalMarker(map,p,label,click) {
-  const marker=L.marker([p.lat,p.lng],{keyboard:true,title:p.name||label,alt:p.name||label,icon:L.divIcon({className:'rux-map-marker',html:`<span>${escapeHtml(label)}</span>`,iconSize:[44,44],iconAnchor:[22,22]})}).addTo(map);
+  const element=document.createElement('div');element.className='rux-map-marker';
+  const shortEnglish={'출발':'Start','도착':'End','차량':'Car','픽업':'Pick up','후보':'Pin'};
+  const text=document.createElement('span');text.textContent=window.MoovI18n?.getLanguage()==='en'?(shortEnglish[label]||window.MoovI18n.translate(label)):label;element.append(text);
+  const marker=MoovNaverMap.marker([p.lat,p.lng],{element,title:p.name||label}).addTo(map);
   if(click)marker.on('click',click);
   return marker;
 }
 function createRentalMap(el,center,zoom=15) {
   if(!el)return null;
-  if(!window.L){el.innerHTML='<p class="rux-map-status">지도를 표시하지 못했어요. 검색 목록에서 위치를 선택해 주세요.</p>';return null;}
-  const reduced=rentalReducedMotion();
-  const map=L.map(el,{zoomControl:true,attributionControl:true,scrollWheelZoom:false,zoomAnimation:false,markerZoomAnimation:false,fadeAnimation:!reduced}).setView(center,zoom);
-  addMoovBasemap(map);
-  let alive=true;map.on('unload',()=>alive=false);
-  map.whenReady(()=>setTimeout(()=>{if(alive&&el.isConnected)map.invalidateSize();},0));
+  el.replaceChildren();
+  const map=MoovNaverMap.createView(el,center,zoom);
+  el.dataset.mapProvider='naver';
   return map;
 }
 function rentalMapBase(el,center,zoom=15) {
@@ -203,24 +279,25 @@ function rentalMapBase(el,center,zoom=15) {
   rentalCarMarker=null;rentalApproachLine=null;
   rentalLeafletMap=createRentalMap(el,center,zoom);return rentalLeafletMap;
 }
-function initRentalFlowMap() {
+async function initRentalFlowMap() {
   const el=document.querySelector('.rux .rental-osm-map');if(!el)return;
+  if(!await readyRentalMap(el))return;
   const c=rentalPickup(), step=state.rentalFlowStep;
   const map=rentalMapBase(el,[c.lat,c.lng],step==='driving'?13:15);if(!map)return;
   if(step==='driving') {
     const route=ensureRentalRoute();
-    if(!route.unresolved)L.polyline(route.points,{color:'#22744c',weight:5,opacity:.9,dashArray:'8 5'}).addTo(map);
+    if(!route.unresolved)MoovNaverMap.polyline(route.points,{color:'#22744c',weight:5,opacity:.9,dashArray:'8 5'}).addTo(map);
     route.stops.forEach((p,i)=>{if(p.lat==null)return;rentalMarker(map,p,i===0?'출발':String(i),i===0?null:()=>showRentalStop(i));});
     if(route.points.length>1)map.fitBounds(route.points,{padding:[36,50]});
   } else {
     rentalMarker(map,c,'픽업');
     if(step==='pickup')map.on('click',e=>openMapPinPicker(rentalPoint(e.latlng.lat,e.latlng.lng)));
-    if(step==='matching')L.circle([c.lat,c.lng],{radius:500,color:'#28754e',fillOpacity:.1}).addTo(map);
+    if(step==='matching')MoovNaverMap.circle([c.lat,c.lng],{radius:500,color:'#28754e',fillOpacity:.1}).addTo(map);
     if(['approaching','arrived'].includes(step)) {
       const d=state.rentalUX.dispatch,route=d.approachRoute;
       if(!route)return;
       const p=step==='arrived'?route.pickupSnap:d.position||{lat:route.points[0][0],lng:route.points[0][1]};
-      rentalApproachLine=L.polyline(step==='arrived'?[]:d.remainingPoints||route.points,{color:'#28754e',weight:5}).addTo(map);
+      rentalApproachLine=MoovNaverMap.polyline(step==='arrived'?[]:d.remainingPoints||route.points,{color:'#28754e',weight:5}).addTo(map);
       rentalCarMarker=rentalMarker(map,{...p,name:'배정 차량 MOOV 24'},'차량');
       rentalCarMarker.getElement()?.classList.add('home-car');
       map.fitBounds(route.points,{padding:[44,48]});
@@ -234,8 +311,11 @@ function openMapPinPicker(candidate=null) {
   openModal({title:'픽업 위치 수정',iconName:'pin',body:`<form id="rux-pickup-form" class="rux-search-form"><label class="sr-only" for="rental-pickup-search">등록 장소 검색</label><input id="rental-pickup-search" type="search" placeholder="서울숲, 성수역 등 등록 장소 검색"/><button class="ghost-button" type="submit">검색</button></form><p class="rux-note">체험용 등록 장소 검색 · 지도에서 직접 선택 가능</p><div id="rux-pickup-results" class="rental-search-results" aria-live="polite"></div><div id="rental-picker-osm" class="rental-osm-map picker" aria-label="픽업 후보 선택 지도"></div><p id="rux-draft-label" class="rux-draft-label" aria-live="polite">선택 후보: ${escapeHtml(state.rentalUX.draftPickup.name)}</p><h4>최근 위치</h4><div class="rental-search-results">${recents.map(p=>`<button data-action="rux-recent" data-id="${escapeHtml(p.id)}"><strong>${escapeHtml(p.name)}</strong><small>이 위치 미리보기</small></button>`).join('')}</div>`,primary:'이 위치로 확정',secondary:'취소',onConfirm:()=>{const p=state.rentalUX.draftPickup;if(!p)return false;applyPickupLocation(p.name,p);toast('픽업 위치를 확정했어요.');}});
   requestAnimationFrame(initRentalPickerMap);
 }
-function initRentalPickerMap() {
-  const p=state.rentalUX.draftPickup,el=document.querySelector('#rental-picker-osm');if(!p||!el)return;
+async function initRentalPickerMap() {
+  const el=document.querySelector('#rental-picker-osm');if(!state.rentalUX.draftPickup||!el)return;
+  if(!await readyRentalMap(el)||rentalModalKind!=='pickup')return;
+  const p=state.rentalUX.draftPickup;if(!p)return;
+  if(rentalPickerMap)rentalPickerMap.remove();
   rentalPickerMap=createRentalMap(el,[p.lat,p.lng]);if(!rentalPickerMap)return;
   rentalPickerMarker=rentalMarker(rentalPickerMap,p,'후보');
   rentalPickerMap.on('click',e=>setRentalDraftPickup(rentalPoint(e.latlng.lat,e.latlng.lng)));
@@ -278,15 +358,27 @@ function openRentalDestinationSearch(targetIndex=null) {
   openModal({title:'코스 변경',iconName:'search',body:`<p class="rux-note">${targetIndex===-1?'목적지 앞에 새 경유지를 추가합니다.':'변경할 장소: '+escapeHtml(route.stops[index]?.name||'목적지')}</p><form id="rux-route-form" class="rux-search-form"><label for="rux-route-query" class="sr-only">코스 장소 검색</label><input id="rux-route-query" type="search" placeholder="등록 장소 검색"/><button class="ghost-button" type="submit">검색</button></form><div id="rux-route-results" class="rental-search-results" aria-live="polite"></div><div id="rux-route-preview-map" class="rental-osm-map picker" aria-label="변경 전후 코스 미리보기 지도"></div><p class="rux-note">체험용 장소 검색 · 지도 터치로 후보 선택</p><div id="rux-route-preview" aria-live="polite">새 장소를 선택하면 거리와 시간 변화를 보여드려요.</div>`,primary:'변경 적용',secondary:'취소',onConfirm:applyRentalRoutePreview});
   document.querySelector('[data-modal-confirm]').disabled=true;
   searchRentalPlaces('route','');
-  requestAnimationFrame(()=>{
-    const el=document.querySelector('#rux-route-preview-map');if(!el||rentalModalKind!=='route')return;
-    rentalPickerMap=createRentalMap(el,[state.rentalPickupCoords.lat,state.rentalPickupCoords.lng],13);
-    if(!rentalPickerMap)return;
-    if(route.points.length>1){L.polyline(route.points,{color:'#63736b',weight:4,dashArray:'5 6'}).addTo(rentalPickerMap);rentalPickerMap.fitBounds(route.points,{padding:[25,30]});}
-    rentalPickerMap.on('click',e=>previewRentalRoute(rentalPoint(e.latlng.lat,e.latlng.lng)));
-  });
+  requestAnimationFrame(initRentalRoutePickerMap);
+}
+async function initRentalRoutePickerMap() {
+  const el=document.querySelector('#rux-route-preview-map');if(!el||rentalModalKind!=='route')return;
+  if(!await readyRentalMap(el)||rentalModalKind!=='route')return;
+  if(rentalPickerMap)rentalPickerMap.remove();
+  rentalPreviewLayer=null;
+  const route=ensureRentalRoute();
+  rentalPickerMap=createRentalMap(el,[state.rentalPickupCoords.lat,state.rentalPickupCoords.lng],13);
+  if(route.points.length>1){MoovNaverMap.polyline(route.points,{color:'#63736b',weight:4,dashArray:'5 6'}).addTo(rentalPickerMap);rentalPickerMap.fitBounds(route.points,{padding:[25,30]});}
+  rentalPickerMap.on('click',e=>previewRentalRoute(rentalPoint(e.latlng.lat,e.latlng.lng)));
+  const edit=state.rentalUX.routeEdit;
+  if(edit?.status==='ready'&&edit.preview)drawRentalRoutePreview(edit.preview);
 }
 let rentalPreviewLayer=null;
+function drawRentalRoutePreview(route) {
+  if(!rentalPickerMap)return;
+  if(rentalPreviewLayer)rentalPreviewLayer.remove();
+  rentalPreviewLayer=MoovNaverMap.polyline(route.points,{color:'#28754e',weight:5}).addTo(rentalPickerMap);
+  rentalPickerMap.fitBounds(route.points,{padding:[25,30]});
+}
 async function previewRentalRoute(p) {
   const edit=state.rentalUX.routeEdit;if(!edit)return;
   const token=++edit.token;edit.candidate=p;edit.status='loading';edit.preview=null;
@@ -297,9 +389,9 @@ async function previewRentalRoute(p) {
     const next=await rentalServices.calculateRoute(stops);
     if(state.rentalUX.routeEdit!==edit||edit.token!==token)return;
     edit.preview=next;edit.status='ready';const old=ensureRentalRoute();
-    container.innerHTML=`<strong>${escapeHtml(p.name)}</strong><table class="rux-preview-table"><caption>코스 변경 미리보기</caption><thead><tr><th>항목</th><th>현재</th><th>변경 후</th></tr></thead><tbody><tr><th>거리</th><td>${old.distance??'—'} km</td><td>${next.distance??'—'} km</td></tr><tr><th>이동 시간</th><td>${old.minutes??'—'}분</td><td>${next.minutes??'—'}분</td></tr></tbody></table><p>${rentalRouteDelta(old,next)}</p><small class="rux-note">모의 경로 · 교통상황 미반영 · 체류 시간 제외</small>`;
+    container.innerHTML=`<strong>${escapeHtml(p.name)}</strong><table class="rux-preview-table"><caption>코스 변경 미리보기</caption><thead><tr><th>항목</th><th>현재</th><th>변경 후</th></tr></thead><tbody><tr><th>거리</th><td>${old.distance??'—'} km</td><td>${next.distance??'—'} km</td></tr><tr><th>이동 시간</th><td>${old.minutes??'—'}분</td><td>${next.minutes??'—'}분</td></tr></tbody></table><p>${rentalRouteDelta(old,next)}</p><small class="rux-note">${rentalRouteNote(next)}</small>`;
     confirm.disabled=false;
-    if(rentalPickerMap){if(rentalPreviewLayer)rentalPreviewLayer.remove();rentalPreviewLayer=L.polyline(next.points,{color:'#28754e',weight:5}).addTo(rentalPickerMap);rentalPickerMap.fitBounds(next.points,{padding:[25,30]});}
+    drawRentalRoutePreview(next);
     container.scrollIntoView({block:'nearest',behavior:rentalReducedMotion()?'instant':'smooth'});
   } catch(e) {if(state.rentalUX.routeEdit===edit&&edit.token===token){edit.status='error';container.innerHTML='<p role="alert">경로를 계산하지 못했어요. 기존 코스는 유지됩니다. 다른 위치를 선택해 주세요.</p>';}}
 }
@@ -322,6 +414,7 @@ function openRentalStopList() {
 function handleRentalAction(button) {
   const action=button.dataset.action,value=button.dataset.value;
   const actions={
+    'retry-rental-route':retryRentalRoadRoute,
     'rental-flow-back':rentalBack,'request-rent-flow':requestRentalVehicle,'cancel-rent-match':cancelRentalDispatch,'rental-boarded':boardRentalVehicle,
     'rental-flow-next':()=>{if((state.rentalFlowStep==='time'&&value==='vehicle')||(state.rentalFlowStep==='vehicle'&&value==='pickup'))rentalSetStep(value);},
     'rental-stop-popup':()=>showRentalStop(Number(value)), 'rental-stop-close':()=>showRentalStop(null),

@@ -304,6 +304,18 @@ html[lang="en"] .home-notice-row > span:nth-child(2) { min-width: 0; }
 .mobility-tabs svg { width: 17px; height: 17px; }
 .mode-reset { padding: 7px 4px; border: 0; background: transparent; color: var(--muted); font-size: .68rem; font-weight: 850; }
 .mobility-map { position: relative; height: 286px; overflow: hidden; border-radius: 18px; background: #dcebe2; box-shadow: 0 10px 26px rgba(24,23,37,.1); }
+.mobility-map.naver-mobility-map { height: 320px; }
+.naver-map-canvas { width: 100%; height: 100%; }
+.naver-mobility-map .map-mode-chip, .naver-mobility-map .map-locate { z-index: 2; }
+.naver-mobility-map .map-safety { bottom: 28px; pointer-events: none; }
+.taxi-map-marker { display: flex; align-items: center; gap: 5px; width: max-content; max-width: 150px; padding: 7px 9px; border: 2px solid white; border-radius: 12px; background: #246f48; color: white; box-shadow: 0 2px 8px #0003; font-size: 11px; font-weight: 800; }
+.taxi-map-marker.goal { background: #b46719; }
+.taxi-map-marker.waypoint { background: #756233; }
+.taxi-map-marker.vehicle { background: #3271ce; }
+.taxi-map-marker span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.taxi-map-marker svg { width: 18px; height: 18px; flex: none; }
+.pin-picker-map.naver-pin-picker { height: 250px; }
+.taxi-map-message { margin: 8px 0; font-size: .76rem; line-height: 1.5; }
 .mobility-map > img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.72) contrast(.96); }
 .map-route-line { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .map-route-line path { fill: none; stroke: var(--green); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 4 5; filter: drop-shadow(0 1px 1px white); }
@@ -1068,6 +1080,8 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
 
     </style>
     <link rel="stylesheet" href="./moov0917-ui.css" />
+    <link rel="stylesheet" href="./taxi-fare-ui.css" />
+    <link rel="stylesheet" href="./google-auth.css" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -1153,13 +1167,16 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
             <div class="mini-logo">M</div>
             <p class="eyebrow">ROBOTAXI · TRAVEL · CULTURE</p>
             <h2>moov 시작하기</h2>
-            <p>택시, 여행, 문화를 무인차 안에서. 어떤 아이디와 비밀번호로도 로그인할 수 있어요.</p>
+            <p id="google-auth-intro" data-i18n-skip>택시, 여행, 문화를 무인차 안에서. Google 계정으로 MOOV를 시작하세요.</p>
           </div>
-          <form id="login-form" class="login-form">
-            <label>아이디<input id="user-id" autocomplete="username" placeholder="아이디 입력" /></label>
-            <label>비밀번호<input id="user-password" type="password" autocomplete="current-password" placeholder="비밀번호 입력" /></label>
-            <button class="primary-button" type="submit">로그인</button>
-          </form>
+          <div class="google-auth-panel" data-i18n-skip>
+            <button id="google-login-button" class="google-signin-button" type="button" disabled>
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65Z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.87 23.87 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19Z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"/></svg>
+              <span id="google-login-label">Google로 로그인</span>
+            </button>
+            <p id="google-auth-status" class="google-auth-status" role="status" aria-live="polite">로그인 상태를 확인하고 있어요…</p>
+            <button id="google-auth-retry" class="google-auth-retry" type="button" hidden>다시 확인</button>
+          </div>
           <p class="legal-note">로그인 시 서비스 이용약관과 개인정보 처리방침에 동의합니다.</p>
         </section>
 
@@ -1205,12 +1222,16 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
     <script src="./i18n-data.js"></script>
     <script src="./i18n.js"></script>
     <script src="./outing-data.js"></script>
+    <script src="./naver-map.js"></script>
+    <script src="./taxi-fare-policy.js"></script>
+    <script src="./taxi-fare.js"></script>
+    <script src="./taxi-fare-ui.js"></script>
+    <script src="./google-auth.js"></script>
     <script>
-const STORAGE_KEY = "moov-app-v2";
+const STORAGE_KEY = "moov-app-v3:";
 const OUTING_STORAGE_PREFIX = "moov-outing-v1:";
 const OUTING_LOG_PREFIX = "moov-outing-pending-v1:";
-const OUTING_API = window.MOOV_OUTING_API_BASE ||
-  (["localhost", "127.0.0.1"].includes(location.hostname) ? "http://127.0.0.1:8000/api/outing" : "/api/outing");
+const OUTING_API = window.MOOV_OUTING_API_BASE || "/api/outing";
 const APP_VERSION = "2.6.2";
 const DEFAULT_PROFILE_PHOTO = "./assets/profile-male-user.png";
 
@@ -1262,7 +1283,7 @@ function generateCourseName(tags) {
 
 async function loadCoursesFromDB() {
   try {
-    const res = await fetch("http://127.0.0.1:8000/api/outing/courses");
+    const res = await fetch("/api/outing/courses");
     const data = await res.json();
     dbCourses = data.courses.map((c) => ({
       id: c.id,
@@ -1378,33 +1399,30 @@ const historyRoutes = [
   { id: "ride-6", date: "2025-11-14", name: "인사동 공방 산책", meta: "2025.11.14 · 택시 2시간 16분", stops: ["안국역", "쌈지길", "익선동 한옥거리"] },
 ];
 
-function readSaved() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+function appStorageKey(userId) { return `${STORAGE_KEY}${encodeURIComponent(userId)}`; }
+function readSaved(userId) {
+  if (!userId) return {};
+  try { const value = JSON.parse(localStorage.getItem(appStorageKey(userId)) || "{}"); return value && typeof value === "object" && !Array.isArray(value) && value.userId === userId ? value : {}; }
   catch { return {}; }
 }
 
-const saved = readSaved();
 function outingStorageKey(userId) { return `${OUTING_STORAGE_PREFIX}${encodeURIComponent(userId)}`; }
 function readUserOuting(userId) {
+  if (!userId) return {};
   try {
     const scoped = localStorage.getItem(outingStorageKey(userId));
     if (scoped) return JSON.parse(scoped) || {};
-    // Assign pre-migration browser data only to the account that was signed in.
-    if ((saved.userId || saved.username) === userId) return {
-      outingSort: saved.outingSort, outingMapOpen: saved.outingMapOpen, outingFilters: saved.outingFilters,
-      likedCourseIds: saved.likedCourseIds, savedCourseIds: saved.savedCourseIds,
-      customCourses: saved.customCourses,
-    };
     return {};
   }
   catch { return {}; }
 }
-const outingSaved = readUserOuting(saved.userId || saved.username || "지영");
 const defaultRecommendationPrefs = () => ({ category: "카페", mood: "전체", companion: "전체", time: "전체", budget: 100000 });
 const defaultOutingFilters = () => ({ category: "전체", mood: "전체", companion: "전체", purpose: "전체", time: "전체", budget: 100000 });
-const state = {
-  isAuthenticated: saved.isAuthenticated || false,
-  userId: saved.userId || saved.username || "지영",
+function createAppState(saved = {}, user = null) {
+const outingSaved = readUserOuting(user?.id);
+return {
+  isAuthenticated: Boolean(user),
+  userId: user?.id || "",
   activeTab: "home",
   homeMode: saved.homeMode || "taxi",
   homeStep: saved.tripActive ? "service" : "mode",
@@ -1412,6 +1430,9 @@ const state = {
   usageStartedAt: saved.usageStartedAt || null,
   rentalEndsAt: saved.rentalEndsAt || (saved.tripActive && saved.homeMode === "rent" && saved.usageStartedAt ? saved.usageStartedAt + (saved.rentalHours || 2) * 3600000 : null),
   pickupLocation: (saved.pickupLocation || "현재 위치 · 서울 성수동").replace(/^지도 핀\s*·\s*/, ""),
+  taxiPickupCoords: saved.taxiPickupCoords || null,
+  taxiTrip: saved.taxiTrip || null,
+  taxiReceipts: Array.isArray(saved.taxiReceipts) ? saved.taxiReceipts.filter(receipt => receipt.userId === user?.id && validTaxiStoredTrip(receipt) && typeof receipt.completedAt === "string") : [],
   mapPinOpen: false,
   returnToHomeAfterCourse: false,
   rentalHours: saved.rentalHours || 2,
@@ -1432,24 +1453,14 @@ const state = {
   // 진행 중인(라이브) 대화는 저장 동의 여부와 무관하게 항상 이어짐. 저장 동의가 켜져 있을 때만 chatThreads(대화 기록)에 별도 반영.
   liveThread: saved.liveThread || null,
   liveSessionKey: saved.liveSessionKey || null,
-  chatThreads: saved.chatThreads || [{
-    id: "thread-sample-1",
-    title: "오늘 이동 중 나눈 대화",
-    updated: "3분 전",
-    persona: "무브",
-    messages: [
-      { role: "ai", text: "오늘따라 차가 좀 막히네요. 심심하지 않으세요?", time: "15:12" },
-      { role: "user", text: "응 좀 심심했어", time: "15:12" },
-      { role: "ai", text: "그럼 가벼운 얘기 하나 해드릴까요? 요즘 성수동에 재밌는 팝업이 많더라고요.", time: "15:13" },
-    ],
-  }],
+  chatThreads: saved.chatThreads || [],
   spaceSub: "purchase",
   purchaseSub: "search",
   productCategory: "추천",
   productQuery: "",
   homeQuery: saved.homeQuery || "",
   productLikes: new Set((saved.productLikes || ["fruit-cup"]).filter((id) => products.some((product) => product.id === id))),
-  cart: (saved.cart || [{ id: "bottled-water", qty: 1 }]).filter((line) => products.some((product) => product.id === line.id)),
+  cart: (saved.cart || []).filter((line) => products.some((product) => product.id === line.id)),
   orders: saved.orders || [],
   outingSub: "community",
   outingSort: outingSaved.outingSort || "latest",
@@ -1487,16 +1498,33 @@ const state = {
   theme: saved.theme || "기본",
   pendingTheme: null,
   themeConfig: saved.themeConfig || { temperature: 22, tint: 60, light: "민트 앰비언트", privacy: true },
-  username: saved.username || "지영",
-  profilePhoto: saved.profilePhoto || DEFAULT_PROFILE_PHOTO,
+  username: saved.username || user?.name || "",
+  profilePhoto: saved.profilePhoto || safeGooglePicture(user?.picture) || DEFAULT_PROFILE_PHOTO,
   pendingProfilePhoto: null,
   profileView: "menu",
-  paymentCards: saved.paymentCards || [{ id: "card-main", name: "신한카드", number: "•••• 8421", primary: true }],
+  paymentCards: saved.paymentCards || [],
   securityProof: saved.securityProof || null,
 };
+}
 
-if (!rentalVehicles.some((vehicle) => vehicle.id === state.taxiVehicleType)) state.taxiVehicleType = "standard";
+function safeGooglePicture(value) {
+  try { const url = new URL(value); return url.protocol === "https:" ? url.href : null; } catch { return null; }
+}
+const state = createAppState();
+let authGeneration = 0;
+let splashFinished = false;
+
+function restoreAuthenticatedTrip() {
+if (!MoovTaxiFare.vehicles.some((vehicle) => vehicle.id === state.taxiVehicleType)) state.taxiVehicleType = "standard";
 if (!rentalVehicles.some((vehicle) => vehicle.id === state.rentalVehicleType)) state.rentalVehicleType = "standard";
+if (activeTaxiTrip()) {
+  freezeTaxiRecord(state.taxiTrip);
+  state.taxiVehicleType = state.taxiTrip.quote.vehicleId;
+  state.pickupLocation = state.taxiTrip.pickupLocation;
+  state.taxiPickupCoords = state.taxiTrip.pickupCoords;
+  state.routeStops = [...state.taxiTrip.stops];
+}
+}
 
 const tabMeta = {
   ai: ["Moov", "AI 말동무"],
@@ -1522,6 +1550,7 @@ function outingSessionId() {
   } catch { return MoovOutingData.newId(); }
 }
 function enqueueOuting(path, payload, id) {
+  if (!state.isAuthenticated) return;
   const key = outingQueueKey();
   const queue = readOutingQueue(key);
   queue.push({ path, payload, id });
@@ -1530,11 +1559,12 @@ function enqueueOuting(path, payload, id) {
   void flushOutingQueue();
 }
 async function flushOutingQueue() {
-  if (outingLogSending) return;
+  if (outingLogSending || !state.isAuthenticated) return;
+  const owner = state.userId, generation = authGeneration;
   outingLogSending = true;
   const key = outingQueueKey();
   try {
-    while (readOutingQueue(key).length) {
+    while (state.isAuthenticated && state.userId === owner && generation === authGeneration && readOutingQueue(key).length) {
       const entry = readOutingQueue(key)[0];
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 8000);
@@ -1597,6 +1627,11 @@ let aiSwipeSuppressUntil = 0;
 let aiPersonaMotionClass = "";
 let outingLeafletMap;
 let outingLeafletLayer;
+let taxiMapSession = null;
+let taxiMapVersion = 0;
+let taxiPickupSession = null;
+let secureCleanupPending = false;
+const taxiPlaceCache = new Map();
 
 const SEARCH_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 260;
@@ -1729,8 +1764,8 @@ function courseMatchesQuery(course, query) {
 }
 
 function persist() {
+  if (!state.isAuthenticated || !state.userId) return;
   const data = {
-    isAuthenticated: state.isAuthenticated,
     userId: state.userId,
     username: state.username,
     profilePhoto: state.profilePhoto,
@@ -1745,6 +1780,9 @@ function persist() {
     homeMode: state.homeMode,
     homeQuery: state.homeQuery,
     pickupLocation: state.pickupLocation,
+    taxiPickupCoords: state.taxiPickupCoords,
+    taxiTrip: state.taxiTrip,
+    taxiReceipts: state.taxiReceipts,
     rentalHours: state.rentalHours,
     taxiVehicleType: state.taxiVehicleType,
     rentalVehicleType: state.rentalVehicleType,
@@ -1763,7 +1801,7 @@ function persist() {
     paymentCards: state.paymentCards,
     securityProof: state.securityProof,
   };
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch { /* prototype storage can be full after large photos */ }
+  try { localStorage.setItem(appStorageKey(state.userId), JSON.stringify(data)); } catch { /* large photos may exceed browser storage */ }
   const outing = {
     outingSort: state.outingSort, outingQuery: state.outingQuery, outingMapOpen: state.outingMapOpen,
     outingFilters: state.outingFilters, recommendationPrefs: state.recommendationPrefs,
@@ -1799,31 +1837,61 @@ function showScreen(id) {
   document.querySelector(`#${id}`).classList.add("screen-active");
 }
 
-function login() {
-  const id = document.querySelector("#user-id").value.trim();
-  const password = document.querySelector("#user-password").value.trim();
-  if (!id || !password) {
-    openModal({ title: "로그인 정보를 입력해 주세요", body: "체험용 앱이므로 어떤 아이디와 비밀번호든 사용할 수 있습니다.", iconName: "user", primary: "확인", secondary: null });
-    return;
-  }
-  state.userId = id.slice(0, 64);
-  state.username = id.slice(0, 12);
-  loadOutingForUser(state.userId);
-  state.selectedCourse = null;
-  state.activeDetailCourse = null;
+function enterAuthenticatedScreen() {
+  splashFinished = true;
+  clearTimeout(splashTimer);
+  if (state.isAuthenticated) { showScreen("app"); setTab(state.activeTab || "home"); }
+  else showScreen("login");
+}
+
+function clearAccountUi() {
+  persist();
+  authGeneration += 1;
+  disposeTaxiMap();
+  closeModal();
+  document.querySelector("#modal-body").replaceChildren();
+  document.querySelector("#modal-actions").replaceChildren();
+  document.querySelector("#modal-title").textContent = "";
+  clearTimeout(toastTimer);
+  document.querySelector("#toast").textContent = "";
+  document.querySelector("#toast").classList.remove("show");
+  clearTimeout(searchDebounceTimer);
+  if (outingLeafletMap) { outingLeafletMap.remove(); outingLeafletMap = null; }
+  if (mediaRecorder) { mediaRecorder.onstop = null; if (mediaRecorder.state !== "inactive") mediaRecorder.stop(); }
+  if (audioStream) { audioStream.getTracks().forEach(track => track.stop()); audioStream = null; }
+  if (currentTtsAudio) { currentTtsAudio.pause(); currentTtsAudio = null; }
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+  latestHomeState = null;
   pendingHomeCourse = null;
   routeTransferCourseId = null;
-  state.outingSub = "community";
-  state.isAuthenticated = true;
-  if (!state.profilePhoto) state.profilePhoto = DEFAULT_PROFILE_PHOTO;
-  state.homeStep = state.tripActive ? "service" : "mode";
+  secureCleanupPending = false;
+  searchUi.inputId = null;
+  searchUi.activeIndex = 0;
+  taxiFareState = { status: "idle", key: "", request: taxiFareState.request + 1, quote: null, quotedAt: 0, error: "" };
+  Object.keys(state).forEach(key => delete state[key]);
+  Object.assign(state, createAppState());
+  content.replaceChildren();
+  const headerAvatar = document.querySelector("#header-profile-avatar");
+  if (headerAvatar) headerAvatar.replaceChildren();
+  applyChatFontScale();
+}
+
+function applyAuthenticatedUser(user) {
+  if (state.isAuthenticated && state.userId === user.id) {
+    if (splashFinished && !document.querySelector('#app').classList.contains('screen-active')) enterAuthenticatedScreen();
+    return;
+  }
+  clearAccountUi();
+  Object.assign(state, createAppState(readSaved(user.id), user));
+  restoreAuthenticatedTrip();
+  applyChatFontScale();
   persist();
-  showScreen("app");
-  setTab("home");
-  toast(`${state.username}님, MOOV에 오신 것을 환영해요.`);
+  if (splashFinished) enterAuthenticatedScreen();
+  void flushOutingQueue();
 }
 
 function setTab(tab) {
+  if (!state.isAuthenticated) return;
   state.activeTab = tab;
   state.mapPinOpen = false;
   const [nextKicker, nextTitle] = tabMeta[tab];
@@ -1836,8 +1904,14 @@ function setTab(tab) {
 }
 
 function render() {
+  if (!state.isAuthenticated) return;
+  const taxiChoices = content.querySelector('.taxi-vehicle-list');
+  const taxiChoiceScroll = taxiChoices?.scrollLeft || 0;
+  const taxiChoiceFocused = Boolean(taxiChoices?.contains(document.activeElement));
+  disposeTaxiMap();
   const views = { ai: renderAi, space: renderSpace, home: renderHome, outing: renderOuting, profile: renderProfile };
   content.innerHTML = views[state.activeTab]();
+  restoreTaxiVehicleSelection(taxiChoiceScroll, taxiChoiceFocused);
   content.querySelector(".moov-home-frame")?.addEventListener("load", (event) => sendPendingHomeCourse(event.currentTarget));
   if (state.activeTab === "ai" && state.aiSub === "talk") requestAnimationFrame(scrollChat);
   requestAnimationFrame(enableDragScroll);
@@ -1846,6 +1920,7 @@ function render() {
   // 요청사항: 무브 캐릭터 캐빈은 크기 조절이 되면 안 됨 — 리사이즈 기능 비활성화(주석 처리, 삭제하지 않음)
   // requestAnimationFrame(enableAiPanelResize);
   if (state.activeTab === "outing" && ["community", "recommend"].includes(state.outingSub) && state.outingMapOpen) requestAnimationFrame(initOutingMap);
+  if (content.querySelector("#taxi-naver-map")) void initTaxiMap();
   syncCabinPreview();
   syncHeaderProfile();
 }
@@ -2028,7 +2103,7 @@ function syncCabinPreview() {
 
 function renderHome() {
   if (state.tripActive || (state.homeMode === "taxi" && state.homeStep !== "mode")) return renderLegacyHome();
-  return `<iframe class="moov-home-frame" src="./moov-home/index.html?embed=1&lang=${window.MoovI18n?.getLanguage() === "en" ? "en" : "ko"}" title="MOOV 홈·렌트" allow="geolocation" loading="eager"></iframe>`;
+  return `<iframe class="moov-home-frame" src="./moov-home/index.html?embed=1&account=${encodeURIComponent(state.userId)}&lang=${window.MoovI18n?.getLanguage() === "en" ? "en" : "ko"}" title="MOOV 홈·렌트" allow="geolocation" loading="eager"></iframe>`;
 }
 
 function sendPendingHomeCourse(frame, homeState = frame.contentWindow?.MOOVHome?.getState()) {
@@ -2049,6 +2124,7 @@ function sendPendingHomeCourse(frame, homeState = frame.contentWindow?.MOOVHome?
 }
 
 function handleHomeModuleMessage(event) {
+  if (!state.isAuthenticated) return;
   const frame = content.querySelector(".moov-home-frame");
   if (event.origin !== window.location.origin || event.source !== frame?.contentWindow) return;
   const message = event.data;
@@ -2119,17 +2195,101 @@ function renderHomeNoticePreview() {
 }
 
 function renderMobilityMap() {
-  const destination = state.routeStops.at(-1) || "목적지를 선택해 주세요";
-  const waypoints = state.routeStops.slice(1, -1).filter(Boolean);
-  const pinName = state.pickupLocation.replace(/^(현재 위치 확인됨|현재 위치)\s*·\s*/, "");
-  const longPinName = Array.from(pinName).length > 8;
-  const startLabel = escapeHtml(pinName || "출발지");
-  const waypointLabel = escapeHtml(waypoints[0] || "경유지");
-  const destinationLabel = escapeHtml(destination);
-  const notice = state.tripActive
-    ? `${escapeHtml(destination)} 방면으로 이동 중 · 15분 남음`
-    : state.locationReady ? "차량이 정차할 수 있는 안전한 승차 지점이에요." : "출발지를 확인하면 가까운 무인차를 찾을게요.";
-  return `<section class="mobility-map" aria-label="${state.homeMode === "taxi" ? "택시" : "렌트"} 배차 지도"><img src="./assets/map-seoul.jpg" alt="서울시 도로와 한강이 표시된 이동 지도" /><svg class="map-route-line" viewBox="0 0 360 286" preserveAspectRatio="none" aria-hidden="true"><path d="M82 205 C132 148 165 178 198 125 S267 66 315 87" /></svg><div class="map-shade"></div><div class="map-mode-chip">${icon(state.homeMode === "taxi" ? "car" : "key")} ${state.homeMode === "taxi" ? "MOOV 택시" : "MOOV 렌트"}</div><button class="map-locate" data-action="locate-home" aria-label="현재 위치 찾기">${icon("pin")}</button><button class="map-user-pin" data-action="toggle-map-pin" aria-label="출발 핀 위치 이름 보기" aria-expanded="${state.mapPinOpen}">${icon("pin")}</button><span class="map-start-label">출발지</span><span class="map-marker-label start">${startLabel}</span>${waypoints.length ? `<span class="map-dot waypoint"></span><span class="map-stop-label waypoint">경유지</span><span class="map-marker-label waypoint">${waypointLabel}</span>` : ""}<span class="map-dot end"></span><span class="map-stop-label end">목적지</span><span class="map-marker-label end">${destinationLabel}</span><div class="map-pin-label ${state.mapPinOpen ? "show" : ""} ${longPinName ? "marquee" : ""}"><div>${`<span>${escapeHtml(pinName)}</span>${longPinName ? `<span aria-hidden="true">${escapeHtml(pinName)}</span>` : ""}`}</div></div><span class="map-car-marker">${icon("car")}<small>3분</small></span><div class="map-safety ${state.locationReady || state.tripActive ? "ready" : ""}">${icon(state.locationReady || state.tripActive ? "shield" : "pin")}<span>${notice}</span></div></section>`;
+  return `<section class="mobility-map naver-mobility-map" aria-label="${taxiMapText("네이버 배차 지도", "Naver pickup map")}"><div id="taxi-naver-map" class="naver-map-canvas" data-i18n-skip></div><div class="map-mode-chip">${icon(state.homeMode === "taxi" ? "car" : "key")} ${state.homeMode === "taxi" ? "MOOV 택시" : "MOOV 렌트"}</div><button class="map-locate" data-action="locate-home" aria-label="현재 위치 찾기">${icon("pin")}</button><div class="map-safety"><span id="taxi-map-status" role="status" data-i18n-skip>${taxiMapText("네이버 지도를 불러오는 중…", "Loading Naver map…")}</span></div></section>`;
+}
+
+function taxiMapText(ko, en) { return window.MoovI18n?.getLanguage() === "en" ? en : ko; }
+function validTaxiPoint(point) { return Number.isFinite(point?.lat) && Number.isFinite(point?.lng) && Math.abs(point.lat) <= 90 && Math.abs(point.lng) <= 180; }
+function taxiDefaultPoint() { return { lat: 37.5446, lng: 127.0557 }; }
+function disposeTaxiSession(session) {
+  if (!session) return;
+  session.markers?.forEach(marker => marker.setMap(null));
+  session.line?.setMap(null);
+  if (session.map) { window.naver?.maps?.Event.clearInstanceListeners(session.map); session.map.destroy(); }
+}
+function disposeTaxiMap() { taxiMapVersion += 1; disposeTaxiSession(taxiMapSession); taxiMapSession = null; }
+function disposeTaxiPicker() { const previous = taxiPickupSession; taxiPickupSession = null; disposeTaxiSession(previous); }
+
+async function resolveTaxiPoint(label, pickup = false) {
+  if (pickup && validTaxiPoint(state.taxiPickupCoords)) return { ...state.taxiPickupCoords, name: label };
+  const clean = String(label).replace(/^(현재 위치 확인됨|현재 위치)\s*·\s*/, "").trim();
+  if (pickup && ["서울 성수동", "성수동"].includes(clean)) return { ...taxiDefaultPoint(), name: label };
+  const demo = MoovOutingData.DEMO_PLACES[clean];
+  if (validTaxiPoint(demo)) return { ...demo, name: label };
+  for (const course of [state.selectedCourse, ...dbCourses, ...baseCourses, ...state.customCourses].filter(Boolean)) {
+    const index = (course.stops || []).findIndex(stop => normalizeSearch(stop) === normalizeSearch(clean));
+    if (index < 0) continue;
+    const point = MoovOutingData.pointForStop(course, index);
+    if (validTaxiPoint(point)) return { ...point, name: label };
+    const dbPoint = course._dbPoints?.[index];
+    const coordinates = { lat: Number(dbPoint?.latitude), lng: Number(dbPoint?.longitude) };
+    if (dbPoint?.latitude != null && dbPoint?.longitude != null && validTaxiPoint(coordinates)) return { ...coordinates, name: label };
+  }
+  if (taxiPlaceCache.has(clean)) return { ...taxiPlaceCache.get(clean), name: label };
+  const data = await window.MoovNaverMap.geocode(clean);
+  const point = data.addresses?.find(validTaxiPoint);
+  if (!point) throw new Error(taxiMapText(`“${clean}” 위치를 찾지 못했어요. 도로명·지번 주소로 입력해 주세요.`, `Location not found: ${clean}. Enter a street or parcel address.`));
+  taxiPlaceCache.set(clean, point);
+  return { ...point, name: label };
+}
+
+function taxiMapMarker(session, point, kind, label) {
+  const maps = window.naver.maps;
+  const displayLabel = kind === "start" ? taxiMapText("출발", "Pickup") : kind === "goal" ? taxiMapText("도착", "Destination") : kind === "waypoint" ? label.split(" · ")[0] : label;
+  const marker = new maps.Marker({ map: session.map, position: new maps.LatLng(point.lat, point.lng), title: label, icon: { content: `<div class="taxi-map-marker ${kind}" style="transform:translateX(-50%)" data-i18n-skip>${kind === "vehicle" ? icon("car") : ""}<span>${escapeHtml(displayLabel)}</span></div>`, anchor: new maps.Point(0, 18) } });
+  session.markers.push(marker);
+  return marker;
+}
+
+async function initTaxiMap() {
+  const element = document.querySelector("#taxi-naver-map");
+  if (!element) return;
+  const version = taxiMapVersion;
+  const current = () => element.isConnected && version === taxiMapVersion;
+  const status = document.querySelector("#taxi-map-status");
+  const labels = [...state.routeStops];
+  const activeTrip = state.tripActive;
+  const fareRequest = beginTaxiFareQuote();
+  try {
+    const maps = await window.MoovNaverMap.ready();
+    if (!current()) return;
+    const center = validTaxiPoint(state.taxiPickupCoords) ? state.taxiPickupCoords : taxiDefaultPoint();
+    const session = { map: window.MoovNaverMap.createMap(element, center, 14), markers: [], line: null };
+    taxiMapSession = session;
+    const pickup = await resolveTaxiPoint(labels[0] || state.pickupLocation, true);
+    if (!current()) return;
+    taxiMapMarker(session, pickup, "start", `${taxiMapText("출발", "Pickup")} · ${pickup.name}`);
+    const points = [pickup, ...await Promise.all(labels.slice(1).map(name => resolveTaxiPoint(name)))];
+    if (!current()) return;
+    points.slice(1).forEach((point, index) => taxiMapMarker(session, point, index === points.length - 2 ? "goal" : "waypoint", `${index === points.length - 2 ? taxiMapText("도착", "Destination") : index + 1} · ${point.name}`));
+    if (points.length < 2) { const message = taxiMapText("목적지를 선택하면 자동차 경로를 표시해요.", "Select a destination to see the driving route."); status.textContent = message; failTaxiFareQuote(fareRequest, new Error(message)); return; }
+    const bounds = new maps.LatLngBounds();
+    points.forEach(point => bounds.extend(new maps.LatLng(point.lat, point.lng)));
+    session.map.fitBounds(bounds, { top: 55, right: 35, bottom: 85, left: 35 });
+    if (points.length > 7) throw new Error(taxiMapText("자동차 경로는 경유지를 최대 5곳까지 선택해 주세요.", "Driving routes support up to 5 waypoints."));
+    status.textContent = taxiMapText("자동차 경로를 조회하는 중…", "Finding a driving route…");
+    const route = await window.MoovNaverMap.directions({ start: points[0], goal: points.at(-1), waypoints: points.slice(1, -1) });
+    if (!current()) return;
+    acceptTaxiFareRoute(fareRequest, route);
+    const path = route.points.map(([lat, lng]) => new maps.LatLng(lat, lng));
+    if (!path.length) throw new Error(taxiMapText("표시할 자동차 경로가 없어요.", "No driving route is available."));
+    session.line = new maps.Polyline({ map: session.map, path, strokeColor: "#246f48", strokeWeight: 5, strokeOpacity: .9 });
+    const routeBounds = new maps.LatLngBounds();
+    path.forEach(point => routeBounds.extend(point));
+    session.map.fitBounds(routeBounds, { top: 55, right: 35, bottom: 85, left: 35 });
+    if (activeTrip) taxiMapMarker(session, points[0], "vehicle", taxiMapText("이용 차량", "Your taxi"));
+    const minutes = Math.max(1, Math.ceil(route.durationSeconds / 60));
+    status.textContent = taxiMapText(`자동차 ${(route.distanceMeters / 1000).toFixed(1)} km · 약 ${minutes}분${activeTrip ? " · 이용 중" : ""}`, `Driving ${(route.distanceMeters / 1000).toFixed(1)} km · about ${minutes} min${activeTrip ? " · Trip in progress" : ""}`);
+  } catch (error) {
+    if (current()) { status.textContent = taxiMapText("지도를 확인해 주세요: ", "Please check the map: ") + error.message; failTaxiFareQuote(fareRequest, error); }
+  }
+}
+
+function taxiReverseAddress(data) {
+  const result = data.results?.find(item => item.name === "roadaddr") || data.results?.[0];
+  if (!result) return "";
+  const region = result.region || {}, land = result.land || {};
+  return [...["area1", "area2", "area3", "area4"].map(key => region[key]?.name), land.name, [land.number1, land.number2].filter(Boolean).join("-")].filter(Boolean).join(" ");
 }
 
 function renderRoutePlanner(route) {
@@ -2141,7 +2301,7 @@ function renderRoutePlanner(route) {
 
 function renderActiveRoute(route) {
   const waypoints = state.routeStops.slice(1, -1).filter(Boolean).map((stop, index) => `<div class="active-route-line waypoint"><span class="route-mark"></span><div><small>경유지 ${index + 1}</small><strong>${escapeHtml(stop)}</strong></div></div>`).join("");
-  return `<div class="active-route"><div class="active-route-line"><span class="route-mark"></span><div><small>현재 위치</small><strong>${escapeHtml(state.pickupLocation)}</strong></div></div>${waypoints}<div class="active-route-line destination"><span class="route-mark"></span><div><small>목적지</small><strong>${escapeHtml(route ? route.name : state.routeStops.at(-1))}</strong></div></div><div class="vehicle-health"><span>${icon("car")} MOOV 24</span><span>충전량 <strong>78%</strong></span><span>보안 점검 완료</span></div>${state.homeMode === "taxi" ? `<button class="primary-button full" data-action="request-taxi">실시간 이동 경로 보기</button><button class="ghost-button full" data-action="finish-trip">택시 이용 종료</button>` : `<button class="ghost-button full" data-action="finish-trip">렌트 종료 요청</button>`}</div>`;
+  return `<div class="active-route">${state.homeMode === "taxi" ? renderActiveTaxiFare() : ""}<div class="active-route-line"><span class="route-mark"></span><div><small>출발 위치</small><strong>${escapeHtml(state.pickupLocation)}</strong></div></div>${waypoints}<div class="active-route-line destination"><span class="route-mark"></span><div><small>목적지</small><strong>${escapeHtml(route ? route.name : state.routeStops.at(-1))}</strong></div></div><div class="vehicle-health"><span>${icon("car")} MOOV 24</span><span>충전량 <strong>78%</strong></span><span>보안 점검 완료</span></div>${state.homeMode === "taxi" ? `<button class="ghost-button full" data-action="finish-trip">택시 이용 종료</button>` : `<button class="ghost-button full" data-action="finish-trip">렌트 종료 요청</button>`}</div>`;
 }
 
 function renderPickupCard() {
@@ -2170,13 +2330,15 @@ function formatElapsed(milliseconds) {
 }
 
 function updateUsageTimer() {
+  if (!state.isAuthenticated) return;
+  expireTaxiFareQuote();
   document.querySelectorAll("[data-live-usage]").forEach((timer) => {
     if (state.tripActive && state.usageStartedAt) timer.textContent = formatElapsed(Date.now() - state.usageStartedAt);
   });
   document.querySelectorAll("[data-live-remaining]").forEach((timer) => {
     if (state.tripActive && state.homeMode === "rent") timer.textContent = `${timer.dataset.prefix || ""}${formatElapsed(getRentalRemaining())}`;
   });
-  document.querySelectorAll("[data-live-fee]").forEach((fee) => { fee.textContent = `${currentUsageFee().toLocaleString("ko-KR")}원`; });
+  document.querySelectorAll("[data-live-fee]").forEach((fee) => { const amount = currentUsageFee(); fee.textContent = amount == null ? "—" : taxiMoney(amount); });
   if (state.tripActive && state.homeMode === "rent" && state.rentalEndsAt && getRentalRemaining() <= 0) {
     if (!state.securityEnding) {
       state.securityEnding = true;
@@ -2192,8 +2354,7 @@ function getRentalRemaining() {
 }
 
 function taxiPanel() {
-  const vehicle = rentalVehicles.find((item) => item.id === state.taxiVehicleType) || rentalVehicles[0];
-  return `<div class="booking-summary taxi-summary"><div class="section-row"><strong>차량 종류</strong></div>${renderVehicleTypeSelector(state.taxiVehicleType, "taxi-vehicle")}<div class="vehicle-arrival"><span class="arrival-icon">${icon("car")}</span><span><small>가장 가까운 차량</small><strong>${escapeHtml(vehicle.name)} · 약 3분</strong></span><span class="battery-pill">충전량 78%</span></div><div class="fare-row"><span><small>예상 요금</small><strong>약 18,900원</strong></span><span><small>결제</small><strong>•••• 8421</strong></span></div><button class="primary-button full call-button" data-action="request-taxi">예약</button><p class="booking-caption">하차 후 이동 거리 기준으로 등록 카드에 자동 결제돼요.</p></div>`;
+  return renderTaxiPanel();
 }
 
 function rentalPanel() {
@@ -2208,11 +2369,12 @@ function renderVehicleTypeSelector(selectedId, actionName) {
 }
 
 function openDestinationSearch() {
+  if (preventTaxiTripChange()) return;
   openModal({
     title: "목적지 검색",
     iconName: "pin",
     body: `<p>목적지와 경유지를 직접 입력하거나 관심 코스 전체를 불러오세요.</p><div class="popup-form"><label class="form-label">출발지<input id="route-start" value="${escapeHtml(state.pickupLocation)}" /></label><label class="form-label">경유지<input id="route-waypoint" placeholder="선택 사항" value="${escapeHtml(state.routeStops.length > 2 ? state.routeStops[1] : "")}" /></label><label class="form-label">목적지<input id="route-end" value="${escapeHtml(state.routeStops.at(-1) || "")}" placeholder="목적지 입력" /></label><button class="secondary-button full" data-action="choose-saved-course">${icon("bookmark")} 관심 코스에서 선택</button><button class="ghost-button full" data-action="browse-courses-home">${icon("compass")} AI 코스 추천 열기</button></div>`,
-    primary: "경로 등록",
+    primary: state.homeMode === "taxi" ? "완료" : "경로 등록",
     secondary: "취소",
     onConfirm: () => {
       const start = document.querySelector("#route-start")?.value.trim();
@@ -2220,20 +2382,61 @@ function openDestinationSearch() {
       const end = document.querySelector("#route-end")?.value.trim();
       if (!end) { toast("목적지를 입력해 주세요."); return false; }
       state.selectedCourse = null;
+      if (start && start !== state.pickupLocation) state.taxiPickupCoords = null;
       state.pickupLocation = start || state.pickupLocation;
-      state.routeStops = [start || "현재 위치", waypoint, end].filter(Boolean);
+      state.routeStops = [state.pickupLocation, waypoint, end].filter(Boolean);
       persist(); render(); toast("목적지 경로를 등록했어요.");
     },
   });
 }
 
 function openMapPinPicker() {
-  const places = ["성수역 3번 출구", "서울숲 남문", "뚝섬역 5번 출구", "내 위치 주변 승차구역"];
-  openModal({ title: "지도에서 출발 위치 선택", iconName: "pin", body: `<p>지도를 움직여 위치를 놓거나 가까운 승차 지점을 선택하세요.</p><div class="pin-picker-map"><img src="./assets/map-seoul.jpg" alt="서울시 출발 위치 선택 지도" /><span class="center-pin">${icon("pin")}</span><span class="pin-picker-name">성수동 685-492</span></div><div class="popup-list">${places.map((place) => `<button class="history-route" data-action="map-pin-select" data-value="${place}"><span class="history-icon">${icon("pin")}</span><span><strong>${place}</strong><small>안전 승차 가능 지점</small></span>${icon("chevron")}</button>`).join("")}</div>`, primary: "이 위치 선택", secondary: "취소", onConfirm: () => { applyPickupLocation("성수동 685-492"); } });
+  if (preventTaxiTripChange()) return;
+  let selected = null;
+  openModal({ title: "지도에서 출발 위치 선택", iconName: "pin", body: `<p data-i18n-skip>${taxiMapText("지도를 누르면 해당 위치를 출발지로 선택할 수 있어요.", "Click the map to choose your pickup location.")}</p><div class="pin-picker-map naver-pin-picker"><div id="taxi-pickup-map" class="naver-map-canvas" data-i18n-skip></div></div><p id="taxi-pickup-address" class="taxi-map-message" role="status" data-i18n-skip>${taxiMapText("네이버 지도를 불러오는 중…", "Loading Naver map…")}</p>`, primary: "이 위치 선택", secondary: "취소", onConfirm: () => {
+    if (!selected || !taxiPickupSession?.ready) { toast(taxiMapText("지도에서 출발 위치를 선택해 주세요.", "Select a pickup location on the map.")); return false; }
+    applyPickupLocation(selected.label, selected);
+  } });
+  const element = document.querySelector("#taxi-pickup-map");
+  const message = document.querySelector("#taxi-pickup-address");
+  const session = { map: null, markers: [], ready: false, request: 0 };
+  taxiPickupSession = session;
+  const current = () => taxiPickupSession === session && element.isConnected && modal.classList.contains("open");
+  void (async () => {
+    try {
+      const maps = await window.MoovNaverMap.ready();
+      if (!current()) return;
+      let center = validTaxiPoint(state.taxiPickupCoords) ? state.taxiPickupCoords : taxiDefaultPoint();
+      try { center = await resolveTaxiPoint(state.pickupLocation, true); } catch { /* allow a fresh map selection */ }
+      if (!current()) return;
+      session.map = window.MoovNaverMap.createMap(element, center, 16);
+      const marker = taxiMapMarker(session, center, "start", taxiMapText("출발지", "Pickup"));
+      const select = async point => {
+        const request = ++session.request;
+        selected = null;
+        session.ready = false;
+        marker.setPosition(new maps.LatLng(point.lat, point.lng));
+        message.textContent = taxiMapText("선택한 위치의 주소를 확인하는 중…", "Looking up this location…");
+        let label = `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`;
+        try {
+          const data = await window.MoovNaverMap.reverseGeocode(point.lat, point.lng);
+          label = taxiReverseAddress(data) || label;
+        } catch { /* precise coordinates remain usable when no address is available */ }
+        if (!current() || request !== session.request) return;
+        selected = { ...point, label };
+        session.ready = true;
+        message.textContent = label;
+      };
+      maps.Event.addListener(session.map, "click", event => void select({ lat: event.coord.lat(), lng: event.coord.lng() }));
+      await select(center);
+    } catch (error) { if (current()) message.textContent = error.message; }
+  })();
 }
 
-function applyPickupLocation(label) {
+function applyPickupLocation(label, coordinates = null) {
+  if (preventTaxiTripChange()) return;
   state.pickupLocation = label;
+  state.taxiPickupCoords = validTaxiPoint(coordinates) ? { lat: coordinates.lat, lng: coordinates.lng } : null;
   state.locationReady = true;
   if (state.routeStops.length) state.routeStops[0] = label;
   else state.routeStops = [label];
@@ -2241,13 +2444,24 @@ function applyPickupLocation(label) {
 }
 
 function locateUser(source = "home") {
-  const complete = () => {
-    applyPickupLocation("현재 위치 확인됨 · 서울 성수동");
+  const generation = authGeneration;
+  if (!state.isAuthenticated) return;
+  if (preventTaxiTripChange()) return;
+  const complete = async (position) => {
+    const coordinates = position?.coords ? { lat: position.coords.latitude, lng: position.coords.longitude } : taxiDefaultPoint();
+    let label = position?.coords ? `${coordinates.lat.toFixed(5)}, ${coordinates.lng.toFixed(5)}` : "현재 위치 · 서울 성수동";
+    if (position?.coords) {
+      try { label = taxiReverseAddress(await window.MoovNaverMap.reverseGeocode(coordinates.lat, coordinates.lng)) || label; }
+      catch { /* keep the actual coordinates when reverse geocoding is unavailable */ }
+    }
+    if (!state.isAuthenticated || generation !== authGeneration) return;
+    applyPickupLocation(label, coordinates);
     if (source === "outing") { state.locationReady = true; state.outingSort = "nearby"; persist(); render(); }
     toast(source === "outing" ? "내 위치를 기준으로 가까운 코스를 정렬했어요." : "현재 위치를 출발지로 설정했어요.");
   };
-  if (!navigator.geolocation) return complete();
-  navigator.geolocation.getCurrentPosition(complete, () => openModal({ title: "위치 권한이 필요해요", iconName: "pin", body: "<p>기기의 위치 권한을 허용하면 가까운 코스와 안전한 승차 지점을 찾을 수 있어요. 지금은 성수동 기준 위치를 사용합니다.</p>", primary: "성수동 기준 사용", secondary: "취소", onConfirm: complete }), { enableHighAccuracy: true, timeout: 5000 });
+  const unavailable = () => { if (state.isAuthenticated && generation === authGeneration) openModal({ title: "위치 권한이 필요해요", iconName: "pin", body: "<p>기기의 위치 권한을 허용하면 현재 위치를 출발지로 사용할 수 있어요. 성수동 기준 위치를 사용하거나 지도에서 직접 출발지를 선택할 수 있습니다.</p>", primary: "성수동 기준 사용", secondary: "취소", onConfirm: () => { void complete(); } }); };
+  if (!navigator.geolocation) return unavailable();
+  navigator.geolocation.getCurrentPosition(position => void complete(position), unavailable, { enableHighAccuracy: true, timeout: 5000 });
 }
 
 function chooseSavedCourse() {
@@ -2371,6 +2585,8 @@ function renderAiSettings() {
 }
 
 async function sendMessage(text, voice = false, detectedLanguage = null) {
+  if (!state.isAuthenticated) return;
+  const generation = authGeneration;
   const clean = text.trim();
   if (!clean) return;
   const now = () => new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
@@ -2411,6 +2627,7 @@ async function sendMessage(text, voice = false, detectedLanguage = null) {
     });
     if (!res.ok) throw new Error(`서버 응답 오류: ${res.status}`);
     const data = await res.json();
+    if (!state.isAuthenticated || generation !== authGeneration) return;
     reply = data.reply;
     if (data.switched_persona) {
       setAiPersona(data.switched_persona, true);  // silent=true로 토스트 중복 방지
@@ -2426,6 +2643,7 @@ async function sendMessage(text, voice = false, detectedLanguage = null) {
     }
   }
 
+  if (!state.isAuthenticated || generation !== authGeneration) return;
   thread.messages = thread.messages.filter((m) => !m.loading);
   thread.messages.push({ role: "ai", text: reply, time: now() });
   if (state.aiSaveEnabled) {
@@ -2467,6 +2685,8 @@ function scrollChat() {
 let currentTtsAudio = null;
 
 async function speakReply(text, detectedLanguage = null) {
+  if (!state.isAuthenticated) return;
+  const generation = authGeneration;
   try {
     // 이전에 재생 중이던 음성이 있으면 먼저 멈춤
     if (currentTtsAudio) {
@@ -2482,17 +2702,21 @@ async function speakReply(text, detectedLanguage = null) {
     });
     if (!res.ok) throw new Error("TTS 요청 실패");
     const audioBlob = await res.blob();
+    if (!state.isAuthenticated || generation !== authGeneration) return;
     const audioUrl = URL.createObjectURL(audioBlob);
     const audio = new Audio(audioUrl);
     currentTtsAudio = audio;
     audio.play();
   } catch (err) {
     console.error("TTS 오류:", err);
+    if (!state.isAuthenticated || generation !== authGeneration) return;
     toast("음성 재생에 실패했어요. 텍스트로 확인해 주세요.");
   }
 }
 
 async function startVoiceConversation() {
+  if (!state.isAuthenticated) return;
+  const generation = authGeneration;
   if (!state.aiVoiceEnabled) {
     toast("음성 대화가 꺼져 있어요. 설정에서 다시 켤 수 있어요.");
     return;
@@ -2505,16 +2729,20 @@ async function startVoiceConversation() {
   try {
     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   } catch {
+    if (!state.isAuthenticated || generation !== authGeneration) return;
     state.aiStatus = "idle";
     render();
     toast("마이크 권한을 확인할 수 없어 데모로 표시돼요. 텍스트로도 대화할 수 있어요.");
     return;
   }
 
+  if (!state.isAuthenticated || generation !== authGeneration) { stream.getTracks().forEach(track => track.stop()); return; }
   audioStream = stream;
-  audioChunks = [];
-  mediaRecorder = new MediaRecorder(stream);
-  mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+  const recordedChunks = [];
+  audioChunks = recordedChunks;
+  const recorder = new MediaRecorder(stream);
+  mediaRecorder = recorder;
+  recorder.ondataavailable = (e) => recordedChunks.push(e.data);
 
   // B-11: 무음 임계값(800ms) 감지 — 음량을 측정해 조용한 상태가 이어지면 자동 종료
   const audioContext = new AudioContext();
@@ -2529,6 +2757,7 @@ async function startVoiceConversation() {
   let stopped = false;
 
   const checkSilence = () => {
+    if (!state.isAuthenticated || generation !== authGeneration) { finishRecording(); return; }
     if (stopped) return;
     analyser.getByteFrequencyData(dataArray);
     const volume = dataArray.reduce((sum, v) => sum + v, 0) / dataArray.length;
@@ -2544,7 +2773,7 @@ async function startVoiceConversation() {
   // B-11: 무한 듣기 상태 방지 — 최대 발화 시간(20초) 초과 시 강제 종료
   const MAX_LISTEN_MS = 20000;
   const maxListenTimer = setTimeout(() => {
-    toast("최대 발화 시간을 초과해 자동으로 종료했어요.");
+    if (state.isAuthenticated && generation === authGeneration) toast("최대 발화 시간을 초과해 자동으로 종료했어요.");
     finishRecording();
   }, MAX_LISTEN_MS);
 
@@ -2554,15 +2783,16 @@ async function startVoiceConversation() {
     clearTimeout(silenceTimer);
     clearTimeout(maxListenTimer);
     audioContext.close();
-    if (mediaRecorder.state !== "inactive") mediaRecorder.stop();
+    if (recorder.state !== "inactive") recorder.stop();
   }
 
-  mediaRecorder.onstop = async () => {
-    audioStream?.getTracks().forEach((track) => track.stop());
+  recorder.onstop = async () => {
+    if (!state.isAuthenticated || generation !== authGeneration) return;
+    stream.getTracks().forEach((track) => track.stop());
     state.aiStatus = "idle";
     render();
 
-    const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+    const audioBlob = new Blob(recordedChunks, { type: "audio/webm" });
     if (audioBlob.size < 1000) return; // 너무 짧으면(무음 등) 전송하지 않음
 
     let text = "";
@@ -2572,6 +2802,7 @@ async function startVoiceConversation() {
       formData.append("audio", audioBlob, "speech.webm");
       const res = await fetch("http://127.0.0.1:8000/api/luna/stt", { method: "POST", body: formData });
       const data = await res.json();
+      if (!state.isAuthenticated || generation !== authGeneration) return;
       if (data.error) {
         toast("음성을 확인하지 못했어요. 다시 말하거나 텍스트로 입력해 주세요.");
         return;
@@ -2579,13 +2810,14 @@ async function startVoiceConversation() {
       text = data.text;
       detectedLanguage = data.detected_language;
     } catch {
+      if (!state.isAuthenticated || generation !== authGeneration) return;
       toast("음성 인식 서버에 연결할 수 없어요.");
       return;
     }
     if (text.trim()) sendMessage(text.trim(), true, detectedLanguage);
   };
 
-  mediaRecorder.start();
+  recorder.start();
   requestAnimationFrame(checkSilence);
 }
 
@@ -2963,6 +3195,7 @@ function openCourseDetail(course) {
 }
 
 function useCourseForHome(course) {
+  if (preventTaxiTripChange()) return;
   logOutingEvent("follow_intent", "course", course.id);
   state.selectedCourse = course;
   state.routeStops = [state.pickupLocation, ...course.stops];
@@ -3119,7 +3352,7 @@ function renderUsageHistory() {
   const active = state.tripActive ? `<button class="usage-row active" data-action="usage-detail" data-value="active"><span class="history-icon">${icon(rentActive ? "key" : "car")}</span><span><strong>현재 ${rentActive ? "렌트" : "택시"} 이용 중</strong><small><span ${rentActive ? "data-live-remaining data-prefix=\"남은 시간 \"" : "data-live-usage"}>${rentActive ? `남은 시간 ${formatElapsed(getRentalRemaining())}` : formatElapsed(Date.now() - (state.usageStartedAt || Date.now()))}</span> · ${escapeHtml(state.routeStops.at(-1))}</small></span><span class="badge">LIVE</span></button>` : "";
   const rides = historyRoutes.map((route) => `<button class="usage-row" data-action="usage-detail" data-value="${route.id}"><span class="history-icon">${icon(route.meta.includes("렌트") ? "key" : "car")}</span><span><strong>${route.name}</strong><small>${route.meta}</small></span>${icon("chevron")}</button>`).join("");
   const purchases = state.orders.map((order) => `<button class="usage-row" data-action="order-detail" data-value="${order.id}"><span class="history-icon">${icon("bag")}</span><span><strong>차량 상품 구매</strong><small>${formatOrderDate(order.createdAt)} · ${order.total.toLocaleString("ko-KR")}원</small></span>${icon("chevron")}</button>`).join("");
-  return `<section class="card usage-list">${active}${rides}${purchases}</section>`;
+  return `<section class="card usage-list">${active}${renderTaxiReceiptRows()}${rides}${purchases}</section>`;
 }
 
 function renderProfileCourses() {
@@ -3183,6 +3416,7 @@ function menuItem(iconName, titleText, desc, action = "menu-info", value = title
 function emptyState(iconName, heading, text) { return `<section class="card empty-state">${icon(iconName)}<h4>${heading}</h4><p>${text}</p></section>`; }
 
 function openModal({ title: modalTitle, body, iconName = "shield", primary = "확인", secondary = "닫기", onConfirm = null, onCancel = null }) {
+  disposeTaxiPicker();
   document.querySelector("#modal-title").textContent = modalTitle;
   const modalBody = document.querySelector("#modal-body");
   modalBody.innerHTML = body;
@@ -3195,11 +3429,11 @@ function openModal({ title: modalTitle, body, iconName = "shield", primary = "�
   modal.classList.add("open"); modal.setAttribute("aria-hidden", "false");
 }
 
-function closeModal() { if (state.pendingTheme) { state.pendingTheme = null; syncCabinPreview(); } modal.classList.remove("open"); modal.setAttribute("aria-hidden", "true"); }
+function closeModal() { disposeTaxiPicker(); if (state.pendingTheme) { state.pendingTheme = null; syncCabinPreview(); } modal.classList.remove("open"); modal.setAttribute("aria-hidden", "true"); }
 function toast(message) { const el = document.querySelector("#toast"); el.textContent = message; el.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2200); }
 
 document.addEventListener("submit", (event) => {
-  if (event.target.id === "login-form") { event.preventDefault(); login(); }
+  if (!state.isAuthenticated) { event.preventDefault(); return; }
   if (event.target.id === "chat-form" || event.target.id === "main-text-form") { event.preventDefault(); const input = document.querySelector("#chat-text, #main-text-input"); sendMessage(input?.value || ""); if (input) input.value = ""; }
 });
 
@@ -3257,6 +3491,8 @@ function handleSearchInput(event, stateKey, inputId, forceRender = false) {
 }
 
 document.addEventListener("change", (event) => {
+  if (!state.isAuthenticated) return;
+  const generation = authGeneration;
   if (["outing-budget", "recommend-budget"].includes(event.target.dataset.action)) render();
   if (event.target.dataset.stopType !== undefined) state.courseDraft.stops[Number(event.target.dataset.stopType)].type = event.target.value;
   if (event.target.dataset.stopPhoto !== undefined && event.target.files?.[0]) {
@@ -3264,14 +3500,14 @@ document.addEventListener("change", (event) => {
     const file = event.target.files[0];
     const formData = new FormData();
     formData.append("file", file);
-    fetch("http://127.0.0.1:8000/api/outing/upload-image", { method: "POST", body: formData })
+    fetch("/api/outing/upload-image", { method: "POST", body: formData })
       .then((res) => res.json())
-      .then((data) => { state.courseDraft.stops[index].photo = data.url; render(); })
+      .then((data) => { if (state.isAuthenticated && generation === authGeneration && state.courseDraft.stops[index]) { state.courseDraft.stops[index].photo = data.url; render(); } })
       .catch((e) => console.error("이미지 업로드 실패", e));
   }
   if (event.target.id === "profile-photo-input" && event.target.files?.[0]) {
     const reader = new FileReader();
-    reader.onload = () => { state.pendingProfilePhoto = reader.result; const preview = document.querySelector("#profile-photo-preview"); if (preview) preview.innerHTML = `<img src="${reader.result}" alt="프로필 미리보기" />`; };
+    reader.onload = () => { if (!state.isAuthenticated || generation !== authGeneration) return; state.pendingProfilePhoto = reader.result; const preview = document.querySelector("#profile-photo-preview"); if (preview) preview.innerHTML = `<img src="${reader.result}" alt="프로필 미리보기" />`; };
     reader.readAsDataURL(event.target.files[0]);
   }
 });
@@ -3282,10 +3518,15 @@ document.addEventListener("click", (event) => {
     render();
   }
   const button = event.target.closest("button, [data-action]");
-  if (!button) return;
+  if (!button || button.disabled) return;
   const action = button.dataset.action; const value = button.dataset.value;
+  if (action === "skip-splash") { enterAuthenticatedScreen(); return; }
+  if (!state.isAuthenticated) return;
+  if (taxiTripLocked() && ["taxi-vehicle", "select-home-mode", "home-mode", "switch-to-rent", "request-rent", "map-pin-select", "select-home-course"].includes(action)) { preventTaxiTripChange(); return; }
+  if (action === "taxi-fare-calculator") return openTaxiFareCalculator();
+  if (action === "retry-taxi-fare") { taxiFareState = { status: "idle", key: "", request: taxiFareState.request + 1, quote: null, quotedAt: 0, error: "" }; render(); return; }
+  if (action === "taxi-receipt") return openTaxiReceipt(value);
   if (button.dataset.tab) { if (button.dataset.tab === "home") state.homeStep = state.tripActive ? "service" : "mode"; return setTab(button.dataset.tab); }
-  if (action === "skip-splash") { clearTimeout(splashTimer); if (state.isAuthenticated) { showScreen("app"); setTab(state.activeTab || "home"); } else showScreen("login"); }
   if (action === "close-modal") closeModal();
   if (action === "search-suggestion") { applySearchSuggestion(button); return; }
   if (action === "open-status") openVehicleStatus();
@@ -3305,10 +3546,10 @@ document.addEventListener("click", (event) => {
   if (action === "home-mode") { if (state.tripActive && value === "rent" && state.homeMode === "taxi") return openModal({ title: "렌트로 전환할까요?", body: "<p>렌트 조건과 결제가 확정될 때까지 현재 택시 이동은 계속됩니다.</p>", iconName: "key", primary: "전환 요청", onConfirm: () => { state.homeMode = "rent"; state.tripActive = true; state.usageStartedAt = Date.now(); state.rentalEndsAt = state.usageStartedAt + state.rentalHours * 3600000; persist(); render(); toast("안전 정차 후 렌트 이용을 시작했어요."); } }); state.homeMode = value; persist(); render(); }
   if (action === "rent-minus") { state.rentalHours = Math.max(2, state.rentalHours - 1); render(); }
   if (action === "rent-plus") { state.rentalHours = Math.min(24, state.rentalHours + 1); render(); }
-  if (action === "taxi-vehicle") { state.taxiVehicleType = value; persist(); render(); toast("택시 차량 종류를 변경했어요."); }
+  if (action === "taxi-vehicle") { if (!MoovTaxiFare.vehicles.some(vehicle => vehicle.id === value)) return; state.taxiVehicleType = value; persist(); render(); toast("택시 차량 종류를 변경했어요."); }
   if (action === "rental-vehicle") { state.rentalVehicleType = value; persist(); render(); toast("렌트 차량 종류를 변경했어요."); }
   if (action === "rental-option") { if (state.tripActive) return toast("이용 중 옵션 변경은 고객센터 연결이 필요해요."); state.rentalOptions.has(value) ? state.rentalOptions.delete(value) : state.rentalOptions.add(value); persist(); render(); }
-  if (action === "request-taxi") { const vehicle = rentalVehicles.find((item) => item.id === state.taxiVehicleType) || rentalVehicles[0]; if (state.tripActive) return toast("실시간 이동 경로를 표시하고 있어요."); if (!state.routeStops.at(-1) || state.routeStops.length < 2) return toast("출발지와 목적지를 먼저 설정해 주세요."); openModal({ title: "MOOV 택시를 호출할까요?", body: `<p>${state.routeStops.length - 1}개 이동 장소를 경로에 등록했습니다. ${escapeHtml(vehicle.name)}을 ${escapeHtml(state.pickupLocation)}으로 배정하고 하차 후 등록 카드로 자동 결제합니다.</p>`, iconName: "car", primary: "예약", onConfirm: () => { state.tripActive = true; state.homeStep = "service"; state.usageStartedAt = Date.now(); state.rentalEndsAt = null; persist(); render(); toast(`${vehicle.name}이 배정됐어요.`); } }); }
+  if (action === "request-taxi") return requestTaxiBooking();
   if (action === "switch-to-rent") openModal({ title: "렌트로 전환할까요?", body: "<p>렌트 조건과 결제가 확정될 때까지 현재 택시 이동은 계속됩니다. 안전 정차 후 차량 옵션을 선택합니다.</p>", iconName: "key", primary: "전환 설정", secondary: "취소", onConfirm: () => { state.tripActive = false; state.usageStartedAt = null; state.rentalEndsAt = null; state.homeMode = "rent"; state.homeStep = "setup"; persist(); render(); toast("렌트 조건을 선택해 주세요."); } });
   if (action === "request-rent") { const vehicle = rentalVehicles.find((item) => item.id === state.rentalVehicleType) || rentalVehicles[0]; const optionPrice = rentalOptionCatalog.filter((item) => state.rentalOptions.has(item.id)).reduce((sum, item) => sum + item.price, 0); const total = state.rentalHours * vehicle.price + optionPrice; if (!state.routeStops.at(-1) || state.routeStops.length < 2) return toast("출발지와 목적지를 먼저 설정해 주세요."); openModal({ title: `${vehicle.name} ${state.rentalHours}시간 렌트`, body: `<p>${escapeHtml(state.pickupLocation)}으로 차량을 배정합니다. 예상 요금은 ${total.toLocaleString("ko-KR")}원이며 선택 옵션 ${state.rentalOptions.size}개가 적용됩니다.</p>`, iconName: "key", primary: "예약", onConfirm: () => { state.tripActive = true; state.homeStep = "service"; state.usageStartedAt = Date.now(); state.rentalEndsAt = state.usageStartedAt + state.rentalHours * 3600000; persist(); render(); toast("렌트 차량이 출발지로 이동 중이에요."); } }); }
   if (action === "finish-trip") openEndConfirmation();
@@ -3426,7 +3667,7 @@ document.addEventListener("click", (event) => {
   if (action === "profile-section") { state.profileView = value; render(); content.scrollTop = 0; }
   if (action === "profile-back") { state.profileView = "menu"; render(); }
   if (action === "home-notices") { state.profileView = "notices"; setTab("profile"); }
-  if (action === "logout") { state.isAuthenticated = false; persist(); closeModal(); showScreen("login"); document.querySelector("#user-password").value = ""; toast("로그아웃했어요."); }
+  if (action === "logout") { void MoovGoogleAuth.logout(); return; }
   if (action === "notice-detail") openModal({ title: button.dataset.title, body: `<p>${escapeHtml(button.dataset.text)}</p>`, iconName: "bell", primary: "확인", secondary: null });
   if (action === "usage-detail") openUsageDetail(value);
   if (action === "payment-add") openPaymentEditor();
@@ -3490,7 +3731,7 @@ function publishCourse() {
   if (!draft) return;
   const { titleText, validStops } = draft;
   const course = { id: `mine-${MoovOutingData.newId()}`, author: state.username, name: titleText, desc: state.courseDraft.desc.trim() || "내 이동 경험으로 등록한 코스", image: validStops.find((stop) => stop.photo)?.photo || null, time: `${validStops.length}곳 · 나의 코스`, stops: validStops.map((stop) => stop.name), dwell: validStops.map(() => "60분"), distance: null, likes: 0, createdAt: new Date().toISOString(), recommend: "각 장소의 운영시간과 가격을 확인한 뒤 이동해 주세요.", stopDetails: validStops.map((stop) => ({ type: stop.type, name: stop.name, photo: stop.photo || null })), tagProfile: { category: [state.outingFilters.category].filter((item) => item && item !== "전체"), mood: [state.outingFilters.mood].filter((item) => item && item !== "전체"), companion: [state.outingFilters.companion].filter((item) => item && item !== "전체"), purpose: [state.outingFilters.purpose].filter((item) => item && item !== "전체"), time: [state.outingFilters.time].filter((item) => item && item !== "전체"), price: null }, visual: "" };
-  fetch("http://127.0.0.1:8000/api/outing/courses", {
+  fetch("/api/outing/courses", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -3503,6 +3744,7 @@ function publishCourse() {
 }
 
 function currentUsageFee() {
+  if (state.homeMode === "taxi") return currentTaxiQuote()?.total ?? null;
   if (!state.tripActive || !state.usageStartedAt) return 0;
   const elapsedHours = Math.max(0, Date.now() - state.usageStartedAt) / 3600000;
   if (state.homeMode === "rent") {
@@ -3510,13 +3752,15 @@ function currentUsageFee() {
     const optionPrice = rentalOptionCatalog.filter((item) => state.rentalOptions.has(item.id)).reduce((sum, item) => sum + item.price, 0);
     return Math.round((elapsedHours * vehicle.price + optionPrice) / 100) * 100;
   }
-  return Math.round((4800 + elapsedHours * 25800) / 100) * 100;
+  return activeTaxiTrip()?.quote.total ?? null;
 }
 
 function openVehicleStatus() {
-  const vehicle = state.homeMode === "rent" ? (rentalVehicles.find((item) => item.id === state.rentalVehicleType)?.name || "MOOV 컴팩트") : "MOOV 택시";
+  const isTaxi = state.homeMode === "taxi";
+  const vehicle = isTaxi ? taxiVehicleName(activeTaxiTrip()?.vehicle || taxiVehicle()) : (rentalVehicles.find((item) => item.id === state.rentalVehicleType)?.name || "MOOV 컴팩트");
   const proof = state.securityProof;
-  openModal({ title: state.tripActive ? "이용 중인 무인차" : "배차 가능한 무인차", iconName: "car", body: `<div class="vehicle-status-card"><div class="receipt-info"><span>차량</span><strong>${escapeHtml(vehicle)}</strong><span>차량 번호</span><strong>MOOV 24</strong><span>충전량</span><strong>78%</strong><span>현재 사용 요금</span><strong data-live-fee>${currentUsageFee().toLocaleString("ko-KR")}원</strong></div><div class="security-gate ${proof ? "verified" : ""}">${icon("shield")}<span><strong>${proof ? "이전 세션 삭제 검증 완료" : "보안 게이트 통과"}</strong><small>${proof ? `${escapeHtml(proof.reference)} · 잔존 0건` : "배차 전 차량 내부 기록 정리를 확인했어요."}</small></span></div></div>`, primary: "확인", secondary: null });
+  const fare = currentUsageFee();
+  openModal({ title: state.tripActive ? "이용 중인 무인차" : "배차 가능한 무인차", iconName: "car", body: `<div class="vehicle-status-card"><div class="receipt-info"><span>차량</span><strong>${escapeHtml(vehicle)}</strong><span>차량 번호</span><strong>MOOV 24</strong><span>충전량</span><strong>78%</strong><span data-i18n-skip>${isTaxi ? taxiText("이동 경로 예상 요금", "Trip fare estimate") : taxiText("현재 사용 요금", "Current fare")}</span><strong data-live-fee data-i18n-skip>${fare == null ? "—" : taxiMoney(fare)}</strong></div>${isTaxi ? taxiFareRoundingNote() : ""}<div class="security-gate ${proof ? "verified" : ""}">${icon("shield")}<span><strong>${proof ? "이전 세션 삭제 검증 완료" : "보안 게이트 통과"}</strong><small>${proof ? `${escapeHtml(proof.reference)} · 잔존 0건` : "배차 전 차량 내부 기록 정리를 확인했어요."}</small></span></div></div>`, primary: "확인", secondary: null });
 }
 
 function openEndConfirmation() {
@@ -3529,6 +3773,7 @@ function openEndConfirmation() {
     secondary: "계속 이용",
     onConfirm: () => { runSecureCleanup(state.homeMode); return false; },
   });
+  if (state.homeMode === "taxi") document.querySelector("#modal-body").insertAdjacentHTML("afterbegin", taxiEndFareSummary());
 }
 
 function setSecurityProgress(titleText, percent, activeIndex, message) {
@@ -3538,18 +3783,25 @@ function setSecurityProgress(titleText, percent, activeIndex, message) {
 }
 
 function runSecureCleanup(mode) {
+  const generation = authGeneration;
   if (!state.tripActive && !state.securityEnding) return;
+  if (secureCleanupPending) return;
+  secureCleanupPending = true;
+  if (mode === "taxi") saveTaxiFareReceipt();
   state.securityEnding = true;
   if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
   if (audioStream) { audioStream.getTracks().forEach((track) => track.stop()); audioStream = null; }
   if ("speechSynthesis" in window) window.speechSynthesis.cancel();
   setSecurityProgress("차량 기록을 정리하고 있어요", 18, 0, "신규 인증과 외부 연결을 차단했습니다.");
-  setTimeout(() => setSecurityProgress("차량 기록을 정리하고 있어요", 56, 1, "개인 데이터와 연결 정보를 삭제하고 있습니다."), 700);
-  setTimeout(() => setSecurityProgress("삭제 결과를 확인하고 있어요", 84, 2, "잔존 데이터 0건과 차량 상태를 검증합니다."), 1400);
-  setTimeout(() => completeSecureCleanup(mode), 2200);
+  setTimeout(() => { if (generation === authGeneration) setSecurityProgress("차량 기록을 정리하고 있어요", 56, 1, "개인 데이터와 연결 정보를 삭제하고 있습니다."); }, 700);
+  setTimeout(() => { if (generation === authGeneration) setSecurityProgress("삭제 결과를 확인하고 있어요", 84, 2, "잔존 데이터 0건과 차량 상태를 검증합니다."); }, 1400);
+  setTimeout(() => { if (generation === authGeneration) completeSecureCleanup(mode); }, 2200);
 }
 
 function completeSecureCleanup(mode) {
+  if (!state.tripActive && !state.securityEnding) return;
+  const taxiReceipt = mode === "taxi" ? saveTaxiFareReceipt() : null;
+  secureCleanupPending = false;
   const completedAt = new Date();
   const reference = `ZT-${String(completedAt.getTime()).slice(-8)}`;
   state.securityProof = { reference, completedAt: completedAt.toISOString(), mode, wipedTargets: 7, retainedTargets: 3 };
@@ -3560,6 +3812,9 @@ function completeSecureCleanup(mode) {
   state.homeStep = "mode";
   state.locationReady = false;
   state.pickupLocation = "현재 위치 · 서울 성수동";
+  state.taxiPickupCoords = null;
+  state.taxiTrip = null;
+  taxiFareState = { status: "idle", key: "", request: taxiFareState.request + 1, quote: null, quotedAt: 0, error: "" };
   state.routeStops = [state.pickupLocation];
   state.selectedCourse = null;
   state.returnToHomeAfterCourse = false;
@@ -3575,7 +3830,8 @@ function completeSecureCleanup(mode) {
   render();
   document.querySelector("#modal-title").textContent = "개인 기록 정리가 완료됐어요";
   document.querySelector("#modal-body").innerHTML = `<div class="security-complete"><span class="security-check">${icon("shield")}</span><strong>삭제 검증 PASS · 잔존 0건</strong><p>차량의 인증·연결·콘텐츠 흔적을 삭제하고 다음 이용자의 접근을 차단했습니다.</p><div class="receipt-info"><span>완료 시각</span><strong>${completedAt.toLocaleString("ko-KR")}</strong><span>확인 번호</span><strong>${reference}</strong><span>삭제 대상</span><strong>7개 범주</strong><span>서버 보존</span><strong>결제·법정 증적·동의 기록</strong></div><div class="policy-note">감사 기록에는 결과와 가명 세션만 남으며 원문 대화, 검색어, 토큰 값은 저장하지 않습니다.</div></div>`;
-  document.querySelector("#modal-actions").innerHTML = `<button class="primary-button" data-action="close-modal">완료 확인</button>`;
+  if (taxiReceipt) document.querySelector("#modal-body").insertAdjacentHTML("afterbegin", `<section class="taxi-fare-card" data-i18n-skip><strong>${taxiText("택시 요금 내역 저장 완료", "Taxi fare receipt saved")}</strong>${taxiFareEstimate(taxiReceipt.quote, true)}</section>`);
+  document.querySelector("#modal-actions").innerHTML = `${taxiReceipt ? `<button class="ghost-button" data-action="taxi-receipt" data-value="${escapeHtml(taxiReceipt.id)}">${taxiText("요금 내역", "Fare receipt")}</button>` : ""}<button class="primary-button" data-action="close-modal">완료 확인</button>`;
 }
 
 modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });
@@ -3608,6 +3864,7 @@ function applySearchSuggestion(button) {
 }
 
 function applyHomeSearchSelection(candidate, fallbackValue) {
+  if (preventTaxiTripChange()) return;
   const course = candidate?.itemId ? getCourse(candidate.itemId) : null;
   if (course && candidate.category === "코스") {
     state.selectedCourse = course;
@@ -3668,17 +3925,20 @@ function handleSearchKeydown(event) {
   }
 }
 
+window.addEventListener("moov:language-change", () => {
+  if (document.querySelector("#taxi-naver-map")) render();
+});
+
 function updateClock() { document.querySelector("#clock").textContent = new Date().toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: false }); }
 updateClock(); setInterval(updateClock, 30000); setInterval(updateUsageTimer, 1000);
 applyChatFontScale();
-splashTimer = setTimeout(() => {
-  if (state.isAuthenticated) {
-    showScreen("app");
-    setTab(state.activeTab || "home");
-  } else {
-    showScreen("login");
-  }
-}, 1200);
+splashTimer = setTimeout(enterAuthenticatedScreen, 1200);
+void MoovGoogleAuth.init({
+  onAuthenticated: applyAuthenticatedUser,
+  onSignedOut: () => { clearAccountUi(); if (splashFinished) showScreen("login"); },
+  onLogoutSuccess: () => { enterAuthenticatedScreen(); toast(taxiText("로그아웃했어요.", "You have signed out.")); },
+  onLogoutError: message => toast(message),
+});
 
     </script>
   </body>

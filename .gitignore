@@ -4,7 +4,9 @@ out/
 dist/
 
 .env
+*.env
 .outing-events.sqlite3*
+.auth-sessions.sqlite3*
 .env.local
 .env.development.local
 .env.test.local

@@ -1,0 +1,108 @@
+"""Extract only the final taxi fare table from the team's workbook (stdlib only).
+
+Usage: .venv/Scripts/python.exe tools/import_taxi_policy.py PATH_TO_WORKBOOK
+Excel formulas are not evaluated; saved values in the final summary are used.
+"""
+import argparse
+from decimal import Decimal
+import hashlib
+import json
+from pathlib import Path
+import posixpath
+import xml.etree.ElementTree as ET
+import zipfile
+
+NS = {'s': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
+REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
+PACKAGE_REL = 'http://schemas.openxmlformats.org/package/2006/relationships'
+ROOT = Path(__file__).resolve().parents[1]
+SHEET = '요금정책_요약'
+
+
+def read_summary(path):
+    with zipfile.ZipFile(path) as archive:
+        strings = []
+        if 'xl/sharedStrings.xml' in archive.namelist():
+            strings = [''.join(node.itertext()) for node in
+                       ET.fromstring(archive.read('xl/sharedStrings.xml')).findall('s:si', NS)]
+        workbook = ET.fromstring(archive.read('xl/workbook.xml'))
+        sheet = next((item for item in workbook.findall('s:sheets/s:sheet', NS)
+                      if item.get('name') == SHEET), None)
+        if sheet is None:
+            raise ValueError(f'Missing required sheet: {SHEET}')
+        relations = ET.fromstring(archive.read('xl/_rels/workbook.xml.rels'))
+        target = next(item.get('Target') for item in relations.findall(f'{{{PACKAGE_REL}}}Relationship')
+                      if item.get('Id') == sheet.get(f'{{{REL}}}id'))
+        sheet_path = target.lstrip('/') if target.startswith('/') else posixpath.normpath('xl/' + target)
+        cells = {}
+        for cell in ET.fromstring(archive.read(sheet_path)).findall('.//s:sheetData/s:row/s:c', NS):
+            value = cell.findtext('s:v', default='', namespaces=NS)
+            if cell.get('t') == 's':
+                value = strings[int(value)] if value else ''
+            elif cell.get('t') == 'inlineStr':
+                value = ''.join(cell.find('s:is', NS).itertext())
+            cells[cell.get('r')] = value
+        return cells
+
+
+def extract(path):
+    cells = read_summary(path)
+    expected_headers = {'A3': '1. 최종 확정 요금표 (택시)', 'B4': '기본요금(원)',
+                        'C4': '기본포함거리(km)', 'D4': '추가요금(원/km)'}
+    for address, expected in expected_headers.items():
+        if cells.get(address, '').strip() != expected:
+            raise ValueError(f'Unexpected final-table header: {address}')
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    classes = {}
+    for row, key, label, english in [(5, 'small', '소형', 'Small'),
+                                     (6, 'medium', '중형', 'Medium'),
+                                     (7, 'large', '대형·장애인 차량', 'Large / accessible')]:
+        expected_prefix = {'small': '소형', 'medium': '중형', 'large': '대형'}[key]
+        if not cells.get(f'A{row}', '').strip().startswith(expected_prefix):
+            raise ValueError(f'Unexpected vehicle class in A{row}; check the final table order')
+        base, included, rate = (Decimal(cells[f'{col}{row}']) for col in 'BCD')
+        meters = included * 1000
+        if (not all(value.is_finite() and value > 0 for value in (base, included, rate))
+                or base != base.to_integral_value() or meters != meters.to_integral_value()
+                or rate * 100 != (rate * 100).to_integral_value()):
+            raise ValueError(f'Unsupported final fare values in row {row}')
+        maximum_units = int(base) * 100000 + max(0, 10000000 - int(meters)) * int(rate * 100)
+        if meters > 10000000 or maximum_units + 50000 > 9007199254740991:
+            raise ValueError(f'Fare exceeds the calculator numeric range in row {row}')
+        classes[key] = {'label': label, 'labelEn': english, 'sourceLabel': cells[f'A{row}'],
+                        'sourceCells': f'B{row}:D{row}', 'baseFare': int(base),
+                        'includedMeters': int(meters), 'perKm': float(rate)}
+    return {
+        'version': 'moov-taxi-v1-' + digest[:12],
+        'currency': 'KRW',
+        'source': {'file': path.name, 'sha256': digest, 'sheet': SHEET, 'range': 'A4:D7'},
+        'scope': {'label': '일반형 요금 · 주간·평시', 'labelEn': 'Regular daytime fares'},
+        'appliedCharges': ['base', 'extraDistance'],
+        'rounding': {'unitWon': 1, 'mode': 'half-up', 'origin': 'implementation-choice'},
+        'distanceUnitMeters': 1,
+        'maxDistanceMeters': 10000000,
+        'classes': classes,
+        'vehicleClasses': {'standard': 'small', 'easyfit': 'medium', 'family': 'large',
+                           'premium': 'large', 'barrierfree': 'large'},
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('workbook', type=Path)
+    args = parser.parse_args()
+    policy = extract(args.workbook)
+    output = ROOT / 'front/public/taxi-fare-policy.js'
+    payload = json.dumps(policy, ensure_ascii=False, indent=2)
+    output.write_text(
+        '/* Generated by tools/import_taxi_policy.py from the final taxi table. */\n'
+        '(function (root, factory) {\n'
+        "  if (typeof module === 'object' && module.exports) module.exports = factory();\n"
+        '  else root.MoovTaxiFarePolicy = factory();\n'
+        '})(typeof globalThis === \'object\' ? globalThis : this, function () {\n'
+        '  return ' + payload + ';\n});\n', encoding='utf-8')
+    print(f'Wrote {output.relative_to(ROOT)} ({policy["version"]})')
+
+
+if __name__ == '__main__':
+    main()

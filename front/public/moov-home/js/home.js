@@ -4,11 +4,19 @@
  */
 function rentalOptionFee(){return rentalOptionCatalog.filter(x=>state.rentalOptions.has(x.id)).reduce((sum,x)=>sum+x.price,0);}
 function rentalTotalFare(){return rentalFareForHours(state.rentalVehicleType,state.rentalHours)+rentalOptionFee();}
+function showHomeModeChoice(){
+  if(!state.tripActive){
+    rentalRequestToken++;
+    state.homeStep='mode';state.rentalFlowStep='setup';state.rentalUX.dispatch={status:'idle'};
+    persist();render();
+  }
+  content.scrollTop=0;
+}
 function rentalBack(){
   if(['matching','assigned','approaching','arrived','error'].includes(state.rentalFlowStep))return cancelRentalDispatch();
   if(state.tripActive)return;
   if(state.rentalFlowStep==='pickup')rentalSetStep('setup');
-  else{state.homeStep='mode';persist();render();content.scrollTop=0;}
+  else showHomeModeChoice();
 }
 function renderRentalJourney(){
   const step=state.rentalFlowStep;
@@ -21,7 +29,7 @@ function renderRentalJourney(){
 function renderHomeMap(driving=false){
   const r=ensureRentalRoute(),end=r.stops.at(-1);
   const notice=driving?`${end.name} 방면 · 다음 지점 약 ${r.nextMinutes??'—'}분`:state.locationReady?'차량이 정차할 수 있는 승차 지점을 확인해 주세요.':'출발지를 확인하면 가까운 무인차를 찾을게요.';
-  return `<section class="mobility-map" aria-label="${driving?'이용 중인 코스':'예약 코스'} 지도"><div id="${driving?'rental-driving-osm':'home-booking-map'}" class="home-live-map rental-osm-map"></div><span class="map-mode-chip">${icon('key')} MOOV 렌트</span><button class="map-locate" data-action="${driving?'center-route':'locate-rental'}" aria-label="${driving?'전체 코스 보기':'현재 위치 찾기'}">${icon('pin')}</button><div class="map-safety ${driving||state.locationReady?'ready':''}">${icon(driving?'shield':'pin')}<span>${escapeHtml(notice)}</span></div>${driving?`<div id="rux-stop-popover">${rentalStopPopover()}</div>`:''}</section>`;
+  return `<section class="mobility-map" aria-label="${driving?'이용 중인 코스':'예약 코스'} 지도"><div id="${driving?'rental-driving-osm':'home-booking-map'}" class="home-live-map rental-osm-map"></div><span class="map-mode-chip">${icon('key')} MOOV 렌트</span><button class="map-locate" data-action="${driving?'center-route':'locate-rental'}" aria-label="${driving?'전체 코스 보기':'현재 위치 찾기'}">${icon('pin')}</button><div class="map-safety ${driving||state.locationReady?'ready':''}">${icon(driving?'shield':'pin')}<span>${escapeHtml(notice)}</span></div>${driving?`<div id="rux-stop-popover">${rentalStopPopover()}</div>`:''}</section>${renderRentalRouteRetry(r)}`;
 }
 function renderRoutePlanner(){
   const route=ensureRentalRoute();
@@ -39,7 +47,7 @@ function renderBooking(){
 }
 function renderRentalDrivingScreen(){
   const r=ensureRentalRoute(),m=rentalRouteMetrics(),v=rentalVehicles.find(x=>x.id===state.rentalVehicleType);
-  return `<div class="mobility-screen rent rux rux-driving" data-rental-step="driving"><div class="mobility-mode-bar"><span class="mode-current">${icon('key')} 렌트 이용 중</span><span class="live-indicator"><i></i>LIVE</span></div>${renderHomeMap(true)}${renderUsageStatus()}<section class="mobility-sheet"><div class="sheet-handle"></div><div class="sheet-title"><div><span>나만의 이동 공간</span><h3 class="rux-heading" tabindex="-1">현재 이용 현황</h3></div><span class="mode-symbol">${icon('key')}</span></div><div class="active-route">${r.stops.map((p,i)=>`<button class="active-route-line ${i===r.stops.length-1?'destination':i>0?'waypoint':''}" data-action="${i===0?'center-route':'rental-stop-popup'}" data-value="${i}"><span class="route-mark"></span><span><small>${i===0?'출발 위치':i===r.stops.length-1?'목적지':'경유지 '+i}</small><strong>${escapeHtml(p.name)}</strong></span></button>`).join('')}</div><div class="vehicle-health"><span>${icon('car')} ${escapeHtml(v.name)}</span><span>충전량 <strong>${state.rentalUX.dispatch.vehicle?.battery??78}%</strong></span></div><div class="rux-route-summary"><strong>${m.distance} km <span>· 약 ${m.minutes}분</span></strong><small>모의 경로 · 이동 시간 추정, 체류 제외</small></div>${r.unresolved?'<p class="rux-error-text">위치 미확인 장소가 있어요. 코스 장소에서 위치를 지정해 주세요.</p>':''}<div class="drive-edit-row"><button class="ghost-button" data-action="rental-search-destination">${icon('search')} 코스 변경</button><button class="ghost-button" data-action="rental-stops-list">${icon('pin')} 장소 목록</button></div><button class="ghost-button full" data-action="rental-add-stop">${icon('plus')} 경유지 추가</button><button class="danger-text-button" data-action="finish-trip">렌트 이용 종료</button></section></div>`;
+  return `<div class="mobility-screen rent rux rux-driving" data-rental-step="driving"><div class="mobility-mode-bar"><span class="mode-current">${icon('key')} 렌트 이용 중</span><span class="live-indicator"><i></i>LIVE</span></div>${renderHomeMap(true)}${renderUsageStatus()}<section class="mobility-sheet"><div class="sheet-handle"></div><div class="sheet-title"><div><span>나만의 이동 공간</span><h3 class="rux-heading" tabindex="-1">현재 이용 현황</h3></div><span class="mode-symbol">${icon('key')}</span></div><div class="active-route">${r.stops.map((p,i)=>`<button class="active-route-line ${i===r.stops.length-1?'destination':i>0?'waypoint':''}" data-action="${i===0?'center-route':'rental-stop-popup'}" data-value="${i}"><span class="route-mark"></span><span><small>${i===0?'출발 위치':i===r.stops.length-1?'목적지':'경유지 '+i}</small><strong>${escapeHtml(p.name)}</strong></span></button>`).join('')}</div><div class="vehicle-health"><span>${icon('car')} ${escapeHtml(v.name)}</span><span>충전량 <strong>${state.rentalUX.dispatch.vehicle?.battery??78}%</strong></span></div><div class="rux-route-summary"><strong>${m.distance} km <span>· 약 ${m.minutes}분</span></strong><small>${rentalRouteNote(r)}</small></div>${r.unresolved?'<p class="rux-error-text">위치 미확인 장소가 있어요. 코스 장소에서 위치를 지정해 주세요.</p>':''}<div class="drive-edit-row"><button class="ghost-button" data-action="rental-search-destination">${icon('search')} 코스 변경</button><button class="ghost-button" data-action="rental-stops-list">${icon('pin')} 장소 목록</button></div><button class="ghost-button full" data-action="rental-add-stop">${icon('plus')} 경유지 추가</button><button class="danger-text-button" data-action="finish-trip">렌트 이용 종료</button></section></div>`;
 }
 let renderToken=0;
 function render(){
@@ -60,13 +68,14 @@ function render(){
     if(rentalLastRenderedStep!==state.rentalFlowStep){rentalLastRenderedStep=state.rentalFlowStep;content.querySelector('.rux-heading')?.focus({preventScroll:true});}
   });
 }
-function initHomeRouteMap(){
+async function initHomeRouteMap(){
   const driving=state.rentalFlowStep==='driving',el=document.querySelector(driving?'#rental-driving-osm':'#home-booking-map');
   if(!el)return;
+  if(!await readyRentalMap(el))return;
   const route=ensureRentalRoute(),p=rentalPickup();
   const map=rentalMapBase(el,[p.lat,p.lng],15);if(!map)return;
-  map.zoomControl.setPosition('topleft');
-  if(!route.unresolved)L.polyline(route.points,{color:'#28754e',weight:5,dashArray:'7 6'}).addTo(map);
+  if(!route.unresolved)MoovNaverMap.polyline(route.points,{color:'#28754e',weight:5,dashArray:route.provider==='naver'?undefined:'7 6'}).addTo(map);
+  updateRentalRoadRoute(route);
   route.stops.forEach((p,i)=>{
     if(p.lat==null||p.lng==null)return;
     const label=i===0?'출발':i===route.stops.length-1?'도착':String(i);
@@ -117,8 +126,8 @@ function handleHomeClick(event){
     if(!event.target.closest('#modal')){if(event.target.closest('button,a')){event.preventDefault();toast('차량 기록 정리가 끝난 뒤 이용해 주세요.');}return;}
   }
   const nav=event.target.closest('[data-tab]');
-  if(nav){if(nav.dataset.tab==='home'){content.scrollTop=0;}else navigateHost(nav.dataset.tab);return;}
-  if(event.target.closest('.home-logo')){event.preventDefault();if(!state.tripActive){state.homeStep='mode';persist();render();}content.scrollTop=0;return;}
+  if(nav){if(nav.dataset.tab==='home')showHomeModeChoice();else navigateHost(nav.dataset.tab);return;}
+  if(event.target.closest('.home-logo')){event.preventDefault();showHomeModeChoice();return;}
   const button=event.target.closest('[data-action]');if(!button||button.disabled)return;
   const action=button.dataset.action,value=button.dataset.value;
   if(handleRentalAction(button))return;
@@ -167,10 +176,12 @@ function handleHomeSubmit(event){
 }
 function handleHomeKey(event){if(event.key==='Escape'&&modal.classList.contains('open'))closeModal();}
 function handleBackdrop(event){if(event.target===modal)closeModal();}
+function refreshRentalMapLanguage(){if(state.homeStep!=='mode'||state.tripActive)render();}
 document.addEventListener('click',handleHomeClick);
 document.addEventListener('submit',handleHomeSubmit);
 document.addEventListener('keydown',handleHomeKey);
 modal.addEventListener('click',handleBackdrop);
+window.addEventListener('moov:language-change',refreshRentalMapLanguage);
  function importRoute(stops){
   if(!Array.isArray(stops)||stops.length<2||stops.length>20||stops.some(p=>!p||typeof p.name!=='string'||!p.name.trim()||(p.lat!=null&&!Number.isFinite(p.lat))||(p.lng!=null&&!Number.isFinite(p.lng))||(p.lat!=null&&Math.abs(p.lat)>90)||(p.lng!=null&&Math.abs(p.lng)>180)))throw Error('코스는 이름이 있는 2~20개 장소여야 합니다.');
   if(cleanupRunning()||state.tripActive||!['setup','pickup'].includes(state.rentalFlowStep))throw Error('배차 또는 이용 중에는 앱의 코스 변경 기능을 사용해 주세요.');
@@ -187,11 +198,11 @@ window.addEventListener('message',handleHostMessage);
 function updateClock(){document.querySelector('#clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'numeric',minute:'2-digit',hour12:false});}
 let ticker=setInterval(()=>{if(cleanupRunning())tickSecureCleanup();else{rentalTick();updateUsageTimer();}},250),clockTicker=setInterval(updateClock,30000);
 function destroy(){
+  window.removeEventListener('moov:language-change',refreshRentalMapLanguage);
   clearInterval(ticker);clearInterval(clockTicker);clearTimeout(toastTimer);rentalRequestToken++;rentalSearchToken++;renderToken++;
   if(rentalLeafletMap){rentalLeafletMap.stop();rentalLeafletMap.remove();rentalLeafletMap=null;}
   if(rentalPickerMap){rentalPickerMap.stop();rentalPickerMap.remove();rentalPickerMap=null;}
   document.removeEventListener('click',handleHomeClick);document.removeEventListener('submit',handleHomeSubmit);document.removeEventListener('keydown',handleHomeKey);document.removeEventListener('keydown',trapRentalModalFocus);modal.removeEventListener('click',handleBackdrop);window.removeEventListener('message',handleHostMessage);
-  if(moovMapDownloadUrl){URL.revokeObjectURL(moovMapDownloadUrl);moovMapDownloadUrl=null;}
 }
 window.MOOVHome=Object.freeze({getState:publicState,setRoute:importRoute,destroy,services:rentalServices});
 window.addEventListener('pagehide',destroy,{once:true});

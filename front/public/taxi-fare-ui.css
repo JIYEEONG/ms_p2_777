@@ -1,0 +1,45 @@
+.taxi-vehicle-picker { min-width: 0; overflow: hidden; margin: 10px 0 18px; border: 1px solid #dce5df; border-radius: 18px; background: white; }
+.taxi-vehicle-hero { position: relative; height: 210px; display: grid; place-items: center; overflow: hidden; background: linear-gradient(180deg, #f8fbf9, #eef6f1); }
+.taxi-vehicle-hero::before { content: ""; position: absolute; width: 250px; height: 250px; right: -50px; top: -80px; border-radius: 50%; background: rgba(83,177,117,.09); }
+.taxi-vehicle-hero > img { position: relative; width: 94%; height: 194px; object-fit: contain; filter: drop-shadow(0 16px 18px rgba(24,23,37,.14)); }
+.taxi-vehicle-badge { position: absolute; z-index: 1; left: 14px; top: 14px; padding: 6px 9px; border-radius: 999px; background: #edf6f0; color: #236442; font-size: 12px; font-weight: 900; box-shadow: 0 5px 14px rgba(24,23,37,.08); }
+.taxi-vehicle-index { position: absolute; right: 14px; bottom: 13px; padding: 5px 8px; border-radius: 999px; background: rgba(24,23,37,.7); color: white; font-size: 12px; font-weight: 850; }
+.taxi-vehicle-list { display: flex; gap: 7px; overflow-x: auto; padding: 12px 10px; scrollbar-width: thin; scrollbar-color: #91a99a #f0f4f1; overscroll-behavior-x: contain; }
+.taxi-vehicle-choice { flex: 0 0 82px; min-width: 0; min-height: 80px; padding: 4px; border: 1px solid #dce5df; border-radius: 12px; text-align: center; background: white; color: #5c6d63; }
+.taxi-vehicle-choice.selected { border: 2px solid #28754e; padding: 3px; background: #edf6f0; color: #236442; }
+.taxi-vehicle-choice:focus-visible { outline: 3px solid #28754e; outline-offset: 2px; }
+.taxi-vehicle-choice > img { display: block; width: 70px; height: 50px; margin: 0 auto; object-fit: contain; }
+.taxi-vehicle-choice > span { display: block; margin-top: 3px; font-size: 11px; line-height: 1.4; }
+.taxi-vehicle-details { padding: 16px 12px 4px; }
+.taxi-vehicle-details > h3 { margin: 0 0 10px; font-size: 20px; line-height: 1.35; }
+.taxi-vehicle-description { min-height: 22px; margin: 0 0 14px; font-size: 13px; line-height: 1.65; color: #5c6d63; }
+.taxi-vehicle-specs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin: 14px 0 16px; }
+.taxi-vehicle-spec { min-width: 0; padding: 11px 2px; border: 1px solid #eceeed; border-radius: 12px; text-align: center; }
+.taxi-vehicle-spec > svg { width: 18px; height: 18px; color: #3d4541; }
+.taxi-vehicle-spec > strong { display: block; margin-top: 5px; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.taxi-vehicle-spec > small { display: block; margin-top: 3px; font-size: 10px; line-height: 1.5; color: #7c7c7c; }
+.taxi-vehicle-rate { border-top: 1px solid #edf0ee; padding: 10px 0 14px; }
+.taxi-vehicle-rate .section-row { gap: 8px; flex-wrap: wrap; }
+.taxi-vehicle-rate .mini-action { min-height: 36px; }
+.taxi-vehicle-rate > strong { display: block; margin: 2px 0 5px; font-size: 24px; color: #236442; }
+.taxi-vehicle-rate > span, .taxi-vehicle-rate .section-row > span { color: #5c6d63; font-size: 12px; line-height: 1.5; }
+.taxi-fare-card { margin: 12px 0; padding: 15px; border: 1px solid #dae8de; border-radius: 15px; background: #f6faf7; }
+.taxi-estimate-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 9px; }
+.taxi-estimate-head > span { font-size: .75rem; font-weight: 750; color: #38503f; }
+.taxi-estimate-head > strong { font-size: 1.55rem; letter-spacing: -.05em; color: #1f643c; }
+.taxi-route-metrics { margin: 7px 0 12px; font-size: .7rem; color: #526c59; }
+.taxi-fare-breakdown { margin: 0; padding-top: 10px; border-top: 1px solid #dce6df; font-size: .72rem; }
+.taxi-fare-breakdown > div { display: flex; justify-content: space-between; gap: 10px; margin: 7px 0; }
+.taxi-fare-breakdown dt { flex: 1; }
+.taxi-fare-breakdown dt small { display: block; margin-top: 3px; color: #657369; }
+.taxi-fare-breakdown dd { margin: 0; white-space: nowrap; font-weight: 750; }
+.taxi-fare-note { font-size: .67rem; line-height: 1.55; color: #667269; margin: 10px 0 4px; }
+.taxi-payment-note { display: flex; justify-content: space-between; gap: 10px; padding: 8px 1px; font-size: .69rem; }
+.taxi-calculator .form-label { margin-top: 14px; }
+.taxi-calculator input { width: 100%; }
+#taxi-calculator-error { font-size: .73rem; color: #aa3d30; }
+.taxi-calculator-result { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid #e5ebe6; }
+.taxi-calculator-result > div { display: grid; gap: 4px; }
+.taxi-calculator-result strong { font-size: .8rem; }
+.taxi-calculator-result span { font-size: .65rem; color: #627167; }
+.taxi-calculator-result > b { font-size: 1rem; color: #20633d; white-space: nowrap; }

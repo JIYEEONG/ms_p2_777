@@ -1,11 +1,12 @@
 /* Isolated storage. The host application's authentication / other tabs are untouched. */
-const STORAGE_KEY='moov-home-policy-design-v1';
+const accountId=new URLSearchParams(location.search).get('account')||'';
+const STORAGE_KEY=accountId?`moov-home-policy-design-v2:${encodeURIComponent(accountId)}`:'moov-home-policy-design-v1';
 const config=Object.assign({embedded:new URLSearchParams(location.search).get('embed')==='1',parentOrigin:location.origin},window.MOOV_HOME_CONFIG||{});
 document.body.classList.toggle('embedded',config.embedded);
 function readSaved(){try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');return s&&typeof s==='object'&&!Array.isArray(s)?s:{};}catch{return {};}}
 const saved=readSaved();
 const state={
-  activeTab:'home',homeMode:'rent',homeStep:saved.homeStep==='mode'?'mode':'booking',
+  activeTab:'home',homeMode:'rent',homeStep:'mode',
   tripActive:saved.tripActive===true,usageStartedAt:Number(saved.usageStartedAt)||null,rentalEndsAt:Number(saved.rentalEndsAt)||null,
   rentalHours:Math.max(3,Math.min(24,Number(saved.rentalHours)||3)),
   rentalVehicleType:rentalVehicles.some(v=>v.id===saved.rentalVehicleType)?saved.rentalVehicleType:'standard',
