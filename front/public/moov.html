@@ -1317,7 +1317,7 @@ const aiPersonas = [
   { id: "moov", name: "무브", desc: "캐주얼한 잡담, 공감 위주 대화", image: "./assets/무브_캐릭터.png" },
   { id: "todaki", name: "토닥이", desc: "고민 상담, 공감 기반 대화", image: "./assets/토닥이_캐릭터.png" },
   { id: "doctor", name: "척척박사", desc: "아는 만큼 답해주는 지식 모드", image: "./assets/척척박사_캐릭터.png" },
-  { id: "ringo", name: "링고", desc: "실시간 통역과 주변 관광정보 안내", image: "./assets/링고_캐릭터.png" },
+  { id: "ringo", name: "링고", desc: "사용자의 언어로 주변 관광정보 안내", image: "./assets/링고_캐릭터.png" },
 ];
 const LUNA_BOT_IMAGE = "./assets/luna-bot.svg"; // 캐빈 화면 외 모든 곳(꺼짐 화면, 설정 아이콘 등)에서 쓰는 공통 루나 아이콘
 
@@ -2309,7 +2309,7 @@ function renderAi() {
             <div><h4>혼자 두지 않을게요</h4><p>지금 벅찬 감정, 괜찮다면 조금 더 이야기해줄래요? 필요하면 아래 번호로 언제든 연결할 수 있어요.</p></div>
             <button class="crisis-overlay-close" type="button" data-action="crisis-close" aria-label="위기 안내 닫기">${icon("x")}</button>
           </div>
-          <div class="crisis-overlay-actions"><button class="crisis-call-button" type="button" data-action="crisis-call">${icon("shield")}자살예방상담전화 1393 연결</button></div>
+          <div class="crisis-overlay-actions"><button class="crisis-call-button" type="button" data-action="crisis-call">${icon("shield")}자살예방상담전화 109 연결</button></div>
         </div>
       </div>
       <button class="ai-persona-badge ${state.personaMenuOpen ? "open" : ""}" type="button" data-action="persona-menu" aria-label="페르소나 선택">
@@ -3356,7 +3356,7 @@ document.addEventListener("click", (event) => {
   if (action === "close-thread-detail") { state.aiHistoryDetailId = null; render(); }
   if (action === "delete-thread") { openDeleteThreadConfirm(value); }
   if (action === "crisis-close") { state.aiCrisisOpen = false; render(); }
-  if (action === "crisis-call") toast("프로토타입에서는 전화 연결 대신 안내만 표시해요. 실제 상황에서는 1393 또는 119에 연락해 주세요.");
+  if (action === "crisis-call") toast("프로토타입에서는 전화 연결 대신 안내만 표시해요. 실제 상황에서는 109 또는 119에 연락해 주세요.");
 
   if (action === "space-sub") { state.spaceSub = value; render(); }
   if (action === "purchase-sub") { state.purchaseSub = value; render(); }
