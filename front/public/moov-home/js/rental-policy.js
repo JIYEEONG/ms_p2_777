@@ -127,6 +127,7 @@ function updateVehiclePosition(position,etaSeconds) {
 function boardRentalVehicle() {
   if(state.rentalFlowStep!=='arrived'||state.tripActive)return;
   ensureRentalRoute();state.tripActive=true;state.homeStep='service';state.usageStartedAt=Date.now();
+  state.rentalUX.outing=null;ensureRentalOuting();
   state.rentalEndsAt=state.usageStartedAt+state.rentalHours*3600000;rentalSetStep('boarded');
 }
 
@@ -237,8 +238,8 @@ function openMapPinPicker(candidate=null) {
 function initRentalPickerMap() {
   const p=state.rentalUX.draftPickup,el=document.querySelector('#rental-picker-osm');if(!p||!el)return;
   rentalPickerMap=createRentalMap(el,[p.lat,p.lng]);if(!rentalPickerMap)return;
-  rentalPickerMarker=rentalMarker(rentalPickerMap,p,'후보');
-  rentalPickerMap.on('click',e=>setRentalDraftPickup(rentalPoint(e.latlng.lat,e.latlng.lng)));
+  rentalPickerMarker=rentalMarker(rentalPickerMap,p,rentalModalKind==='recall'?'나':'후보');
+  rentalPickerMap.on('click',e=>{const point=rentalPoint(e.latlng.lat,e.latlng.lng);rentalModalKind==='recall'?chooseRentalRecallPlace(point):setRentalDraftPickup(point);});
 }
 function setRentalDraftPickup(p) {
   state.rentalUX.draftPickup=rentalClone(p);
@@ -273,6 +274,11 @@ async function searchRentalPlaces(kind,query) {
 }
 function openRentalDestinationSearch(targetIndex=null) {
   const route=ensureRentalRoute(),index=targetIndex==null?route.stops.length-1:Number(targetIndex);
+  if(state.tripActive){
+    const outing=ensureRentalOuting();
+    if(!rentalOutingAvailable()||['approaching','arrived'].includes(outing.phase))return toast('호출을 취소하거나 탑승한 뒤 코스를 변경해 주세요.');
+    if(targetIndex!==-1&&index<=outing.completedStops)return toast('이미 방문한 장소예요. 남은 장소를 변경해 주세요.');
+  }
   state.rentalUX.routeEdit={index:Math.max(1,index),add:targetIndex===-1,candidate:null,preview:null,status:'idle',token:0};
   state.rentalStopPopup=null;rentalModalKind='route';
   openModal({title:'코스 변경',iconName:'search',body:`<p class="rux-note">${targetIndex===-1?'목적지 앞에 새 경유지를 추가합니다.':'변경할 장소: '+escapeHtml(route.stops[index]?.name||'목적지')}</p><form id="rux-route-form" class="rux-search-form"><label for="rux-route-query" class="sr-only">코스 장소 검색</label><input id="rux-route-query" type="search" placeholder="등록 장소 검색"/><button class="ghost-button" type="submit">검색</button></form><div id="rux-route-results" class="rental-search-results" aria-live="polite"></div><div id="rux-route-preview-map" class="rental-osm-map picker" aria-label="변경 전후 코스 미리보기 지도"></div><p class="rux-note">체험용 장소 검색 · 지도 터치로 후보 선택</p><div id="rux-route-preview" aria-live="polite">새 장소를 선택하면 거리와 시간 변화를 보여드려요.</div>`,primary:'변경 적용',secondary:'취소',onConfirm:applyRentalRoutePreview});
@@ -292,7 +298,8 @@ async function previewRentalRoute(p) {
   const token=++edit.token;edit.candidate=p;edit.status='loading';edit.preview=null;
   const container=document.querySelector('#rux-route-preview'),confirm=document.querySelector('[data-modal-confirm]');
   container.textContent='변경 경로를 계산하고 있어요…';confirm.disabled=true;
-  const stops=rentalClone(ensureRentalRoute().stops);if(edit.add)stops.splice(stops.length-1,0,p);else stops[edit.index]=p;
+  const stops=rentalClone(ensureRentalRoute().stops);
+  if(edit.add)stops.splice(Math.max(stops.length-1,state.tripActive?ensureRentalOuting().completedStops+1:1),0,p);else stops[edit.index]=p;
   try {
     const next=await rentalServices.calculateRoute(stops);
     if(state.rentalUX.routeEdit!==edit||edit.token!==token)return;
@@ -313,6 +320,7 @@ function applyRentalRoutePreview() {
   const edit=state.rentalUX.routeEdit;if(edit?.status!=='ready'||!edit.preview)return false;
   const old=ensureRentalRoute(),next=edit.preview;
   state.rentalUX.route=next;state.routeStops=next.stops.map(p=>p.name);state.selectedCourse=null;state.rentalCourseModified=true;state.rentalStopPopup=null;
+  if(state.tripActive&&ensureRentalOuting().phase==='complete'&&rentalOutingNext())state.rentalUX.outing.phase='driving';
   persist();render();toast(`코스를 변경했어요. ${rentalRouteDelta(old,next)}`);
 }
 function openRentalStopList() {
@@ -380,3 +388,4 @@ function trapRentalModalFocus(event){
   else if(!event.shiftKey&&document.activeElement===buttons.at(-1)){event.preventDefault();buttons[0].focus();}
 }
 document.addEventListener('keydown',trapRentalModalFocus);
+

@@ -36,7 +36,40 @@ const roadNetwork=(()=>{
     const cumulative=[0];for(let i=1;i<points.length;i++)cumulative.push(cumulative.at(-1)+rentalDistance({lat:points[i-1][0],lng:points[i-1][1]},{lat:points[i][0],lng:points[i][1]})*1000);
     return {points,cumulative,totalMeters:cumulative.at(-1),pickupSnap:{lat:snap.point[0],lng:snap.point[1],distanceMeters:Math.round(snap.distance)},nodePath,roadEdgeIndex:snap.index,durationMs:18000,demo:true};
   }
-  return {buildApproach};
+  function snapPickup(point){
+    const snap=nearest(point);
+    if(!snap||snap.distance>400)throw Error('이 위치 주변의 차량 진입 도로를 찾지 못했어요. 가까운 도로 쪽을 선택해 주세요.');
+    return {lat:snap.point[0],lng:snap.point[1],distanceMeters:Math.round(snap.distance)};
+  }
+  // Route the already rented car from its retained position, respecting one-way edges.
+  function buildRecall(origin,pickup){
+    const source=nearest(origin),target=nearest(pickup);
+    snapPickup(origin);snapPickup(pickup);
+    const [a,b,length,direction]=target.edge,dist=new Float64Array(nodes.length).fill(Infinity),next=new Int32Array(nodes.length).fill(-2),heap=new Heap();
+    const seed=(n,cost)=>{if(cost<dist[n]){dist[n]=cost;next[n]=-1;heap.push([cost,n]);}};
+    if(direction&1)seed(a,length*target.t);if(direction&2)seed(b,length*(1-target.t));
+    if(target.t<1e-9)seed(a,0);if(target.t>1-1e-9)seed(b,0);
+    while(heap.length){
+      const [cost,u]=heap.pop();if(cost!==dist[u])continue;
+      for(const [v,w] of reverse[u]){if(cost+w<dist[v]){dist[v]=cost+w;next[v]=u;heap.push([dist[v],v]);}}
+    }
+    const [sa,sb,sl,sd]=source.edge,candidates=[];
+    if(sd&1)candidates.push({node:sb,cost:sl*(1-source.t)+dist[sb]});
+    if(sd&2)candidates.push({node:sa,cost:sl*source.t+dist[sa]});
+    if(source.t<1e-9)candidates.push({node:sa,cost:dist[sa]});
+    if(source.t>1-1e-9)candidates.push({node:sb,cost:dist[sb]});
+    // A direct path on the same directed edge need not detour through an endpoint.
+    if(source.index===target.index&&((sd&1&&source.t<=target.t)||(sd&2&&source.t>=target.t)))candidates.push({node:-1,cost:sl*Math.abs(source.t-target.t)});
+    candidates.sort((x,y)=>x.cost-y.cost);
+    const best=candidates[0];
+    if(!best||!Number.isFinite(best.cost))throw Error('차량에서 이 승차 지점까지 이어지는 도로가 없어요. 다른 위치를 선택해 주세요.');
+    const points=[source.point];let u=best.node;
+    for(let i=0;u>=0&&i<nodes.length;i++){points.push(nodes[u]);u=next[u];}
+    points.push(target.point);
+    const cumulative=[0];for(let i=1;i<points.length;i++)cumulative.push(cumulative.at(-1)+rentalDistance({lat:points[i-1][0],lng:points[i-1][1]},{lat:points[i][0],lng:points[i][1]})*1000);
+    return {points,cumulative,totalMeters:cumulative.at(-1),pickupSnap:snapPickup(pickup),durationMs:18000,demo:true};
+  }
+  return {buildApproach,buildRecall,snapPickup};
 })();
 function approachAt(route,progress){
   const distance=Math.max(0,Math.min(1,progress))*route.totalMeters,c=route.cumulative;
@@ -57,3 +90,4 @@ function renderRoadPickupNote(){
   const p=state.rentalUX.dispatch.approachRoute?.pickupSnap;
   return p&&p.distanceMeters>20?`<p class="rux-note">선택 위치에서 약 ${p.distanceMeters}m 떨어진 인근 도로의 승차 지점에서 만나요.</p>`:'';
 }
+

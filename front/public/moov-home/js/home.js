@@ -13,7 +13,7 @@ function rentalBack(){
 function renderRentalJourney(){
   const step=state.rentalFlowStep;
   if(step==='setup')return renderBooking();
-  if(step==='driving')return renderRentalDrivingScreen();
+  if(step==='driving')return renderRentalOuting();
   const vehicle=rentalVehicles.find(v=>v.id===state.rentalVehicleType);
   const heading={pickup:'픽업 위치',matching:'차량 찾는 중',assigned:'배차 완료',approaching:'차량 접근 중',arrived:'차량 도착',boarded:'탑승 완료',error:'배차 확인 필요'}[step];
   return `<div class="rental-journey rux" data-rental-step="${step}"><div class="rental-flow-head">${!state.tripActive?`<button class="mode-back" data-action="rental-flow-back" aria-label="${['matching','assigned','approaching','arrived','error'].includes(step)?'배차 취소 후 픽업으로 돌아가기':'이전 단계로 돌아가기'}">${icon('back')}</button>`:''}<h2 class="rux-heading" tabindex="-1"><small>MOOV 렌트</small>${heading}</h2><span class="rux-demo">체험</span></div>${renderRentalProgress(step)}${renderRentalJourneyStep(step,vehicle)}${rentalSetupFooter(step,vehicle)}</div>`;
@@ -37,10 +37,6 @@ function renderBooking(){
   {h:RENTAL_MAX_HOURS,label:'최대'}
 ].map(p=>`<button class="${p.h===state.rentalHours?'active':''}" aria-pressed="${p.h===state.rentalHours}" data-action="rent-set-hours" data-value="${p.h}">${p.label}</button>`).join('')}</div><div class="section-row option-heading"><strong>공간 옵션</strong><span>선택 사항 · 복수 선택</span></div><div class="rental-options">${rentalOptionCatalog.map(x=>`<button class="rental-option ${state.rentalOptions.has(x.id)?'selected':''}" data-action="rental-option" data-value="${x.id}" aria-pressed="${state.rentalOptions.has(x.id)}">${icon(state.rentalOptions.has(x.id)?'bookmark':'plus')}<span>${escapeHtml(x.name)}</span><strong>+${rentalMoney(x.price)}</strong></button>`).join('')}</div><div class="rent-total" aria-live="polite"><span><small>총 예상 요금</small><strong>${rentalMoney(rentalTotalFare())}</strong></span><span>${state.rentalHours}시간</span></div><p class="fare-breakdown">차량 ${rentalMoney(rentalFareForHours(v.id,state.rentalHours))} + 옵션 ${rentalMoney(rentalOptionFee())}<br/>주행요금 포함 · 장시간 패키지 할인 자동 적용</p><button class="primary-button full call-button" data-action="setup-next">픽업 위치 확인</button><p class="source-demo-note">체험 화면 · 실제 차량 호출·결제는 발생하지 않아요.</p></div></section></div>`;
 }
-function renderRentalDrivingScreen(){
-  const r=ensureRentalRoute(),m=rentalRouteMetrics(),v=rentalVehicles.find(x=>x.id===state.rentalVehicleType);
-  return `<div class="mobility-screen rent rux rux-driving" data-rental-step="driving"><div class="mobility-mode-bar"><span class="mode-current">${icon('key')} 렌트 이용 중</span><span class="live-indicator"><i></i>LIVE</span></div>${renderHomeMap(true)}${renderUsageStatus()}<section class="mobility-sheet"><div class="sheet-handle"></div><div class="sheet-title"><div><span>나만의 이동 공간</span><h3 class="rux-heading" tabindex="-1">현재 이용 현황</h3></div><span class="mode-symbol">${icon('key')}</span></div><div class="active-route">${r.stops.map((p,i)=>`<button class="active-route-line ${i===r.stops.length-1?'destination':i>0?'waypoint':''}" data-action="${i===0?'center-route':'rental-stop-popup'}" data-value="${i}"><span class="route-mark"></span><span><small>${i===0?'출발 위치':i===r.stops.length-1?'목적지':'경유지 '+i}</small><strong>${escapeHtml(p.name)}</strong></span></button>`).join('')}</div><div class="vehicle-health"><span>${icon('car')} ${escapeHtml(v.name)}</span><span>충전량 <strong>${state.rentalUX.dispatch.vehicle?.battery??78}%</strong></span></div><div class="rux-route-summary"><strong>${m.distance} km <span>· 약 ${m.minutes}분</span></strong><small>모의 경로 · 이동 시간 추정, 체류 제외</small></div>${r.unresolved?'<p class="rux-error-text">위치 미확인 장소가 있어요. 코스 장소에서 위치를 지정해 주세요.</p>':''}<div class="drive-edit-row"><button class="ghost-button" data-action="rental-search-destination">${icon('search')} 코스 변경</button><button class="ghost-button" data-action="rental-stops-list">${icon('pin')} 장소 목록</button></div><button class="ghost-button full" data-action="rental-add-stop">${icon('plus')} 경유지 추가</button><button class="danger-text-button" data-action="finish-trip">렌트 이용 종료</button></section></div>`;
-}
 let renderToken=0;
 function render(){
   const scroll=content.scrollTop,thumbScroll=content.querySelector('.rux-thumbnails')?.scrollLeft||0;
@@ -55,9 +51,10 @@ function render(){
   requestAnimationFrame(()=>{
     if(token!==renderToken)return;
     if(state.homeStep==='mode'&&!state.tripActive)return;
-    if(['setup','driving'].includes(state.rentalFlowStep))initHomeRouteMap();else initRentalFlowMap();
+    if(state.rentalFlowStep==='driving')initRentalOutingMap();else if(state.rentalFlowStep==='setup')initHomeRouteMap();else initRentalFlowMap();
     scheduleRentalFlowTransitions();
-    if(rentalLastRenderedStep!==state.rentalFlowStep){rentalLastRenderedStep=state.rentalFlowStep;content.querySelector('.rux-heading')?.focus({preventScroll:true});}
+    const focusStep=state.rentalFlowStep+':'+(state.rentalUX.outing?.phase||'');
+    if(rentalLastRenderedStep!==focusStep){rentalLastRenderedStep=focusStep;content.querySelector('.rux-heading')?.focus({preventScroll:true});}
   });
 }
 function initHomeRouteMap(){
@@ -121,7 +118,7 @@ function handleHomeClick(event){
   if(event.target.closest('.home-logo')){event.preventDefault();if(!state.tripActive){state.homeStep='mode';persist();render();}content.scrollTop=0;return;}
   const button=event.target.closest('[data-action]');if(!button||button.disabled)return;
   const action=button.dataset.action,value=button.dataset.value;
-  if(handleRentalAction(button))return;
+  if(handleRentalOutingAction(button)||handleRentalAction(button))return;
   if(action==='close-modal')return closeModal();
   if(action==='open-cleanup')return openCleanupStatus();
   if(action==='notice-detail'){const n=appNotices.find(x=>x.id===value);if(n)return openModal({title:n.title,iconName:'bell',body:`<p>${escapeHtml(n.text)}</p>`,primary:'확인',secondary:null});return;}
@@ -185,7 +182,7 @@ function handleHostMessage(event){
 }
 window.addEventListener('message',handleHostMessage);
 function updateClock(){document.querySelector('#clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'numeric',minute:'2-digit',hour12:false});}
-let ticker=setInterval(()=>{if(cleanupRunning())tickSecureCleanup();else{rentalTick();updateUsageTimer();}},250),clockTicker=setInterval(updateClock,30000);
+let ticker=setInterval(()=>{if(cleanupRunning())tickSecureCleanup();else{updateUsageTimer();if(!cleanupRunning()){rentalTick();tickRentalOuting();}}},250),clockTicker=setInterval(updateClock,30000);
 function destroy(){
   clearInterval(ticker);clearInterval(clockTicker);clearTimeout(toastTimer);rentalRequestToken++;rentalSearchToken++;renderToken++;
   if(rentalLeafletMap){rentalLeafletMap.stop();rentalLeafletMap.remove();rentalLeafletMap=null;}
@@ -197,3 +194,4 @@ window.MOOVHome=Object.freeze({getState:publicState,setRoute:importRoute,destroy
 window.addEventListener('pagehide',destroy,{once:true});
 window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
 render();updateClock();if(!cleanupRunning())updateUsageTimer();restoreCleanup();emitHome('ready',publicState());
+
