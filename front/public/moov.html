@@ -1434,36 +1434,36 @@ const products = [
   // hot_products: 승차이력/연령대별 수요 학습 결과 이번 달 판매 증가율이 높은 인기 급상승 품목(demand_report_v2.10).
   // stock은 현재 차량 진열 수량(기존수량)이며, 새로고침을 누르면 VENDING_LEARNING.recommendedStock의
   // 값(기존수량 + 추가배치 수량)으로 재고가 채워진다.
-  { id: "hot-01", name: "비타민음료 대형 제로", desc: "대형 · 제로", price: 2600, image: "./assets/product-taxi-01-vitamin-drink-big-zero.jpg", category: "음료·간식", recommended: false, stock: 18, location: "냉장함 H-01", growth: 51, reason: "지난달 대비 판매량 +51%" },
-  { id: "hot-02", name: "참치김밥 대형 스위트", desc: "대형 · 스위트", price: 4800, image: "./assets/product-taxi-02-tuna-gimbap-big-sweet.jpg", category: "식사", recommended: false, stock: 4, location: "냉장함 H-02", growth: 48, reason: "지난달 대비 판매량 +48%" },
-  { id: "hot-03", name: "비빔밥 대형 순한맛", desc: "대형 · 순한맛", price: 4800, image: "./assets/product-taxi-03-bibimbap-big-mild.jpg", category: "식사", recommended: false, stock: 3, location: "냉장함 H-03", growth: 45, reason: "지난달 대비 판매량 +45%" },
-  { id: "hot-04", name: "이온음료 중형 순한맛", desc: "중형 · 순한맛", price: 2100, image: "./assets/product-taxi-04-ion-drink-medium-mild.jpg", category: "음료·간식", recommended: false, stock: 10, location: "냉장함 H-04", growth: 45, reason: "지난달 대비 판매량 +45%" },
-  { id: "hot-05", name: "견과류 소형 오리지널", desc: "소형 · 오리지널", price: 1800, image: "./assets/product-taxi-05-nuts-small-original.jpg", category: "음료·간식", recommended: false, stock: 13, location: "수납함 H-05", growth: 37, reason: "지난달 대비 판매량 +37%" },
-  { id: "hot-06", name: "딸기바 중형 스위트", desc: "중형 · 스위트", price: 2100, image: "./assets/product-taxi-06-strawberry-icebar-medium-sweet.jpg", category: "음료·간식", recommended: false, stock: 13, location: "수납함 H-06", growth: 36, reason: "지난달 대비 판매량 +36%" },
-  { id: "hot-07", name: "포도탄산 대형 진한맛", desc: "대형 · 진한맛", price: 2600, image: "./assets/product-taxi-07-grape-soda-big-rich.jpg", category: "음료·간식", recommended: false, stock: 10, location: "냉장함 H-07", growth: 35, reason: "지난달 대비 판매량 +35%" },
-  { id: "hot-08", name: "주먹밥 중형 매운맛", desc: "중형 · 매운맛", price: 4300, image: "./assets/product-taxi-08-riceball-medium-spicy.jpg", category: "식사", recommended: false, stock: 4, location: "냉장함 H-08", growth: 33, reason: "지난달 대비 판매량 +33%" },
-  { id: "hot-09", name: "불고기버거 대형 진한맛", desc: "대형 · 진한맛", price: 4800, image: "./assets/product-taxi-09-bulgogi-burger-big-rich.jpg", category: "식사", recommended: false, stock: 3, location: "냉장함 H-09", growth: 31, reason: "지난달 대비 판매량 +31%" },
-  { id: "hot-10", name: "샌드아이스크림 소형 고단백", desc: "소형 · 고단백", price: 1800, image: "./assets/product-taxi-10-sand-icecream-small-highprotein.jpg", category: "음료·간식", recommended: false, stock: 10, location: "수납함 H-10", growth: 30, reason: "지난달 대비 판매량 +30%" },
-  { id: "hot-11", name: "하이볼 대형 제로", desc: "대형 · 제로", price: 2600, image: "./assets/product-taxi-11-highball-big-zero.jpg", category: "음료·간식", recommended: false, stock: 11, location: "냉장함 H-11", growth: 29, reason: "지난달 대비 판매량 +29%" },
-  { id: "hot-12", name: "포도주스 중형 진한맛", desc: "중형 · 진한맛", price: 2100, image: "./assets/product-taxi-12-grape-juice-medium-rich.jpg", category: "음료·간식", recommended: false, stock: 13, location: "냉장함 H-12", growth: 29, reason: "지난달 대비 판매량 +29%" },
-  { id: "hot-13", name: "제로콜라", desc: "이번 달 인기 급상승 품목", price: 1800, image: "./assets/product-taxi-13-cola-zero.jpg", category: "음료·간식", recommended: false, stock: 27, location: "냉장함 H-13", growth: 28, reason: "지난달 대비 판매량 +28%" },
-  { id: "hot-14", name: "제육도시락 소형 라이트", desc: "소형 · 라이트", price: 4000, image: "./assets/product-taxi-14-spicy-pork-box-small-light.jpg", category: "식사", recommended: false, stock: 3, location: "냉장함 H-14", growth: 28, reason: "지난달 대비 판매량 +28%" },
-  { id: "hot-15", name: "전주비빔삼각김밥 대형 고단백", desc: "대형 · 고단백", price: 4800, image: "./assets/product-taxi-15-jeonju-bibim-onigiri-big-highprotein.jpg", category: "식사", recommended: false, stock: 4, location: "냉장함 H-15", growth: 27, reason: "지난달 대비 판매량 +27%" },
-  { id: "hot-16", name: "불고기삼각김밥 소형 스위트", desc: "소형 · 스위트", price: 4000, image: "./assets/product-taxi-16-bulgogi-onigiri-small-sweet.jpg", category: "식사", recommended: false, stock: 3, location: "냉장함 H-16", growth: 26, reason: "지난달 대비 판매량 +26%" },
-  { id: "hot-17", name: "팝콘 소형 라이트", desc: "소형 · 라이트", price: 1800, image: "./assets/product-taxi-17-popcorn-small-light.jpg", category: "음료·간식", recommended: false, stock: 9, location: "수납함 H-17", growth: 26, reason: "지난달 대비 판매량 +26%" },
-  { id: "hot-18", name: "컵커피 대형 오리지널", desc: "대형 · 오리지널", price: 2600, image: "./assets/product-taxi-18-cup-coffee-big-original.jpg", category: "음료·간식", recommended: false, stock: 11, location: "냉장함 H-18", growth: 26, reason: "지난달 대비 판매량 +26%" },
-  { id: "hot-19", name: "참치샌드위치 미니 오리지널", desc: "미니 · 오리지널", price: 3700, image: "./assets/product-taxi-19-tuna-sandwich-mini-original.jpg", category: "식사", recommended: false, stock: 3, location: "냉장함 H-19", growth: 26, reason: "지난달 대비 판매량 +26%" },
-  { id: "hot-20", name: "바닐라바 대형 오리지널", desc: "대형 · 오리지널", price: 2600, image: "./assets/product-taxi-20-vanilla-icebar-big-original.jpg", category: "음료·간식", recommended: false, stock: 11, location: "수납함 H-20", growth: 25, reason: "지난달 대비 판매량 +25%" },
-  { id: "hot-21", name: "저지방우유 중형 제로", desc: "중형 · 제로", price: 2100, image: "./assets/product-taxi-21-low-fat-milk-medium-zero.jpg", category: "음료·간식", recommended: false, stock: 11, location: "냉장함 H-21", growth: 24, reason: "지난달 대비 판매량 +24%" },
-  { id: "hot-22", name: "컵커피 소형 순한맛", desc: "소형 · 순한맛", price: 1800, image: "./assets/product-taxi-22-cup-coffee-small-mild.jpg", category: "음료·간식", recommended: false, stock: 29, location: "냉장함 H-22", growth: 24, reason: "지난달 대비 판매량 +24%" },
-  { id: "hot-23", name: "김치컵라면 미니 순한맛", desc: "미니 · 순한맛", price: 3700, image: "./assets/product-taxi-23-kimchi-cup-ramen-mini-mild.jpg", category: "식사", recommended: false, stock: 17, location: "냉장함 H-23", growth: 24, reason: "지난달 대비 판매량 +24%" },
-  { id: "hot-24", name: "제로콜라 소형 진한맛", desc: "소형 · 진한맛", price: 1800, image: "./assets/product-taxi-24-zero-cola-small-rich.jpg", category: "음료·간식", recommended: false, stock: 28, location: "냉장함 H-24", growth: 23, reason: "지난달 대비 판매량 +23%" },
-  { id: "hot-25", name: "몬스터에너지", desc: "이번 달 인기 급상승 품목", price: 1800, image: "./assets/product-taxi-25-monster-energy-small-rich.jpg", category: "음료·간식", recommended: false, stock: 24, location: "냉장함 H-25", growth: 23, reason: "지난달 대비 판매량 +23%" },
-  { id: "hot-26", name: "캔커피 소형 진한맛", desc: "소형 · 진한맛", price: 1800, image: "./assets/product-taxi-26-canned-coffee-small-rich.jpg", category: "음료·간식", recommended: false, stock: 13, location: "냉장함 H-26", growth: 23, reason: "지난달 대비 판매량 +23%" },
-  { id: "hot-27", name: "볶음면 소형 제로", desc: "소형 · 제로", price: 4000, image: "./assets/product-taxi-27-stir-fried-noodles-small-zero.jpg", category: "식사", recommended: false, stock: 11, location: "냉장함 H-27", growth: 22, reason: "지난달 대비 판매량 +22%" },
-  { id: "hot-28", name: "볶음면 중형 제로", desc: "중형 · 제로", price: 4300, image: "./assets/product-taxi-28-stir-fried-noodles-medium-zero.jpg", category: "식사", recommended: false, stock: 11, location: "냉장함 H-28", growth: 22, reason: "지난달 대비 판매량 +22%" },
-  { id: "hot-29", name: "카페라떼 소형 라이트", desc: "소형 · 라이트", price: 1800, image: "./assets/product-taxi-29-cafe-latte-small-light.jpg", category: "음료·간식", recommended: false, stock: 21, location: "냉장함 H-29", growth: 21, reason: "지난달 대비 판매량 +21%" },
-  { id: "hot-30", name: "포도탄산 소형 고단백", desc: "소형 · 고단백", price: 1800, image: "./assets/product-taxi-30-grape-soda-small-highprotein.jpg", category: "음료·간식", recommended: false, stock: 29, location: "냉장함 H-30", growth: 21, reason: "지난달 대비 판매량 +21%" },
+  { id: "hot-01", name: "비타민음료 대형 제로", desc: "대형 · 제로", price: 2600, image: HOT_PRODUCTS_API + "/images/product-taxi-01-vitamin-drink-big-zero.jpg", category: "음료·간식", recommended: false, stock: 18, location: "냉장함 H-01", growth: 51, reason: "지난달 대비 판매량 +51%" },
+  { id: "hot-02", name: "참치김밥 대형 스위트", desc: "대형 · 스위트", price: 4800, image: HOT_PRODUCTS_API + "/images/product-taxi-02-tuna-gimbap-big-sweet.jpg", category: "식사", recommended: false, stock: 4, location: "냉장함 H-02", growth: 48, reason: "지난달 대비 판매량 +48%" },
+  { id: "hot-03", name: "비빔밥 대형 순한맛", desc: "대형 · 순한맛", price: 4800, image: HOT_PRODUCTS_API + "/images/product-taxi-03-bibimbap-big-mild.jpg", category: "식사", recommended: false, stock: 3, location: "냉장함 H-03", growth: 45, reason: "지난달 대비 판매량 +45%" },
+  { id: "hot-04", name: "이온음료 중형 순한맛", desc: "중형 · 순한맛", price: 2100, image: HOT_PRODUCTS_API + "/images/product-taxi-04-ion-drink-medium-mild.jpg", category: "음료·간식", recommended: false, stock: 10, location: "냉장함 H-04", growth: 45, reason: "지난달 대비 판매량 +45%" },
+  { id: "hot-05", name: "견과류 소형 오리지널", desc: "소형 · 오리지널", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-05-nuts-small-original.jpg", category: "음료·간식", recommended: false, stock: 13, location: "수납함 H-05", growth: 37, reason: "지난달 대비 판매량 +37%" },
+  { id: "hot-06", name: "딸기바 중형 스위트", desc: "중형 · 스위트", price: 2100, image: HOT_PRODUCTS_API + "/images/product-taxi-06-strawberry-icebar-medium-sweet.jpg", category: "음료·간식", recommended: false, stock: 13, location: "수납함 H-06", growth: 36, reason: "지난달 대비 판매량 +36%" },
+  { id: "hot-07", name: "포도탄산 대형 진한맛", desc: "대형 · 진한맛", price: 2600, image: HOT_PRODUCTS_API + "/images/product-taxi-07-grape-soda-big-rich.jpg", category: "음료·간식", recommended: false, stock: 10, location: "냉장함 H-07", growth: 35, reason: "지난달 대비 판매량 +35%" },
+  { id: "hot-08", name: "주먹밥 중형 매운맛", desc: "중형 · 매운맛", price: 4300, image: HOT_PRODUCTS_API + "/images/product-taxi-08-riceball-medium-spicy.jpg", category: "식사", recommended: false, stock: 4, location: "냉장함 H-08", growth: 33, reason: "지난달 대비 판매량 +33%" },
+  { id: "hot-09", name: "불고기버거 대형 진한맛", desc: "대형 · 진한맛", price: 4800, image: HOT_PRODUCTS_API + "/images/product-taxi-09-bulgogi-burger-big-rich.jpg", category: "식사", recommended: false, stock: 3, location: "냉장함 H-09", growth: 31, reason: "지난달 대비 판매량 +31%" },
+  { id: "hot-10", name: "샌드아이스크림 소형 고단백", desc: "소형 · 고단백", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-10-sand-icecream-small-highprotein.jpg", category: "음료·간식", recommended: false, stock: 10, location: "수납함 H-10", growth: 30, reason: "지난달 대비 판매량 +30%" },
+  { id: "hot-11", name: "하이볼 대형 제로", desc: "대형 · 제로", price: 2600, image: HOT_PRODUCTS_API + "/images/product-taxi-11-highball-big-zero.jpg", category: "음료·간식", recommended: false, stock: 11, location: "냉장함 H-11", growth: 29, reason: "지난달 대비 판매량 +29%" },
+  { id: "hot-12", name: "포도주스 중형 진한맛", desc: "중형 · 진한맛", price: 2100, image: HOT_PRODUCTS_API + "/images/product-taxi-12-grape-juice-medium-rich.jpg", category: "음료·간식", recommended: false, stock: 13, location: "냉장함 H-12", growth: 29, reason: "지난달 대비 판매량 +29%" },
+  { id: "hot-13", name: "제로콜라", desc: "이번 달 인기 급상승 품목", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-13-cola-zero.jpg", category: "음료·간식", recommended: false, stock: 27, location: "냉장함 H-13", growth: 28, reason: "지난달 대비 판매량 +28%" },
+  { id: "hot-14", name: "제육도시락 소형 라이트", desc: "소형 · 라이트", price: 4000, image: HOT_PRODUCTS_API + "/images/product-taxi-14-spicy-pork-box-small-light.jpg", category: "식사", recommended: false, stock: 3, location: "냉장함 H-14", growth: 28, reason: "지난달 대비 판매량 +28%" },
+  { id: "hot-15", name: "전주비빔삼각김밥 대형 고단백", desc: "대형 · 고단백", price: 4800, image: HOT_PRODUCTS_API + "/images/product-taxi-15-jeonju-bibim-onigiri-big-highprotein.jpg", category: "식사", recommended: false, stock: 4, location: "냉장함 H-15", growth: 27, reason: "지난달 대비 판매량 +27%" },
+  { id: "hot-16", name: "불고기삼각김밥 소형 스위트", desc: "소형 · 스위트", price: 4000, image: HOT_PRODUCTS_API + "/images/product-taxi-16-bulgogi-onigiri-small-sweet.jpg", category: "식사", recommended: false, stock: 3, location: "냉장함 H-16", growth: 26, reason: "지난달 대비 판매량 +26%" },
+  { id: "hot-17", name: "팝콘 소형 라이트", desc: "소형 · 라이트", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-17-popcorn-small-light.jpg", category: "음료·간식", recommended: false, stock: 9, location: "수납함 H-17", growth: 26, reason: "지난달 대비 판매량 +26%" },
+  { id: "hot-18", name: "컵커피 대형 오리지널", desc: "대형 · 오리지널", price: 2600, image: HOT_PRODUCTS_API + "/images/product-taxi-18-cup-coffee-big-original.jpg", category: "음료·간식", recommended: false, stock: 11, location: "냉장함 H-18", growth: 26, reason: "지난달 대비 판매량 +26%" },
+  { id: "hot-19", name: "참치샌드위치 미니 오리지널", desc: "미니 · 오리지널", price: 3700, image: HOT_PRODUCTS_API + "/images/product-taxi-19-tuna-sandwich-mini-original.jpg", category: "식사", recommended: false, stock: 3, location: "냉장함 H-19", growth: 26, reason: "지난달 대비 판매량 +26%" },
+  { id: "hot-20", name: "바닐라바 대형 오리지널", desc: "대형 · 오리지널", price: 2600, image: HOT_PRODUCTS_API + "/images/product-taxi-20-vanilla-icebar-big-original.jpg", category: "음료·간식", recommended: false, stock: 11, location: "수납함 H-20", growth: 25, reason: "지난달 대비 판매량 +25%" },
+  { id: "hot-21", name: "저지방우유 중형 제로", desc: "중형 · 제로", price: 2100, image: HOT_PRODUCTS_API + "/images/product-taxi-21-low-fat-milk-medium-zero.jpg", category: "음료·간식", recommended: false, stock: 11, location: "냉장함 H-21", growth: 24, reason: "지난달 대비 판매량 +24%" },
+  { id: "hot-22", name: "컵커피 소형 순한맛", desc: "소형 · 순한맛", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-22-cup-coffee-small-mild.jpg", category: "음료·간식", recommended: false, stock: 29, location: "냉장함 H-22", growth: 24, reason: "지난달 대비 판매량 +24%" },
+  { id: "hot-23", name: "김치컵라면 미니 순한맛", desc: "미니 · 순한맛", price: 3700, image: HOT_PRODUCTS_API + "/images/product-taxi-23-kimchi-cup-ramen-mini-mild.jpg", category: "식사", recommended: false, stock: 17, location: "냉장함 H-23", growth: 24, reason: "지난달 대비 판매량 +24%" },
+  { id: "hot-24", name: "제로콜라 소형 진한맛", desc: "소형 · 진한맛", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-24-zero-cola-small-rich.jpg", category: "음료·간식", recommended: false, stock: 28, location: "냉장함 H-24", growth: 23, reason: "지난달 대비 판매량 +23%" },
+  { id: "hot-25", name: "몬스터에너지", desc: "이번 달 인기 급상승 품목", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-25-monster-energy-small-rich.jpg", category: "음료·간식", recommended: false, stock: 24, location: "냉장함 H-25", growth: 23, reason: "지난달 대비 판매량 +23%" },
+  { id: "hot-26", name: "캔커피 소형 진한맛", desc: "소형 · 진한맛", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-26-canned-coffee-small-rich.jpg", category: "음료·간식", recommended: false, stock: 13, location: "냉장함 H-26", growth: 23, reason: "지난달 대비 판매량 +23%" },
+  { id: "hot-27", name: "볶음면 소형 제로", desc: "소형 · 제로", price: 4000, image: HOT_PRODUCTS_API + "/images/product-taxi-27-stir-fried-noodles-small-zero.jpg", category: "식사", recommended: false, stock: 11, location: "냉장함 H-27", growth: 22, reason: "지난달 대비 판매량 +22%" },
+  { id: "hot-28", name: "볶음면 중형 제로", desc: "중형 · 제로", price: 4300, image: HOT_PRODUCTS_API + "/images/product-taxi-28-stir-fried-noodles-medium-zero.jpg", category: "식사", recommended: false, stock: 11, location: "냉장함 H-28", growth: 22, reason: "지난달 대비 판매량 +22%" },
+  { id: "hot-29", name: "카페라떼 소형 라이트", desc: "소형 · 라이트", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-29-cafe-latte-small-light.jpg", category: "음료·간식", recommended: false, stock: 21, location: "냉장함 H-29", growth: 21, reason: "지난달 대비 판매량 +21%" },
+  { id: "hot-30", name: "포도탄산 소형 고단백", desc: "소형 · 고단백", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-30-grape-soda-small-highprotein.jpg", category: "음료·간식", recommended: false, stock: 29, location: "냉장함 H-30", growth: 21, reason: "지난달 대비 판매량 +21%" },
 ];
 
 // 차량 자판기 물품판매 알고리즘(연령대별 수요 학습 + 진열 판단) 기반 추천값의 오프라인 대체값.
@@ -3047,7 +3047,11 @@ function renderProducts() {
 // AI 재고 학습 요약 + 새로고침. 새로고침을 누르면 학습 결과(추천 보충 수량)로 차량 재고를 초기화한다.
 function vendingPanel() {
   const totalStock = products.reduce((sum, product) => sum + productStock(product), 0);
-  return `<section class="card padded stack vending-panel"><div class="row"><div><span class="badge">AI 재고 학습</span><h4>MOOV 24의 재고 현황</h4></div><button class="secondary-button compact-button" data-action="refresh-vending" aria-label="차량 재고 새로고침">${icon("refresh")} 새로고침</button></div><div class="row"><span class="small muted">차량 전체 재고</span><strong>${totalStock}개</strong></div>${state.vendingRefreshedAt ? `<div class="row"><span class="small muted">출고 시 기본 수량으로 되돌리기</span><button class="mini-action" data-action="reset-vending">기본값으로 되돌리기</button></div>` : ""}</section>`;
+  const refreshState = state.vendingRefreshedAt;
+  const isLoading = refreshState === "불러오는 중...";
+  const refreshDone = Boolean(refreshState) && !isLoading;
+  const refreshLabel = isLoading ? "불러오는 중..." : refreshDone ? "새로고침 완료" : "새로고침";
+  return `<section class="card padded stack vending-panel"><div class="row"><div><span class="badge">AI 재고 학습</span><h4>MOOV 24의 재고 현황</h4></div><button class="secondary-button compact-button" data-action="refresh-vending" aria-label="차량 재고 새로고침, 탑승 1회당 1번만 가능" ${refreshState ? "disabled" : ""}>${icon("refresh")} ${refreshLabel}</button></div><div class="row"><span class="small muted">차량 전체 재고</span><strong>${totalStock}개</strong></div></section>`;
 }
 
 function productCard(product) {
@@ -3765,6 +3769,7 @@ document.addEventListener("click", (event) => {
   if (action === "purchase-sub") { state.purchaseSub = value; render(); }
   if (action === "product-category") { state.productCategory = value; render(); }
   if (action === "refresh-vending") {
+    if (state.vendingRefreshedAt) return;
     state.vendingRefreshedAt = "불러오는 중...";
     render();
     (async () => {
@@ -3802,13 +3807,6 @@ document.addEventListener("click", (event) => {
       }
     })();
     return;
-  }
-  if (action === "reset-vending") {
-    state.vendingStockOverrides = {};
-    state.vendingRefreshedAt = null;
-    clampCartToStock();
-    persist(); render();
-    toast("차량 재고를 기본값으로 되돌렸어요.");
   }
   if (action === "like-product") { state.productLikes.has(value) ? state.productLikes.delete(value) : state.productLikes.add(value); persist(); render(); toast(state.productLikes.has(value) ? "관심 목록에 저장했어요." : "관심 목록에서 삭제했어요."); }
   if (action === "product-detail") { const product = products.find((item) => item.id === value); if (product) openProductDetail(product, true); }

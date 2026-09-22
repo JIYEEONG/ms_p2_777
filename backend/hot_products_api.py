@@ -13,7 +13,10 @@ scripts/import_hot_products_csv.py로 Postgres(taxi_products 스키마)에
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+import mimetypes
+import os
+
+from fastapi import APIRouter, HTTPException, Response
 
 from db import get_conn, release_conn
 
@@ -21,6 +24,11 @@ router = APIRouter(prefix="/api/hot-products", tags=["hot-products"])
 
 SCHEMA = "taxi_products"
 TABLE = f"{SCHEMA}.hot_product_recommendations"
+
+# 상품 사진이 들어있는 Azure Blob Storage 컨테이너.
+# 프론트는 이 컨테이너를 직접 보지 않고, 아래 /images/{filename} 엔드포인트를 거친다 —
+# 그래야 컨테이너가 Private이어도(공개 액세스 꺼져 있어도) 항상 동작한다.
+IMAGE_CONTAINER = os.getenv("AZURE_STORAGE_TAXI_CONTAINER", "taxiproductimage")
 
 
 def ensure_table():
@@ -100,3 +108,34 @@ def get_latest_hot_products():
         }
     finally:
         release_conn(conn)
+
+
+@router.get("/images/{filename}")
+def get_product_image(filename: str):
+    """Azure Blob Storage(taxiproductimage 컨테이너)의 상품 사진을 백엔드가 대신
+    받아와서 그대로 돌려준다. 컨테이너의 공개 액세스 설정과 무관하게 항상 동작한다
+    (연결 문자열로 인증하기 때문). 프론트는 이 URL만 알면 되고 Azure 자격증명은
+    서버 밖으로 나가지 않는다.
+    """
+    # 경로 조작(../ 등) 방지: 슬래시가 섞인 파일명은 거부
+    if "/" in filename or ".." in filename:
+        raise HTTPException(status_code=400, detail="잘못된 파일명입니다")
+
+    from azure.storage.blob import BlobServiceClient
+    from azure.core.exceptions import ResourceNotFoundError
+
+    conn_str = os.environ["AZURE_STORAGE_CONNECTION_STRING"]
+    client = BlobServiceClient.from_connection_string(conn_str)
+    blob_client = client.get_blob_client(container=IMAGE_CONTAINER, blob=filename)
+    try:
+        downloaded = blob_client.download_blob()
+        data = downloaded.readall()
+    except ResourceNotFoundError:
+        raise HTTPException(status_code=404, detail=f"이미지를 찾을 수 없습니다: {filename}")
+
+    content_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+    return Response(
+        content=data,
+        media_type=content_type,
+        headers={"Cache-Control": "public, max-age=86400"},  # 상품 사진은 자주 안 바뀌니 하루 캐시
+    )
