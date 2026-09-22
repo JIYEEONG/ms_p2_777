@@ -19,6 +19,7 @@ from urllib.parse import urlencode, urlsplit
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
+from pydantic import BaseModel, Field
 
 
 router = APIRouter(prefix='/api/auth', tags=['authentication'])
@@ -250,7 +251,35 @@ def _new_session(user, old_token=None):
 
 @router.get('/config')
 def auth_config():
-    return JSONResponse({'configured': _config() is not None, 'loginUrl': '/api/auth/google/start'}, headers=PRIVATE_HEADERS)
+    return JSONResponse({'configured': _config() is not None, 'demoEnabled': _demo_enabled(), 'loginUrl': '/api/auth/google/start'}, headers=PRIVATE_HEADERS)
+
+
+def _demo_enabled():
+    try:
+        return (os.getenv('ENABLE_DEMO_LOGIN', 'true').lower() == 'true'
+                and urlsplit(_app_base()).hostname in ('localhost', '127.0.0.1', '::1'))
+    except ValueError:
+        return False
+
+
+class DemoLogin(BaseModel):
+    username: str = Field(min_length=1, max_length=64)
+    password: str = Field(min_length=1, max_length=128)
+
+
+@router.post('/demo/login')
+def demo_login(payload: DemoLogin, request: Request):
+    if not _demo_enabled():
+        raise HTTPException(404, 'Demo login is unavailable.')
+    base = _require_same_origin(request)
+    if not (secrets.compare_digest(payload.username.encode(), b'moov')
+            and secrets.compare_digest(payload.password.encode(), b'demo1234')):
+        raise HTTPException(401, 'Check the demo ID and password.', headers=PRIVATE_HEADERS)
+    user = {'id': 'demo:moov', 'name': 'MOOV 체험', 'email': '', 'picture': ''}
+    token = _new_session(user, request.cookies.get(SESSION_COOKIE))
+    response = JSONResponse({'authenticated': True, 'user': user}, headers=PRIVATE_HEADERS)
+    _set_cookie(response, SESSION_COOKIE, token, SESSION_TTL, base.startswith('https://'))
+    return response
 
 
 @router.get('/google/start')
@@ -305,7 +334,7 @@ def _session_user(request):
     user = None
     token = request.cookies.get(SESSION_COOKIE)
     config = _config()
-    if config and isinstance(token, str) and re.fullmatch(r'[A-Za-z0-9_-]{43}', token):
+    if (config or _demo_enabled()) and isinstance(token, str) and re.fullmatch(r'[A-Za-z0-9_-]{43}', token):
         try:
             with _database() as database:
                 row = database.execute('SELECT profile FROM auth_sessions WHERE token_hash=? AND expires_at>?', (_digest(token), time.time())).fetchone()
@@ -313,9 +342,11 @@ def _session_user(request):
                     user = json.loads(row['profile'])
         except (sqlite3.Error, ValueError):
             user = None
-    if not isinstance(user, dict) or not isinstance(user.get('id'), str) or not user['id'].startswith('google:'):
+    if not isinstance(user, dict) or not isinstance(user.get('id'), str):
         return None
-    return user
+    if user['id'] == 'demo:moov' and _demo_enabled():
+        return user
+    return user if config and user['id'].startswith('google:') else None
 
 
 def _require_same_origin(request):

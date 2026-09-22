@@ -9,3 +9,9 @@
 .google-auth-status[data-state="unavailable"], .google-auth-status[data-state="failed"] { color: #a3372e; }
 .google-auth-retry { justify-self: center; border: 0; background: transparent; color: #1d594c; text-decoration: underline; font: inherit; font-size: .8rem; cursor: pointer; padding: 8px 16px; }
 .google-auth-retry[hidden] { display: none; }
+.demo-login-form { display: grid; gap: 10px; padding: 16px; border: 1px solid #cbe6d5; border-radius: 16px; background: #f6fbf8; }
+.demo-login-form[hidden] { display: none; }
+.demo-login-form small { color: #53685b; font-size: .75rem; line-height: 1.5; }
+.demo-login-form label { display: grid; gap: 5px; font-size: .8rem; }
+.demo-login-form input { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid #ccd9d1; border-radius: 8px; background: white; }
+.demo-login-form p { margin: 0; color: #a3372e; font-size: .75rem; }

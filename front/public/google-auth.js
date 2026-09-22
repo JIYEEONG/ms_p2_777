@@ -1,6 +1,6 @@
 /* Google credentials are handled by the server; the browser only checks its session. */
 (() => {
-  const auth = { phase: 'checking', configured: false, error: '', busy: false, user: null };
+  const auth = { phase: 'checking', configured: false, demoEnabled: false, error: '', busy: false, user: null };
   let hooks = {}, generation = 0, initialized = false;
   const text = (ko, en) => window.MoovI18n?.getLanguage() === 'en' ? en : ko;
   const callbackError = new URLSearchParams(location.search).get('auth_error');
@@ -16,6 +16,11 @@
     const status = document.querySelector('#google-auth-status');
     const retry = document.querySelector('#google-auth-retry');
     if (!button || !status) return;
+    const demoForm = document.querySelector('#demo-login-form');
+    if (demoForm) {
+      demoForm.hidden = !auth.demoEnabled;
+      demoForm.querySelector('button').disabled = auth.busy || auth.phase === 'checking';
+    }
     button.disabled = auth.phase === 'checking' || auth.busy || !auth.configured;
     label.textContent = auth.phase === 'redirecting' ? text('Google로 연결 중…', 'Connecting to Google…') : text('Google로 로그인', 'Sign in with Google');
     const messages = {
@@ -28,6 +33,7 @@
       redirecting: text('Google에서 사용할 계정을 선택해 주세요.', 'Choose your account on Google.'),
     };
     status.textContent = messages[auth.error || auth.phase] || '';
+    if (auth.demoEnabled && auth.error === 'unconfigured') status.textContent = text('Google 설정 없이 위의 시연 계정으로 시작할 수 있어요.', 'Use the demo account above without configuring Google.');
     status.dataset.state = auth.error || auth.phase;
     retry.hidden = auth.phase === 'checking' || auth.phase === 'redirecting' || (!auth.error && auth.configured);
     retry.textContent = text('다시 확인', 'Try again');
@@ -44,7 +50,7 @@
     } finally { clearTimeout(timeout); }
   }
   function validUser(user) {
-    return user && typeof user.id === 'string' && /^google:[^\s]{1,57}$/.test(user.id) && typeof user.name === 'string';
+    return user && typeof user.id === 'string' && (/^google:[^\s]{1,57}$/.test(user.id) || user.id === 'demo:moov') && typeof user.name === 'string';
   }
   async function retry() {
     if (auth.busy) return;
@@ -53,6 +59,7 @@
     const [configResult, sessionResult] = await Promise.allSettled([request('config'), request('me')]);
     if (current !== generation) return;
     auth.configured = configResult.status === 'fulfilled' && configResult.value.configured === true;
+    auth.demoEnabled = configResult.status === 'fulfilled' && configResult.value.demoEnabled === true;
     if (sessionResult.status === 'fulfilled' && sessionResult.value.authenticated === true && validUser(sessionResult.value.user)) {
       auth.phase = 'authenticated'; auth.error = ''; auth.user = sessionResult.value.user;
       pendingCallbackError = '';
@@ -71,6 +78,21 @@
     auth.phase = 'redirecting'; auth.error = ''; auth.busy = true; render();
     // Keep the browser on the same-origin endpoint; never accept a redirect URL from storage.
     window.location.assign('/api/auth/google/start');
+  }
+  async function demoLogin(event) {
+    event.preventDefault();
+    if (!auth.demoEnabled || auth.busy) return;
+    const form = event.currentTarget, message = form.querySelector('[role="status"]');
+    ++generation; auth.busy = true; message.textContent = ''; render();
+    try {
+      const result = await request('demo/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: form.elements.username.value.trim(), password: form.elements.password.value }) });
+      if (!result.authenticated || !validUser(result.user)) throw Error('demo-login');
+      form.elements.password.value = '';
+      auth.user = result.user; auth.phase = 'authenticated'; auth.error = ''; pendingCallbackError = '';
+      hooks.onAuthenticated?.(auth.user);
+    } catch {
+      message.textContent = text('로그인하지 못했어요. 서버 연결과 아이디 moov / 비밀번호 demo1234를 확인해 주세요.', 'Check the server connection and use moov / demo1234.');
+    } finally { auth.busy = false; render(); }
   }
   async function logout() {
     if (auth.busy) return false;
@@ -99,6 +121,7 @@
       initialized = true;
       document.querySelector('#google-login-button')?.addEventListener('click', start);
       document.querySelector('#google-auth-retry')?.addEventListener('click', retry);
+      document.querySelector('#demo-login-form')?.addEventListener('submit', demoLogin);
       window.addEventListener('moov:language-change', render);
       window.addEventListener('storage', event => { if (event.key === 'moov-auth-session-changed') void retry(); });
       window.addEventListener('pageshow', event => { if (event.persisted) { auth.busy = false; void retry(); } });

@@ -85,7 +85,7 @@ class GoogleAuthTests(unittest.TestCase):
 
     def test_public_configuration_never_exposes_credentials(self):
         response = auth.auth_config()
-        self.assertEqual(body(response), {'configured': True, 'loginUrl': '/api/auth/google/start'})
+        self.assertEqual(body(response), {'configured': True, 'demoEnabled': True, 'loginUrl': '/api/auth/google/start'})
         self.assertEqual(response.headers['cache-control'], 'no-store')
         for key in ['GOOGLE_CLIENT_SECRET', 'AUTH_SESSION_SECRET']:
             self.assertNotIn(TEST_ENV[key], response.body.decode())
@@ -306,6 +306,37 @@ class GoogleAuthTests(unittest.TestCase):
             result = auth._verify_google_token('signed-token', TEST_ENV['GOOGLE_CLIENT_ID'])
         self.assertEqual(result, {'verified': True})
         self.assertEqual(network.call_args.kwargs['timeout'], (3.05, 8))
+
+
+class DemoAuthTests(unittest.TestCase):
+    setUp = GoogleAuthTests.setUp
+
+    def test_demo_without_google_configuration_and_logout(self):
+        with patch.dict(os.environ, {'GOOGLE_CLIENT_ID': '', 'GOOGLE_CLIENT_SECRET': '', 'AUTH_SESSION_SECRET': ''}):
+            response = auth.demo_login(auth.DemoLogin(username='moov', password='demo1234'), request('POST', origin=TEST_ENV['APP_BASE_URL']))
+            cookie = response_cookie(response, auth.SESSION_COOKIE)
+            self.assertTrue(cookie['httponly'])
+            cookies = {auth.SESSION_COOKIE: cookie.value}
+            self.assertEqual(auth.require_auth_user(request(cookies=cookies))['id'], 'demo:moov')
+            auth.auth_logout(request('POST', cookies=cookies, origin=TEST_ENV['APP_BASE_URL']))
+            self.assertFalse(body(auth.auth_me(request(cookies=cookies)))['authenticated'])
+
+    def test_demo_rejects_wrong_credentials_and_cross_origin(self):
+        for username, password, origin, status in [('moov', 'wrong', TEST_ENV['APP_BASE_URL'], 401), ('google:123', 'demo1234', TEST_ENV['APP_BASE_URL'], 401), ('moov', 'demo1234', 'https://other.example', 403)]:
+            with self.assertRaises(HTTPException) as raised:
+                auth.demo_login(auth.DemoLogin(username=username, password=password), request('POST', origin=origin))
+            self.assertEqual(raised.exception.status_code, status)
+
+    def test_demo_and_existing_demo_sessions_are_disabled_on_public_origin(self):
+        response = auth.demo_login(auth.DemoLogin(username='moov', password='demo1234'), request('POST', origin=TEST_ENV['APP_BASE_URL']))
+        cookies = {auth.SESSION_COOKIE: response_cookie(response, auth.SESSION_COOKIE).value}
+        for settings in [{'APP_BASE_URL': 'https://moov.example', 'GOOGLE_REDIRECT_URI': 'https://moov.example/api/auth/google/callback'}, {'ENABLE_DEMO_LOGIN': 'false'}]:
+            with patch.dict(os.environ, settings):
+                self.assertFalse(body(auth.auth_config())['demoEnabled'])
+                self.assertFalse(body(auth.auth_me(request(cookies=cookies)))['authenticated'])
+                with self.assertRaises(HTTPException) as raised:
+                    auth.demo_login(auth.DemoLogin(username='moov', password='demo1234'), request('POST', origin=TEST_ENV['APP_BASE_URL']))
+                self.assertEqual(raised.exception.status_code, 404)
 
 
 if __name__ == '__main__':
