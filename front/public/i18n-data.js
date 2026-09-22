@@ -85,7 +85,6 @@ window.MOOV_EN = Object.freeze({
   "MOOV 앱": "MOOV app",
   "MOOV 앱으로 돌아가기": "Back to the MOOV app",
   "MOOV 이용과 개인정보·차량 보안 기준": "MOOV usage, privacy, and vehicle security standards",
-  "MOOV 이지핏": "MOOV Easy Fit",
   "MOOV 자산 보관함": "MOOV asset library",
   "MOOV 추천": "MOOV pick",
   "MOOV 컴팩트": "MOOV Compact",

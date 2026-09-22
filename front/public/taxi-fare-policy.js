@@ -56,9 +56,8 @@
       "perKm": 1126.25
     }
   },
-  "vehicleClasses": {
+    "vehicleClasses": {
     "standard": "small",
-    "easyfit": "medium",
     "family": "medium",
     "premium": "large",
     "barrierfree": "medium"
