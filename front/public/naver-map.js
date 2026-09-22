@@ -366,7 +366,7 @@
     return data.places;
   }
   function matchPlace(query, places) {
-    const normalize=value=>String(value||'').normalize('NFKC').replace(/\s+/g,'').toLocaleLowerCase();
+    const normalize=value=>String(value||'').normalize('NFKC').replace(/[\s()]+/g,'').toLocaleLowerCase();
     const valid=places.filter(item=>Number.isFinite(item.lat)&&Number.isFinite(item.lng));
     const exact=valid.filter(item=>normalize(item.name)===normalize(query));
     const distinct=items=>[...new Map(items.map(item=>[`${item.lat},${item.lng}`,item])).values()];

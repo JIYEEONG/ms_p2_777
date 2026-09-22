@@ -54,6 +54,7 @@ function rentalCanEditRoute() { return !state.tripActive&&['setup','pickup'].inc
 function rentalKnownPlace(name) { return RENTAL_PLACES.find(p=>p.name===name || (name.includes('반포') && p.id==='banpo') || (name.includes('현재 위치') && p.id==='seongsu')); }
 function rentalPoint(lat,lng) { return {id:'pin-'+lat.toFixed(6)+'-'+lng.toFixed(6),name:`${rentalMapText('지도 선택','Map selection')} · ${lat.toFixed(4)}, ${lng.toFixed(4)}`,lat,lng,category:rentalMapText('지도 선택','Map selection'),dwell:0}; }
 function fitRentalRoute(map,route,options={}) {
+  map.stop();
   const points=[...(route.points||[]),...(route.stops||[]).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lng)).map(p=>[p.lat,p.lng])];
   const key=JSON.stringify((route.stops||[]).map(p=>[p.lat,p.lng]));
   if(map.native)map.native.moovRouteKey=key;
@@ -91,7 +92,7 @@ async function calculateNaverRentalRoute(stops) {
   return {...route,points:result.points,distance:Number((result.distanceMeters/1000).toFixed(1)),minutes:Math.max(1,Math.ceil(result.durationSeconds/60)),nextMinutes:stops.length===2?Math.max(1,Math.ceil(result.durationSeconds/60)):null,provider:'naver',demo:false,routeError:false};
 }
 function updateRentalRoadRoute(route) {
-  if(route.unresolved){resolveRentalRouteStops(route);return;}
+  if(route.unresolved||route.stops.some(rentalNeedsPlaceLabel)){resolveRentalRouteStops(route);return;}
   if(route.provider==='naver'||route.routeError||rentalRouteRequests.has(route))return;
   rentalRouteRequests.add(route);
   rentalServices.calculateRoute(route.stops).then(next=>{
@@ -103,22 +104,39 @@ function updateRentalRoadRoute(route) {
   });
 }
 const rentalLocationRequests=new WeakSet();
+function rentalNeedsPlaceLabel(stop){
+  return !stop.locationLabelChecked&&/^(?:지도 선택|Map selection)\s*·/.test(stop.name);
+}
 async function resolveRentalRouteStops(route) {
   if(route.locationLookupDone||rentalLocationRequests.has(route))return;
   rentalLocationRequests.add(route);
   const lookups=new Map();
   const stops=await Promise.all(route.stops.map(async stop=>{
-    if(Number.isFinite(stop.lat)&&Number.isFinite(stop.lng))return stop;
+    if(Number.isFinite(stop.lat)&&Number.isFinite(stop.lng)){
+      if(!rentalNeedsPlaceLabel(stop))return stop;
+      try{
+        const place=await MoovNaverMap.describePoint(stop);
+        return {...stop,name:place.landmark||place.address||place.name,address:place.address,locationLabelChecked:true};
+      }catch{return {...stop,locationLabelChecked:true};}
+    }
     try{
       if(!lookups.has(stop.name))lookups.set(stop.name,rentalServices.search(stop.name));
       const results=await lookups.get(stop.name);
-      const place=MoovNaverMap.matchPlace(stop.name,results);
+      let place=MoovNaverMap.matchPlace(stop.name,results);
+      // Some saved labels differ from NAVER's indexed spelling (e.g. 서호).
+      const queries=stop.name==='석촌호수 서호'?['석촌호수서호 서울']:[stop.name.replace(/\s+/g,'')];
+      for(const query of queries){
+        if(place||query===stop.name)break;
+        if(!lookups.has(query))lookups.set(query,rentalServices.search(query));
+        place=MoovNaverMap.matchPlace(stop.name,await lookups.get(query));
+      }
       if(!place)return {...stop,locationIssue:'choose'};
       return {...stop,lat:place.lat,lng:place.lng,address:place.address,source:'naver',locationIssue:null};
     }catch{return {...stop,locationIssue:'retry'};}
   }));
   if(state.rentalUX.route!==route)return;
   const next=calculateRentalRoute(stops);next.locationLookupDone=true;
+  state.routeStops=stops.map(p=>p.name);
   state.rentalUX.route=next;resetRentalRouteCamera();persist();refreshRentalRouteScreen();
 }
 function resetRentalRouteCamera(){
@@ -334,8 +352,7 @@ async function initRentalFlowMap() {
       const route=ensureRentalRoute();
       route.stops.slice(1).forEach((p,i)=>{
         if(p.lat==null||p.lng==null)return;
-        const marker=rentalMarker(map,p,i===route.stops.length-2?'도착':String(i+1),()=>selectRentalPointOnMap(i+1),true);
-        marker.on('dragend',()=>{const point=marker.getLatLng();applyRentalStopLocation(i+1,rentalPoint(point.lat,point.lng));});
+        rentalMarker(map,p,i===route.stops.length-2?'도착':String(i+1),()=>toast(p.name));
       });
       if(route.points.length)MoovNaverMap.polyline(route.points,{color:'#28754e',weight:5}).addTo(map);
       fitRentalRoute(map,route);updateRentalRoadRoute(route);

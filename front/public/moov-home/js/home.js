@@ -92,9 +92,10 @@ async function initHomeRouteMap(){
     const label=i===0?'출발':i===route.stops.length-1?'도착':String(i);
     const marker=rentalMarker(map,p,label,()=>{
       if(driving){if(i>0)showRentalStop(i);else toast('출발 위치 · '+p.name);}
-      else if(!MoovLocationPicker.selectExistingPoint(p))selectRentalPointOnMap(i);
-    },rentalCanEditRoute());
-    if(rentalCanEditRoute())marker.on('dragend',()=>{const point=marker.getLatLng();if(i===0){marker.setLatLng(p);selectRentalPointOnMap(0,point);}else applyRentalStopLocation(i,rentalPoint(point.lat,point.lng));});
+      else if(i===0){if(!MoovLocationPicker.selectExistingPoint(p))selectRentalPointOnMap(0);}
+      else toast(p.name);
+    },i===0&&rentalCanEditRoute());
+    if(i===0&&rentalCanEditRoute())marker.on('dragend',()=>{const point=marker.getLatLng();marker.setLatLng(p);selectRentalPointOnMap(0,point);});
     marker.getElement()?.classList.add('home-pin',i===0?'start':i===route.stops.length-1?'goal':'waypoint');
     marker.bindTooltip(escapeHtml(p.name.replace('현재 위치 · ','')),{direction:i%2?'right':'left',className:'home-map-label',offset:[16,0]});
   });
@@ -154,7 +155,7 @@ function handleHomeClick(event){
   if(action==='rental-change-stop')return openRentalDestinationSearch(Number(value));
   if(action==='rental-search-destination')return openRentalDestinationSearch();
   if(action==='locate-rental-map'){MoovNaverMap.locateOnMap(rentalMapView,button,toast);return;}
-  if(action==='center-route'){MoovLocationPicker.cancelSelection();resetRentalRouteCamera();if(rentalMapView)fitRentalRoute(rentalMapView,ensureRentalRoute());return;}
+  if(action==='center-route'){MoovLocationPicker.cancelSelection();resetRentalRouteCamera();render();return;}
   if(action==='select-home-mode'){
     if(value==='taxi')return navigateHost('taxi');
     state.homeMode='rent';state.homeStep='booking';state.rentalFlowStep='setup';persist();render();content.scrollTop=0;return;
@@ -228,6 +229,7 @@ render();updateClock();if(!cleanupRunning())updateUsageTimer();restoreCleanup();
 
 function selectRentalPointOnMap(index=0,initial=null){
   if(state.tripActive||!['setup','pickup'].includes(state.rentalFlowStep))return;
+  if(index!==0)return openRentalDestinationSearch(index);
   const element=document.querySelector('#home-booking-map,#rental-pickup-naver');
   if(!element||!rentalMapView)return toast(rentalMapText('지도를 불러오는 중이에요. 잠시 후 다시 선택하세요.','The map is loading. Please try again shortly.'));
   rentalLocationToken++;

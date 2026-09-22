@@ -558,6 +558,11 @@ async function setControlRoute(client, rental, stops) {
 
 async function assertRouteMarkersFit(client, rental) {
   const config = routeControlPage(rental);
+  await client.wait(`(() => {
+    const rect=document.querySelector(${JSON.stringify(config.map)}).getBoundingClientRect();
+    const markers=[...document.querySelectorAll(${JSON.stringify(config.map + (rental ? ' .home-pin' : ' .taxi-map-marker'))})];
+    return markers.length>=2&&markers.every(el=>{const r=el.getBoundingClientRect();return r.left>=rect.left-1&&r.top>=rect.top-1&&r.right<=rect.right+1&&r.bottom<=rect.bottom+1;});
+  })()`,config.kind+' map finishes fitting route markers');
   const layout = await client.evaluate(`(() => {
     const map=${config.native},rect=document.querySelector(${JSON.stringify(config.map)}).getBoundingClientRect();
     const selector=${JSON.stringify(config.map + (rental ? ' .home-pin' : ' .taxi-map-marker'))};
@@ -613,6 +618,12 @@ async function testRouteControls(rental) {
     const before = await client.evaluate(config.points);
     const selector = config.map + (rental ? ' .home-pin.' : ' .taxi-map-marker.') + kind;
     await client.dragMarker(selector);
+    if(rental&&index>0){
+      assert.deepEqual(await client.evaluate(config.points),before,'rental stop dragging preserves all coordinates');
+      assert.equal(await client.evaluate("!!document.querySelector('.inplace-map-selection')"),false);
+      passed('rental '+kind+' remains fixed when dragged');
+      continue;
+    }
     if(index===0){
       await client.wait("!!document.querySelector('.pickup-selection .primary-button:not(:disabled)')", 'dragged pickup candidate ready');
       await client.click('.pickup-selection .primary-button');
@@ -740,7 +751,7 @@ async function testNameOnlyRentalCourse(){
   await client.wait("typeof MOOVHome==='object'",'name-only rental course boot');
   await client.evaluate(`clearInterval(ticker);state.tripActive=false;MOOVHome.setRoute([
     {name:'서울특별시 성동구 성수동2가 289-36',lat:37.5446,lng:127.0557},
-    {name:'숭례문',dwell:20},{name:'광화문',dwell:25},{name:'경복궁',dwell:40}
+    {name:'서울숲',dwell:20},{name:'석촌호수 서호',dwell:25},{name:'송리단길',dwell:40}
   ])`);
   await client.wait("state.rentalUX.route?.provider==='naver'||state.rentalUX.route?.routeError||state.rentalUX.route?.unresolved&&state.rentalUX.route?.locationLookupDone",'name-only stops resolved and driving route calculated',45000);
   assert.equal(await client.evaluate('state.rentalUX.route.provider'),'naver',JSON.stringify(await client.evaluate('state.rentalUX.route')));
@@ -748,7 +759,7 @@ async function testNameOnlyRentalCourse(){
   assert.equal(await client.evaluate("document.querySelectorAll('#home-booking-map .home-pin').length"),4);
   await assertRouteMarkersFit(client,true);
   assert.ok(await client.evaluate('state.rentalUX.route.points.length>2'));
-  passed('name-only Sungnyemun, Gwanghwamun and Gyeongbokgung course resolves through NAVER and shows all four markers');
+  passed('name-only history lake course resolves through NAVER and shows all four markers');
   await client.evaluate('selectRentalPointOnMap(0)');
   await client.wait("!!document.querySelector('.pickup-selection .primary-button:not(:disabled)')",'same pickup confirmation ready');
   await client.click('.pickup-selection .primary-button');
@@ -759,9 +770,10 @@ async function testNameOnlyRentalCourse(){
   passed('confirming the same pickup exits the close-up and fits the entire road route');
   const before=await client.evaluate('state.rentalUX.route.stops.map(({lat,lng})=>({lat,lng}))');
   await client.dragMarker('#home-booking-map .home-pin.waypoint');
-  await client.wait('state.rentalUX.route?.provider===\'naver\' && state.rentalUX.route.stops[1].lat!=='+before[1].lat,'waypoint drag updates restored route');
   const after=await client.evaluate('state.rentalUX.route.stops.map(({lat,lng})=>({lat,lng}))');
-  for(const i of [0,2,3])assert.deepEqual(after[i],before[i]);
+  assert.deepEqual(after,before,'waypoint stays fixed when dragged');
+  await client.dragMarker('#home-booking-map .home-pin.goal');
+  assert.deepEqual(await client.evaluate('state.rentalUX.route.stops.map(({lat,lng})=>({lat,lng}))'),before,'destination stays fixed when dragged');
   await client.panMap('#home-booking-map');
   await client.click('.route-overview');
   await assertRouteMarkersFit(client,true);
@@ -769,7 +781,7 @@ async function testNameOnlyRentalCourse(){
   await client.click('.route-overview');
   assert.equal(await client.evaluate("!!document.querySelector('.pickup-selection')"),false);
   await assertRouteMarkersFit(client,true);
-  passed('restored course waypoints remain draggable and full-route button restores all markers');
+  passed('restored course waypoints and destination stay fixed and full-route button restores all markers');
 }
 
 async function testTaxiLocationRace(existingClient) {

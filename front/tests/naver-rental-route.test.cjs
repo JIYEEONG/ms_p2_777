@@ -84,6 +84,47 @@ test('a late name lookup cannot overwrite a newer waypoint selection',async()=>{
   assert.equal(context.state.rentalUX.route,newer);
 });
 
+test('history lake label resolves the NAVER parenthesized name and requests road geometry', async () => {
+  const context=load(async request=>({points:[request.start,...request.waypoints,request.goal].map(p=>[p.lat,p.lng]),distanceMeters:15000,durationSeconds:1200}));
+  const stops=prepareEditableRoute(context);
+  stops[1]={name:'석촌호수 서호',lat:null,lng:null,dwell:40};
+  const queries=[];
+  context.MoovNaverMap.searchPlaces=async query=>{
+    queries.push(query);
+    return query==='석촌호수서호 서울'?[
+      {name:'크래프트한스 석촌호수서호점',lat:37.506345,lng:127.0995273},
+      {name:'석촌호수(서호)',lat:37.5076911,lng:127.0995691},
+    ]:[];
+  };
+  const route=context.calculateRentalRoute(stops);context.state.rentalUX.route=route;
+  await context.resolveRentalRouteStops(route);
+  const resolved=context.state.rentalUX.route;
+  assert.equal(resolved.unresolved,undefined);
+  assert.equal(resolved.stops[1].name,'석촌호수 서호');
+  assert.equal(resolved.stops[1].lat,37.5076911);
+  assert.equal(resolved.stops[1].dwell,40);
+  assert.deepEqual(queries,['석촌호수 서호','석촌호수서호 서울']);
+  context.updateRentalRoadRoute(resolved);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(context.state.rentalUX.route.provider,'naver');
+  assert.ok(context.state.rentalUX.route.points.length>1);
+});
+
+test('old dragged stop labels recover a nearby business without moving the saved coordinates',async()=>{
+  const context=load(async()=>{}),stops=prepareEditableRoute(context);
+  stops[1].name='지도 선택 · 37.5437, 127.0374';
+  context.MoovNaverMap.describePoint=async()=>({name:'근처 카페',landmark:'근처 카페',address:'서울 성동구',lat:0,lng:0});
+  const route=context.calculateRentalRoute(stops);context.state.rentalUX.route=route;
+  await context.resolveRentalRouteStops(route);
+  const point=context.state.rentalUX.route.stops[1];
+  assert.equal(point.name,'근처 카페');
+  assert.equal(point.lat,stops[1].lat);
+  assert.equal(point.lng,stops[1].lng);
+  assert.equal(point.dwell,stops[1].dwell);
+  assert.equal(context.state.routeStops[1],point.name);
+  assert.equal(context.rentalNeedsPlaceLabel(point),false);
+});
+
 test('single-leg route uses actual seconds and keeps failed routing visible to caller', async () => {
   const context = load(async () => ({ points: [[37.5, 127], [37.6, 127]], distanceMeters: 1234, durationSeconds: 91 }));
   const stops = [{ name: 'A', lat: 37.5, lng: 127 }, { name: 'B', lat: 37.6, lng: 127 }];
@@ -177,7 +218,7 @@ test('demo vehicle approaches and moves only along NAVER geometry without an off
   assert.equal(end.remainingMeters, 0);
 });
 
-test('dragging a waypoint or destination changes only that stop and preserves dwell time', () => {
+test('selecting a waypoint or destination changes only that stop and preserves dwell time', () => {
   for (const index of [1, 2]) {
     const context = load(async () => {});
     const original = prepareEditableRoute(context);
