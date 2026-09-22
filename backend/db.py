@@ -105,8 +105,9 @@ def log_crisis_event(conversation_id: str | None, user_id: str, persona: str, me
         release_conn(conn)
 
 
-def query_lingo_courses() -> list[dict]:
+def query_lingo_courses(course_ids: list[str] | None = None) -> list[dict]:
     """링고 D#: 이름 있는 공개 코스 + 경유지/목적지 정보.
+    course_ids를 주면 그 코스만(검색으로 좁힌 결과), 안 주면 전체를 읽는다(코스가 적을 때 또는 검색 실패 시 대체용).
     영문 이름·주소는 juso로 검증된 지점(address_source='juso_verified')만 포함한다.
     검증 안 된 영문명(romanized_fallback)은 뺀다 -> 링고가 로마자 표기법으로 직접 음차하고 근거 ID에서 제외."""
     conn = get_conn()
@@ -121,8 +122,10 @@ def query_lingo_courses() -> list[dict]:
                 JOIN moov.course_points cp ON cp.course_id = c.course_id
                 WHERE c.visibility = 'public'
                   AND cp.place_name_kr IS NOT NULL
+                  AND (%(course_ids)s IS NULL OR c.course_id = ANY(%(course_ids)s))
                 ORDER BY c.course_id, cp.sequence_no
-                """
+                """,
+                {"course_ids": course_ids},
             )
             rows = cur.fetchall()
     finally:
