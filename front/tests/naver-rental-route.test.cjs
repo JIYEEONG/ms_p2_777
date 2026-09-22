@@ -202,6 +202,45 @@ test('place search uses NAVER results and propagates failure instead of returnin
   assert.equal(await service.search('성수'), expected);
 });
 
+test('every rental duration dispatches only to the pickup and keeps the passenger course unchanged',async()=>{
+  for(const hours of [3,6,10,15,24]){
+    const requests=[];
+    const context=load(async request=>{
+      requests.push(request);
+      return {points:[[request.start.lat,request.start.lng],[request.goal.lat,request.goal.lng]],distanceMeters:500,durationSeconds:60};
+    });
+    const stops=prepareEditableRoute(context);
+    context.state.rentalHours=hours;
+    context.state.rentalVehicleType='standard';
+    context.rentalSetStep=step=>{context.state.rentalFlowStep=step;};
+    const before=JSON.stringify(context.state.rentalUX.route);
+    await context.requestRentalVehicle();
+    assert.equal(requests.length,4);
+    for(const request of requests){
+      assert.deepEqual(Object.keys(request).sort(),['goal','start']);
+      assert.equal(request.goal.lat,stops[0].lat);
+      assert.equal(request.goal.lng,stops[0].lng);
+    }
+    assert.equal(JSON.stringify(context.state.rentalUX.route),before);
+    const dispatch=context.state.rentalUX.dispatch;
+    assert.equal(dispatch.pickup.name,stops[0].name);
+    const end=context.approachAt(dispatch.approachRoute,1);
+    assert.equal(end.lat,stops[0].lat);
+    assert.equal(end.lng,stops[0].lng);
+    assert.ok(dispatch.response);
+  }
+});
+
+test('rental dispatch rejects a road response ending at a course destination',async()=>{
+  const context=load(async()=>({points:[[37.51,127],[37.59,127.1]],distanceMeters:1000,durationSeconds:90}));
+  prepareEditableRoute(context);
+  context.rentalSetStep=step=>{context.state.rentalFlowStep=step;};
+  await context.requestRentalVehicle();
+  assert.equal(context.state.rentalFlowStep,'error');
+  assert.equal(context.state.rentalUX.dispatch.approachRoute,undefined);
+  assert.equal(context.state.rentalUX.dispatch.response,undefined);
+});
+
 test('demo vehicle approaches and moves only along NAVER geometry without an offline graph', async () => {
   const context = load(async request => ({ points: [[37.546, 127.058], [request.goal.lat, request.goal.lng]], distanceMeters: 400, durationSeconds: 75 }));
   const route = await context.naverRentalApproach({ lat: 37.5446, lng: 127.0557 });

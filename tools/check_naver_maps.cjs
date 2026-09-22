@@ -405,6 +405,41 @@ async function testExistingMapSelection(client,rental) {
   passed((rental?'rental':'taxi')+' selects pickup and destination on the existing map; cancel preserves route and no modal opens');
 }
 
+async function testRentalPickupOnly(){
+  const client=await openPage(base+'/moov-home/index.html?embed=1&lang=ko');
+  await client.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:false});
+  await client.wait("typeof MOOVHome==='object'",'rental dispatch boot');
+  await client.evaluate(`clearInterval(ticker);state.tripActive=false;MOOVHome.setRoute([
+    {name:'성수역',lat:37.5446,lng:127.0557},
+    {name:'서울숲',lat:37.5445,lng:127.0374},
+    {name:'반포한강공원',lat:37.5104,lng:126.9960}
+  ])`);
+  await client.wait("state.rentalUX.route?.provider==='naver'",'passenger course ready');
+  const course=await client.evaluate('JSON.stringify(state.rentalUX.route)');
+  for(const hours of [3,24]){
+    await client.evaluate(`state.rentalHours=${hours};state.rentalFlowStep='setup';render()`);
+    await client.click('[data-action="setup-next"]');
+    await client.wait(mapReady('#rental-pickup-naver'),'pickup-only confirmation map');
+    assert.equal(await client.evaluate("[...rentalMapView._layers].filter(layer=>layer.native instanceof naver.maps.Polyline).length"),0);
+    assert.equal(await client.evaluate("document.querySelectorAll('#rental-pickup-naver .rux-map-marker').length"),1);
+    await client.click('[data-action="request-rent-flow"]');
+    await client.wait("!!state.rentalUX.dispatch.response||state.rentalFlowStep==='error'",'dispatch road request',45000);
+    assert.notEqual(await client.evaluate('state.rentalFlowStep'),'error',await client.evaluate('state.rentalUX.dispatch.message'));
+    await client.evaluate("state.rentalUX.dispatch.enteredAt=Date.now()-2500;rentalTick();state.rentalUX.dispatch.enteredAt=Date.now()-2000;rentalTick()");
+    await client.wait(mapReady('#rental-approach-naver'),'vehicle-to-pickup map');
+    assert.ok(await client.evaluate('state.rentalUX.dispatch.approachRoute.distanceMeters<2000'));
+    assert.equal(await client.evaluate('JSON.stringify(state.rentalUX.route)'),course);
+    await client.evaluate('state.rentalUX.dispatch.enteredAt=Date.now()-9000;rentalTick()');
+    assert.ok(await client.evaluate('state.rentalUX.dispatch.remainingMeters>0'));
+    await client.evaluate('state.rentalUX.dispatch.enteredAt=Date.now()-20000;rentalTick()');
+    assert.equal(await client.evaluate('state.rentalFlowStep'),'arrived');
+    assert.ok(await client.evaluate('rentalDistance(state.rentalUX.dispatch.position,state.rentalUX.dispatch.pickup)<0.2'));
+    assert.equal(await client.evaluate('state.tripActive'),false);
+    passed(hours+' hour rental shows only the pickup approach before boarding');
+  }
+  await client.screenshot('rental-pickup-arrival');
+}
+
 async function testRental() {
   const client = await openPage(base + '/moov-home/index.html?embed=1&lang=ko');
   await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
@@ -1021,6 +1056,7 @@ async function main() {
   else if(process.argv.includes('--taxi-shared')){await testTaxiSharedRoute();await testCourseRouteControls();}
   else if(process.argv.includes('--course-return'))await testCourseReturnHistory();
   else if(process.argv.includes('--name-only-route'))await testNameOnlyRentalCourse();
+  else if(process.argv.includes('--rental-dispatch'))await testRentalPickupOnly();
   else if(process.argv.includes('--pickup-drag-cancel')){await testPickupDragCancel(true);await testPickupDragCancel(false);}
   else if(process.argv.includes('--pickup-only')){await testPickupSelection(true);await testPickupSelection(false);}
   else if(process.argv.includes('--outing-only'))await testNaverOnlyOuting();

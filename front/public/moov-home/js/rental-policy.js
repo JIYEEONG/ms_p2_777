@@ -169,7 +169,13 @@ function renderRentalRouteRetry(route) {
   return `<div class="rux-note" role="status" data-i18n-skip><p>${rentalRouteNote(route)}</p><button class="ghost-button" data-action="retry-rental-route">${rentalMapText('도로 경로 다시 조회','Retry driving route')}</button></div>`;
 }
 async function naverRentalApproach(pickup) {
-  return MoovNaverMap.pickupApproach(pickup);
+  const route=await MoovNaverMap.pickupApproach(pickup);
+  const end=route.points?.at(-1);
+  // Dispatch must terminate at the requested pickup, never at a course stop.
+  if(!end||!Number.isFinite(end[0])||!Number.isFinite(end[1])||rentalDistance(pickup,{lat:end[0],lng:end[1]})>0.2){
+    throw Error('출발지로 오는 차량 경로를 확인하지 못했어요. 출발 위치를 확인한 뒤 다시 요청해 주세요.');
+  }
+  return {...route,pickup:rentalClone(pickup)};
 }
 function ensureRentalRoute() {
   const u=state.rentalUX, current=u.route;
@@ -214,10 +220,11 @@ function cancelRentalDispatch() {
 async function requestRentalVehicle() {
   if (state.tripActive || ['matching','assigned','approaching','arrived'].includes(state.rentalFlowStep)) return;
   const token=++rentalRequestToken;
-  state.rentalUX.dispatch={status:'requesting',enteredAt:Date.now(),deadline:Date.now()+30000,vehicle:null};
+  const pickup=rentalClone(rentalPickup());
+  state.rentalUX.dispatch={status:'requesting',enteredAt:Date.now(),deadline:Date.now()+30000,vehicle:null,pickup};
   rentalSetStep('matching');
   try {
-    const approachRoute=await naverRentalApproach(rentalPickup());
+    const approachRoute=await naverRentalApproach(pickup);
     if(token!==rentalRequestToken||state.rentalFlowStep!=='matching')return;
     state.rentalUX.dispatch.approachRoute=approachRoute;
     const result=await rentalServices.requestVehicle(state.rentalVehicleType);
@@ -337,7 +344,8 @@ function rentalMapBase(el,center,zoom=15) {
 async function initRentalFlowMap() {
   const el=document.querySelector('.rux .rental-naver-map');if(!el)return;
   if(!await readyRentalMap(el))return;
-  const c=rentalPickup(), step=state.rentalFlowStep;
+  const step=state.rentalFlowStep;
+  const c=['matching','assigned','approaching','arrived'].includes(step)?state.rentalUX.dispatch.pickup||rentalPickup():rentalPickup();
   const map=rentalMapBase(el,[c.lat,c.lng],step==='driving'?13:15);if(!map)return;
   if(step==='driving') {
     const route=ensureRentalRoute();
@@ -349,13 +357,8 @@ async function initRentalFlowMap() {
     pickupMarker.getElement()?.classList.add('pickup-origin');
     if(step==='pickup'){
       pickupMarker.on('dragend',()=>{const point=pickupMarker.getLatLng();pickupMarker.setLatLng(c);selectRentalPointOnMap(0,point);});
-      const route=ensureRentalRoute();
-      route.stops.slice(1).forEach((p,i)=>{
-        if(p.lat==null||p.lng==null)return;
-        rentalMarker(map,p,i===route.stops.length-2?'도착':String(i+1),()=>toast(p.name));
-      });
-      if(route.points.length)MoovNaverMap.polyline(route.points,{color:'#28754e',weight:5}).addTo(map);
-      fitRentalRoute(map,route);updateRentalRoadRoute(route);
+      // Before boarding this is the meeting-point map, not the passenger course.
+      MoovNaverMap.circle([c.lat,c.lng],{radius:150,color:'#28754e',fillOpacity:.06}).addTo(map);
     }
     if(step==='pickup')map.on('click',e=>{if(!document.querySelector('.inplace-map-selection'))selectRentalPointOnMap(0,e.latlng);});
     if(step==='matching')MoovNaverMap.circle([c.lat,c.lng],{radius:500,color:'#28754e',fillOpacity:.1}).addTo(map);
@@ -366,7 +369,7 @@ async function initRentalFlowMap() {
       rentalApproachLine=MoovNaverMap.polyline(step==='arrived'?[]:d.remainingPoints||route.points,{color:'#28754e',weight:5}).addTo(map);
       rentalCarMarker=rentalMarker(map,{...p,name:'배정 차량 MOOV 24'},'차량');
       rentalCarMarker.getElement()?.classList.add('home-car');
-      fitRentalRoute(map,route);
+      MoovNaverMap.fitRoute(map,[...route.points,[c.lat,c.lng]]);
     }
   }
 }
