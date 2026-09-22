@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node server.mjs",
+    "dev": "node dev.mjs",
+    "dev:maps": "node dev.mjs --maps-only",
+    "dev:front": "node server.mjs",
     "build": "next build",
-    "start": "node server.mjs",
+    "start": "node dev.mjs",
     "lint": "next lint"
   },
   "dependencies": {

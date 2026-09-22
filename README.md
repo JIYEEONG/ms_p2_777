@@ -4,7 +4,30 @@
 
 ## 실행
 
-별도 설치나 빌드가 필요하지 않습니다. `dist/index.html`을 브라우저에서 열거나 정적 웹 서버의 루트로 `dist` 폴더를 지정하세요.
+현재 앱은 프로젝트의 `front` 폴더에서 실행합니다. 최초 한 번 프로젝트 루트에서 Python 가상환경과 의존성을 준비하세요(Windows PowerShell).
+
+```powershell
+python -m venv .venv
+.venv/Scripts/python.exe -m pip install -r backend/requirements.txt
+cd front
+npm install
+```
+
+이후에는 `front` 폴더에서 아래 명령 하나로 프론트와 전체 백엔드를 함께 실행합니다.
+
+```powershell
+npm run dev
+```
+
+브라우저에서 **http://localhost:3000**을 여세요. 로컬 시연 로그인은 **`moov` / `demo1234`**입니다. 전체 백엔드는 팀에서 공유받은 `backend/.env`의 Azure·DB 등 설정이 필요합니다. AI 설정 없이 지도·로그인만 확인하려면 `npm run dev:maps`를 사용하세요. [로그인 설정 안내](docs/google-login-setup.md)를 참고하세요.
+
+- 실행할 때마다 최신 코드와 `.env`를 읽는 전용 백엔드를 새로 시작합니다. 8000번 포트가 사용 중이면 빈 포트를 자동 선택하고, 모든 앱 API를 그 백엔드에 연결합니다. 기존에 따로 실행한 서버는 종료하지 않습니다.
+- `Ctrl+C`로 이번에 실행한 프론트와 백엔드를 함께 종료합니다. 백엔드 코드나 `.env`를 수정한 뒤에는 `Ctrl+C` → `npm run dev`로 다시 실행하세요.
+- `npm start`도 함께 실행합니다. 백엔드를 직접 관리하려면 `npm run dev:front`로 프론트만 실행할 수 있습니다(기본 백엔드 `http://127.0.0.1:8000`, `MOOV_BACKEND_URL`로 변경 가능).
+- 통합 실행은 로컬 개발용입니다. 실행 프로세스의 `APP_BASE_URL`과 `GOOGLE_REDIRECT_URI`는 `http://localhost:3000` 기준으로 맞추며 `.env` 파일은 변경하지 않습니다. `PORT`를 지정하면 해당 프론트 포트에 맞춥니다. Google 로그인에는 그 콜백 주소의 등록이 필요합니다.
+- 가상환경은 프로젝트 루트의 `.venv`를 사용합니다. 다른 Python 환경을 쓰려면 `MOOV_PYTHON`에 해당 Python 실행 파일 경로를 지정하세요.
+
+아래 구조·구현 범위는 초기 정적 프로토타입(`dist`)에 대한 설명입니다.
 
 ## 구조
 

@@ -2712,7 +2712,7 @@ async function sendMessage(text, voice = false, detectedLanguage = null) {
       .slice(-10)     // 최근 10개 메시지만 (토큰 비용 관리)
       .map((m) => ({ role: m.role === "user" ? "user" : "assistant", content: m.text }));
 
-    const res = await fetch("http://127.0.0.1:8000/api/luna/chat", {
+    const res = await fetch("/api/luna/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -2794,7 +2794,7 @@ async function speakReply(text, detectedLanguage = null) {
       currentTtsAudio = null;
     }
 
-    const res = await fetch("http://127.0.0.1:8000/api/luna/tts", {
+    const res = await fetch("/api/luna/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text, persona: state.aiPersona, detected_language: detectedLanguage }),
@@ -2899,7 +2899,7 @@ async function startVoiceConversation() {
     try {
       const formData = new FormData();
       formData.append("audio", audioBlob, "speech.webm");
-      const res = await fetch("http://127.0.0.1:8000/api/luna/stt", { method: "POST", body: formData });
+      const res = await fetch("/api/luna/stt", { method: "POST", body: formData });
       const data = await res.json();
       if (!state.isAuthenticated || generation !== authGeneration) return;
       if (data.error) {

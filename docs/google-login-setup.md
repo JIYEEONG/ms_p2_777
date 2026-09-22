@@ -10,7 +10,7 @@ Google 로그인 설정 없이 로컬 시연을 하려면 로그인 화면의 **
 - `APP_BASE_URL=http://localhost:3000`인 로컬 환경에서 기본 활성화됩니다. 환경변수 `ENABLE_DEMO_LOGIN=false`로 끌 수 있습니다.
 - 공개 도메인에서는 비활성화됩니다. 실제 Google 사용자와 다른 `demo:moov` 공용 계정으로 저장되며, 같은 서버에서 이 계정을 쓰면 시연 데이터가 공유됩니다.
 - 아이디·비밀번호를 임의로 입력하는 방식은 아닙니다. 위에 지정된 계정을 사용하세요.
-- 변경 사항을 받은 팀원은 백엔드를 재시작하고 브라우저를 새로고침해야 합니다.
+- 변경 사항을 받은 팀원은 실행 중인 터미널에서 `Ctrl+C` 후 `front`의 `npm run dev`를 다시 실행하고 브라우저를 새로고침하세요. 백엔드도 함께 새로 실행됩니다.
 
 ## Google 계정 로그인
 
@@ -47,26 +47,30 @@ AUTH_SESSION_SECRET=자동_생성된_값_유지
 
 ## 실행
 
-프로젝트 루트에서 로그인용 의존성을 설치한다.
+프로젝트 루트에서 가상환경을 만들고 백엔드 의존성을 설치한다(최초 한 번).
 
 ```powershell
-.venv/Scripts/python.exe -m pip install "google-auth>=2.38,<3" "requests>=2.32,<3"
+python -m venv .venv
+.venv/Scripts/python.exe -m pip install -r backend/requirements.txt
 ```
 
-터미널 1 — 지도·로그인 서버:
-
-```powershell
-.venv/Scripts/python.exe -m uvicorn maps_server:app --app-dir backend --host 127.0.0.1 --port 8000 --no-access-log
-```
-
-터미널 2 — 프론트:
+프론트 폴더에서 실행하면 전체 백엔드까지 함께 시작한다. `npm install`은 최초 설치 시 필요하다.
 
 ```powershell
 cd front
+npm install
 npm run dev
 ```
 
-브라우저에서 `http://localhost:3000`을 연다. `.env` 수정 후에는 백엔드 서버를 재시작한다. 전체 AI·나들이 백엔드에는 `backend/main.py`에도 같은 로그인 라우터가 연결되어 있다. 지도·로그인 전용 실행 명령은 AI·PostgreSQL을 초기화하지 않는다.
+브라우저에서 `http://localhost:3000`을 연다. `Ctrl+C`는 프론트와 이번에 띄운 백엔드를 함께 종료한다. `.env` 또는 백엔드 코드 수정 후에는 `npm run dev`를 다시 실행한다. 실행할 때마다 새 백엔드가 연결되므로 이전 서버에 남은 로그인 코드를 사용하지 않는다. 기존 서버가 8000번 포트를 사용하면 자동으로 다른 포트를 쓴다.
+
+AI 설정 없이 지도·로그인·취향 설문만 확인하려면 같은 `front` 폴더에서 아래 명령을 사용한다. Azure AI·PostgreSQL을 초기화하지 않는다.
+
+```powershell
+npm run dev:maps
+```
+
+통합 실행은 로컬 개발용이며 실행 중인 프로세스의 `APP_BASE_URL`과 `GOOGLE_REDIRECT_URI`를 프론트의 `localhost` 주소로 맞춘다. `.env`의 저장된 값은 변경하지 않는다. 기본 포트는 3000이며 `PORT` 환경변수로 변경할 수 있다. Google Cloud에 등록한 콜백 주소도 해당 포트와 일치해야 한다. 프론트만 따로 실행하려면 `npm run dev:front`를 사용한다.
 
 ## 동작과 저장
 
