@@ -6,6 +6,7 @@ const port = Number(process.env.PORT || 3000);
 const root = process.cwd();
 const publicDir = join(root, "public");
 const fallbackFile = join(publicDir, "moov.html");
+const dashboardFile = join(publicDir, "dashboard", "index.html");
 const backendUrl = process.env.MOOV_BACKEND_URL || "http://127.0.0.1:8000";
 
 const contentTypes = {
@@ -46,6 +47,11 @@ createServer((req, res) => {
 
   if (requestedPath === "/" || requestedPath === "/index.html") {
     sendFile(res, fallbackFile);
+    return;
+  }
+
+  if (requestedPath === "/dashboard" || requestedPath === "/dashboard/") {
+    sendFile(res, dashboardFile);
     return;
   }
 

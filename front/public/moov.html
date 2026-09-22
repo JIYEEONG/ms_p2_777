@@ -119,6 +119,16 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .login-head > p:last-child { margin: 0; color: var(--muted); font-size: .86rem; line-height: 1.62; }
 .login-form { display: grid; gap: 14px; margin-top: 34px; }
 .login-form label, .form-label { display: grid; gap: 7px; color: #404047; font-size: .82rem; font-weight: 800; }
+.admin-page-link { min-height: 58px; display: grid; grid-template-columns: 38px minmax(0, 1fr) 18px; align-items: center; gap: 10px; margin-top: 14px; padding: 9px 12px; border: 1px solid rgba(83,177,117,.34); border-radius: 15px; background: linear-gradient(135deg, #f1faf4, #fff); color: var(--ink); text-decoration: none; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.admin-page-link:hover { border-color: var(--green); box-shadow: 0 8px 20px rgba(83,177,117,.12); transform: translateY(-1px); }
+.admin-page-link:active { transform: translateY(0); }
+.admin-page-link > span:first-child { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; background: var(--green); color: white; }
+.admin-page-link > span:first-child svg { width: 19px; height: 19px; }
+.admin-page-link > span:nth-child(2) { min-width: 0; }
+.admin-page-link strong, .admin-page-link small { display: block; }
+.admin-page-link strong { font-size: .78rem; }
+.admin-page-link small { margin-top: 3px; color: var(--muted); font-size: .61rem; line-height: 1.35; }
+.admin-page-link > svg { width: 17px; height: 17px; color: var(--green-dark); }
 input, textarea, select { width: 100%; min-height: 50px; padding: 13px 15px; border: 1px solid var(--line); border-radius: 14px; background: white; color: var(--ink); resize: vertical; }
 input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .primary-button, .secondary-button, .ghost-button, .danger-button { min-height: 52px; padding: 12px 16px; border: 1px solid transparent; border-radius: 16px; font-weight: 900; transition: transform .15s ease, background .15s ease; }
@@ -1179,6 +1189,16 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
             <p id="google-auth-status" class="google-auth-status" role="status" aria-live="polite">로그인 상태를 확인하고 있어요…</p>
             <button id="google-auth-retry" class="google-auth-retry" type="button" hidden>다시 확인</button>
           </div>
+          <form id="login-form" class="login-form">
+            <label>아이디<input id="user-id" autocomplete="username" placeholder="아이디 입력" /></label>
+            <label>비밀번호<input id="user-password" type="password" autocomplete="current-password" placeholder="비밀번호 입력" /></label>
+            <button class="primary-button" type="submit">로그인</button>
+          </form>
+          <a class="admin-page-link" href="/dashboard" target="_blank" rel="noopener" aria-label="관리자 페이지 새 창으로 열기">
+            <span aria-hidden="true"><svg><use href="#i-shield"></use></svg></span>
+            <span><strong data-i18n-en="Admin dashboard">관리자 페이지</strong><small data-i18n-en="View app features and data status">앱 기능과 데이터 현황을 확인하세요.</small></span>
+            <svg aria-hidden="true"><use href="#i-chevron"></use></svg>
+          </a>
           <p class="legal-note">로그인 시 서비스 이용약관과 개인정보 처리방침에 동의합니다.</p>
         </section>
 
@@ -1332,7 +1352,7 @@ const aiPersonas = [
   { id: "moov", name: "무브", desc: "캐주얼한 잡담, 공감 위주 대화", image: "./assets/무브_캐릭터.png" },
   { id: "todaki", name: "토닥이", desc: "고민 상담, 공감 기반 대화", image: "./assets/토닥이_캐릭터.png" },
   { id: "doctor", name: "척척박사", desc: "아는 만큼 답해주는 지식 모드", image: "./assets/척척박사_캐릭터.png" },
-  { id: "ringo", name: "링고", desc: "실시간 통역과 주변 관광정보 안내", image: "./assets/링고_캐릭터.png" },
+  { id: "ringo", name: "링고", desc: "사용자의 언어로 주변 관광정보 안내", image: "./assets/링고_캐릭터.png" },
 ];
 const LUNA_BOT_IMAGE = "./assets/luna-bot.svg"; // 캐빈 화면 외 모든 곳(꺼짐 화면, 설정 아이콘 등)에서 쓰는 공통 루나 아이콘
 
@@ -2579,7 +2599,7 @@ function renderAi() {
             <div><h4>혼자 두지 않을게요</h4><p>지금 벅찬 감정, 괜찮다면 조금 더 이야기해줄래요? 필요하면 아래 번호로 언제든 연결할 수 있어요.</p></div>
             <button class="crisis-overlay-close" type="button" data-action="crisis-close" aria-label="위기 안내 닫기">${icon("x")}</button>
           </div>
-          <div class="crisis-overlay-actions"><button class="crisis-call-button" type="button" data-action="crisis-call">${icon("shield")}자살예방상담전화 1393 연결</button></div>
+          <div class="crisis-overlay-actions"><button class="crisis-call-button" type="button" data-action="crisis-call">${icon("shield")}자살예방상담전화 109 연결</button></div>
         </div>
       </div>
       <button class="ai-persona-badge ${state.personaMenuOpen ? "open" : ""}" type="button" data-action="persona-menu" aria-label="페르소나 선택">
@@ -3667,7 +3687,7 @@ document.addEventListener("click", (event) => {
   if (action === "close-thread-detail") { state.aiHistoryDetailId = null; render(); }
   if (action === "delete-thread") { openDeleteThreadConfirm(value); }
   if (action === "crisis-close") { state.aiCrisisOpen = false; render(); }
-  if (action === "crisis-call") toast("프로토타입에서는 전화 연결 대신 안내만 표시해요. 실제 상황에서는 1393 또는 119에 연락해 주세요.");
+  if (action === "crisis-call") toast("프로토타입에서는 전화 연결 대신 안내만 표시해요. 실제 상황에서는 109 또는 119에 연락해 주세요.");
 
   if (action === "space-sub") { state.spaceSub = value; render(); }
   if (action === "purchase-sub") { state.purchaseSub = value; render(); }
