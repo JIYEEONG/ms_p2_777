@@ -12,7 +12,7 @@ from typing import Any
 from uuid import uuid4
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 
 if __package__:
@@ -155,12 +155,9 @@ def register_course(payload: CourseRegisterInput, user: dict = Depends(require_a
     return {"ok": True, "course_id": course_id}
 
 
-@router.get("/courses")
-def get_courses():
-    conn = get_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute("""
+def _load_courses(conn):
+    with conn.cursor() as cur:
+        cur.execute("""
                 SELECT
                     c.course_id,
                     c.title,
@@ -174,12 +171,16 @@ def get_courses():
                     nearest.place_name_kr,
                     nearest.open_time,
                     nearest.close_time,
+                    nearest.category,
+                    nearest.sub_category,
+                    nearest.address_kr,
                     pt.tag_type,
                     pt.tag_name
                 FROM moov.courses c
                 JOIN moov.course_points cp ON cp.course_id = c.course_id
                 LEFT JOIN LATERAL (
                     SELECT p.place_id, p.place_name_kr, p.open_time, p.close_time,
+                        p.category, p.sub_category, p.address_kr,
                         6371 * acos(
                             cos(radians(cp.latitude)) * cos(radians(p.latitude)) *
                             cos(radians(p.longitude) - radians(cp.longitude)) +
@@ -192,12 +193,15 @@ def get_courses():
                 LEFT JOIN moov.place_tags pt ON pt.place_id = nearest.place_id
                 ORDER BY c.course_id, cp.sequence_no
             """)
-            rows = cur.fetchall()
-    finally:
-        release_conn(conn)
+        rows = cur.fetchall()
 
     courses = {}
-    for course_id, title, image_url, created_at, duration, distance, seq, lat, lng, place_name, open_time, close_time, tag_type, tag_name in rows:
+    tag_keys = {
+        'CATEGORY': 'category', 'SUB_CATEGORY': 'subcategory', 'REGION': 'region',
+        'PURPOSE': 'purpose', 'PURPOSE1': 'purpose', 'MOOD': 'mood', 'COMPANION': 'companion',
+    }
+    for (course_id, title, image_url, created_at, duration, distance, seq, lat, lng,
+         place_name, open_time, close_time, category, sub_category, address, tag_type, tag_name) in rows:
         course = courses.setdefault(course_id, {
             "id": course_id,
             "title": title,
@@ -206,15 +210,20 @@ def get_courses():
             "duration_seconds": duration,
             "distance_m": distance,
             "points": {},
-            "tags": {"category": set(), "purpose": set(), "mood": set(), "companion": set()},
+            "tags": {key: set() for key in ('category', 'subcategory', 'region', 'purpose', 'mood', 'companion')},
         })
         point = course["points"].setdefault(seq, {
             "sequence_no": seq, "latitude": lat, "longitude": lng,
             "place_name": place_name, "open_time": open_time, "close_time": close_time,
+            "address": address,
         })
+        if category:
+            course['tags']['category'].add(category)
+        if sub_category:
+            course['tags']['subcategory'].add(sub_category)
         if tag_type and tag_name:
-            key = tag_type.lower()
-            if key in course["tags"]:
+            key = tag_keys.get(str(tag_type).upper())
+            if key:
                 course["tags"][key].add(tag_name)
 
     result = []
@@ -224,4 +233,108 @@ def get_courses():
             "points": sorted(course["points"].values(), key=lambda p: p["sequence_no"]),
             "tags": {k: sorted(v) for k, v in course["tags"].items()},
         })
-    return {"courses": result}
+    return result
+
+
+@router.get("/courses")
+def get_courses():
+    conn = get_conn()
+    try:
+        return {"courses": _load_courses(conn)}
+    finally:
+        release_conn(conn)
+
+
+def _time_score(points, slot):
+    ranges = {'아침': (360, 600), '점심': (600, 840), '오후': (840, 1080),
+              '저녁': (1080, 1320), '야간': (1320, 1440)}
+    if slot not in ranges:
+        return 0
+    start, end = ranges[slot]
+    checkable, open_count = 0, 0
+    for point in points:
+        try:
+            opened = [int(value) for value in str(point.get('open_time')).split(':')[:2]]
+            closed = [int(value) for value in str(point.get('close_time')).split(':')[:2]]
+            opened, closed = opened[0] * 60 + opened[1], closed[0] * 60 + closed[1]
+        except (TypeError, ValueError, IndexError):
+            continue
+        checkable += 1
+        open_count += opened <= end and closed >= start
+    return open_count / checkable if checkable else 0
+
+
+def _rank_courses(courses, preferences, filters, popularity):
+    selected = {
+        'category': set(preferences.get('CATEGORY', [])),
+        'subcategory': set(preferences.get('SUB_CATEGORY', [])),
+        'region': set(preferences.get('REGION', [])),
+    }
+    excluded_regions = set(preferences.get('EXCLUDED_REGION', []))
+    excluded_tags = set(preferences.get('EXCLUDED_TAG', []))
+    ranked = []
+    for course in courses:
+        tags = {key: set(values) for key, values in course['tags'].items()}
+        all_tags = set().union(*tags.values()) if tags else set()
+        text = ' '.join([course.get('title') or '', *[p.get('address') or '' for p in course['points']]])
+        if excluded_tags & all_tags or any(region in text or region in tags['region'] for region in excluded_regions):
+            continue
+        if any(value and value != '전체' and value not in tags.get(key, set())
+               for key, value in filters.items() if key in ('category', 'mood', 'companion')):
+            continue
+        category_score = len(selected['category'] & tags['category']) / max(1, len(selected['category']))
+        subcategory_score = len(selected['subcategory'] & tags['subcategory']) / max(1, len(selected['subcategory']))
+        region_score = sum(region in text or region in tags['region'] for region in selected['region'])
+        time_score = _time_score(course['points'], filters.get('time'))
+        matched = sorted((selected['category'] & tags['category']) |
+                         (selected['subcategory'] & tags['subcategory']) |
+                         (selected['region'] & tags['region']))
+        ranked.append({
+            'course': course,
+            'sort': (category_score, subcategory_score, region_score, time_score,
+                     popularity.get(course['id'], 0), course.get('created_at') or '', course['id']),
+            'score': round(category_score * 45 + subcategory_score * 25 +
+                           min(region_score, 1) * 20 + time_score * 10, 2),
+            'matched_tags': matched,
+        })
+    return sorted(ranked, key=lambda item: item['sort'], reverse=True)
+
+
+@router.get('/recommendations')
+def recommend_courses(
+    category: str | None = None,
+    mood: str | None = None,
+    companion: str | None = None,
+    time: str | None = None,
+    limit: int = Query(3, ge=1, le=20),
+    user: dict = Depends(require_auth_user),
+):
+    conn = get_conn()
+    try:
+        courses = _load_courses(conn)
+        with conn.cursor() as cur:
+            cur.execute('''SELECT tag_type, tag_name FROM moov.user_preference
+                WHERE user_id=%s AND upper(coalesce(source,''))='SURVEY' ''', (user['id'],))
+            preferences = {}
+            for tag_type, tag_name in cur.fetchall():
+                preferences.setdefault(str(tag_type).upper(), []).append(tag_name)
+            cur.execute('''SELECT aggregate_id, count(*) FROM moov.app_events
+                WHERE aggregate_type='course' AND event_type='course_like'
+                  AND occurred_at >= now() - interval '7 days'
+                GROUP BY aggregate_id''')
+            popularity = dict(cur.fetchall())
+    finally:
+        release_conn(conn)
+    ranked = _rank_courses(courses, preferences, {
+        'category': category, 'mood': mood, 'companion': companion, 'time': time,
+    }, popularity)[:limit]
+    request_id = uuid4().hex
+    return {
+        'request_id': request_id,
+        'rule_version': 'survey-content-v1.8-server',
+        'items': [{
+            'course_id': item['course']['id'],
+            'score': item['score'],
+            'matched_tags': item['matched_tags'],
+        } for item in ranked],
+    }

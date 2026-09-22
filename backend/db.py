@@ -2,10 +2,14 @@
 import os
 import json
 import uuid
+from datetime import datetime, timezone
+from threading import Lock
 import psycopg2
 from psycopg2.pool import SimpleConnectionPool
 
 _pool: SimpleConnectionPool | None = None
+_online_schema_ready = False
+_online_schema_lock = Lock()
 
 
 def init_pool():
@@ -29,6 +33,67 @@ def get_conn():
 
 def release_conn(conn):
     init_pool().putconn(conn)
+
+
+def ensure_online_schema():
+    """Create only the small online-serving objects absent from the lakehouse schema."""
+    global _online_schema_ready
+    if _online_schema_ready:
+        return
+    with _online_schema_lock:
+        if _online_schema_ready:
+            return
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS users_user_id_uidx ON moov.users (user_id)")
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS moov.location_consent (
+                        user_id text PRIMARY KEY,
+                        version text NOT NULL,
+                        agreed_at timestamptz NOT NULL DEFAULT now()
+                    )
+                """)
+            conn.commit()
+            _online_schema_ready = True
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            release_conn(conn)
+
+
+def upsert_google_user(user: dict):
+    """Persist the stable Google subject while preserving unrelated profile fields."""
+    ensure_online_schema()
+    profile = {
+        "name": user.get("name"),
+        "email": user.get("email"),
+        "picture": user.get("picture"),
+        "provider": "google",
+        "last_login_at": datetime.now(timezone.utc).isoformat(),
+    }
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO moov.users
+                    (user_id, profile_json, created_at, is_synthetic, basis_id)
+                VALUES (%s, %s, now(), false, 'GOOGLE_OAUTH')
+                ON CONFLICT (user_id) DO UPDATE SET
+                    profile_json = (
+                        COALESCE(NULLIF(moov.users.profile_json, ''), '{}')::jsonb
+                        || EXCLUDED.profile_json::jsonb
+                    )::text,
+                    is_synthetic = false,
+                    basis_id = 'GOOGLE_OAUTH'
+            """, (user["id"], json.dumps(profile, ensure_ascii=False)))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        release_conn(conn)
 
 
 def ensure_session(conversation_id: str, user_id: str, persona: str, locale: str | None):
