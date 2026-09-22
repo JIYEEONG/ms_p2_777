@@ -21,6 +21,11 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel, Field
 
+if __package__:
+    from .db import upsert_google_user
+else:
+    from db import upsert_google_user
+
 
 router = APIRouter(prefix='/api/auth', tags=['authentication'])
 DB_PATH = Path(__file__).with_name('.auth-sessions.sqlite3')
@@ -320,6 +325,7 @@ def google_callback(request: Request):
             raise LoginFailed()
         token = _exchange_code(code, config, flow['verifier'])
         user = _user_from_claims(_verify_google_token(token, config.client_id), config, flow['nonce'])
+        upsert_google_user(user)
         session = _new_session(user, request.cookies.get(SESSION_COOKIE))
     except Exception:
         # Never reflect codes, tokens, credentials, upstream errors or traces.

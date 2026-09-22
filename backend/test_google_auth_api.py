@@ -58,6 +58,9 @@ class GoogleAuthTests(unittest.TestCase):
         self.db = patch.object(auth, 'DB_PATH', Path(self.temp.name) / 'sessions.sqlite3')
         self.db.start()
         self.addCleanup(self.db.stop)
+        self.user_sync = patch.object(auth, 'upsert_google_user')
+        self.user_sync.start()
+        self.addCleanup(self.user_sync.stop)
 
     def start(self):
         response = auth.google_start(request())
@@ -144,6 +147,7 @@ class GoogleAuthTests(unittest.TestCase):
         self.assertEqual(user['authenticated'], True)
         self.assertEqual(user['user']['id'], 'google:123456789012345678901')
         self.assertEqual(user['user']['email'], 'person@example.com')
+        auth.upsert_google_user.assert_called_once_with(user['user'])
         verify.assert_called_once_with('test-id-token', TEST_ENV['GOOGLE_CLIENT_ID'])
         self.assertEqual(exchange.call_args.args[0], 'test-code')
         with auth._database() as database:

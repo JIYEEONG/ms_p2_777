@@ -3434,8 +3434,29 @@ function renderRecommendation() {
   return `${renderSurveyNote()}<section class="section-lead"><h3>어떤 나들이를 원하세요?</h3><p>${escapeHtml(state.username)}님의 선택을 바탕으로 검수 전 데모 코스를 비교합니다.</p></section><section class="card preference-panel">${choiceGroup("CATEGORY", "category", ["전체", "음식점", "카페", "전시", "쇼핑", "관광", "체험"])}${choiceGroup("분위기", "mood", ["전체", "조용함", "활기참", "감성", "트렌디", "로맨틱"])}${choiceGroup("동행", "companion", ["전체", "혼자", "연인", "친구", "가족", "동료"])}${choiceGroup("시간대", "time", ["전체", "아침", "점심", "오후", "저녁", "야간"])}<div class="choice-group"><div class="row"><h4>참고 예산</h4><strong class="green">${Number(prefs.budget).toLocaleString("ko-KR")}원 이하</strong></div><input class="budget" type="range" min="30000" max="300000" step="10000" value="${prefs.budget}" data-action="recommend-budget" aria-label="추천 참고 예산" /><p class="small muted">데모 비용 기준입니다. 실제 가격·이동비·영업시간 충족을 보장하지 않습니다.</p></div><button class="primary-button full" data-action="recommend-course">코스 추천받기</button><p class="small muted">전송 대기 기록 ${readOutingQueue().length}건 · 백엔드가 켜지면 같은 ID로 재시도합니다.</p></section>${result}`;
 }
 
-function runOutingRecommendation() {
+async function runOutingRecommendation() {
   const prefs = { ...state.recommendationPrefs };
+  try {
+    if (!dbCourses.length) await loadCoursesFromDB();
+    const params = new URLSearchParams({ limit: "3" });
+    for (const key of ["category", "mood", "companion", "time"]) {
+      if (prefs[key] && prefs[key] !== "전체") params.set(key, prefs[key]);
+    }
+    const response = await fetch(`/api/outing/recommendations?${params}`, {
+      credentials: "same-origin", cache: "no-store"
+    });
+    if (!response.ok) throw new Error(`추천 API ${response.status}`);
+    const data = await response.json();
+    const available = new Set((dbCourses.length ? dbCourses : [...baseCourses, ...state.customCourses]).map((course) => course.id));
+    state.recommendationRequestId = data.request_id;
+    state.recommendationResultIds = data.items.map((item) => item.course_id).filter((id) => available.has(id));
+    persist(); render();
+    logOutingEvent("recommendation_exposure", "recommendation", state.recommendationRequestId,
+      { conditions: prefs, shown_course_ids: state.recommendationResultIds, results: data.items });
+    return;
+  } catch (error) {
+    console.error("서버 추천 실패, 로컬 추천으로 전환", error);
+  }
   const candidates = (dbCourses.length ? dbCourses : [...baseCourses, ...state.customCourses]).filter((course) =>
     MoovOutingData.matches(course, "", prefs, getCourseTags(course))
   );
