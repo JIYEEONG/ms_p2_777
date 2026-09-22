@@ -1080,6 +1080,7 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
 
     </style>
     <link rel="stylesheet" href="./moov0917-ui.css" />
+    <link rel="stylesheet" href="./promo-carousel.css" />
     <link rel="stylesheet" href="./taxi-fare-ui.css" />
     <link rel="stylesheet" href="./google-auth.css" />
     <link rel="stylesheet" href="./login-survey.css" />
@@ -1234,6 +1235,7 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
     <script src="./survey-profile.js"></script>
     <script src="./account-snapshot.js"></script>
     <script src="./login-survey.js"></script>
+    <script src="./promo-carousel.js"></script>
     <script>
 const STORAGE_KEY = "moov-app-v3:";
 const OUTING_STORAGE_PREFIX = "moov-outing-v1:";
@@ -2239,7 +2241,7 @@ function renderHomeModeChoice() {
 }
 
 function renderHomePromotionSlider() {
-  const slides = [...homePromotions, ...homePromotions];
+  const slides = homePromotions;
   return `<section class="home-promo-section" aria-label="광고와 추천 코스"><div class="section-row"><strong>광고·프로모션</strong></div><div class="home-promo-slider" data-drag-scroll>${slides.map((promo, index) => `<button class="home-promo-slide promo-${promo.id}" data-action="${promo.action}" aria-label="${escapeHtml(promo.title)}"><img src="${promo.image}" alt="${escapeHtml(promo.title)}" /><span class="home-promo-shade"></span><span class="home-promo-copy"><small>${escapeHtml(promo.tag)}</small><strong>${escapeHtml(promo.title)}</strong><em>${escapeHtml(promo.desc)}</em></span></button>`).join("")}</div></section>`;
 }
 

@@ -1,0 +1,10 @@
+.home-promo-section .home-promo-slider { grid-auto-columns: 100%; gap: 0; padding: 0; border-radius: 16px; overscroll-behavior-x: contain; }
+.home-promo-slider .home-promo-slide { width: 100%; min-width: 0; box-shadow: none; scroll-snap-stop: always; }
+.home-promo-slider.dragging .home-promo-slide { transform: none; }
+.home-promo-slider.settling .home-promo-slide { animation: none; }
+.promo-controls { display: flex; justify-content: center; align-items: center; gap: 2px; margin-top: 5px; }
+.promo-controls button { display: grid; place-items: center; width: 30px; height: 28px; border: 0; background: transparent; color: #397c57; cursor: pointer; border-radius: 8px; }
+.promo-controls .promo-dot::before { content: ''; width: 6px; height: 6px; border-radius: 99px; background: #d3ddd6; transition: width .2s, background .2s; }
+.promo-controls .promo-dot[aria-current="true"]::before { width: 18px; background: #53b175; }
+.promo-controls button:focus-visible { outline: 2px solid #397c57; outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { .home-promo-section .home-promo-slider { scroll-behavior: auto; } .promo-controls .promo-dot::before { transition: none; } }

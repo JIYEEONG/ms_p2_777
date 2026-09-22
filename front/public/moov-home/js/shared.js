@@ -31,7 +31,7 @@ function renderHomeModeChoice() {
   return `<div class="home-mode-entry">${renderSearchField({ inputId: "home-search", stateKey: "homeQuery", className: "home-search", placeholder: "원하는 곳, 코스를 검색하세요", label: "홈 검색" })}<div class="home-mode-grid"><button class="home-mode-card taxi" data-action="select-home-mode" data-value="taxi"><img src="assets/afbdf8b0ad3f4986.png" alt="택시 아이콘" /><span><strong>택시</strong><small>목적지까지 빠르게 이동하고<br />거리만큼 자동 결제해요.</small></span><em>가까운 차량 약 3분 ${icon("chevron")}</em></button><button class="home-mode-card rent" data-action="select-home-mode" data-value="rent"><img src="assets/315ebb9cbe762ef8.png" alt="렌트 아이콘" /><span><strong>렌트</strong><small>차량과 공간 옵션을 골라<br />3~24시간 자유롭게 이용해요.</small></span><em>3시간 10,180원부터 ${icon("chevron")}</em></button></div>${renderHomePromotionSlider()}${renderHomeNoticePreview()}</div>`;
 }
 function renderHomePromotionSlider() {
-  const slides = [...homePromotions, ...homePromotions];
+  const slides = homePromotions;
   return `<section class="home-promo-section" aria-label="광고와 추천 코스"><div class="section-row"><strong>광고·프로모션</strong></div><div class="home-promo-slider" data-drag-scroll>${slides.map((promo, index) => `<button class="home-promo-slide promo-${promo.id}" data-action="${promo.action}" aria-label="${escapeHtml(promo.title)}"><img src="${document.documentElement.lang === "en" ? promo.imageEn : promo.image}" alt="${escapeHtml(promo.title)}" /><span class="home-promo-shade"></span><span class="home-promo-copy"><small>${escapeHtml(promo.tag)}</small><strong>${escapeHtml(promo.title)}</strong><em>${escapeHtml(promo.desc)}</em></span></button>`).join("")}</div></section>`;
 }
 function renderHomeNoticePreview() {
