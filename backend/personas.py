@@ -66,7 +66,9 @@ def is_crisis_message(text: str) -> bool:
     return any(keyword in text for keyword in CRISIS_KEYWORDS)
 
 
-def detect_persona_switch(message: str, current_persona_code: str) -> str | None:
+from typing import Optional
+
+def detect_persona_switch(message: str, current_persona_code: str) -> Optional[str]:
     """D-1: 명령 동사 + 페르소나 이름이 함께 있을 때만 전환 대상으로 판별.
     반환값은 내부 표준 영문 코드(moove/todaki/expert/lingo), 없으면 None."""
     if not any(verb in message for verb in COMMAND_VERBS):

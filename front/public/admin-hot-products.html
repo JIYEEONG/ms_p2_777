@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MOOV 핫아이템 재고/추가배치 권고 - 관리자</title>
+<style>
+  :root { color-scheme: light; }
+  body { font-family: -apple-system, "Pretendard", sans-serif; margin: 0; background: #f4f7f5; color: #1c231f; }
+  header { padding: 20px 24px; background: #14351f; color: #fff; }
+  header h1 { margin: 0 0 4px; font-size: 18px; }
+  header p { margin: 0; font-size: 13px; opacity: .8; }
+  main { padding: 20px 24px; }
+  .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  button { border: 1px solid #14351f; background: #fff; color: #14351f; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+  button:hover { background: #eef3ee; }
+  .meta { font-size: 13px; color: #55625a; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  th, td { padding: 8px 10px; font-size: 13px; text-align: right; border-bottom: 1px solid #eef0ee; white-space: nowrap; }
+  th:nth-child(2), td:nth-child(2), th:last-child, td:last-child { text-align: left; }
+  th { background: #f0f4f1; font-weight: 600; position: sticky; top: 0; }
+  tbody tr:hover { background: #fafcfa; }
+  .diff-up { color: #1a7d3a; font-weight: 600; }
+  .state { padding: 40px; text-align: center; color: #7a867e; }
+  .err { color: #b3261e; }
+</style>
+</head>
+<body>
+<header>
+  <h1>MOOV 핫아이템(TOP30) 재고 · 추가배치 권고</h1>
+  <p>demand_report 알고리즘이 계산한 현재 진열수량과 raw/학습 기반 추가배치 권고 수량을 Postgres(taxi_products 스키마)에서 실시간으로 조회합니다.</p>
+</header>
+<main>
+  <div class="toolbar">
+    <button id="refresh-btn" type="button">다시 불러오기</button>
+    <span class="meta" id="meta"></span>
+  </div>
+  <div id="content"><div class="state">불러오는 중...</div></div>
+</main>
+<script>
+const API_BASE = window.MOOV_HOT_PRODUCTS_API_BASE || "/api/hot-products";
+
+async function load() {
+  const content = document.getElementById("content");
+  const meta = document.getElementById("meta");
+  content.innerHTML = '<div class="state">불러오는 중...</div>';
+  try {
+    const res = await fetch(API_BASE, { headers: { Accept: "application/json" } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const items = data.items || [];
+    meta.textContent = data.generated_at ? `마지막 적재: ${new Date(data.generated_at).toLocaleString("ko-KR")} · ${items.length}개 품목` : `${items.length}개 품목`;
+    if (!items.length) {
+      content.innerHTML = '<div class="state">아직 import된 데이터가 없습니다. backend/scripts/import_hot_products_csv.py를 먼저 실행하세요.</div>';
+      return;
+    }
+    const rows = items.map((item) => `
+      <tr>
+        <td>${item.rank}</td>
+        <td>${item.product_name}</td>
+        <td>${item.this_month_qty ?? ""}</td>
+        <td>${item.last_month_qty ?? ""}</td>
+        <td>${item.mom_growth_rate ?? ""}</td>
+        <td>${item.learned_growth_rate ?? ""}</td>
+        <td>${item.current_display_qty_per_vehicle ?? ""}</td>
+        <td class="diff-up">+${item.recommended_additional_qty_raw ?? 0}</td>
+        <td class="diff-up">+${item.recommended_additional_qty_learned ?? 0}</td>
+        <td>${(item.current_display_qty_per_vehicle ?? 0) + (item.recommended_additional_qty_learned ?? 0)}</td>
+        <td>${item.notice ?? ""}</td>
+      </tr>`).join("");
+    content.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>순위</th><th>상품명</th><th>이번달 판매</th><th>지난달 판매</th>
+          <th>전월대비</th><th>학습 성장률</th><th>현재 진열수량</th>
+          <th>raw 추가권고</th><th>학습 추가권고</th><th>새로고침 후 예상</th><th>알림 문구</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  } catch (err) {
+    content.innerHTML = `<div class="state err">데이터를 불러오지 못했어요: ${err.message}<br>백엔드(FastAPI)가 실행 중인지, /api/hot-products가 프록시되는지 확인하세요.</div>`;
+  }
+}
+
+document.getElementById("refresh-btn").addEventListener("click", load);
+load();
+</script>
+</body>
+</html>

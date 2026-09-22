@@ -1271,6 +1271,7 @@ const STORAGE_KEY = "moov-app-v3:";
 const OUTING_STORAGE_PREFIX = "moov-outing-v1:";
 const OUTING_LOG_PREFIX = "moov-outing-pending-v1:";
 const OUTING_API = window.MOOV_OUTING_API_BASE || "/api/outing";
+const HOT_PRODUCTS_API = window.MOOV_HOT_PRODUCTS_API_BASE || "/api/hot-products";
 const APP_VERSION = "2.6.2";
 const DEFAULT_PROFILE_PHOTO = "./assets/profile-male-user.png";
 
@@ -1465,8 +1466,10 @@ const products = [
   { id: "hot-30", name: "포도탄산 소형 고단백", desc: "소형 · 고단백", price: 1800, image: "./assets/product-taxi-30-grape-soda-small-highprotein.jpg", category: "음료·간식", recommended: false, stock: 29, location: "냉장함 H-30", growth: 21, reason: "지난달 대비 판매량 +21%" },
 ];
 
-// 차량 자판기 물품판매 알고리즘(연령대별 수요 학습 + 진열 판단) 기반 추천값.
-// 새로고침을 누르면 이 값으로 차량 재고를 다시 채운 것으로 반영한다(백엔드 없이 프론트엔드 전용 시뮬레이션).
+// 차량 자판기 물품판매 알고리즘(연령대별 수요 학습 + 진열 판단) 기반 추천값의 오프라인 대체값.
+// 정상 상태에서는 새로고침 시 HOT_PRODUCTS_API(백엔드 /api/hot-products, Postgres taxi_products
+// 스키마에 적재된 demand_report_v2.11 결과)를 호출해서 실시간 값을 쓰고, 이 객체는 서버 호출이
+// 실패했을 때만 쓰인다.
 const VENDING_LEARNING = {
   recommendedStock: {
     "bottled-water": 14, "sparkling-water": 9, "green-tea": 6, "protein-bar": 11,
@@ -3762,14 +3765,43 @@ document.addEventListener("click", (event) => {
   if (action === "purchase-sub") { state.purchaseSub = value; render(); }
   if (action === "product-category") { state.productCategory = value; render(); }
   if (action === "refresh-vending") {
-    products.forEach((product) => {
-      const recommended = VENDING_LEARNING.recommendedStock[product.id];
-      if (recommended != null) state.vendingStockOverrides[product.id] = recommended;
-    });
-    state.vendingRefreshedAt = "방금 전";
-    clampCartToStock();
-    persist(); render();
-    toast("학습 결과로 차량 재고를 새로고침했어요.");
+    state.vendingRefreshedAt = "불러오는 중...";
+    render();
+    (async () => {
+      try {
+        const response = await fetch(HOT_PRODUCTS_API, { headers: { Accept: "application/json" } });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const byRank = {};
+        (data.items || []).forEach((item) => { byRank[item.rank] = item; });
+        let matched = 0;
+        products.forEach((product) => {
+          const match = /^hot-(\d+)$/.exec(product.id);
+          if (!match) return;
+          const item = byRank[Number(match[1])];
+          if (!item) return;
+          const current = item.current_display_qty_per_vehicle ?? product.stock;
+          const additional = item.recommended_additional_qty_learned ?? 0;
+          state.vendingStockOverrides[product.id] = current + additional;
+          matched += 1;
+        });
+        state.vendingRefreshedAt = "방금 전";
+        clampCartToStock();
+        persist(); render();
+        toast(matched > 0 ? "서버에서 학습 기반 추천 재고를 받아왔어요." : "서버 응답에 일치하는 상품이 없어요.");
+      } catch (err) {
+        console.warn("[refresh-vending] hot-products API 호출 실패, 저장된 추천값으로 대체합니다:", err);
+        products.forEach((product) => {
+          const recommended = VENDING_LEARNING.recommendedStock[product.id];
+          if (recommended != null) state.vendingStockOverrides[product.id] = recommended;
+        });
+        state.vendingRefreshedAt = "방금 전(오프라인 추천값)";
+        clampCartToStock();
+        persist(); render();
+        toast("서버에 연결하지 못해 저장된 추천값으로 새로고침했어요.");
+      }
+    })();
+    return;
   }
   if (action === "reset-vending") {
     state.vendingStockOverrides = {};
