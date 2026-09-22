@@ -15,3 +15,4 @@ python-multipart                # FastAPI가 UploadFile(오디오 파일)을 받
 azure-storage-blob              # 코스 등록 사진을 Azure Blob Storage(course-images 컨테이너)에 업로드하기 위한 라이브러리
 google-auth>=2.38,<3            # Google ID 토큰 서명·audience·issuer·만료 검증
 requests>=2.32,<3               # Google OAuth 코드 교환 및 공개 인증서 조회 (서버 전용)
+cryptography>=46,<51            # Google 로그인 프로필·OAuth 임시값 저장 암호화

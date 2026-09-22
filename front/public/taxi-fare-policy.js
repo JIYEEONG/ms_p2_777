@@ -4,7 +4,7 @@
   else root.MoovTaxiFarePolicy = factory();
 })(typeof globalThis === 'object' ? globalThis : this, function () {
   return {
-  "version": "moov-taxi-v1-e1a8219d571e",
+  "version": "moov-taxi-v2-easyfit-midsize-e1a8219d571e",
   "currency": "KRW",
   "source": {
     "file": "택시_요금정책.xlsx",
@@ -47,8 +47,8 @@
       "perKm": 850.0
     },
     "large": {
-      "label": "대형·장애인 차량",
-      "labelEn": "Large / accessible",
+      "label": "대형",
+      "labelEn": "Large",
       "sourceLabel": "대형 / 장애인",
       "sourceCells": "B7:D7",
       "baseFare": 5950,
@@ -59,9 +59,9 @@
   "vehicleClasses": {
     "standard": "small",
     "easyfit": "medium",
-    "family": "large",
+    "family": "medium",
     "premium": "large",
-    "barrierfree": "large"
+    "barrierfree": "medium"
   }
 };
 });

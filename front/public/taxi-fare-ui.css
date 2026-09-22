@@ -50,3 +50,16 @@
 .taxi-calculator-result strong { font-size: .8rem; }
 .taxi-calculator-result span { font-size: .65rem; color: #627167; }
 .taxi-calculator-result > b { font-size: 1rem; color: #20633d; white-space: nowrap; }
+/* Emphasize dispatch while keeping cancellation reachable and readable. */
+.modal-actions[data-layout="taxi-dispatch"] { grid-template-columns: minmax(64px, 0.7fr) minmax(0, 2fr); align-items: center; }
+.modal-actions[data-layout="taxi-dispatch"] [data-modal-confirm] { min-height: 50px; font-size: .9rem; }
+.modal-actions[data-layout="taxi-dispatch"] [data-modal-cancel], .taxi-cancel-link { min-height: 44px; padding: 6px 10px; border: 0; background: transparent; box-shadow: none; color: #626c66; font-size: .75rem; font-weight: 500; }
+.taxi-cancel-link { display: block; width: auto; margin: 8px auto 0; }
+.modal-actions[data-layout="taxi-dispatch"] [data-modal-cancel]:focus-visible, .taxi-cancel-link:focus-visible { outline: 2px solid #368355; outline-offset: 2px; }
+.vehicle-policy-list { display: grid; gap: 14px; }
+.vehicle-policy-card { padding: 14px; border: 1px solid #dce7e0; border-radius: 16px; }
+.vehicle-policy-card h4 { margin: 0 0 8px; }
+.vehicle-policy-card h4 small { display: inline-block; margin-left: 5px; font-size: .7rem; font-weight: 500; color: #657269; }
+.vehicle-policy-card dl { margin: 10px 0 0; font-size: .76rem; }
+.vehicle-policy-card dl > div { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; }
+.vehicle-policy-card dd { margin: 0; font-weight: 700; text-align: right; }

@@ -4,6 +4,10 @@
  */
 function rentalOptionFee(){return rentalOptionCatalog.filter(x=>state.rentalOptions.has(x.id)).reduce((sum,x)=>sum+x.price,0);}
 function rentalTotalFare(){return rentalFareForHours(state.rentalVehicleType,state.rentalHours)+rentalOptionFee();}
+function enterRental(query=''){
+  state.homeMode='rent';state.homeStep='booking';state.rentalFlowStep='setup';persist();render();content.scrollTop=0;
+  if(query){openRentalDestinationSearch();document.querySelector('#rux-route-query').value=query;searchRentalPlaces('route',query);}
+}
 function showHomeModeChoice(){
   if(!state.tripActive){
     rentalRequestToken++;
@@ -43,7 +47,7 @@ function renderRoutePlanner(){
 
 function renderBooking(){
   const v=rentalVehicles.find(v=>v.id===state.rentalVehicleType);
-  return `<div class="mobility-screen rent" data-rental-step="setup"><div class="mobility-mode-bar"><button class="mode-back" data-action="rental-flow-back" aria-label="이동 모드 선택">${icon('back')}</button><span class="mode-current">${icon('key')} 렌트</span></div>${renderHomeMap()}<section class="mobility-sheet"><div class="sheet-handle"></div><div class="sheet-title"><div><span>나만의 이동 공간</span><h3 class="rux-heading" tabindex="-1">어떤 차량을 이용할까요?</h3></div><span class="mode-symbol">${icon('key')}</span></div>${renderRoutePlanner()}<div class="rent-config"><div class="section-row"><strong>차량 선택</strong><span>아래 차량을 눌러 비교</span></div><section class="vehicle-detail-picker rux" aria-label="차량 선택">${renderRentalVehicleCards(state.rentalVehicleType)}</section><div class="rent-control-row"><div><small>이용 시간</small><strong>3~24시간</strong></div><div class="hour-control"><button data-action="rent-minus" aria-label="이용 시간 1시간 줄이기" ${state.rentalHours<=3?'disabled':''}>−</button><strong aria-live="polite">${state.rentalHours}시간</strong><button data-action="rent-plus" aria-label="이용 시간 1시간 늘리기" ${state.rentalHours>=24?'disabled':''}>＋</button></div></div><div class="rental-preset-row" role="group" aria-label="이용 시간 빠른 선택">${[
+  return `<div class="mobility-screen rent" data-rental-step="setup"><div class="mobility-mode-bar"><button class="mode-back" data-action="rental-flow-back" aria-label="이동 모드 선택">${icon('back')}</button><span class="mode-current">${icon('key')} 렌트</span></div>${renderHomeMap()}<section class="mobility-sheet"><div class="sheet-handle"></div><div class="sheet-title"><div><span>나만의 이동 공간</span><h3 class="rux-heading" tabindex="-1">어떤 차량을 이용할까요?</h3></div><span class="mode-symbol">${icon('key')}</span></div>${renderRoutePlanner()}<div class="rent-config"><div class="section-row"><strong>차량 선택</strong><button type="button" class="mini-action" data-action="rental-fare-policy">요금정책</button></div><section class="vehicle-detail-picker rux" aria-label="차량 선택">${renderRentalVehicleCards(state.rentalVehicleType)}</section><div class="rent-control-row"><div><small>이용 시간</small><strong>3~24시간</strong></div><div class="hour-control"><button data-action="rent-minus" aria-label="이용 시간 1시간 줄이기" ${state.rentalHours<=3?'disabled':''}>−</button><strong aria-live="polite">${state.rentalHours}시간</strong><button data-action="rent-plus" aria-label="이용 시간 1시간 늘리기" ${state.rentalHours>=24?'disabled':''}>＋</button></div></div><div class="rental-preset-row" role="group" aria-label="이용 시간 빠른 선택">${[
   {h:RENTAL_MIN_HOURS,label:'최소'},
   {h:6,label:'6시간'},
   {h:10,label:'10시간'},
@@ -134,6 +138,13 @@ function updateUsageTimer(){
   document.querySelectorAll('[data-live-remaining]').forEach(el=>el.textContent=formatElapsed(getRentalRemaining()));
   if(state.tripActive&&!cleanupRunning()&&getRentalRemaining()<=0){closeModal();runSecureCleanup('time-expired');}
 }
+function openRentalFarePolicy() {
+  const rows=rentalVehicles.map(vehicle=>{
+    const rate=rentalFarePolicy[vehicle.id];
+    return `<section class="rental-policy-row"><strong>${escapeHtml(vehicle.name)} · ${escapeHtml(vehicle.seats)}</strong><p>${escapeHtml(vehicle.desc)}</p><dl><div><dt>3시간</dt><dd>${rentalMoney(rate.base3)}</dd></div><div><dt>1시간 추가</dt><dd>${rentalMoney(rate.hourlyStep)}</dd></div><div><dt>24시간</dt><dd>${rentalMoney(rate.base24)}</dd></div></dl></section>`;
+  }).join('');
+  openModal({title:'렌트 요금정책',iconName:'key',body:`<p>3~24시간 이용 · 선택 옵션 요금 별도</p>${rows}`,primary:'확인',secondary:null});
+}
 function handleHomeClick(event){
   if(!event.target.isConnected)return;
   if(cleanupRunning()){
@@ -146,6 +157,7 @@ function handleHomeClick(event){
   const button=event.target.closest('[data-action]');if(!button||button.disabled)return;
   const action=button.dataset.action,value=button.dataset.value;
   if(handleRentalAction(button))return;
+  if(action==='rental-fare-policy')return openRentalFarePolicy();
   if(action==='close-modal')return closeModal();
   if(action==='open-cleanup')return openCleanupStatus();
   if(action==='notice-detail'){const n=appNotices.find(x=>x.id===value);if(n)return openModal({title:n.title,iconName:'bell',body:`<p>${escapeHtml(n.text)}</p>`,primary:'확인',secondary:null});return;}
@@ -158,7 +170,8 @@ function handleHomeClick(event){
   if(action==='center-route'){MoovLocationPicker.cancelSelection();resetRentalRouteCamera();render();return;}
   if(action==='select-home-mode'){
     if(value==='taxi')return navigateHost('taxi');
-    state.homeMode='rent';state.homeStep='booking';state.rentalFlowStep='setup';persist();render();content.scrollTop=0;return;
+    if(window.parent!==window){emitHome('request-rental-entry',{});return;}
+    enterRental();return;
   }
   if(action==='setup-next'){if(ensureRentalRoute().unresolved)return toast('코스 장소의 위치를 먼저 확인해 주세요.');return rentalSetStep('pickup');}
   if(action==='rental-vehicle'){
@@ -188,7 +201,8 @@ function handleHomeSubmit(event){
   if(event.target.id==='rux-route-form'){event.preventDefault();searchRentalPlaces('route',document.querySelector('#rux-route-query').value);}
   if(event.target.id==='home-search-form'){
     event.preventDefault();const q=document.querySelector('#home-search').value.trim();
-    state.homeStep='booking';state.rentalFlowStep='setup';render();openRentalDestinationSearch();document.querySelector('#rux-route-query').value=q;searchRentalPlaces('route',q);
+    if(window.parent!==window){emitHome('request-rental-entry',{query:q});return;}
+    enterRental(q);
   }
 }
 function handleHomeKey(event){if(event.key==='Escape'&&modal.classList.contains('open'))closeModal();}
@@ -208,6 +222,9 @@ window.addEventListener('moov:language-change',refreshRentalMapLanguage);
 }
 function handleHostMessage(event){
   if(event.source!==window.parent||event.origin!==config.parentOrigin||event.data?.source!=='moov-host'||event.data?.version!==1)return;
+  if(event.data.type==='enter-rental'&&rentalCanEditRoute()){
+    enterRental(typeof event.data.query==='string'?event.data.query.slice(0,200):'');return;
+  }
   if(event.data.type==='resume-booking'&&rentalCanEditRoute()){state.homeStep='booking';persist();render();return;}
   try{if(event.data.type==='set-route')emitHome('route-applied',importRoute(event.data.stops));if(event.data.type==='get-state')emitHome('state',publicState());}
   catch(error){emitHome('error',{message:error.message});}

@@ -6,10 +6,7 @@ function normalizeSearch(value) {
   return String(value || "").trim().toLowerCase();
 }
 function rentalFareForHours(vehicleId, hours) {
-  const policy = rentalFarePolicy[vehicleId] || rentalFarePolicy.standard;
-  const h = Math.max(3, Math.min(24, Number(hours) || 3));
-  const total = policy.base3 + policy.hourlyStep * (h - 3);
-  return Math.round(total / 10) * 10;
+  return MoovVehicleCatalog.rentalFare(vehicleId, hours);
 }
 function rentalFareDelta(vehicleId, hours) {
   const h = Math.max(3, Math.min(24, Number(hours) || 3));

@@ -1250,3 +1250,20 @@ input::placeholder, textarea::placeholder { color: #a7a7aa; }
 .profile-language-switch button:focus-visible { outline: 2px solid #247348; outline-offset: 2px; }
 .taste-course > .taste-match { margin: 0 0 4px 12px; }
 .taste-basis { display: block; margin: 0 0 8px 12px; color: var(--muted); font-size: .56rem; }
+[data-course-visual] { position: relative; overflow: hidden; }
+[data-course-visual]:has(> img) > .course-photo-placeholder { display: none; }
+.course-photo-kind { display: none; position: absolute; left: 10px; bottom: 10px; padding: 4px 7px; border-radius: 6px; background: rgba(20,32,26,.7); color: white; font-size: .6rem; }
+[data-course-visual] > img[data-representative="true"] ~ .course-photo-kind { display: block; }
+[data-course-visual] > img[data-representative="true"] { object-fit: cover; }
+.course-photo-placeholder { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; width: 100%; min-height: 180px; height: 100%; padding: 24px; color: #305f49; background: linear-gradient(130deg, #e5f2e9, #f4f0df); text-align: left; }
+.course-photo-placeholder.tone-1 { color: #4f5678; background: linear-gradient(130deg, #e7eaf7, #f2eef8); }
+.course-photo-placeholder.tone-2 { color: #775c39; background: linear-gradient(130deg, #f7edde, #edf4e7); }
+.course-photo-placeholder svg { width: 24px; height: 24px; }
+.course-photo-placeholder strong { font-size: .95rem; line-height: 1.45; }
+.course-photo-placeholder small { font-size: .7rem; line-height: 1.6; }
+.registered-stop-photo { display: block; height: 72px; border-radius: 8px; }
+.registered-stop-photo .course-photo-placeholder { min-height: 72px; padding: 8px; gap: 4px; }
+.registered-stop-photo .course-photo-placeholder strong { font-size: .65rem; }
+.registered-stop-photo .course-photo-placeholder svg { width: 16px; height: 16px; }
+.survey-course-match { display: grid; gap: 6px; margin: 0 0 10px; }
+.survey-course-match small { color: #68736c; font-size: .7rem; }

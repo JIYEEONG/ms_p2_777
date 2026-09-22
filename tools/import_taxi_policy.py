@@ -56,7 +56,7 @@ def extract(path):
     classes = {}
     for row, key, label, english in [(5, 'small', '소형', 'Small'),
                                      (6, 'medium', '중형', 'Medium'),
-                                     (7, 'large', '대형·장애인 차량', 'Large / accessible')]:
+                                     (7, 'large', '대형', 'Large')]:
         expected_prefix = {'small': '소형', 'medium': '중형', 'large': '대형'}[key]
         if not cells.get(f'A{row}', '').strip().startswith(expected_prefix):
             raise ValueError(f'Unexpected vehicle class in A{row}; check the final table order')
@@ -73,7 +73,7 @@ def extract(path):
                         'sourceCells': f'B{row}:D{row}', 'baseFare': int(base),
                         'includedMeters': int(meters), 'perKm': float(rate)}
     return {
-        'version': 'moov-taxi-v1-' + digest[:12],
+        'version': 'moov-taxi-v2-easyfit-midsize-' + digest[:12],
         'currency': 'KRW',
         'source': {'file': path.name, 'sha256': digest, 'sheet': SHEET, 'range': 'A4:D7'},
         'scope': {'label': '일반형 요금 · 주간·평시', 'labelEn': 'Regular daytime fares'},
@@ -82,8 +82,8 @@ def extract(path):
         'distanceUnitMeters': 1,
         'maxDistanceMeters': 10000000,
         'classes': classes,
-        'vehicleClasses': {'standard': 'small', 'easyfit': 'medium', 'family': 'large',
-                           'premium': 'large', 'barrierfree': 'large'},
+        'vehicleClasses': {'standard': 'small', 'easyfit': 'medium', 'family': 'medium',
+                           'premium': 'large', 'barrierfree': 'medium'},
     }
 
 

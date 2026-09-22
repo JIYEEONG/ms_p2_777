@@ -35,9 +35,88 @@
     return String(value || "").normalize("NFKC").trim().toLocaleLowerCase("ko-KR");
   }
 
+  function distanceKm(course) {
+    const value = course.distance_m != null && String(course.distance_m).trim() !== ''
+      ? Number(course.distance_m) / 1000
+      : course.distance != null && String(course.distance).trim() !== '' ? Number(course.distance) : NaN;
+    return Number.isFinite(value) && value >= 0 ? value : null;
+  }
+
+  function fromDatabase(course) {
+    const points = [...(course.points || [])].sort((a, b) => Number(a.sequence_no) - Number(b.sequence_no));
+    const seconds = Number(course.duration_seconds);
+    const originalName = course.title || '';
+    const stopNames = points.map(point => point.place_name || `지점 ${point.sequence_no}`);
+    const generic = !originalName || /^(?:(?:감성|활기참|트렌디|조용함|힐링)\s+)?(?:전시|관광|카페|음식점|체험|쇼핑|나들이)\s*코스$/.test(originalName.trim());
+    const namedStops = stopNames.filter(name => !/^지점\s*\d+$/.test(name));
+    return {
+      id: course.id, name: generic && namedStops.length ? namedStops.join(' → ') : originalName || '나들이 코스',
+      _originalName: originalName,
+      desc: course.description || '', image: course.image_url || null, author: course.author || 'MOOV', createdAt: course.created_at,
+      stops: stopNames,
+      duration_seconds: course.duration_seconds, distance_m: course.distance_m,
+      distance: distanceKm(course), time: seconds > 0 && Number.isFinite(seconds) ? `약 ${Math.ceil(seconds / 60)}분` : `${points.length}곳`,
+      _dbPoints: points, _dbTags: course.tags || {},
+    };
+  }
+
+  function uniqueCourses(courses) {
+    const seen = new Set();
+    const keyText = value => normalized(value).replace(/[\s\p{P}\p{S}]+/gu, '');
+    return courses.filter(course => {
+      if (!course) return false;
+      const keys = course.id == null ? [] : ['id:' + course.id];
+      const names = (course.stops || []).map(keyText);
+      if (names.length >= 2 && names.every(name => name && !/^지점\d+$/.test(name))) keys.push('stops:' + names.join('>'));
+      if (names.length === 1 && names[0] && !/^지점\d+$/.test(names[0]) && keyText(course.name)) keys.push('single:' + names[0] + '|' + keyText(course.name));
+      const points = (course.stops || []).map((_, index) => pointForStop(course, index));
+      if (points.length >= 2 && points.every(point => Number.isFinite(point.lat) && Number.isFinite(point.lng))) {
+        keys.push('route:' + points.map(point => point.lat.toFixed(4) + ',' + point.lng.toFixed(4)).join('>'));
+      }
+      const duplicate = keys.some(key => seen.has(key));
+      if (!duplicate) keys.forEach(key => seen.add(key));
+      return !duplicate;
+    });
+  }
+
+  function distinguishNames(courses) {
+    const counts = new Map();
+    courses.forEach(course => counts.set(normalized(course.name), (counts.get(normalized(course.name)) || 0) + 1));
+    return courses.map(course => {
+      if (counts.get(normalized(course.name)) < 2 || !course.stops?.length) return course;
+      const route = course.stops.join(' → ');
+      return { ...course, name: course.name === route ? route : `${course.name} · ${route}` };
+    });
+  }
+
+  // Keep score/price/filter priorities; spread repeated places within equal ranks.
+  function diversifyTies(items, priorityFor, courseFor = item => item) {
+    const output = [], usage = new Map();
+    const stopKeys = item => [...new Set((courseFor(item).stops || []).map(normalized))];
+    let start = 0;
+    while (start < items.length) {
+      let end = start + 1;
+      while (end < items.length && priorityFor(items[end]) === priorityFor(items[start])) end++;
+      const group = items.slice(start, end);
+      while (group.length) {
+        let best = 0, penalty = Infinity;
+        group.forEach((item, index) => {
+          const stops = stopKeys(item);
+          const overlap = stops.reduce((sum, stop) => sum + (usage.get(stop) || 0), 0) / Math.max(1, stops.length);
+          if (overlap < penalty) { best = index; penalty = overlap; }
+        });
+        const item = group.splice(best, 1)[0];
+        output.push(item);
+        stopKeys(item).forEach(stop => usage.set(stop, (usage.get(stop) || 0) + 1));
+      }
+      start = end;
+    }
+    return output;
+  }
+
   function matches(course, query, filters, tags) {
     const q = normalized(query);
-    if (q && ![course.name, course.desc, ...(course.stops || [])].some((field) => normalized(field).includes(q))) return false;
+    if (q && ![course.name, course.desc, ...(course.stops || []), ...(tags.category || [])].some((field) => normalized(field).includes(q))) return false;
     for (const key of ["category", "mood", "companion", "purpose"]) {
       const selected = filters[key] || "전체";
       if (selected !== "전체" && !(tags[key] || []).includes(selected)) return false;
@@ -237,22 +316,25 @@ function scoreBreakdown(course, preference, tags, context = {}) {
       const price = Number(tags.price);
       return !Number.isFinite(price) || price <= 0 || price <= Number(preference.budget || Infinity);
     });
-    return eligible.map((course) => ({ course, score: score(course, preference, tagsFor(course), context) }))
+    const ranked = eligible.map((course) => ({ course, score: score(course, preference, tagsFor(course), context) }))
       .sort((a, b) => b.score - a.score || tieBreak(a.course, b.course));
+    return diversifyTies(ranked, item => item.score, item => item.course);
   }
 
   function sort(courses, sortBy, preference, tagsFor, likesFor, context = {}) {
-    return [...courses].sort((a, b) => {
+    const sorted = [...courses].sort((a, b) => {
       if (sortBy === "preference") return score(b, preference, tagsFor(b), context) - score(a, preference, tagsFor(a), context) || tieBreak(a, b);
       if (sortBy === "popular") return likesFor(b) - likesFor(a) || tieBreak(a, b);
       if (sortBy === "nearby") return (Number(a.distance_m) || Infinity) - (Number(b.distance_m) || Infinity) || tieBreak(a, b);
       return tieBreak(a, b);
     });
+    return diversifyTies(sorted, course => sortBy === 'preference' ? score(course, preference, tagsFor(course), context)
+      : sortBy === 'popular' ? likesFor(course) : sortBy === 'nearby' ? (Number(course.distance_m) || Infinity) : course.createdAt || '');
   }
   function newId() {
     return root.crypto?.randomUUID?.() || `moov-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  const api = { RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, scoreBreakdown, tasteSignals, tasteMatch, rank, sort, newId, courseCentroid, haversineKm, calcGeoScore, calcDurationScore, calcTimeScore};  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  const api = {distanceKm, fromDatabase, uniqueCourses, distinguishNames, diversifyTies, RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, scoreBreakdown, tasteSignals, tasteMatch, rank, sort, newId, courseCentroid, haversineKm, calcGeoScore, calcDurationScore, calcTimeScore};  if (typeof module !== "undefined" && module.exports) module.exports = api;
     else root.MoovOutingData = api;
   })(typeof window !== "undefined" ? window : globalThis);

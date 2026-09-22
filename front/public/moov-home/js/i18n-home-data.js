@@ -382,5 +382,13 @@ window.MOOV_EN = Object.freeze({...window.MOOV_EN, ...{
   "출발 주변 지도": "Pickup area map",
   "출발 후보 선택 지도": "Pickup candidate map",
   "확정된 출발 위치": "Confirmed pickup point",
-  "출발": "Start"
+  "출발": "Start",
+  "MOOV 중형": "MOOV Midsize",
+  "중형": "Midsize",
+  "넓은 출입구와 휠체어 승하차 지원": "Wide doors and wheelchair access",
+  "최대 4명이 함께하는 편안한 이동": "Comfortable trips for up to four",
+  "넓은 출입구와 경사로, 여유로운 이동 공간으로 휠체어 이용자도 편안하게 승하차할 수 있는 차량입니다.": "Wide doors, a ramp and ample room provide comfortable wheelchair access.",
+  "일상 이동부터 나들이까지 최대 4명이 편안하게 이용할 수 있는 중형 차량입니다.": "A comfortable midsize car for up to four on daily trips and outings.",
+  "혼자 또는 둘이 이용하기 좋은 컴팩트형 차량입니다.": "A compact vehicle for one or two passengers."
+
 }});
