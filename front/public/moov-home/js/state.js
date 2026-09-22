@@ -5,6 +5,7 @@ const config=Object.assign({embedded:new URLSearchParams(location.search).get('e
 document.body.classList.toggle('embedded',config.embedded);
 function readSaved(){try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');return s&&typeof s==='object'&&!Array.isArray(s)?s:{};}catch{return {};}}
 const saved=readSaved();
+saved.rentalVehicleType=MoovVehicleCatalog.normalizeId(saved.rentalVehicleType);
 const state={
   activeTab:'home',homeMode:'rent',homeStep:'mode',
   tripActive:saved.tripActive===true,usageStartedAt:Number(saved.usageStartedAt)||null,rentalEndsAt:Number(saved.rentalEndsAt)||null,

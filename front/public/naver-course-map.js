@@ -14,7 +14,7 @@
       }
     }
   }
-  async function mount(element, courses, { route = false, onSelect } = {}) {
+  async function mount(element, courses, { route = false, onSelect, onResolved } = {}) {
     disposeWithin(element);
     const status = document.createElement('p');
     status.className = 'course-map-status small muted';
@@ -27,12 +27,13 @@
     const session = { element, status, map: null, active: true };
     sessions.add(session);
     const current = () => session.active && element.isConnected;
-    const records = courses.flatMap(course => course.points.map((point, index) => ({ point, index, course })));
-    const points = records.map(record => record.point).filter(valid);
-    status.textContent = text('지도를 불러오는 중…', 'Loading map…');
+    status.textContent = text('장소 위치와 지도를 불러오는 중…', 'Finding places and loading the map…');
     try {
-      await MoovNaverMap.ready();
+      const [, resolved] = await Promise.all([MoovNaverMap.ready(), MoovCourseLocations.resolveCourses(courses, MoovNaverMap, current)]);
       if (!current()) return;
+      const records = resolved.flatMap(course => course.points.map((point, index) => ({ point, index, course })));
+      const points = records.map(record => record.point).filter(valid);
+      onResolved?.(resolved);
       element.replaceChildren();
       const map = session.map = MoovNaverMap.createView(element, points[0] || { lat: 37.5666, lng: 126.9784 }, 13);
       for (const { point, index, course } of records) {
@@ -49,8 +50,9 @@
       element.dataset.mapState = 'ready';
       const missing = records.length - points.length;
       status.textContent = missing
-        ? text(`위치 미확인 장소 ${missing}곳은 지도에서 제외했어요.`, `${missing} places need location confirmation.`)
+        ? text(`${points.length}/${records.length}곳 표시 · 나머지 장소는 위치를 다시 확인해 주세요.`, `${points.length}/${records.length} places shown. Retry to locate the remaining places.`)
         : text('장소를 누르면 코스 상세를 볼 수 있어요.', 'Select a place to view its course.');
+      if (missing) appendRetry();
       if (!route || !records.length || missing || points.length < 2) return;
       status.textContent = text('자동차 경로를 조회하는 중…', 'Finding a driving route…');
       let path = [], distance = 0, seconds = 0;
@@ -70,11 +72,14 @@
       if (!current()) return;
       element.dataset.mapState = session.map ? 'route-error' : 'error';
       status.textContent = error.message + ' ';
+      appendRetry();
+    }
+    function appendRetry() {
       const retry = document.createElement('button');
       retry.type = 'button';
       retry.className = 'mini-action';
       retry.textContent = text('다시 시도', 'Retry');
-      retry.onclick = () => { if (current()) void mount(element, courses, { route, onSelect }); };
+      retry.onclick = () => { if (current()) void mount(element, courses, { route, onSelect, onResolved }); };
       status.append(retry);
     }
   }

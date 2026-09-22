@@ -1050,9 +1050,12 @@ async function main() {
   }
   assert.ok(fs.existsSync(portFile), 'Edge debugging port did not start');
   debuggingPort = Number(fs.readFileSync(portFile, 'utf8').split('\n')[0]);
-  if(process.argv.includes('--account-snapshot'))await require('./account_snapshot_browser_checks.cjs')({openPage,base,passed});
+  if(process.argv.includes('--photo-review'))await require('./photo_review_browser_checks.cjs')({openPage,base,passed});
+  else if(process.argv.includes('--account-snapshot'))await require('./account_snapshot_browser_checks.cjs')({openPage,base,passed});
   else if(process.argv.includes('--map-location'))await require('./map_location_browser_checks.cjs')({openPage,base,mapReady,passed});
   else if(process.argv.includes('--login-survey'))await require('./login_survey_browser_checks.cjs')({openPage,base,passed});
+  else if(process.argv.includes('--course-covers'))await require('./course_covers_browser_checks.cjs')({openPage,base,passed});
+  else if(process.argv.includes('--course-settings'))await require('./course_settings_browser_checks.cjs')({openPage,base,passed});
   else if(process.argv.includes('--taxi-shared')){await testTaxiSharedRoute();await testCourseRouteControls();}
   else if(process.argv.includes('--course-return'))await testCourseReturnHistory();
   else if(process.argv.includes('--name-only-route'))await testNameOnlyRentalCourse();

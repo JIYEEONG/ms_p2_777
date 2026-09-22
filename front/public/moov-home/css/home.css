@@ -930,3 +930,8 @@ html,body { height:100%; }
   .app-header { padding-left:20px;padding-right:20px; }
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important;transition:none!important;scroll-behavior:auto!important; } }
+.rental-policy-row { padding: 14px 0; border-bottom: 1px solid #e1e8e3; font-size: .82rem; }
+.rental-policy-row strong { display: block; margin-bottom: 6px; }
+.rental-policy-row dl { margin: 10px 0 0; }
+.rental-policy-row dl > div { display: flex; justify-content: space-between; padding: 4px 0; gap: 12px; }
+.rental-policy-row dd { margin: 0; font-weight: 700; }

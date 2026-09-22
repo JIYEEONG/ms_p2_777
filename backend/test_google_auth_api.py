@@ -19,6 +19,7 @@ TEST_ENV = {
     'GOOGLE_CLIENT_ID': 'unit-test-client.apps.googleusercontent.com',
     'GOOGLE_CLIENT_SECRET': 'unit-test-secret-not-a-real-google-credential',
     'AUTH_SESSION_SECRET': 'unit-test-signing-key-with-more-than-thirty-two-characters',
+    'AUTH_DATA_ENCRYPTION_KEY': '',
     'APP_BASE_URL': 'http://localhost:3000',
     'GOOGLE_REDIRECT_URI': 'http://localhost:3000/api/auth/google/callback',
 }
@@ -135,8 +136,13 @@ class GoogleAuthTests(unittest.TestCase):
         self.assertEqual(row['state_hash'], auth._digest(params['state']))
         self.assertNotEqual(row['state_hash'], params['state'])
         self.assertEqual(row['binding_hash'], auth._digest(auth._read_binding(cookie, auth._config())))
-        self.assertEqual(row['nonce'], params['nonce'])
-        self.assertEqual(params['code_challenge'], auth._base64(auth.hashlib.sha256(row['verifier'].encode()).digest()))
+        nonce = auth.auth_crypto.unseal(row['nonce'], 'oauth-nonce', row['state_hash'])
+        verifier = auth.auth_crypto.unseal(row['verifier'], 'oauth-verifier', row['state_hash'])
+        self.assertEqual(nonce, params['nonce'])
+        self.assertEqual(params['code_challenge'], auth._base64(auth.hashlib.sha256(verifier.encode()).digest()))
+        for field, plaintext in [('nonce', nonce), ('verifier', verifier)]:
+            self.assertTrue(row[field].startswith(auth.auth_crypto.PREFIX))
+            self.assertNotIn(plaintext.encode(), auth.DB_PATH.read_bytes())
 
     def test_success_uses_verified_subject_and_stores_only_session_hash_and_profile(self):
         response, params, cookie, exchange, verify = self.login()
@@ -155,6 +161,9 @@ class GoogleAuthTests(unittest.TestCase):
         self.assertEqual(row['token_hash'], auth._digest(token))
         self.assertNotIn(token, json.dumps(row))
         self.assertNotIn('test-id-token', json.dumps(row))
+        self.assertTrue(row['profile'].startswith(auth.auth_crypto.PREFIX))
+        for plaintext in user['user'].values():
+            self.assertNotIn(plaintext.encode(), auth.DB_PATH.read_bytes())
         self.assertEqual(response_cookie(response, auth.FLOW_COOKIE)['max-age'], '0')
 
     def test_https_deployment_marks_both_cookies_secure(self):

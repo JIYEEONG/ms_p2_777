@@ -1094,6 +1094,7 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
     <link rel="stylesheet" href="./taxi-fare-ui.css" />
     <link rel="stylesheet" href="./google-auth.css" />
     <link rel="stylesheet" href="./login-survey.css" />
+    <link rel="stylesheet" href="./theme-settings.css" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -1254,10 +1255,14 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
     <script src="./i18n-data.js"></script>
     <script src="./i18n.js"></script>
     <script src="./outing-data.js"></script>
+    <script src="./course-photos.js"></script>
+    <script src="./course-media.js"></script>
     <script src="./naver-map.js"></script>
 <link rel="stylesheet" href="./map-location-picker.css" />
 <script src="./map-location-picker.js"></script>
+<script src="./course-locations.js"></script>
 <script src="./naver-course-map.js"></script>
+    <script src="./vehicle-catalog.js"></script>
     <script src="./taxi-fare-policy.js"></script>
     <script src="./taxi-fare.js"></script>
     <script src="./taxi-fare-ui.js"></script>
@@ -1265,6 +1270,7 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
     <script src="./survey-profile.js"></script>
     <script src="./account-snapshot.js"></script>
     <script src="./login-survey.js"></script>
+    <script type="module" src="./theme-settings.js"></script>
     <script src="./promo-carousel.js"></script>
     <script>
 const STORAGE_KEY = "moov-app-v3:";
@@ -1315,40 +1321,21 @@ const baseCourses = [
 
 let dbCourses = [];
 
-function generateCourseName(tags) {
-  const mood = tags.mood?.[0] || "";
-  const category = tags.category?.[0] || "나들이";
-  return `${mood} ${category} 코스`.trim().replace(/\s+/g, " ");
-}
-
 async function loadCoursesFromDB() {
   try {
     const res = await fetch("/api/outing/courses");
+    if (!res.ok) throw new Error("Course service unavailable");
     const data = await res.json();
-    dbCourses = data.courses.map((c) => ({
-      id: c.id,
-      name: c.title || generateCourseName(c.tags),
-      desc: "",
-      image: c.image_url || null,
-      createdAt: c.created_at,
-      stops: c.points.map((p) => p.place_name || `지점 ${p.sequence_no}`),
-      duration_seconds: c.duration_seconds,
-      distance_m: c.distance_m,
-      _dbPoints: c.points,
-      _dbTags: c.tags,
-    }));
+    if (!Array.isArray(data.courses)) throw new Error("Invalid course list");
+    dbCourses = data.courses.map(MoovOutingData.fromDatabase);
+    if (state.isAuthenticated && state.activeTab === "outing") render();
   } catch (e) {
     console.error("코스 데이터 로드 실패, 기존 데모 데이터 사용", e);
   }
 }
 loadCoursesFromDB();
 
-const rentalVehicles = [
-  { id: "standard", name: "MOOV 컴팩트", seats: "1~2인", price: 22000, desc: "도심 이동에 편한 기본형", image: "./assets/vehicle-compact.png" },
-  { id: "premium", name: "MOOV 라운지", seats: "1~4인", price: 29000, desc: "넓은 좌석과 독립형 테이블", image: "./assets/vehicle-lounge.png" },
-  { id: "family", name: "MOOV 패밀리", seats: "최대 6인", price: 34000, desc: "가족·짐이 많은 여행용", image: "./assets/vehicle-family.png" },
-  { id: "barrierfree", name: "MOOV 이지핏", seats: "1~3인", price: 32000, desc: "휠체어 승하차와 넓은 이동 공간", image: "./assets/vehicle-easyfit.jpg" },
-];
+const rentalVehicles = MoovVehicleCatalog.vehicles.map(vehicle => ({ ...vehicle, price: MoovVehicleCatalog.rentalRates[vehicle.id].hourlyStep }));
 
 const themeAssets = {
   "기본": "./assets/cabin-default.jpg",
@@ -1531,7 +1518,7 @@ return {
   homeStep: saved.tripActive ? "service" : "mode",
   tripActive: saved.tripActive || false,
   usageStartedAt: saved.usageStartedAt || null,
-  rentalEndsAt: saved.rentalEndsAt || (saved.tripActive && saved.homeMode === "rent" && saved.usageStartedAt ? saved.usageStartedAt + (saved.rentalHours || 2) * 3600000 : null),
+  rentalEndsAt: saved.rentalEndsAt || (saved.tripActive && saved.homeMode === "rent" && saved.usageStartedAt ? saved.usageStartedAt + (saved.rentalHours || 3) * 3600000 : null),
   pickupLocation: (saved.pickupLocation || "현재 위치 · 서울 성수동").replace(/^지도 핀\s*·\s*/, ""),
   taxiPickupCoords: saved.taxiPickupCoords || null,
   taxiPickupDetails: saved.taxiPickupDetails || null,
@@ -1541,7 +1528,7 @@ return {
   taxiReceipts: Array.isArray(saved.taxiReceipts) ? saved.taxiReceipts.filter(receipt => receipt.userId === user?.id && validTaxiStoredTrip(receipt) && typeof receipt.completedAt === "string") : [],
   mapPinOpen: false,
   returnToHomeAfterCourse: false,
-  rentalHours: saved.rentalHours || 2,
+  rentalHours: Math.max(3, Math.min(24, Number(saved.rentalHours) || 3)),
   taxiVehicleType: saved.taxiVehicleType || "standard",
   rentalVehicleType: saved.rentalVehicleType || "standard",
   rentalOptions: new Set(saved.rentalOptions || ["privacy"]),
@@ -1626,6 +1613,8 @@ let authGeneration = 0;
 let splashFinished = false;
 
 function restoreAuthenticatedTrip() {
+state.taxiVehicleType = MoovVehicleCatalog.normalizeId(state.taxiVehicleType);
+state.rentalVehicleType = MoovVehicleCatalog.normalizeId(state.rentalVehicleType);
 if (!MoovTaxiFare.vehicles.some((vehicle) => vehicle.id === state.taxiVehicleType)) state.taxiVehicleType = "standard";
 if (!rentalVehicles.some((vehicle) => vehicle.id === state.rentalVehicleType)) state.rentalVehicleType = "standard";
 if (activeTaxiTrip()) {
@@ -2012,8 +2001,9 @@ function applyAuthenticatedUser(user) {
   void flushOutingQueue();
 }
 
-function setTab(tab) {
+function setTab(tab, surveyChecked = false) {
   if (!state.isAuthenticated) return;
+  if (tab === 'outing' && !surveyChecked && MoovLoginSurvey.requestCompletion(() => { showScreen('app'); setTab(tab, true); })) return;
   if(tab!=='outing')state.returnToHomeAfterCourse=false;
   state.activeTab = tab;
   state.mapPinOpen = false;
@@ -2260,6 +2250,15 @@ function handleHomeModuleMessage(event) {
   if (message?.source !== "moov-home" || message.version !== 1) return;
   if (message.type === "ready") sendPendingHomeCourse(frame, message.detail);
   if (message.type === "state") latestHomeState = message.detail;
+  if (message.type === 'request-rental-entry') {
+    const resume = () => {
+      if (!state.isAuthenticated || !frame.isConnected) return;
+      showScreen('app');
+      frame.contentWindow.postMessage({source:'moov-host',version:1,type:'enter-rental',query:message.detail?.query}, window.location.origin);
+    };
+    if (!MoovLoginSurvey.requestCompletion(resume)) resume();
+    return;
+  }
   if (message.type === "route-applied" && routeTransferCourseId) {
     logOutingEvent("follow_route_applied", "course", routeTransferCourseId);
     routeTransferCourseId = null;
@@ -2320,7 +2319,7 @@ function renderLegacyHome() {
 }
 
 function renderHomeModeChoice() {
-  return `<div class="home-mode-entry">${renderSearchField({ inputId: "home-search", stateKey: "homeQuery", className: "home-search", placeholder: "원하는 곳, 코스를 검색하세요", label: "홈 검색" })}<div class="home-mode-grid"><button class="home-mode-card taxi" data-action="select-home-mode" data-value="taxi"><img src="./assets/icon-taxi.png" alt="택시 아이콘" /><span><strong>택시</strong><small>목적지까지 빠르게 이동하고<br />거리만큼 자동 결제해요.</small></span><em>가까운 차량 약 3분 ${icon("chevron")}</em></button><button class="home-mode-card rent" data-action="select-home-mode" data-value="rent"><img src="./assets/icon-rent.png" alt="렌트 아이콘" /><span><strong>렌트</strong><small>차량과 공간 옵션을 골라<br />2~24시간 자유롭게 이용해요.</small></span><em>시간당 22,000원부터 ${icon("chevron")}</em></button></div>${renderHomePromotionSlider()}${renderHomeNoticePreview()}</div>`;
+  return `<div class="home-mode-entry">${renderSearchField({ inputId: "home-search", stateKey: "homeQuery", className: "home-search", placeholder: "원하는 곳, 코스를 검색하세요", label: "홈 검색" })}<div class="home-mode-grid"><button class="home-mode-card taxi" data-action="select-home-mode" data-value="taxi"><img src="./assets/icon-taxi.png" alt="택시 아이콘" /><span><strong>택시</strong><small>목적지까지 빠르게 이동하고<br />거리만큼 자동 결제해요.</small></span><em>가까운 차량 약 3분 ${icon("chevron")}</em></button><button class="home-mode-card rent" data-action="select-home-mode" data-value="rent"><img src="./assets/icon-rent.png" alt="렌트 아이콘" /><span><strong>렌트</strong><small>차량과 공간 옵션을 골라<br />3~24시간 자유롭게 이용해요.</small></span><em>3시간 10,180원부터 ${icon("chevron")}</em></button></div>${renderHomePromotionSlider()}${renderHomeNoticePreview()}</div>`;
 }
 
 function renderHomePromotionSlider() {
@@ -2524,8 +2523,8 @@ function taxiPanel() {
 function rentalPanel() {
   const vehicle = rentalVehicles.find((item) => item.id === state.rentalVehicleType) || rentalVehicles[0];
   const optionPrice = rentalOptionCatalog.filter((item) => state.rentalOptions.has(item.id)).reduce((sum, item) => sum + item.price, 0);
-  const price = state.rentalHours * vehicle.price + optionPrice;
-  return `<div class="rent-config"><div class="section-row"><strong>차량 종류</strong></div>${renderVehicleTypeSelector(state.rentalVehicleType, "rental-vehicle")}<div class="rent-control-row"><div><small>이용 시간</small><strong>2~24시간</strong></div><div class="hour-control"><button data-action="rent-minus" aria-label="대여 시간 줄이기">−</button><strong>${state.rentalHours}시간</strong><button data-action="rent-plus" aria-label="대여 시간 늘리기">＋</button></div></div><div class="section-row option-heading"><strong>공간 옵션</strong><span>복수 선택</span></div><div class="rental-options">${rentalOptionCatalog.map((item) => `<button class="rental-option ${state.rentalOptions.has(item.id) ? "selected" : ""}" data-action="rental-option" data-value="${item.id}">${icon(state.rentalOptions.has(item.id) ? "bookmark" : "plus")}<span>${item.name}</span><strong>+${item.price.toLocaleString("ko-KR")}원</strong></button>`).join("")}</div><div class="rent-total"><span><small>총 예상 요금</small><strong>${price.toLocaleString("ko-KR")}원</strong></span><span>카드 •••• 8421</span></div><button class="primary-button full call-button" data-action="request-rent">예약</button><p class="booking-caption">충전 대기가 예상되면 동일 종류의 충전 완료 차량을 우선 배정해요.</p></div>`;
+  const price = MoovVehicleCatalog.rentalFare(vehicle.id, state.rentalHours) + optionPrice;
+  return `<div class="rent-config"><div class="section-row"><strong>차량 종류</strong></div>${renderVehicleTypeSelector(state.rentalVehicleType, "rental-vehicle")}<div class="rent-control-row"><div><small>이용 시간</small><strong>3~24시간</strong></div><div class="hour-control"><button data-action="rent-minus" aria-label="대여 시간 줄이기">−</button><strong>${state.rentalHours}시간</strong><button data-action="rent-plus" aria-label="대여 시간 늘리기">＋</button></div></div><div class="section-row option-heading"><strong>공간 옵션</strong><span>복수 선택</span></div><div class="rental-options">${rentalOptionCatalog.map((item) => `<button class="rental-option ${state.rentalOptions.has(item.id) ? "selected" : ""}" data-action="rental-option" data-value="${item.id}">${icon(state.rentalOptions.has(item.id) ? "bookmark" : "plus")}<span>${item.name}</span><strong>+${item.price.toLocaleString("ko-KR")}원</strong></button>`).join("")}</div><div class="rent-total"><span><small>총 예상 요금</small><strong>${price.toLocaleString("ko-KR")}원</strong></span><span>카드 •••• 8421</span></div><button class="primary-button full call-button" data-action="request-rent">예약</button><p class="booking-caption">충전 대기가 예상되면 동일 종류의 충전 완료 차량을 우선 배정해요.</p></div>`;
 }
 
 function renderVehicleTypeSelector(selectedId, actionName) {
@@ -3163,13 +3162,18 @@ function renderOutingMap(courses = getVisibleOutingCourses()) {
 }
 
 function getCourseTags(course) {
-  if (course._dbTags) return { ...course._dbTags, price: null };
+  if (course._dbTags) return { category: [], mood: [], companion: [], purpose: [], time: [], ...course._dbTags, price: null };
   const fallback = { category: [], mood: [], companion: [], purpose: [], time: [], price: null };
   return courseTagProfiles[course.id] ? { ...courseTagProfiles[course.id], subcategories: demoSurveyDetails[course.id] || {} } : course.tagProfile || fallback;
 }
 
+function allOutingCourses() {
+  const source = [...state.customCourses, ...(dbCourses.length ? dbCourses : baseCourses)];
+  return MoovCourseMedia.distinguishCovers(MoovOutingData.distinguishNames(MoovOutingData.uniqueCourses(source)));
+}
+
 function getFilteredOutingCourses() {
-  const source = dbCourses.length ? dbCourses : [...baseCourses, ...state.customCourses];
+  const source = allOutingCourses();
   return source.filter((course) =>
     MoovOutingData.matches(course, state.outingQuery, state.outingFilters, getCourseTags(course)));
 }
@@ -3206,6 +3210,21 @@ function mountCourseMap(element, courses, route = false) {
   if (!element) return;
   return MoovCourseMap.mount(element, courses.map(course => ({ id: course.id, name: course.name, points: getCourseMapPoints(course) })), {
     route,
+    onResolved: resolved => {
+      let known = 0, total = 0;
+      resolved.forEach(item => {
+        const course = courses.find(course => course.id === item.id);
+        item.points.forEach((point, index) => {
+          total++;
+          if (!MoovCourseLocations.valid(point)) return;
+          known++;
+          course.stopDetails ||= [];
+          course.stopDetails[index] = { ...course.stopDetails[index], ...point };
+        });
+      });
+      const heading = element.parentElement.querySelector('[data-course-location-count]');
+      if (heading) heading.textContent = taxiText(`장소 위치 ${known}/${total}곳 표시`, `${known}/${total} places on map`);
+    },
     onSelect: id => { const course = courses.find(item => item.id === id); if (course) openCourseDetail(course); },
   });
 }
@@ -3221,6 +3240,8 @@ function renderCourseBrowse() {
   let tasteFilters = "";
   if (state.outingSort === "preference" && state.surveyRecord) {
     list = rankSurveyCourses(visible);
+    const covers = MoovCourseMedia.sequenceCovers(list.map(item => item.course));
+    list = list.map((item, index) => ({...item, course: covers[index]}));
     tasteFilters = renderSurveyNote();
     cards = list.map(({course, match}) => `<div class="taste-course">${renderSurveyMatch(match)}${courseCard(course)}</div>`).join("");
   } else if (state.outingSort === "preference") {
@@ -3231,23 +3252,26 @@ function renderCourseBrowse() {
       return group.categories.some((value) => tags.category.includes(value)) || group.moods.some((value) => tags.mood.includes(value));
     }).map((course) => ({ course, match: MoovOutingData.tasteMatch(getCourseTags(course), signals) }))
       .sort((a, b) => (b.match.percent ?? -1) - (a.match.percent ?? -1) || String(b.course.createdAt || "").localeCompare(String(a.course.createdAt || "")));
+    const covers = MoovCourseMedia.sequenceCovers(list.map(item => item.course));
+    list = list.map((item, index) => ({...item, course: covers[index]}));
     tasteFilters = `<div class="community-filter" aria-label="취향 유형">${tasteGroups.map((item) => `<button class="${state.tasteGroup === item.name ? "selected" : ""}" data-action="taste-group" data-value="${item.name}" data-i18n-en="${item.english}">${item.name}</button>`).join("")}</div>`;
     cards = list.map(({ course, match }) => `<div class="taste-course"><span class="taste-match">${icon("user")} ${match.percent === null ? "취향 정보 없음" : `내 취향 ${match.percent}% 일치`}</span><small class="taste-basis">${match.matched}/${match.total}개 취향 태그 일치 · 데모 기준</small>${courseCard(course)}</div>`).join("");
   } else {
+    list = MoovCourseMedia.sequenceCovers(list);
     cards = list.map(courseCard).join("");
   }
-  return `${state.outingMapOpen ? renderOutingMap(state.outingSort === "preference" ? list.map((item) => item.course) : list) : ""}<div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div>${tasteFilters}${cards ? `<div class="stack">${cards}</div>` : emptyState("search", "검색 결과가 없어요", "조건을 직접 넓히거나 다른 취향 유형을 선택해 주세요.")}`;
+  return `${state.outingMapOpen ? renderOutingMap(state.outingSort === "preference" ? list.map((item) => item.course) : list) : ""}<div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div>${tasteFilters}${cards ? `<div class="stack">${cards}</div><p class="small muted" style="text-align:right"><a href="./assets/course-photo-library.html" target="_blank" rel="noopener" data-i18n-skip>${taxiText("사진 정보", "Photo credits")}</a></p>` : emptyState("search", "검색 결과가 없어요", "조건을 직접 넓히거나 다른 취향 유형을 선택해 주세요.")}`;
 }
 
 function courseCard(course) {
   const savedCourse = state.savedCourseIds.has(course.id);
   const likedCourse = state.likedCourseIds.has(course.id);
-const cover = getCourseCoverImage(course);
-const visual = cover
-  ? `<button class="course-visual" data-action="course-detail" data-value="${course.id}" aria-label="${escapeHtml(course.name)} 상세 보기"><img src="${escapeHtml(cover)}" alt="${escapeHtml(course.name)} 코스 이미지" loading="lazy" /><span class="photo-detail-hint">${icon("search")} 상세 보기</span></button>`
-  : `<button class="course-visual no-image" data-action="course-detail" data-value="${course.id}">${icon("pin")}<span class="small" data-i18n-en="View course map">코스 지도 보기</span></button>`;
-  const stopPhotos = course.stopDetails ? `<div class="registered-stops">${course.stopDetails.map((stop,index) => {const photo=stop.photo || getMatchedCoursePlaceImage(stop.name);return `<div>${photo ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(stop.name)} 사진" loading="lazy" />` : `<span class="no-stop-photo">${icon("image")}</span>`}<small>${escapeHtml(stop.type)} · ${escapeHtml(stop.name)}</small></div>`;}).join("")}</div>` : "";
-  return `<article class="course-card">${visual}<div class="course-body"><div class="row"><span class="small muted">${escapeHtml(course.author || state.username)}님의 코스 · ${course.distance == null ? "거리 미확인" : `${Number(course.distance).toLocaleString("ko-KR")}km`}</span><span class="badge orange">${escapeHtml(course.time || `${course.stops.length}곳`)}</span></div><h4>${escapeHtml(course.name)}</h4><p>${escapeHtml(course.desc)}</p>${stopPhotos}${coursePhotoCredits(course)}<div class="course-stats"><span>${icon("heart")} 최근 7일 ${state.popularityAt ? (state.popularityCounts[course.id] || 0) : "—"}</span><span>${icon("compass")} ${course.stops.length}개 장소</span><span>가격·시간 확인 필요</span></div><div class="course-actions"><button class="${likedCourse ? "liked" : ""}" data-action="course-like" data-value="${course.id}">${icon("heart")}<span>${likedCourse ? "좋아요 취소" : "좋아요"}</span></button><button class="${savedCourse ? "saved" : ""}" data-action="course-save" data-value="${course.id}">${icon("bookmark")}<span>${savedCourse ? "저장됨" : "관심 저장"}</span></button><button class="follow" data-action="follow-course" data-value="${course.id}">${icon("pin")}<span data-i18n-skip>${courseFollowLabel()}</span></button></div></div></article>`;
+  const distance = MoovOutingData.distanceKm(course);
+  const distanceText = distance == null ? taxiText("경로 선택 후 거리 안내", "Distance available after route selection") : `${Number(distance.toFixed(1)).toLocaleString("ko-KR")}km`;
+  const likes = state.popularityAt ? Math.max(0, Number(state.popularityCounts[course.id]) || 0) : Number(likedCourse);
+  const visual = `<button class="course-visual" data-course-visual data-action="course-detail" data-value="${escapeHtml(course.id)}" aria-label="${escapeHtml(course.name)} 상세 보기">${renderCoursePhoto(course)}<span class="photo-detail-hint">${icon("search")} 상세 보기</span></button>`;
+  const stopPhotos = course.stopDetails ? `<div class="registered-stops">${course.stopDetails.map((stop, index) => `<div><span class="registered-stop-photo" data-course-visual>${renderCoursePhoto(course, index)}</span><small>${escapeHtml(stop.type)} · ${escapeHtml(stop.name)}</small></div>`).join("")}</div>` : "";
+  return `<article class="course-card">${visual}<div class="course-body"><div class="row"><span class="small muted">${escapeHtml(course.author || "MOOV")}님의 코스 · <span data-i18n-skip>${distanceText}</span></span><span class="badge orange">${escapeHtml(course.time || `${course.stops.length}곳`)}</span></div><h4>${escapeHtml(course.name)}</h4><p>${escapeHtml(course.desc)}</p>${stopPhotos}<div class="course-stats"><span data-i18n-skip>${icon("heart")} ${likes.toLocaleString("ko-KR")}${taxiText("개", " likes")}</span><span>${icon("compass")} ${course.stops.length}개 장소</span><span>가격·시간 확인 필요</span></div><div class="course-actions"><button class="${likedCourse ? "liked" : ""}" data-action="course-like" data-value="${escapeHtml(course.id)}">${icon("heart")}<span>${likedCourse ? "좋아요 취소" : "좋아요"}</span></button><button class="${savedCourse ? "saved" : ""}" data-action="course-save" data-value="${escapeHtml(course.id)}">${icon("bookmark")}<span>${savedCourse ? "저장됨" : "관심 저장"}</span></button><button class="follow" data-action="follow-course" data-value="${escapeHtml(course.id)}">${icon("pin")}<span data-i18n-skip>${courseFollowLabel()}</span></button></div></div></article>`;
 }
 
 function getCourseStopRole(index, count) {
@@ -3257,38 +3281,20 @@ function getCourseStopRole(index, count) {
 }
 
 function getCourseCoverImage(course) {
-  return course.image || course.stopDetails?.find(stop=>stop.photo)?.photo || getMatchedCoursePlaceImage(course.name) || [...(course.stops || [])].reverse().map(getMatchedCoursePlaceImage).find(Boolean) || null;
+  return MoovCourseMedia.candidates(course)[0] || null;
 }
 function getCourseStopImage(course, stop, index) {
-  return course.stopDetails?.[index]?.photo || getMatchedCoursePlaceImage(stop) || course.image || "./assets/course-cafe.jpg";
+  return MoovCourseMedia.candidates(course, index)[0] || null;
 }
 function getMatchedCoursePlaceImage(stop) {
-  const imageByPlace = [
-    [/광화문|gwanghwamun/i, "./assets/place-gwanghwamun.jpg"],
-    [/경복궁|근정전|gyeongbokgung|geunjeongjeon/i, "./assets/place-gyeongbokgung.jpg"],
-    [/숭례문|남대문|sungnyemun|namdaemun/i, "./assets/place-sungnyemun.jpg"],
-    [/서울숲|가족마당|성수|카페|로스터리|대림창고|어니언/, "./assets/course-cafe.jpg"],
-    [/뚝섬|반포|한강|달빛광장/, "./assets/course-hangang-sunset.jpg"],
-    [/야구장|잠실새내/, "./assets/course-baseball.jpg"],
-    [/재즈|이태원|한남동|경리단/, "./assets/course-jazz.jpg"],
-    [/캠핑|난지|망원시장/, "./assets/course-camping.jpg"],
-    [/북악|팔각정|부암동/, "./assets/course-bugak.jpg"],
-    [/인사동|익선동|쌈지길|한옥/, "./assets/course-insadong.jpg"],
-    [/이천|도자|설봉/, "./assets/course-pottery.jpg"],
-    [/석촌|송리단길/, "./assets/course-seokchon.jpg"],
-    [/롯데월드|매직아일랜드|회전목마/, "./assets/course-lotteworld.jpg"],
-    [/예술의전당|한가람|오페라|음악분수/, "./assets/course-artscenter.jpg"],
-    [/냉면|을지로|덕수궁/, "./assets/course-naengmyeon.jpg"],
-    [/돈까스|케이블카|서울타워|N서울/, "./assets/course-tonkatsu.jpg"],
-    [/도서관|정동길|청계천|책쉼터/, "./assets/course-library.jpg"],
-  ];
-  return imageByPlace.find(([pattern]) => pattern.test(stop))?.[1] || null;
+  return MoovCourseMedia.placeImage(stop);
 }
-
-function coursePhotoCredits(course) {
-  const images = [getCourseCoverImage(course), ...(course.stops || []).map((stop,index)=>getCourseStopImage(course,stop,index))];
-  if (!images.some(src=>src?.includes('/place-'))) return '';
-  return `<a class="course-photo-credit" href="./assets/course-photo-credits.html" target="_blank" rel="noopener" data-i18n-skip>${taxiMapText('사진 출처 · Wikimedia Commons','Photo credits · Wikimedia Commons')}</a>`;
+function renderCoursePhoto(course, index = null) {
+  const photos = MoovCourseMedia.candidates(course, index);
+  const label = index == null ? course.name : course.stops[index];
+  const route = index == null ? (course.stops || []).slice(0, 3).join(" → ") : "";
+  const tone = [...String(course.name || course.id)].reduce((sum, char) => sum + char.codePointAt(0), 0) % 3;
+  return `${photos.length ? `<img src="${escapeHtml(photos[0])}" ${index == null ? `data-course-cover="${escapeHtml(course.id)}"` : ""} data-course-photos="${escapeHtml(JSON.stringify(photos.slice(1)))}" data-representative="${MoovCourseMedia.isRepresentative(course,photos[0])}" alt="${escapeHtml(label)} ${MoovCourseMedia.isRepresentative(course,photos[0])?'활동 참고 사진':'코스 사진'}" loading="lazy" />` : ""}${index == null ? `<span class="course-photo-kind" data-i18n-skip>${taxiText("분위기 사진", "Activity photo")}</span>` : ""}<span class="course-photo-placeholder tone-${tone}">${icon("pin")}<strong>${escapeHtml(label)}</strong><small>${escapeHtml(route)}</small></span>`;
 }
 
 function getCourseStopDescription(course, stop, index) {
@@ -3311,20 +3317,17 @@ function getCourseStopTip(stop) {
 }
 
 function buildCourseMap(course) {
-  const points = getCourseMapPoints(course);
-  const known = points.filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lng)).length;
-  return `<div class="card padded"><strong>장소 위치 ${known}/${points.length}개 확인 가능</strong><div id="course-detail-naver-map" class="course-detail-naver-map" aria-label="${escapeHtml(course.name)} 지도"></div></div>`;
+  return `<div class="card padded"><strong data-course-location-count>장소 위치를 확인하고 있어요</strong><div id="course-detail-naver-map" class="course-detail-naver-map" aria-label="${escapeHtml(course.name)} 지도"></div></div>`;
 }
 
 function openCourseStopDetail(course, index) {
   const stop = course.stops[index];
   if (!stop) return;
   const role = getCourseStopRole(index, course.stops.length);
-  const image = getCourseStopImage(course, stop, index);
   openModal({
     title: stop,
     iconName: "pin",
-    body: `<div class="stop-detail-role"><span>${index + 1}</span><div><small>${role}</small><strong>${escapeHtml(course.name)}</strong></div></div><div class="stop-detail-image"><img src="${image}" alt="${escapeHtml(stop)} 장소 이미지" /></div>${coursePhotoCredits(course)}<div class="stop-detail-copy"><strong>${escapeHtml(stop)}</strong><p>${escapeHtml(getCourseStopDescription(course, stop, index))}</p></div><div class="receipt-info"><span>장소 구분</span><strong>${role}</strong><span>추천 체류</span><strong>${escapeHtml(course.dwell?.[index] || "60분")}</strong><span>방문 순서</span><strong>${index + 1} / ${course.stops.length}</strong></div><div class="recommend-box"><strong>${icon("pin")} 장소 추천</strong><p>${escapeHtml(getCourseStopTip(stop))}</p></div>`,
+    body: `<div class="stop-detail-role"><span>${index + 1}</span><div><small>${role}</small><strong>${escapeHtml(course.name)}</strong></div></div><div class="stop-detail-image" data-course-visual>${renderCoursePhoto(course, index)}</div><div class="stop-detail-copy"><strong>${escapeHtml(stop)}</strong><p>${escapeHtml(getCourseStopDescription(course, stop, index))}</p></div><div class="receipt-info"><span>장소 구분</span><strong>${role}</strong><span>추천 체류</span><strong>${escapeHtml(course.dwell?.[index] || "60분")}</strong><span>방문 순서</span><strong>${index + 1} / ${course.stops.length}</strong></div><div class="recommend-box"><strong>${icon("pin")} 장소 추천</strong><p>${escapeHtml(getCourseStopTip(stop))}</p></div>`,
     primary: "코스 상세로 돌아가기",
     secondary: null,
     onConfirm: () => setTimeout(() => openCourseDetail(course), 0),
@@ -3337,8 +3340,7 @@ function openCourseDetail(course) {
     const role = getCourseStopRole(index, course.stops.length);
     return `<button class="course-detail-stop ${index === 0 ? "start" : index === course.stops.length - 1 ? "destination" : "waypoint"}" data-action="course-stop-detail" data-value="${index}"><span>${index + 1}</span><div><small>${role}</small><strong>${escapeHtml(stop)}</strong><em>${escapeHtml(course.dwell?.[index] || "60분")} 머무름</em></div>${icon("chevron")}</button>`;
   }).join("");
-  const cover = getCourseCoverImage(course) || getCourseStopImage(course, course.stops[0] || "", 0);
-  openModal({ title: course.name, iconName: "compass", body: `<div class="detail-cover"><img src="${cover}" alt="${escapeHtml(course.name)}" /></div>${coursePhotoCredits(course)}<p>${escapeHtml(course.desc)}</p>${buildCourseMap(course)}<div class="course-detail-meta"><div><small>전체 시간</small><strong>${escapeHtml(course.time)}</strong></div><div><small>장소</small><strong>${course.stops.length}곳</strong></div><div><small>추천 순서</small><strong>번호 순서대로</strong></div></div><div class="course-route-heading"><strong>빠른 이동 경로</strong><small>장소를 누르면 상세 내용을 볼 수 있어요.</small></div><div class="detail-stop-list">${stops}</div><div class="recommend-box"><strong>${icon("heart")} MOOV 추천</strong><p>${escapeHtml(course.recommend || "여유 있게 출발해 각 장소의 운영시간을 확인해 주세요.")}</p></div>`, primary: courseFollowLabel(), secondary: "닫기", onConfirm: () => useCourseForHome(course) });
+  openModal({ title: course.name, iconName: "compass", body: `<div class="detail-cover" data-course-visual>${renderCoursePhoto(course)}</div><p>${escapeHtml(course.desc)}</p>${buildCourseMap(course)}<div class="course-detail-meta"><div><small>전체 시간</small><strong>${escapeHtml(course.time)}</strong></div><div><small>장소</small><strong>${course.stops.length}곳</strong></div><div><small>추천 순서</small><strong>번호 순서대로</strong></div></div><div class="course-route-heading"><strong>빠른 이동 경로</strong><small>장소를 누르면 상세 내용을 볼 수 있어요.</small></div><div class="detail-stop-list">${stops}</div><div class="recommend-box"><strong>${icon("heart")} MOOV 추천</strong><p>${escapeHtml(course.recommend || "여유 있게 출발해 각 장소의 운영시간을 확인해 주세요.")}</p></div>`, primary: courseFollowLabel(), secondary: "닫기", onConfirm: () => useCourseForHome(course) });
   void mountCourseMap(document.querySelector("#course-detail-naver-map"), [course], true);
 }
 
@@ -3397,7 +3399,7 @@ function currentTasteSignals() {
 function renderSimilarTaste() {
   const group = tasteGroups.find((item) => item.name === state.tasteGroup) || tasteGroups[0];
   const signals = currentTasteSignals();
-  const list = baseCourses.filter((course) => {
+  const list = allOutingCourses().filter((course) => {
     const tags = getCourseTags(course);
     return group.categories.some((value) => tags.category.includes(value)) ||
       group.moods.some((value) => tags.mood.includes(value));
@@ -3409,17 +3411,20 @@ function renderSimilarTaste() {
 }
 
 function rankSurveyCourses(courses) {
-  return MoovSurveyProfile.rank(courses, state.surveyRecord?.profile, getCourseTags, course => state.popularityCounts[course.id] || 0);
+  const ranked = MoovSurveyProfile.rank(courses, state.surveyRecord?.profile, getCourseTags, course => state.popularityCounts[course.id] || 0);
+  return MoovOutingData.diversifyTies(ranked, item => JSON.stringify([item.match.category,item.match.subcategory,item.match.region,state.popularityCounts[item.course.id] || 0]), item => item.course);
 }
 function renderSurveyMatch(match) {
-  return `<p class="small green" data-i18n-skip>${escapeHtml(match.total ? taxiText(`선호 활동 ${match.matched}/${match.total}개 일치`, `${match.matched}/${match.total} preferred activities matched`) : taxiText("활동 취향 미설정 · 기본 추천", "No activity preferences · general recommendations"))}${match.region ? " · " + taxiText("선호 지역 포함", "Preferred area included") : ""}</p>`;
+  const label = match.percent == null ? taxiText("취향 정보 없음", "No taste data") : taxiText(`내 취향 ${match.percent}% 일치`, `Taste match ${match.percent}%`);
+  const basis = match.total ? taxiText(`선호 활동 ${match.matched}/${match.total}개 일치`, `${match.matched}/${match.total} preferred activities matched`) : taxiText("취향 설문을 설정하면 일치율을 보여드려요.", "Set your preferences to see your match.");
+  return `<div class="survey-course-match" data-i18n-skip><span class="taste-match">${icon("user")} ${escapeHtml(label)}</span><small>${escapeHtml(basis)}${match.region ? " · " + taxiText("선호 지역 포함", "Preferred area included") : ""}</small></div>`;
 }
 function renderSurveyNote() {
   return `<div class="survey-profile-note" data-i18n-skip><strong>${taxiText("내 취향을 반영한 코스", "Trips based on your preferences")}</strong><div>${taxiText("제외 조건을 먼저 적용하고 활동, 세부 취향, 선호 지역 순서로 비교해요. 정보가 없는 장소는 제외 여부를 확인할 수 없어요.", "We apply exclusions first, then compare activities, details and preferred areas. Places with missing information cannot be checked for exclusions.")}</div><button class="mini-action" data-action="edit-taste-survey">${taxiText("취향 설문 수정", "Edit preferences")}</button></div>`;
 }
 function renderRecommendation() {
   const prefs = state.recommendationPrefs;
-  const recommended = state.recommendationResultIds.map((id) => getCourse(id)).filter(Boolean);
+  const recommended = MoovCourseMedia.sequenceCovers(MoovOutingData.uniqueCourses(state.recommendationResultIds.map((id) => getCourse(id)).filter(Boolean)));
   const result = state.recommendationRequestId
     ? `<section class="section-lead compact"><h3>추천 결과</h3><p>설문 취향과 선택 조건을 코스 태그와 비교합니다. 실제 장소 운영시간·가격·동선은 확인이 필요해요.</p></section>${recommended.length ? `<div class="stack">${recommended.map((course, index) => {
   const context = { userLat: 37.5445, userLon: 127.0557, remainingMs: getHomeRentalRemaining() };
@@ -3462,24 +3467,14 @@ async function runOutingRecommendation() {
   );
   const context = { userLat: 37.5445, userLon: 127.0557, remainingMs: getHomeRentalRemaining() };
   const rankedAll = state.surveyRecord ? rankSurveyCourses(candidates) : MoovOutingData.rank(candidates, prefs, getCourseTags, context);
-  const seenNames = new Set();
-  const ranked = [];
-  for (const item of rankedAll) {
-    const key = item.course._dbPoints
-      ? item.course._dbPoints.map((p) => `${p.latitude},${p.longitude}`).join("|")
-      : item.course.name || item.course.id;
-    if (seenNames.has(key)) continue;
-    seenNames.add(key);
-    ranked.push(item);
-    if (ranked.length >= 3) break;
-  }
+  const ranked = rankedAll.slice(0, 3);
   const previousRequestId = state.recommendationRequestId;
   state.recommendationRequestId = MoovOutingData.newId();
   state.recommendationResultIds = ranked.map((item) => item.course.id);
   persist(); render();
   logOutingEvent("recommendation_exposure", "recommendation", state.recommendationRequestId,
-      { conditions: prefs, shown_course_ids: state.recommendationResultIds,
-        results: ranked.map((item, index) => ({ course_id: item.course.id, rank: index + 1, score: item.score })) });
+    { conditions: prefs, shown_course_ids: state.recommendationResultIds,
+      results: ranked.map((item, index) => ({ course_id: item.course.id, rank: index + 1, score: item.score })) });
 }
 
 function renderRegisterCourse() {
@@ -3515,8 +3510,8 @@ function renderInterestCourses() {
   return `<section class="section-lead"><h3>관심 코스</h3><p>관심 저장한 코스를 한곳에서 확인하세요.</p></section>${list.length ? `<div class="stack">${list.map(courseCard).join("")}</div>` : emptyState("bookmark", "관심 코스가 없어요", "AI 코스 추천에서 저장하거나 새 코스를 등록해 주세요.")}`;
 }
 
-function getCourse(id) { return dbCourses.find((course) => course.id === id) || baseCourses.find((course) => course.id === id) || state.customCourses.find((course) => course.id === id); }
-function getInterestCourses() { return [...baseCourses, ...state.customCourses].filter((course) => state.savedCourseIds.has(course.id)); }
+function getCourse(id) { return allOutingCourses().find(course => course.id === id) || dbCourses.find(course => course.id === id) || baseCourses.find(course => course.id === id) || state.customCourses.find(course => course.id === id); }
+function getInterestCourses() { return MoovOutingData.uniqueCourses([...state.customCourses, ...dbCourses, ...baseCourses].filter(course => state.savedCourseIds.has(course.id))); }
 
 function renderProfile() {
   if (state.profileView !== "menu") return renderProfileSection();
@@ -3524,7 +3519,7 @@ function renderProfile() {
   const primaryCard = state.paymentCards.find((card) => card.primary) || state.paymentCards[0];
   const english = window.MoovI18n?.getLanguage() === "en";
   const languageSwitch = `<div class="profile-language-corner"><div class="profile-language-switch" role="group" aria-label="Language / 언어" data-i18n-skip><button type="button" data-language="ko" lang="ko" aria-label="한국어" title="한국어" aria-pressed="${!english}">한</button><button type="button" data-language="en" lang="en" aria-label="English" title="English" aria-pressed="${english}">E</button></div></div>`;
-  return `<div class="stack">${languageSwitch}<section class="card profile-card"><div class="avatar">${avatar}</div><div style="flex:1"><h3>${escapeHtml(state.username)}님</h3><p>MOOV Explorer · 누적 이동 128km</p></div><button class="mini-action" data-action="edit-profile">${icon("edit")} 편집</button></section><section class="card mode-hero"><div class="mode-hero-visual"><img src="${themeAssets[state.theme]}" alt="${escapeHtml(state.theme)} 공간 테마가 적용된 차량 내부" /><span class="badge">공간 모드</span></div><div class="mode-hero-body"><h3>${escapeHtml(state.theme)} 모드 적용 중</h3><p class="small">${state.themeConfig.temperature}℃ · 창문 농도 ${state.themeConfig.tint}% · ${escapeHtml(state.themeConfig.light)}</p><button class="secondary-button full" data-action="open-theme">공간 테마 상세 설정</button></div></section><section class="card menu-list">${menuItem("bell", "공지·이벤트", "새로운 MOOV 소식과 혜택", "profile-section", "notices")}${menuItem("clock", "이용 기록", "택시·렌트·공간·구매 내역", "profile-section", "usage")}${menuItem("bookmark", "관심 코스", `저장·등록한 코스 ${getInterestCourses().length}개`, "profile-section", "courses")}${menuItem("heart", taxiText("취향 설문", "Taste preferences"), taxiText("활동 · 세부 취향 · 지역 · 제외 항목 수정", "Edit activities, areas and exclusions"), "edit-taste-survey")}${menuItem("card", "결제수단 관리", primaryCard ? `${primaryCard.name} ${primaryCard.number}` : "등록된 결제수단 없음", "profile-section", "payments")}${menuItem("shield", "약관 및 정책", "개인정보·차량 보안 정책", "profile-section", "policies")}${menuItem("space", "버전 정보", `MOOV ${APP_VERSION}`, "profile-section", "version")}${menuItem("user", "로그아웃", "로그인 화면으로 돌아가기", "logout", "logout")}</section><button class="card security-summary" data-action="open-security-proof">${icon("shield")}<span><strong>차량 보안 상태</strong><small>${state.securityProof ? `삭제 검증 완료 · ${escapeHtml(state.securityProof.reference)}` : "배차 전 이전 이용 데이터 삭제 확인"}</small></span><span class="badge">안전</span></button></div>`;
+  return `<div class="stack">${languageSwitch}<section class="card profile-card"><div class="avatar">${avatar}</div><div style="flex:1"><h3>${escapeHtml(state.username)}님</h3><p>MOOV Explorer · 누적 이동 128km</p></div><button class="mini-action" data-action="edit-profile">${icon("edit")} 편집</button></section><section class="card mode-hero"><div class="mode-hero-visual">${window.MoovThemeSettings ? MoovThemeSettings.preview(state.themeConfig) : `<img src="${themeAssets[state.theme]}" alt="차량 내부" />`}<span class="badge">공간 모드</span></div><div class="mode-hero-body"><h3>${escapeHtml(window.MoovThemeSettings ? MoovThemeSettings.modeLabel(state.themeConfig) : state.theme)} 모드 미리보기</h3><p class="small">${state.themeConfig.temperature}℃ · 창문 투명도 ${state.themeConfig.tint}% · ${escapeHtml(state.themeConfig.light)}</p><button class="secondary-button full" data-action="open-theme">공간 테마 상세 설정</button></div></section><section class="card menu-list">${menuItem("bell", "공지·이벤트", "새로운 MOOV 소식과 혜택", "profile-section", "notices")}${menuItem("clock", "이용 기록", "택시·렌트·공간·구매 내역", "profile-section", "usage")}${menuItem("bookmark", "관심 코스", `저장·등록한 코스 ${getInterestCourses().length}개`, "profile-section", "courses")}${menuItem("heart", taxiText("취향 설문", "Taste preferences"), taxiText("활동 · 세부 취향 · 지역 · 제외 항목 수정", "Edit activities, areas and exclusions"), "edit-taste-survey")}${menuItem("card", "결제수단 관리", primaryCard ? `${primaryCard.name} ${primaryCard.number}` : "등록된 결제수단 없음", "profile-section", "payments")}${menuItem("shield", "약관 및 정책", "개인정보·차량 보안 정책", "profile-section", "policies")}${menuItem("space", "버전 정보", `MOOV ${APP_VERSION}`, "profile-section", "version")}${menuItem("user", "로그아웃", "로그인 화면으로 돌아가기", "logout", "logout")}</section><button class="card security-summary" data-action="open-security-proof">${icon("shield")}<span><strong>차량 보안 상태</strong><small>${state.securityProof ? `삭제 검증 완료 · ${escapeHtml(state.securityProof.reference)}` : "배차 전 이전 이용 데이터 삭제 확인"}</small></span><span class="badge">안전</span></button></div>`;
 }
 
 function renderProfileSection() {
@@ -3562,7 +3557,7 @@ function renderPaymentMethods() {
 }
 
 function renderPolicies() {
-  const policies = [["service", "서비스 이용약관", "택시·렌트·공간 이용 기준"], ["privacy", "개인정보 처리방침", "위치·결제·프로필 정보 처리 기준"], ["security", "차량 보안 정책", "탑승 인증·데이터 삭제·긴급 대응"], ["refund", "취소 및 환불 정책", "배차·렌트·상품 주문 취소 기준"]];
+  const policies = [["fares", "차량·요금정책", "차종별 탑승 인원과 택시·렌트 요금"], ["service", "서비스 이용약관", "택시·렌트·공간 이용 기준"], ["privacy", "개인정보 처리방침", "위치·결제·프로필 정보 처리 기준"], ["security", "차량 보안 정책", "탑승 인증·데이터 삭제·긴급 대응"], ["refund", "취소 및 환불 정책", "배차·렌트·상품 주문 취소 기준"]];
   return `<section class="card menu-list">${policies.map(([id, name, desc]) => menuItem("shield", name, desc, "policy-detail", id)).join("")}</section>`;
 }
 
@@ -3576,8 +3571,17 @@ function openProfileEditor() {
 }
 
 function openThemeSettings() {
-  state.pendingTheme = state.theme;
-  openModal({ title: "공간 테마 설정", iconName: "space", body: `<p>테마를 선택하면 차량 내부가 어떻게 바뀌는지 먼저 확인할 수 있어요.</p><div class="popup-form"><figure class="theme-main-preview"><img id="theme-example-image" src="${themeAssets[state.theme]}" alt="${escapeHtml(state.theme)} 공간 테마 예시" /><figcaption id="theme-example-label">${escapeHtml(state.theme)} 모드 미리보기</figcaption></figure><div class="theme-preview">${["윈도우", "콘텐츠", "웰니스", "수면", "프라이빗"].map((mode) => `<button class="${state.theme === mode ? "active" : ""}" data-action="theme-choice" data-value="${mode}"><img src="${themeAssets[mode]}" alt="" /><span>${mode}</span></button>`).join("")}</div><label class="range-row"><span class="row small"><strong>실내 온도</strong><span id="temp-value">${state.themeConfig.temperature}℃</span></span><input id="theme-temp" type="range" min="18" max="28" value="${state.themeConfig.temperature}" /></label><label class="range-row"><span class="row small"><strong>창문 투명도</strong><span id="tint-value">${state.themeConfig.tint}%</span></span><input id="theme-tint" type="range" min="0" max="100" value="${state.themeConfig.tint}" /></label><label class="form-label">조명<select id="theme-light">${["민트 앰비언트", "따뜻한 독서등", "콘텐츠 몰입등", "수면 저조도"].map((light) => `<option ${state.themeConfig.light === light ? "selected" : ""}>${light}</option>`).join("")}</select></label><label class="row card padded" style="font-size:.76rem"><span><strong>프라이버시 글라스</strong><br /><small class="muted">외부 시야 차단</small></span><input id="theme-privacy" type="checkbox" style="width:22px;min-height:22px" ${state.themeConfig.privacy ? "checked" : ""} /></label></div>`, primary: "차량에 적용", secondary: "취소", onCancel: () => { state.pendingTheme = null; syncCabinPreview(); }, onConfirm: () => { state.theme = state.pendingTheme || state.theme; state.pendingTheme = null; state.themeConfig.temperature = Number(document.querySelector("#theme-temp")?.value || 22); state.themeConfig.tint = Number(document.querySelector("#theme-tint")?.value || 60); state.themeConfig.light = document.querySelector("#theme-light")?.value || "민트 앰비언트"; state.themeConfig.privacy = Boolean(document.querySelector("#theme-privacy")?.checked); persist(); render(); toast(`${state.theme} 모드를 차량에 적용했어요.`); } });
+  if (!window.MoovThemeSettings) return toast('설정을 불러오는 중이에요. 잠시 후 다시 열어 주세요.');
+  openModal({
+    title: taxiText('공간 테마 설정', 'Space settings'), iconName: 'space',
+    body: MoovThemeSettings.markup(state.themeConfig),
+    primary: taxiText('확인', 'Confirm'), secondary: taxiText('취소', 'Cancel'),
+    onConfirm: () => {
+      state.themeConfig = MoovThemeSettings.read(document.querySelector('#theme-settings'));
+      persist(); render(); toast(taxiText('실내 환경 설정을 저장했어요.', 'Cabin settings saved.'));
+    },
+  });
+  MoovThemeSettings.attach(document.querySelector('#theme-settings'));
 }
 
 function openPaymentEditor() {
@@ -3585,6 +3589,7 @@ function openPaymentEditor() {
 }
 
 function openPolicyDetail(id) {
+  if (id === "fares") return openVehicleFarePolicy();
   const policies = {
     service: ["서비스 이용약관", "MOOV 택시·렌트·공간 서비스는 본인 인증과 차량 배정 완료 후 이용할 수 있습니다. 운행 중 안전 지시와 차량 이용 규칙을 따라야 합니다."],
     privacy: ["개인정보 처리방침", "배차와 경로 제공을 위해 위치정보를 이용하며 결제·프로필 정보는 서비스 제공 목적에 한해 처리합니다. 차량 내 음성 원본과 OTT 로그인 정보는 하차 후 자동 삭제합니다."],
@@ -3612,7 +3617,7 @@ function toggleItem(titleText, desc, on, action = "toggle", iconVariant = null) 
 function menuItem(iconName, titleText, desc, action = "menu-info", value = titleText) { return `<button class="menu-item" data-action="${action}" data-value="${value}"><span class="menu-icon">${icon(iconName)}</span><span><strong>${titleText}</strong><small>${desc}</small></span>${icon("chevron")}</button>`; }
 function emptyState(iconName, heading, text) { return `<section class="card empty-state">${icon(iconName)}<h4>${heading}</h4><p>${text}</p></section>`; }
 
-function openModal({ title: modalTitle, body, iconName = "shield", primary = "확인", secondary = "닫기", onConfirm = null, onCancel = null }) {
+function openModal({ title: modalTitle, body, iconName = "shield", primary = "확인", secondary = "닫기", onConfirm = null, onCancel = null, actionLayout = "balanced" }) {
   disposeTaxiPicker();
   MoovCourseMap.disposeWithin(modal);
   document.querySelector("#modal-title").textContent = modalTitle;
@@ -3621,6 +3626,7 @@ function openModal({ title: modalTitle, body, iconName = "shield", primary = "�
   modalBody.scrollTop = 0;
   document.querySelector("#modal-icon").innerHTML = icon(iconName);
   const actions = document.querySelector("#modal-actions");
+  actions.dataset.layout = actionLayout;
   actions.innerHTML = `${secondary ? `<button class="ghost-button" data-modal-cancel>${secondary}</button>` : ""}<button class="primary-button" data-modal-confirm>${primary}</button>`;
   actions.querySelector("[data-modal-cancel]")?.addEventListener("click", () => { if (onCancel) onCancel(); closeModal(); });
   actions.querySelector("[data-modal-confirm]").onclick = () => { const shouldClose = onConfirm ? onConfirm() !== false : true; if (shouldClose) closeModal(); };
@@ -3730,7 +3736,10 @@ document.addEventListener("click", (event) => {
   if (action === "open-status") openVehicleStatus();
   if (action === "open-security-proof") openVehicleStatus();
   if (action === "header-profile") setTab("profile");
-  if (action === "select-home-mode") { state.homeMode = value; state.homeStep = "setup"; persist(); render(); }
+  if (action === "select-home-mode") {
+    const proceed = () => { showScreen('app'); state.homeMode = value; state.homeStep = 'setup'; persist(); render(); };
+    if (value !== 'rent' || !MoovLoginSurvey.requestCompletion(proceed)) proceed();
+  }
   if (action === "return-mode-choice") { state.homeStep = "mode"; render(); }
   if (action === "locate-taxi-map") { MoovNaverMap.locateOnMap(taxiMapSession?.map, button, toast); return; }
   if (action === "locate-home") locateUser("home");
@@ -3745,7 +3754,7 @@ document.addEventListener("click", (event) => {
   if (action === "taxi-center-route") {MoovLocationPicker.cancelSelection();if(taxiMapSession){taxiMapSession.map.moovInteracted=false;MoovNaverMap.fitRoute(taxiMapSession.map,[...taxiMapSession.routePoints,...taxiMapSession.points.filter(validTaxiPoint)]);}return;}
   if (action === "select-home-course") { const course = getCourse(value); if (course) { state.selectedCourse = course; state.routeStops = [state.pickupLocation, ...course.stops]; state.homeStep = "setup"; persist(); closeModal(); render(); toast("관심 코스 전체를 목적지에 등록했어요."); } }
   if (action === "home-mode") { if (state.tripActive && value === "rent" && state.homeMode === "taxi") return openModal({ title: "렌트로 전환할까요?", body: "<p>렌트 조건과 결제가 확정될 때까지 현재 택시 이동은 계속됩니다.</p>", iconName: "key", primary: "전환 요청", onConfirm: () => { state.homeMode = "rent"; state.tripActive = true; state.usageStartedAt = Date.now(); state.rentalEndsAt = state.usageStartedAt + state.rentalHours * 3600000; persist(); render(); toast("안전 정차 후 렌트 이용을 시작했어요."); } }); state.homeMode = value; persist(); render(); }
-  if (action === "rent-minus") { state.rentalHours = Math.max(2, state.rentalHours - 1); render(); }
+  if (action === "rent-minus") { state.rentalHours = Math.max(3, state.rentalHours - 1); render(); }
   if (action === "rent-plus") { state.rentalHours = Math.min(24, state.rentalHours + 1); render(); }
   if (action === "taxi-vehicle") { if (!MoovTaxiFare.vehicles.some(vehicle => vehicle.id === value)) return; state.taxiVehicleType = value; persist(); render(); toast("택시 차량 종류를 변경했어요."); }
   if (action === "rental-vehicle") { state.rentalVehicleType = value; persist(); render(); toast("렌트 차량 종류를 변경했어요."); }
@@ -3753,7 +3762,7 @@ document.addEventListener("click", (event) => {
   if (["taxi-boarded", "taxi-cancel-approach", "taxi-retry-approach"].includes(action)) return handleTaxiApproachAction(action);
   if (action === "request-taxi") return requestTaxiBooking();
   if (action === "switch-to-rent") openModal({ title: "렌트로 전환할까요?", body: "<p>렌트 조건과 결제가 확정될 때까지 현재 택시 이동은 계속됩니다. 안전 정차 후 차량 옵션을 선택합니다.</p>", iconName: "key", primary: "전환 설정", secondary: "취소", onConfirm: () => { state.tripActive = false; state.usageStartedAt = null; state.rentalEndsAt = null; state.homeMode = "rent"; state.homeStep = "setup"; persist(); render(); toast("렌트 조건을 선택해 주세요."); } });
-  if (action === "request-rent") { const vehicle = rentalVehicles.find((item) => item.id === state.rentalVehicleType) || rentalVehicles[0]; const optionPrice = rentalOptionCatalog.filter((item) => state.rentalOptions.has(item.id)).reduce((sum, item) => sum + item.price, 0); const total = state.rentalHours * vehicle.price + optionPrice; if (!state.routeStops.at(-1) || state.routeStops.length < 2) return toast("출발지와 목적지를 먼저 설정해 주세요."); openModal({ title: `${vehicle.name} ${state.rentalHours}시간 렌트`, body: `<p>${escapeHtml(state.pickupLocation)}으로 차량을 배정합니다. 예상 요금은 ${total.toLocaleString("ko-KR")}원이며 선택 옵션 ${state.rentalOptions.size}개가 적용됩니다.</p>`, iconName: "key", primary: "예약", onConfirm: () => { state.tripActive = true; state.homeStep = "service"; state.usageStartedAt = Date.now(); state.rentalEndsAt = state.usageStartedAt + state.rentalHours * 3600000; persist(); render(); toast("렌트 차량이 출발지로 이동 중이에요."); } }); }
+  if (action === "request-rent") { const vehicle = rentalVehicles.find((item) => item.id === state.rentalVehicleType) || rentalVehicles[0]; const optionPrice = rentalOptionCatalog.filter((item) => state.rentalOptions.has(item.id)).reduce((sum, item) => sum + item.price, 0); const total = MoovVehicleCatalog.rentalFare(vehicle.id, state.rentalHours) + optionPrice; if (!state.routeStops.at(-1) || state.routeStops.length < 2) return toast("출발지와 목적지를 먼저 설정해 주세요."); openModal({ title: `${vehicle.name} ${state.rentalHours}시간 렌트`, body: `<p>${escapeHtml(state.pickupLocation)}으로 차량을 배정합니다. 예상 요금은 ${total.toLocaleString("ko-KR")}원이며 선택 옵션 ${state.rentalOptions.size}개가 적용됩니다.</p>`, iconName: "key", primary: "예약", onConfirm: () => { state.tripActive = true; state.homeStep = "service"; state.usageStartedAt = Date.now(); state.rentalEndsAt = state.usageStartedAt + state.rentalHours * 3600000; persist(); render(); toast("렌트 차량이 출발지로 이동 중이에요."); } }); }
   if (action === "finish-trip") openEndConfirmation();
   if (action === "ai-sub") { state.aiSub = value; state.personaMenuOpen = false; render(); }
   if (action === "persona-menu") { state.personaMenuOpen = !state.personaMenuOpen; render(); }
@@ -3905,7 +3914,6 @@ document.addEventListener("click", (event) => {
   if (action === "publish-course") publishCourse();
   if (action === "edit-profile") openProfileEditor();
   if (action === "open-theme") openThemeSettings();
-  if (action === "theme-choice") { state.pendingTheme = value; document.querySelectorAll('[data-action="theme-choice"]').forEach((item) => item.classList.toggle("active", item === button)); const preview = document.querySelector("#theme-example-image"); const label = document.querySelector("#theme-example-label"); const livePreview = document.querySelector("#cabin-live-image"); const liveLabel = document.querySelector("#cabin-live-label"); if (preview) { preview.src = themeAssets[value]; preview.alt = `${value} 공간 테마 예시`; } if (label) label.textContent = `${value} 모드 미리보기`; if (livePreview) livePreview.src = themeAssets[value]; if (liveLabel) liveLabel.textContent = `${value} 모드 미리보기`; }
   if (action === "open-interest") { state.outingSub = "interest"; state.hasUnseenInterestCourse = false; persist(); setTab("outing"); }
   if (action === "profile-section") { state.profileView = value; render(); content.scrollTop = 0; }
   if (action === "profile-back") { state.profileView = "menu"; render(); }
@@ -3918,7 +3926,7 @@ document.addEventListener("click", (event) => {
   if (action === "payment-remove") { const target = state.paymentCards.find((card) => card.id === value); if (!target || state.paymentCards.length === 1) return toast("결제수단은 한 개 이상 필요해요."); openModal({ title: "결제수단을 삭제할까요?", body: `<p>${escapeHtml(target.name)} ${escapeHtml(target.number)} 카드를 삭제합니다.</p>`, iconName: "card", primary: "삭제", secondary: "취소", onConfirm: () => { const wasPrimary = target.primary; state.paymentCards = state.paymentCards.filter((card) => card.id !== value); if (wasPrimary && state.paymentCards[0]) state.paymentCards[0].primary = true; persist(); render(); toast("결제수단을 삭제했어요."); } }); }
   if (action === "policy-detail") openPolicyDetail(value);
   if (action === "check-update") toast("현재 최신 버전을 사용 중이에요.");
-  if (action === "license-info") openModal({ title: "오픈소스 라이선스", body: "<p>프로토타입에 사용된 오픈소스 구성요소의 라이선스는 정식 배포 시 앱 설정에서 제공합니다.</p>", iconName: "space", secondary: null });
+  if (action === "license-info") openModal({ title: "오픈소스 라이선스", body: "<p>프로토타입에 사용된 오픈소스 구성요소의 라이선스는 정식 배포 시 앱 설정에서 제공합니다.</p><p><a href='./assets/course-photo-credits.html' target='_blank' rel='noopener'>코스 사진 라이선스</a></p>", iconName: "space", secondary: null });
   if (action === "menu-info") openModal({ title: value, body: `<p>${value} 상세 화면은 서비스 정책과 연결되는 프로토타입 영역입니다.</p>`, iconName: "user", secondary: null });
 });
 
@@ -3993,20 +4001,20 @@ function publishCourse() {
   body: JSON.stringify({
     user_id: state.userId,
     title: titleText,
+    image_url: course.image,
     stops: validStops.map((stop) => ({ name: stop.name })),
   }),
-}).then(() => loadCoursesFromDB()).catch((e) => console.error("코스 DB 저장 실패", e));
+}).then(response => { if (!response.ok) throw new Error("Course save failed"); return loadCoursesFromDB(); }).catch((e) => console.error("코스 DB 저장 실패", e));
   state.customCourses.unshift(course); state.savedCourseIds.add(course.id); state.hasUnseenInterestCourse = true; logOutingEvent("course_publish", "course", course.id); state.courseDraft = { title: "", desc: "", stops: [{ type: "경유지", name: "", photo: null }, { type: "목적지", name: "", photo: null }] }; persist(); render(); toast("내 코스를 등록했어요. 관심코스에서 확인해 주세요.");
 }
 
 function currentUsageFee() {
   if (state.homeMode === "taxi") return currentTaxiQuote()?.total ?? null;
   if (!state.tripActive || !state.usageStartedAt) return 0;
-  const elapsedHours = Math.max(0, Date.now() - state.usageStartedAt) / 3600000;
   if (state.homeMode === "rent") {
     const vehicle = rentalVehicles.find((item) => item.id === state.rentalVehicleType) || rentalVehicles[0];
     const optionPrice = rentalOptionCatalog.filter((item) => state.rentalOptions.has(item.id)).reduce((sum, item) => sum + item.price, 0);
-    return Math.round((elapsedHours * vehicle.price + optionPrice) / 100) * 100;
+    return MoovVehicleCatalog.rentalFare(vehicle.id, state.rentalHours) + optionPrice;
   }
   return activeTaxiTrip()?.quote.total ?? null;
 }
@@ -4191,7 +4199,7 @@ updateClock(); setInterval(updateClock, 30000); setInterval(updateUsageTimer, 10
 applyChatFontScale();
 MoovLoginSurvey.configure({
   getUserId: () => state.isAuthenticated ? state.userId : null,
-  showSurvey: () => { disposeTaxiMap(); showScreen("survey"); },
+  showSurvey: () => { closeModal(); disposeTaxiMap(); showScreen("survey"); },
   onBackup: backup => {
     if(!state.isAuthenticated)return;
     const restored=MoovAccountSnapshot.restore(backup,localStorage,state.userId,state.snapshotMissing);
@@ -4204,7 +4212,7 @@ MoovLoginSurvey.configure({
     if(restored.language&&!new URLSearchParams(location.search).has('lang'))MoovI18n.setLanguage(restored.language);
   },
   onRecord: record => { state.surveyRecord = record; state.recommendationResultIds = []; state.recommendationRequestId = null; },
-  enterApp: () => { if (state.isAuthenticated) { showScreen("app"); setTab(state.activeTab || "home"); } },
+  enterApp: (restoreView = false) => { if (state.isAuthenticated) { showScreen("app"); setTab(restoreView ? state.activeTab : "home", true); } },
 });
 splashTimer = setTimeout(enterAuthenticatedScreen, 1200);
 void MoovGoogleAuth.init({

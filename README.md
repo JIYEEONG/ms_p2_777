@@ -2,6 +2,60 @@
 
 `moov_서비스_앱_전체_기획서_V1.0_20260911`과 제공된 IA·콘셉트 화면을 바탕으로 만든 모바일 우선 정적 웹앱 V2.1입니다. Pretendard를 유지하면서 밝은 그린, 18px 카드, 큰 검색 영역과 하단 내비게이션을 중심으로 UI를 재구성했습니다.
 
+## jsw 브랜치 변경 사항 (2026-09-22)
+
+현재 앱의 차량·요금 안내, 나들이 코스, 취향 설문, 공간 설정과 로그인 정보 저장을 개선했습니다. 팀원은 이 브랜치를 확인한 뒤 `main`에 병합할 수 있습니다.
+
+| 영역 | 변경 내용 |
+| --- | --- |
+| 차량·요금정책 | 배리어프리 기능을 **이지핏**으로 통합하고 이지핏 기준 요금·설명을 사용합니다. 패밀리는 **중형(최대 4인)**으로 표시합니다. 택시·렌트·요금 안내가 공통 차량 정보를 사용하며 기존 차량 선택 기록도 호환합니다. |
+| 택시 호출 | 배차 버튼을 강조하고 취소 버튼의 크기와 강조를 줄였습니다. |
+| 나들이 이름·추천 | 반복되는 기본 제목은 실제 방문지 순서로 표시하고 동일 경로를 합칩니다. 같은 추천 순위에서는 방문지가 덜 겹치는 코스를 먼저 보여줍니다. 취향 일치율·근거를 표시하고 하트 옆 수치는 `최근 7일` 없이 개수로 표시합니다. 거리를 알 수 없으면 경로 선택 후 안내한다는 문구를 사용합니다. |
+| 나들이 사진 | **무료 공개 사진 90장**과 기존 장소 사진을 함께 사용합니다. 실제 장소 사진을 우선하며 일반 활동 사진에는 `분위기 사진`을 표시합니다. 현재 데이터에서 **연속 50개 카드 안의 동일 사진 반복을 방지**하고, 정렬·필터 변경 및 이미지 로딩 실패에도 사진을 다시 배정합니다. 목록과 상세보기의 사진을 맞췄습니다. |
+| 코스 상세 지도 | 좌표가 없는 장소는 이름으로 위치를 확인해 네이버 지도에 표시합니다. 확인된 장소 수와 재시도 기능을 제공합니다. |
+| 취향 설문 | 끝까지 완료하지 않은 설문은 다음 로그인 때 다시 표시합니다. 건너뛴 뒤 나들이·렌트로 진입하면 이어서 작성할 수 있습니다. 이전 선택 복원, 미응답 안내, 선호·비선호 지역 중복 방지를 적용했습니다. |
+| 공간 테마 설정 | **윈도우·OTT·웰니스·테마·프라이빗** 미리보기를 제공합니다. OTT 로고와 요가 이미지는 전면 화면에 표시하고, 테마는 선택된 테마 이미지와 연결합니다. 프라이빗 선택 시 창문 투명도는 0%가 됩니다. 조명 변경에 따라 미리보기가 달라지고 민트 조명을 해제하면 민트 라인도 사라집니다. `확인`으로 저장한 설정은 내 정보 미리보기에도 반영됩니다. |
+| Google 로그인 정보 | 서버 로그인 DB의 프로필과 OAuth 임시 인증값을 암호화합니다. 기존 평문 기록은 새 백엔드에서 자동 전환하며, 세션 토큰은 해시로 저장합니다. Google 비밀번호는 앱에서 받거나 저장하지 않습니다. |
+
+사진은 코스의 장소·활동에 맞춰 배정하며, 이미지 생성 API를 호출하지 않습니다. 사진 파일 합계는 약 14.8 MB이고 지연 로딩·브라우저 캐시를 사용합니다. 카드별 출처 문구 대신 목록 아래 **사진 정보**에서 작가·출처·이용 조건을 확인할 수 있습니다. 같은 사진은 51번째 카드부터 재사용할 수 있으며, 정렬을 바꾸면 코스의 대표 사진도 달라질 수 있습니다. 앞으로 특정 활동의 코스가 늘어 관련 사진이 부족해지면 해당 분야 사진을 보충해야 50개 간격을 유지할 수 있습니다.
+
+상세 내용: [코스 이름·사진 배정](docs/course-covers.md), [차량·요금정책](docs/taxi-fare-policy.md), [설문 저장·추천 적용](docs/login-survey-setup.md), [로그인 암호화·설정](docs/google-login-setup.md).
+
+### 기존 팀원이 업데이트할 때
+
+프로젝트 루트에서 실행합니다. 이미 실행 중인 개발 서버는 해당 터미널에서 `Ctrl+C`로 종료한 뒤 다시 시작하세요.
+
+```powershell
+git fetch origin
+git switch jsw
+git pull --ff-only origin jsw
+.venv/Scripts/python.exe -m pip install -r backend/requirements.txt
+cd front
+npm install
+npm run dev
+```
+
+- `.venv`가 없다면 아래 **실행** 절의 최초 설치부터 진행합니다. 이번 변경에는 암호화 의존성 `cryptography`가 추가되어 Python 의존성 설치가 필요합니다.
+- `backend/.env`와 로컬 로그인·설문 DB는 Git에 포함하지 않습니다. 각 PC의 기존 설정을 유지하세요. 기본 암호화 키는 `AUTH_SESSION_SECRET`에서 파생하므로 업데이트를 위해 값을 바꿀 필요가 없습니다.
+- 기존 로그인 DB가 암호화된 뒤에는 같은 DB를 이전 버전 백엔드와 함께 사용하지 않습니다. 키를 변경하면 기존 로그인 기록을 읽을 수 없으므로 자세한 범위·키 관리 방법은 위 로그인 설정 문서를 참고하세요.
+- 접속 주소는 **http://localhost:3000**, 시연 계정은 **`moov` / `demo1234`**입니다. 화면이 이전 상태로 보이면 `Ctrl+F5`로 새로고침하세요.
+
+### 변경 사항 검증
+
+사진 배정은 공개 코스 1,017개 중 중복 경로를 제외한 164개를 기준으로, 정렬 4종 × 분류 7종의 28개 조합에서 모든 연속 50개 구간을 확인했습니다. 아래 프론트 단위 테스트 61개와 로그인·설문·나들이 인증 관련 백엔드 테스트 43개가 통과했습니다. 실제 브라우저에서 사진 로딩·오류 복구·목록과 상세보기 일치도 검사했습니다.
+
+다음 명령은 프로젝트 루트에서 실행합니다. 브라우저 검사는 별도 터미널에서 `npm run dev`로 서버를 켜 둔 상태에서 실행하며, 임시 테스트 계정을 사용합니다.
+
+```powershell
+node --test front/tests/course-presentation.test.cjs front/tests/course-locations.test.cjs front/tests/outing-data.test.cjs front/tests/survey-profile.test.cjs front/tests/taxi-fare.test.cjs front/tests/naver-rental-route.test.cjs front/tests/taxi-approach.test.cjs
+.venv/Scripts/python.exe -m unittest backend.test_auth_crypto backend.test_google_auth_api backend.test_survey_api backend.test_outing_auth
+node tools/check_naver_maps.cjs http://localhost:3000 --course-covers
+node tools/check_naver_maps.cjs http://localhost:3000 --course-settings
+node tools/check_naver_maps.cjs http://localhost:3000 --login-survey
+```
+
+기존 `backend/test_outing_api.py`는 현재 API에 없는 `RecommendationRecord` 등을 가져오므로 단독 실행 시 import 오류가 납니다. 이 브랜치 이전 코드에도 있던 테스트 불일치이며, 위 통과 수에는 포함하지 않았습니다. 해당 구형 저장소 테스트는 현재 API에 맞춰 별도로 정비해야 합니다.
+
 ## 실행
 
 현재 앱은 프로젝트의 `front` 폴더에서 실행합니다. 최초 한 번 프로젝트 루트에서 Python 가상환경과 의존성을 준비하세요(Windows PowerShell).

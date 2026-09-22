@@ -74,13 +74,38 @@ npm run dev:maps
 
 ## 동작과 저장
 
-로그인 후에는 계정당 한 번 취향 설문을 표시한다. 완료·건너뛰기 후에는 `내 정보 → 취향 설문`에서 수정한다. [설문 구성·저장·추천 적용 안내](login-survey-setup.md)를 참고한다.
+취향 설문을 끝까지 완료하기 전에는 다음 로그인 때 다시 표시한다. 건너뛴 설문은 나들이·렌트 진입 시 이어서 작성할 수 있고, `내 정보 → 취향 설문`에서도 수정한다. [설문 구성·저장·추천 적용 안내](login-survey-setup.md)를 참고한다.
 
 - 클라이언트 보안 비밀번호와 세션 비밀값은 서버에서만 사용한다.
 - 로그인 요청의 state·nonce·PKCE와 Google ID 토큰을 검증한다. 계정 식별에는 Google의 고유 사용자 ID를 사용한다.
 - 로그인 쿠키는 HttpOnly로 발급하며 HTTPS에서는 Secure도 적용한다. 로그아웃하면 서버 세션도 무효화한다.
-- 서버 세션은 `backend/.auth-sessions.sqlite3`에 저장하며 Git에 포함하지 않는다.
+- 서버 세션은 `backend/.auth-sessions.sqlite3`에 저장하며 Git에 포함하지 않는다. Google 계정 ID·이름·이메일·프로필 사진 주소와 OAuth 임시 인증값은 암호화해서 저장한다. 세션 토큰은 원문 대신 SHA-256 해시만 저장한다.
+- Google 계정 비밀번호는 앱에서 받지 않는다. Google에서 발급한 액세스·ID 토큰은 로그인 검증 중에만 사용하며 DB에 저장하거나 브라우저로 반환하지 않는다.
 - 브라우저의 기존 로그인 표시값만으로 로그인하지 않는다. Google 계정별로 앱 데이터와 렌트 상태를 구분하며 기존 임시 아이디 데이터는 자동으로 다른 계정에 옮기지 않는다.
 - 발급된 실제 Google 설정값이 없으면 인증을 완료할 수 없다. 자동 검증은 Google 응답을 대체한 테스트를 사용하며 실제 계정의 동의·로그인은 사용자가 브라우저에서 확인한다.
 
-공식 참고: [서버 OAuth 흐름](https://developers.google.com/identity/protocols/oauth2/web-server), [ID 토큰 검증](https://developers.google.com/identity/gsi/web/guides/verify-google-id-token).
+## 로그인 저장 정보 암호화
+
+별도 설정이 없으면 기존 `AUTH_SESSION_SECRET`에서 HKDF로 저장용 키를 파생하고, `cryptography`의 Fernet으로 암호화·변조 검증한다. OAuth 쿠키 서명과 저장 암호화에는 서로 다른 키를 사용한다. `AUTH_SESSION_SECRET`은 위 설정 도구가 생성한 무작위 비밀값을 유지한다. 프론트에는 키를 넣지 않는다.
+
+업데이트를 받은 팀원은 프로젝트 루트에서 의존성을 설치한 뒤, 실행 중인 개발 서버를 `Ctrl+C`로 종료하고 `front`에서 `npm run dev`를 다시 실행한다.
+
+```powershell
+.venv/Scripts/python.exe -m pip install -r backend/requirements.txt
+cd front
+npm run dev
+```
+
+새 백엔드에서 처음 로그인 DB에 접근할 때 기존 평문 프로필과 진행 중인 OAuth 인증값도 자동으로 암호화한다. 기존 비밀값을 유지하면 로그인 세션도 유지한다. 이 전환 후에는 이전 버전의 백엔드를 같은 DB와 함께 실행하지 않는다. 로컬 시연 계정은 개인 정보 대신 고정된 계정 표시값만 저장하므로 Google 설정 없이도 사용할 수 있다.
+
+암호화 키를 세션 서명 비밀값과 별도로 관리하려면 아래 명령으로 키를 생성하고 `backend/.env`의 `AUTH_DATA_ENCRYPTION_KEY`에 넣을 수 있다. 기본 사용에는 이 추가 설정이 필요하지 않다.
+
+```powershell
+.venv/Scripts/python.exe -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+키는 서버의 환경변수/비밀 저장소로 관리하고 Git에 올리지 않는다. 키를 새로 지정·변경하거나 분실하면 이전 키로 저장된 로그인 기록을 읽을 수 없으므로 사용자는 다시 로그인해야 한다. 기본 설정에서는 `AUTH_SESSION_SECRET` 변경도 같은 영향을 준다. 키가 없거나 유효하지 않으면 Google 로그인을 비활성화하며, 평문 저장으로 전환하지 않는다.
+
+암호화 범위는 **서버 로그인 DB의 프로필과 OAuth 임시 인증값**이다. DB의 만료 시각 등 메타데이터, 별도 설문·앱 데이터, 브라우저에서 표시·보관하는 프로필, 과거에 복사한 DB 백업까지 암호화하는 기능은 아니다. 사용자에게 프로필을 보여주는 API 응답은 계속 제공하며, 외부 접속 시 전송 구간은 HTTPS로 보호한다. DB와 서버 비밀키가 함께 유출되는 상황까지 이 기능만으로 막을 수는 없다.
+
+공식 참고: [서버 OAuth 흐름](https://developers.google.com/identity/protocols/oauth2/web-server), [ID 토큰 검증](https://developers.google.com/identity/gsi/web/guides/verify-google-id-token), [Fernet 암호화](https://cryptography.io/en/latest/fernet/).

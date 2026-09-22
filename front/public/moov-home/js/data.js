@@ -1,18 +1,8 @@
 /* Shared home assets; prices from policy HTML. */
-const rentalVehicles = [
-  { id: "standard", name: "MOOV 컴팩트", seats: "1~2인", baggage: "1개", category: "컴팩트", desc: "도심 이동에 편한 2인형 자율주행 차량", image: "assets/8934912b44347ad3.png", about: "짧은 이동이나 혼자·둘이 이용하기 좋은 컴팩트형 차량입니다.", accent: "#53B175" },
-  { id: "easyfit", name: "MOOV 이지핏", seats: "최대 4인", baggage: "2개", category: "이지핏", desc: "넓은 출입구와 편안한 승하차", image: "assets/33b13453f88ad262.png", about: "넓은 개방형 도어와 여유로운 실내 공간을 갖춘 이동 편의형 차량입니다.", accent: "#72C9B2" },
-  { id: "family", name: "MOOV 패밀리", seats: "최대 6인", baggage: "4개", category: "패밀리", desc: "가족·친구와 함께 이동하기 좋은 다인승", image: "assets/263af28a256b1278.png", about: "가족 나들이와 짐이 많은 이동을 고려한 넓은 실내 중심의 차량입니다.", accent: "#61B48B" },
-  { id: "premium", name: "MOOV 라운지", seats: "최대 6인", baggage: "3개", category: "프리미엄", desc: "이동 중에도 머무를 수 있는 라운지형 공간", image: "assets/46edadb897016e6a.png", about: "좌석과 실내 공간을 라운지처럼 활용할 수 있도록 구성한 프리미엄 차량입니다.", accent: "#9F8DD2" },
-  { id: "barrierfree", name: "MOOV 배리어프리", seats: "최대 5인", baggage: "2개", category: "배리어프리", desc: "휠체어 승하차를 지원하는 접근성 특화 차량", image: "assets/faa24cc841b99c10.png", about: "경사로와 넓은 승하차 공간을 갖춰 휠체어 이용자도 편하게 탑승할 수 있습니다.", accent: "#49A995" },
-];
-const rentalFarePolicy = {
-  standard: { label: "컴팩트", base3: 10180, base24: 56380, hourlyStep: 2200 },
-  easyfit: { label: "이지핏", base3: 12900, base24: 69600, hourlyStep: 2700 },
-  family: { label: "패밀리", base3: 29870, base24: 162170, hourlyStep: 6300 },
-  premium: { label: "프리미엄", base3: 29870, base24: 162170, hourlyStep: 6300 },
-  barrierfree: { label: "배리어프리", base3: 29870, base24: 162170, hourlyStep: 6300 },
-};
+const rentalVehicles = MoovVehicleCatalog.vehicles.map(vehicle => ({
+  ...vehicle, baggage: `${vehicle.baggage}개`, image: vehicle.image.replace('./moov-home/', '')
+}));
+const rentalFarePolicy = MoovVehicleCatalog.rentalRates;
 const rentalOptionCatalog = [
   { id: "privacy", name: "프라이버시 글라스", price: 3000 },
   { id: "wellness", name: "웰니스 온도·조명", price: 2000 },

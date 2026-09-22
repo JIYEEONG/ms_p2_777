@@ -168,7 +168,7 @@ def _load_courses(conn):
                     cp.sequence_no,
                     cp.latitude,
                     cp.longitude,
-                    nearest.place_name_kr,
+                    COALESCE(NULLIF(cp.place_name_kr, ''), nearest.place_name_kr),
                     nearest.open_time,
                     nearest.close_time,
                     nearest.category,

@@ -6,7 +6,6 @@ stored nor returned; the session cookie contains a random opaque token.
 import base64
 import hashlib
 import hmac
-import json
 import os
 from pathlib import Path
 import re
@@ -23,8 +22,10 @@ from pydantic import BaseModel, Field
 
 if __package__:
     from .db import upsert_google_user
+    from . import auth_crypto
 else:
     from db import upsert_google_user
+    import auth_crypto
 
 
 router = APIRouter(prefix='/api/auth', tags=['authentication'])
@@ -92,8 +93,9 @@ def _config():
             return None
         if not client_id or not client_secret or len(session_secret) < 32:
             return None
+        auth_crypto.check_configuration()
         return AuthConfig(client_id, client_secret, redirect, base, session_secret)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, auth_crypto.StorageEncryptionError):
         return None
 
 
@@ -102,6 +104,7 @@ def _database():
     connection = sqlite3.connect(str(DB_PATH), timeout=5)
     connection.row_factory = sqlite3.Row
     try:
+        connection.execute('PRAGMA secure_delete=ON')
         connection.execute('''CREATE TABLE IF NOT EXISTS oauth_flows (
             state_hash TEXT PRIMARY KEY, binding_hash TEXT NOT NULL,
             nonce TEXT NOT NULL, verifier TEXT NOT NULL, expires_at REAL NOT NULL
@@ -111,6 +114,7 @@ def _database():
             created_at REAL NOT NULL, expires_at REAL NOT NULL
         )''')
         connection.commit()
+        auth_crypto.migrate(connection)
         with connection:
             yield connection
     finally:
@@ -176,7 +180,8 @@ def _consume_flow(state, binding):
         if row is None:
             raise LoginFailed()
         database.execute('DELETE FROM oauth_flows WHERE state_hash=?', (_digest(state),))
-        return dict(row)
+        flow = dict(row)
+    return {field: auth_crypto.unseal(flow[field], 'oauth-' + field, _digest(state)) for field in ('nonce', 'verifier')}
 
 
 def _exchange_code(code, config, verifier):
@@ -246,11 +251,12 @@ def _user_from_claims(claims, config, nonce):
 def _new_session(user, old_token=None):
     token = secrets.token_urlsafe(32)
     now = time.time()
+    profile = auth_crypto.DEMO_PROFILE if user.get('id') == 'demo:moov' else auth_crypto.seal(user, 'session-profile', _digest(token))
     with _database() as database:
         database.execute('DELETE FROM auth_sessions WHERE expires_at<=?', (now,))
         if isinstance(old_token, str) and len(old_token) <= 256:
             database.execute('DELETE FROM auth_sessions WHERE token_hash=?', (_digest(old_token),))
-        database.execute('INSERT INTO auth_sessions(token_hash,profile,created_at,expires_at) VALUES(?,?,?,?)', (_digest(token), json.dumps(user, ensure_ascii=False), now, now + SESSION_TTL))
+        database.execute('INSERT INTO auth_sessions(token_hash,profile,created_at,expires_at) VALUES(?,?,?,?)', (_digest(token), profile, now, now + SESSION_TTL))
     return token
 
 
@@ -281,7 +287,10 @@ def demo_login(payload: DemoLogin, request: Request):
             and secrets.compare_digest(payload.password.encode(), b'demo1234')):
         raise HTTPException(401, 'Check the demo ID and password.', headers=PRIVATE_HEADERS)
     user = {'id': 'demo:moov', 'name': 'MOOV 체험', 'email': '', 'picture': ''}
-    token = _new_session(user, request.cookies.get(SESSION_COOKIE))
+    try:
+        token = _new_session(user, request.cookies.get(SESSION_COOKIE))
+    except (sqlite3.Error, auth_crypto.StorageEncryptionError, ValueError):
+        raise HTTPException(503, 'Login is temporarily unavailable.', headers=PRIVATE_HEADERS) from None
     response = JSONResponse({'authenticated': True, 'user': user}, headers=PRIVATE_HEADERS)
     _set_cookie(response, SESSION_COOKIE, token, SESSION_TTL, base.startswith('https://'))
     return response
@@ -297,8 +306,8 @@ def google_start(request: Request):
     try:
         with _database() as database:
             database.execute('DELETE FROM oauth_flows WHERE expires_at<=?', (now,))
-            database.execute('INSERT INTO oauth_flows(state_hash,binding_hash,nonce,verifier,expires_at) VALUES(?,?,?,?,?)', (_digest(state), _digest(binding), nonce, verifier, now + FLOW_TTL))
-    except sqlite3.Error:
+            database.execute('INSERT INTO oauth_flows(state_hash,binding_hash,nonce,verifier,expires_at) VALUES(?,?,?,?,?)', (_digest(state), _digest(binding), auth_crypto.seal(nonce, 'oauth-nonce', _digest(state)), auth_crypto.seal(verifier, 'oauth-verifier', _digest(state)), now + FLOW_TTL))
+    except (sqlite3.Error, auth_crypto.StorageEncryptionError, ValueError):
         raise HTTPException(503, 'Google login is temporarily unavailable.', headers=PRIVATE_HEADERS) from None
     response = RedirectResponse(GOOGLE_AUTHORIZE + '?' + urlencode({
         'client_id': config.client_id, 'redirect_uri': config.redirect_uri,
@@ -345,8 +354,10 @@ def _session_user(request):
             with _database() as database:
                 row = database.execute('SELECT profile FROM auth_sessions WHERE token_hash=? AND expires_at>?', (_digest(token), time.time())).fetchone()
                 if row:
-                    user = json.loads(row['profile'])
-        except (sqlite3.Error, ValueError):
+                    user = ({'id': 'demo:moov', 'name': 'MOOV 체험', 'email': '', 'picture': ''}
+                            if row['profile'] == auth_crypto.DEMO_PROFILE else
+                            auth_crypto.unseal(row['profile'], 'session-profile', _digest(token)))
+        except (sqlite3.Error, ValueError, auth_crypto.StorageEncryptionError):
             user = None
     if not isinstance(user, dict) or not isinstance(user.get('id'), str):
         return None
@@ -394,7 +405,7 @@ def auth_logout(request: Request):
         if isinstance(token, str) and len(token) <= 256:
             with _database() as database:
                 database.execute('DELETE FROM auth_sessions WHERE token_hash=?', (_digest(token),))
-    except sqlite3.Error:
+    except (sqlite3.Error, auth_crypto.StorageEncryptionError, ValueError):
         raise HTTPException(503, 'Logout is temporarily unavailable.', headers=PRIVATE_HEADERS) from None
     response = JSONResponse({'authenticated': False, 'user': None}, headers=PRIVATE_HEADERS)
     _clear_cookie(response, SESSION_COOKIE, base.startswith('https://'))

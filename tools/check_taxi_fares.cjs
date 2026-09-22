@@ -22,7 +22,7 @@ const rates = {
   medium: { base: 4080, included: 1600, rate100: 85000 },
   large: { base: 5950, included: 3000, rate100: 112625 },
 };
-const vehicleClasses = { standard: 'small', easyfit: 'medium', family: 'large', premium: 'large', barrierfree: 'large' };
+const vehicleClasses = { standard: 'small', easyfit: 'medium', family: 'medium', premium: 'large' };
 function expectedFare(vehicleId, distanceMeters) {
   const rate = rates[vehicleClasses[vehicleId]];
   return Math.floor((rate.base * 100000 + Math.max(0, distanceMeters - rate.included) * rate.rate100 + 50000) / 100000);
@@ -127,7 +127,7 @@ class CDP {
   async diagnostics() {
     return this.evaluate(`(() => ({
       path:location.pathname, readyState:document.readyState, language:document.documentElement.lang,
-      fareEngine:typeof window.MoovTaxiFare, mapConstructor:typeof window.naver?.maps?.Map,
+      courseImages:[...document.querySelectorAll('img[data-course-photos]')].map(i=>({src:i.getAttribute('src'),complete:i.complete,width:i.naturalWidth})),fareEngine:typeof window.MoovTaxiFare, mapConstructor:typeof window.naver?.maps?.Map,
       fareStatus:typeof taxiFareState==='object'?{status:taxiFareState.status,error:taxiFareState.error,hasQuote:!!taxiFareState.quote}:null,
       mapStatus:document.querySelector('#taxi-map-status')?.textContent,
       fareCard:document.querySelector('#taxi-fare-card')?.textContent.slice(0,600),
@@ -195,7 +195,7 @@ async function checkPolicyAndCalculator() {
     assert.equal(result.fareClass, vehicleClasses[sample.vehicleId]);
     assert.ok(Number.isInteger(result.total));
   });
-  passed('workbook rates and included-distance boundaries for all five vehicles', { cases: cases.length });
+  passed('workbook rates and included-distance boundaries for all four vehicles', { cases: cases.length });
   const invalid = await client.evaluate(`[-1,0.5,NaN,Infinity,10000001].map(distanceMeters=>{
     try{MoovTaxiFare.calculate({vehicleId:'standard',distanceMeters});return false;}catch{return true;}
   })`);
@@ -206,7 +206,7 @@ async function checkPolicyAndCalculator() {
   await client.wait("!!document.querySelector('#taxi-fare-distance')", 'manual calculator');
   for (const distanceMeters of [1600, 1601, 3000, 3001, 12345]) {
     await client.input('#taxi-fare-distance', String(distanceMeters / 1000));
-    await client.wait("document.querySelectorAll('#taxi-calculator-results [data-taxi-calculator-vehicle][data-taxi-total]').length===5", 'calculator results for all vehicles');
+    await client.wait("document.querySelectorAll('#taxi-calculator-results [data-taxi-calculator-vehicle][data-taxi-total]').length===4", 'calculator results for all vehicles');
     const rows = await client.evaluate("[...document.querySelectorAll('#taxi-calculator-results [data-taxi-calculator-vehicle]')].map(row=>({vehicleId:row.dataset.taxiCalculatorVehicle,total:Number(row.dataset.taxiTotal)}))");
     for (const row of rows) assert.equal(row.total, expectedFare(row.vehicleId, distanceMeters));
   }
@@ -218,7 +218,7 @@ async function checkPolicyAndCalculator() {
   }
   passed('manual calculator rejects empty, negative, zero, nonnumeric and fractional-meter input');
   await client.input('#taxi-fare-distance', '12.345');
-  await client.wait("document.querySelectorAll('#taxi-calculator-results [data-taxi-total]').length===5", 'calculator restored after invalid input');
+  await client.wait("document.querySelectorAll('#taxi-calculator-results [data-taxi-total]').length===4", 'calculator restored after invalid input');
   await client.screenshot('taxi-calculator-ko', '#taxi-fare-distance');
   await closeModal();
 }
@@ -233,7 +233,7 @@ async function checkQuotesAndLanguage() {
     assert.ok(amount && Number(amount.replace(/[^0-9]/g, '')) === current.total, 'Displayed quote matches selected vehicle');
   }
   passed('actual NAVER route produces correct fare for all vehicle classes');
-  passed('all five taxi selections update hero, title and pressed thumbnail without mobile overflow');
+  passed('all four taxi selections update hero, title and pressed thumbnail without mobile overflow');
   await client.click('[data-action="taxi-vehicle"][data-value="standard"]');
   const korean = await quote();
   await checkVehicleSelector('standard');
@@ -253,7 +253,7 @@ async function checkQuotesAndLanguage() {
   await client.screenshot('taxi-booking-en', '#taxi-fare-card');
   await client.click('[data-action="taxi-fare-calculator"]');
   await client.input('#taxi-fare-distance', '3.001');
-  await client.wait("document.querySelectorAll('#taxi-calculator-results [data-taxi-total]').length===5", 'English calculator results');
+  await client.wait("document.querySelectorAll('#taxi-calculator-results [data-taxi-total]').length===4", 'English calculator results');
   assert.equal(await client.evaluate("/[가-힣]/.test(document.querySelector('#modal-body').textContent)"), false);
   await client.screenshot('taxi-calculator-en', '#taxi-fare-distance');
   await closeModal();
@@ -316,7 +316,7 @@ async function checkAsyncAndFailure() {
   await client.wait("taxiFareState.status==='error'", 'map service unavailable');
   await client.click('[data-action="taxi-fare-calculator"]');
   await client.input('#taxi-fare-distance', '5.5');
-  await client.wait("document.querySelectorAll('#taxi-calculator-results [data-taxi-total]').length===5", 'calculator works without map');
+  await client.wait("document.querySelectorAll('#taxi-calculator-results [data-taxi-total]').length===4", 'calculator works without map');
   const noMapRows = await client.evaluate("[...document.querySelectorAll('#taxi-calculator-results [data-taxi-calculator-vehicle]')].map(row=>({vehicleId:row.dataset.taxiCalculatorVehicle,total:Number(row.dataset.taxiTotal)}))");
   for (const row of noMapRows) assert.equal(row.total, expectedFare(row.vehicleId, 5500));
   await closeModal();
@@ -412,6 +412,88 @@ async function checkBookingAndReceipt() {
   passed('completed receipt survives reload without duplication');
 }
 
+async function checkVehicleOutingPresentation() {
+  await client.evaluate(`
+    enterAuthenticatedScreen();closeModal();
+    state.activeTab='outing';state.outingSub='community';state.outingSort='latest';state.outingQuery='';
+    state.customCourses=[];state.outingMapOpen=false;state.communityRecommendationOpen=false;state.recommendationRequestId=null;
+    state.outingFilters={category:'전체',mood:'전체',companion:'전체',purpose:'전체',time:'전체',budget:100000};
+    state.recommendationPrefs={category:'전체',mood:'전체',companion:'전체',time:'전체',budget:100000};
+    state.surveyRecord={profile:{categories:{'관광':1},subcategories:{},preferredRegions:[],excludedRegions:[],excludedTags:[]}};
+    dbCourses=[
+      {id:'palace',title:'경복궁 산책',image_url:'/assets/expired-palace-upload.jpg',distance_m:1800,points:[{sequence_no:0,place_name:'광화문'},{sequence_no:1,place_name:'경복궁'}],tags:{category:['관광']}},
+      {id:'palace-copy',title:'궁궐 코스 재등록',points:[{sequence_no:0,place_name:'광화문'},{sequence_no:1,place_name:'경복궁'}],tags:{category:['관광']}},
+      {id:'forest',title:'서울숲 산책',image_url:'/assets/place-gyeongbokgung.jpg',points:[{sequence_no:0,place_name:'서울숲'},{sequence_no:1,place_name:'가족마당'}],tags:{category:['관광']}},
+      {id:'new-cafe',title:'우리 동네 카페',image_url:'/assets/place-gyeongbokgung.jpg',points:[{sequence_no:0,place_name:'새 카페 A'},{sequence_no:1,place_name:'새 가게 B'}],tags:{category:['카페']}}
+    ].map(MoovOutingData.fromDatabase);
+    render();document.querySelectorAll('img[data-course-photos]').forEach(image=>image.loading='eager');
+  `);
+  await client.wait("[...document.querySelectorAll('img[data-course-photos]')].every(img=>{img.loading='eager';return img.complete&&img.naturalWidth>0})", 'course photos decode after fallback');
+  const courses = await client.evaluate(`({count:document.querySelectorAll('.course-card').length,text:content.textContent,photos:[...document.querySelectorAll('.course-visual img')].map(img=>img.getAttribute('src')),credits:document.querySelectorAll('.course-photo-credit').length})`);
+  assert.equal(courses.count, 3);
+  assert.match(courses.text, /1\.8km/);
+  assert.doesNotMatch(courses.text, /최근 7일|거리 미확인/);
+  assert.match(courses.text, /0개/);
+  assert.equal(courses.credits, 0);
+  assert.equal(courses.photos.length,3);
+  assert.ok(courses.photos.includes('./assets/place-gyeongbokgung.jpg'));
+  assert.ok(courses.photos.includes('./assets/course-seoulforest.jpg'));
+  assert.equal(new Set(courses.photos).size,3);
+  await client.screenshot('outing-courses');
+  passed('community removes duplicate routes and repeated generic photos, recovers palace photos and formats distance/likes');
+
+  await client.evaluate("state.communityRecommendationOpen=true;runOutingRecommendation();content.scrollTop=0");
+  const recommendation = await client.evaluate(`({ids:state.recommendationResultIds,text:document.querySelector('#community-recommendation').textContent})`);
+  assert.equal(new Set(recommendation.ids).size, 3);
+  assert.match(recommendation.text, /내 취향 100% 일치/);
+  assert.match(recommendation.text, /내 취향 0% 일치/);
+  await client.screenshot('outing-taste-match', '#community-recommendation .survey-course-match');
+  await client.evaluate("openCourseStopDetail(getCourse('palace'),1)");
+  await client.wait("document.querySelector('.stop-detail-image img')?.naturalWidth>0", 'palace stop detail photo');
+  await client.screenshot('palace-stop-photo');
+  passed('recommendations display survey match percentages and palace stop images load');
+  await closeModal();
+
+  await client.evaluate(`
+    state.taxiVehicleType='family';state.homeMode='taxi';state.tripActive=false;
+    content.innerHTML=renderTaxiVehicleSelector();
+    const quote=MoovTaxiFare.quote({vehicleId:'family',distanceMeters:5500,durationSeconds:900});
+    taxiFareState={status:'ready',key:taxiQuoteKey(),quote,quotedAt:Date.now()};requestTaxiBooking();
+  `);
+  await client.wait("document.querySelector('#modal-actions')?.dataset.layout==='taxi-dispatch'", 'dispatch confirmation');
+  const buttons = await client.evaluate(`(()=>{const primary=document.querySelector('[data-modal-confirm]'),cancel=document.querySelector('[data-modal-cancel]');return {primary:primary.textContent,width:primary.getBoundingClientRect().width,cancelWidth:cancel.getBoundingClientRect().width,cancelColor:getComputedStyle(cancel).backgroundColor,vehicle:content.textContent}})()`);
+  assert.match(buttons.primary, /배차하기/);
+  assert.ok(buttons.width > buttons.cancelWidth * 2);
+  assert.equal(buttons.cancelColor, 'rgba(0, 0, 0, 0)');
+  assert.match(buttons.vehicle, /MOOV 중형/);
+  assert.match(buttons.vehicle, /최대 4인/);
+  await client.screenshot('taxi-dispatch-buttons');
+  await client.click('[data-modal-cancel]');
+  assert.equal(await client.evaluate('state.tripActive'), false);
+  await client.evaluate('openVehicleFarePolicy()');
+  assert.equal(await client.evaluate("document.querySelectorAll('.vehicle-policy-card').length"), 4);
+  await client.screenshot('vehicle-fares');
+  passed('taxi shows midsize four-passenger fares and emphasizes dispatch over a working cancel action');
+  await closeModal();
+
+  await client.evaluate(`state.courseDraft={title:'사진 전달 테스트',desc:'',stops:[{type:'목적지',name:'경복궁',photo:'./assets/place-gyeongbokgung.jpg'}]};publishCourse()`);
+  await client.wait("window.__presentationCourse?.image_url==='./assets/place-gyeongbokgung.jpg'", 'uploaded course cover is included in save request');
+  passed('publishing sends the uploaded cover photo to the backend');
+
+  await client.evaluate(`content.innerHTML='<iframe id="rental-test" class="moov-home-frame" src="./moov-home/index.html?embed=1&account=presentation-test"></iframe>'`);
+  await client.wait("document.querySelector('#rental-test')?.contentWindow.MOOVHome", 'rental iframe startup');
+  await client.evaluate(`document.querySelector('#rental-test').contentWindow.eval("state.rentalVehicleType='family';state.rentalHours=3;document.querySelector('#app-content').innerHTML=renderRentalVehicleCards('family')")`);
+  const rental = await client.evaluate(`document.querySelector('#rental-test').contentDocument.querySelector('#app-content').textContent`);
+  assert.match(rental, /MOOV 중형/);
+  assert.match(rental, /최대 4인/);
+  assert.match(rental, /12,900원/);
+  assert.doesNotMatch(rental, /패밀리|배리어프리/);
+  await client.screenshot('rental-midsize');
+  await client.evaluate("document.querySelector('#rental-test').contentWindow.openRentalFarePolicy()");
+  assert.equal(await client.evaluate("document.querySelector('#rental-test').contentDocument.querySelectorAll('.rental-policy-row').length"), 4);
+  passed('rental shares midsize capacity, three-hour fare and the four-vehicle policy');
+}
+
 async function main() {
   assert.ok(fs.existsSync(executable), 'Microsoft Edge is required (or set EDGE_PATH)');
   const profile = path.join(artifactDir, 'profile');
@@ -430,10 +512,33 @@ async function main() {
   await client.send('Page.enable');
   await client.send('Runtime.enable');
   await installBrowserAuthFixture(client, base);
+  if (process.argv.includes('--presentation-only')) {
+    client.authFixture.survey.status = 'completed';
+    client.authFixture.survey.answers.categories = ['관광'];
+    client.authFixture.survey.profile.categories = {'관광':1};
+  }
+  if (process.argv.includes('--presentation-only')) await client.send('Page.addScriptToEvaluateOnNewDocument', {source: `
+    const originalFetch=window.fetch;
+    window.fetch=function(input,options){
+      const path=new URL(typeof input==='string'?input:input.url,location.href).pathname;
+      if(path.startsWith('/api/outing/')&&!path.startsWith('/api/outing/survey')){
+        if(path==='/api/outing/courses'&&options?.method==='POST')window.__presentationCourse=JSON.parse(options.body);
+        return Promise.resolve(new Response(JSON.stringify({courses:[],counts:{},aggregated_at:new Date().toISOString(),ok:true}),{status:200,headers:{'Content-Type':'application/json'}}));
+      }
+      return originalFetch.apply(this,arguments);
+    };
+  `});
   await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   await client.send('Page.navigate', { url: base + '/moov.html?lang=ko' });
   await client.wait("typeof state==='object' && typeof currentTaxiQuote==='function' && !!window.MoovTaxiFare", 'taxi fare UI boot');
   await waitForVerifiedSmokeUser(client);
+  await client.wait("document.querySelector('#app.screen-active') && state.surveyRecord?.status==='completed'", 'completed onboarding before presentation checks');
+  if (process.argv.includes('--presentation-only')) {
+    await checkVehicleOutingPresentation();
+    assert.deepEqual(client.exceptions, [], 'No uncaught JavaScript errors');
+    console.log(JSON.stringify({ok:true,checks:checks.length,artifacts:artifactDir}));
+    return;
+  }
   await client.evaluate("enterAuthenticatedScreen();state.activeTab='home';state.homeMode='taxi';state.homeStep='setup';state.tripActive=false;persist();render()");
   assert.equal(await client.evaluate('state.paymentCards.length'), 2);
   assert.equal(await client.evaluate('taxiPrimaryCard().simulated'), true);

@@ -1252,5 +1252,15 @@ window.MOOV_EN = Object.freeze({
   "휴대폰에서 업로드": "Upload from phone",
   "휴식": "Rest",
   "흙을 빚고 나만의 작품을 만드는 감성 체험 코스": "A hands-on trip to shape clay and create your own pottery",
-  "힘들어 죽겠": "I'm so exhausted I could die"
+  "힘들어 죽겠": "I'm so exhausted I could die",
+  "MOOV 중형": "MOOV Midsize",
+  "차량·요금정책": "Vehicles & fares",
+  "차종별 탑승 인원과 택시·렌트 요금": "Passenger capacity, taxi fares and rental rates",
+  "요금정책": "Fare policy",
+  "렌트 요금정책": "Rental fare policy",
+  "3~24시간 이용 · 선택 옵션 요금 별도": "3–24 hours · optional extras charged separately",
+  "3시간": "3 hours",
+  "1시간 추가": "Additional hour",
+  "24시간": "24 hours",
+  "경로 선택 후 거리 안내": "Distance available after route selection"
 });

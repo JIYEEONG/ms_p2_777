@@ -9,7 +9,7 @@ async function installBrowserAuthFixture(client, base, options = {}) {
   const origin = new URL(base).origin;
   const emptyAnswers = { categories: [], subcategories: {}, preferredRegions: [], avoidedRegions: [], avoidances: { foodRestrictions: [], foods: [], other: [] } };
   const fixture = { errors: [], requests: [], failSave: false, failLoad: false, survey: Object.hasOwn(options, 'survey') ? options.survey : {
-    version: '1.8', status: 'skipped', answers: emptyAnswers, profile: { categories: {}, subcategories: {}, preferredRegions: [], excludedRegions: [], excludedTags: [] },
+    version: '1.8', status: 'completed', answers: emptyAnswers, profile: { categories: {}, subcategories: {}, preferredRegions: [], excludedRegions: [], excludedTags: [] },
   } };
   client.authFixture = fixture;
   fixture.locationConsent = Object.hasOwn(options,'consent') ? options.consent : {version:'1',agreedAt:'2026-09-21T00:00:00Z'};

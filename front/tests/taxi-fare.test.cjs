@@ -10,13 +10,12 @@ const { policy, vehicles, calculate, quote } = require('../public/taxi-fare.js')
 const classes = [
   { vehicleId: 'standard', fareClass: 'small', baseFare: 3223, includedMeters: 1600, perKm: 671.5, exampleTotal: 5842 },
   { vehicleId: 'easyfit', fareClass: 'medium', baseFare: 4080, includedMeters: 1600, perKm: 850, exampleTotal: 7395 },
-  { vehicleId: 'family', fareClass: 'large', baseFare: 5950, includedMeters: 3000, perKm: 1126.25, exampleTotal: 8766 },
+  { vehicleId: 'family', fareClass: 'medium', baseFare: 4080, includedMeters: 1600, perKm: 850, exampleTotal: 7395 },
   { vehicleId: 'premium', fareClass: 'large', baseFare: 5950, includedMeters: 3000, perKm: 1126.25, exampleTotal: 8766 },
-  { vehicleId: 'barrierfree', fareClass: 'large', baseFare: 5950, includedMeters: 3000, perKm: 1126.25, exampleTotal: 8766 },
 ];
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} should equal ${expected}`);
 
-test('all five app vehicles use the workbook final taxi rates and 5.5 km fares', () => {
+test('the four consolidated vehicles use the selected taxi classes and 5.5 km fares', () => {
   for (const expected of classes) {
     const fare = calculate({ vehicleId: expected.vehicleId, distanceMeters: 5500 });
     for (const key of ['vehicleId', 'fareClass', 'baseFare', 'includedMeters', 'perKm']) assert.equal(fare[key], expected[key]);
@@ -45,7 +44,8 @@ test('only the distance beyond the threshold is charged, including the first met
   const expected = [
     ['standard', 1601, 0.6715, 3224],
     ['easyfit', 1601, 0.85, 4081],
-    ['family', 3001, 1.12625, 5951],
+    ['family', 1601, 0.85, 4081],
+    ['premium', 3001, 1.12625, 5951],
   ];
   for (const [vehicleId, distanceMeters, extraFare, total] of expected) {
     const fare = calculate({ vehicleId, distanceMeters });
@@ -60,10 +60,11 @@ test('fractional rate calculations round the total once, including exact half-wo
     ['standard', 1602, 3224.343, 3224], // Rounding each metre would incorrectly charge 3,225.
     ['standard', 2600, 3894.5, 3895],
     ['easyfit', 1610, 4088.5, 4089],
-    ['family', 3004, 5954.505, 5955],
-    ['family', 3400, 6400.5, 6401],
+    ['premium', 3004, 5954.505, 5955],
+    ['premium', 3400, 6400.5, 6401],
     ['standard', 5500, 5841.85, 5842],
-    ['family', 5500, 8765.625, 8766],
+    ['premium', 5500, 8765.625, 8766],
+    ['family', 1610, 4088.5, 4089],
   ];
   for (const [vehicleId, distanceMeters, unroundedTotal, total] of expected) {
     const fare = calculate({ vehicleId, distanceMeters });
@@ -73,12 +74,12 @@ test('fractional rate calculations round the total once, including exact half-wo
   }
 });
 
-test('large-car service aliases share rates without introducing an accessibility or premium surcharge', () => {
+test('legacy accessible selections migrate to Easyfit and share the midsize fare', () => {
   for (const distanceMeters of [0, 2999, 3000, 3400, 5500, 18532]) {
-    const family = calculate({ vehicleId: 'family', distanceMeters });
-    for (const vehicleId of ['premium', 'barrierfree']) {
+    const easyfit = calculate({ vehicleId: 'easyfit', distanceMeters });
+    for (const vehicleId of ['family', 'barrierfree']) {
       const fare = calculate({ vehicleId, distanceMeters });
-      assert.deepEqual({ ...fare, vehicleId: 'family' }, family);
+      assert.deepEqual({ ...fare, vehicleId: 'easyfit' }, easyfit);
     }
   }
 });
@@ -92,7 +93,8 @@ test('invalid, fractional, or oversized distances are rejected instead of coerce
   assert.throws(() => calculate({ vehicleId: 'standard' }));
   assert.equal(calculate({ vehicleId: 'standard', distanceMeters: 10000000 }).total, 6717149);
   assert.equal(calculate({ vehicleId: 'easyfit', distanceMeters: 10000000 }).total, 8502720);
-  assert.equal(calculate({ vehicleId: 'family', distanceMeters: 10000000 }).total, 11265071);
+  assert.equal(calculate({ vehicleId: 'family', distanceMeters: 10000000 }).total, 8502720);
+  assert.equal(calculate({ vehicleId: 'premium', distanceMeters: 10000000 }).total, 11265071);
 });
 
 test('unknown vehicle identifiers cannot inherit a default rate or prototype entry', () => {
