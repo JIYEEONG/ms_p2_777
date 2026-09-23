@@ -310,22 +310,93 @@ function scoreBreakdown(course, preference, tags, context = {}) {
     return dates || String(a.id).localeCompare(String(b.id));
   }
 
+  function hasCourseImage(course) {
+    return Boolean(String(course.image || course.image_url || "").trim());
+  }
+
+  function hasCourseName(course) {
+    return Boolean(String(course.name || course.title || "").trim());
+  }
+
+  function courseImageKey(course) {
+    return String(course.image || course.image_url || "").trim();
+  }
+
+  function courseNameKey(course) {
+    return normalized(course.name || course.title);
+  }
+
+  function valueCounts(courses, getter) {
+    const counts = new Map();
+    for (const course of courses) {
+      const key = getter(course);
+      if (!key) continue;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    return counts;
+  }
+
+  function exposureRank(course, imageCounts, nameCounts) {
+    const imageKey = courseImageKey(course);
+    const nameKey = courseNameKey(course);
+    if (imageKey && (imageCounts.get(imageKey) || 0) > 1) return 5;
+    if (nameKey && (nameCounts.get(nameKey) || 0) > 1) return 4;
+    if (imageKey && nameKey) return 0;
+    if (imageKey) return 1;
+    if (nameKey) return 2;
+    return 3;
+  }
+
+  function exposureBreak(a, b, imageCounts, nameCounts) {
+    return exposureRank(a, imageCounts, nameCounts) - exposureRank(b, imageCounts, nameCounts);
+  }
+
+  function validNumber(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function courseDistanceFromUser(course, context = {}) {
+    const userLat = validNumber(context.userLat);
+    const userLon = validNumber(context.userLon);
+    if (userLat == null || userLon == null) return Infinity;
+    const points = course._dbPoints
+      ? course._dbPoints
+      : (course.stops || []).map((_, i) => pointForStop(course, i));
+    const distances = points
+      .map((point) => {
+        const lat = validNumber(point.latitude ?? point.lat);
+        const lng = validNumber(point.longitude ?? point.lng);
+        if (lat == null || lng == null) return null;
+        return haversineKm(userLat, userLon, lat, lng);
+      })
+      .filter((distance) => distance != null);
+    if (!distances.length) return Infinity;
+    return Math.min(...distances);
+  }
+
   function rank(courses, preference, tagsFor, context = {}) {
     const eligible = courses.filter((course) => {
       const tags = tagsFor(course);
       const price = Number(tags.price);
       return !Number.isFinite(price) || price <= 0 || price <= Number(preference.budget || Infinity);
     });
+    const imageCounts = valueCounts(eligible, courseImageKey);
+    const nameCounts = valueCounts(eligible, courseNameKey);
     const ranked = eligible.map((course) => ({ course, score: score(course, preference, tagsFor(course), context) }))
-      .sort((a, b) => b.score - a.score || tieBreak(a.course, b.course));
+      .sort((a, b) => exposureBreak(a.course, b.course, imageCounts, nameCounts) || b.score - a.score || tieBreak(a.course, b.course));
     return diversifyTies(ranked, item => item.score, item => item.course);
   }
 
   function sort(courses, sortBy, preference, tagsFor, likesFor, context = {}) {
+    const imageCounts = valueCounts(courses, courseImageKey);
+    const nameCounts = valueCounts(courses, courseNameKey);
     const sorted = [...courses].sort((a, b) => {
+      const exposureOrder = exposureBreak(a, b, imageCounts, nameCounts);
+      if (exposureOrder) return exposureOrder;
       if (sortBy === "preference") return score(b, preference, tagsFor(b), context) - score(a, preference, tagsFor(a), context) || tieBreak(a, b);
       if (sortBy === "popular") return likesFor(b) - likesFor(a) || tieBreak(a, b);
-      if (sortBy === "nearby") return (Number(a.distance_m) || Infinity) - (Number(b.distance_m) || Infinity) || tieBreak(a, b);
+      if (sortBy === "nearby") return courseDistanceFromUser(a, context) - courseDistanceFromUser(b, context) || tieBreak(a, b);
       return tieBreak(a, b);
     });
     return diversifyTies(sorted, course => sortBy === 'preference' ? score(course, preference, tagsFor(course), context)
@@ -335,6 +406,7 @@ function scoreBreakdown(course, preference, tags, context = {}) {
     return root.crypto?.randomUUID?.() || `moov-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  const api = {distanceKm, fromDatabase, uniqueCourses, distinguishNames, diversifyTies, RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, scoreBreakdown, tasteSignals, tasteMatch, rank, sort, newId, courseCentroid, haversineKm, calcGeoScore, calcDurationScore, calcTimeScore};  if (typeof module !== "undefined" && module.exports) module.exports = api;
-    else root.MoovOutingData = api;
+  const api = { distanceKm, fromDatabase, uniqueCourses, distinguishNames, diversifyTies, RULE_VERSION, DEMO_PLACES, pointForStop, matches, score, scoreBreakdown, tasteSignals, tasteMatch, rank, sort, newId, courseCentroid, haversineKm, courseDistanceFromUser, calcGeoScore, calcDurationScore, calcTimeScore };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else root.MoovOutingData = api;
   })(typeof window !== "undefined" ? window : globalThis);

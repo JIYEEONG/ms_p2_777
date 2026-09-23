@@ -45,6 +45,66 @@ test('database coordinates survive course map and rental handoff without demo re
   assert.equal(typeof outing.newId(), 'string');
 });
 
+test('nearby sorting recalculates distance from current user coordinates', () => {
+  const nearByCoordinates = {
+    id: 'near-db',
+    createdAt: '2026-09-01',
+    distance_m: 999999,
+    stops: ['Near'],
+    _dbPoints: [{ latitude: '37.5446', longitude: '127.0580' }],
+  };
+  const farByCoordinates = {
+    id: 'far-db',
+    createdAt: '2026-09-02',
+    distance_m: 1,
+    stops: ['Far'],
+    _dbPoints: [{ latitude: '37.6100', longitude: '127.1000' }],
+  };
+  const sorted = outing.sort(
+    [farByCoordinates, nearByCoordinates],
+    'nearby',
+    {},
+    () => ({}),
+    () => 0,
+    { userLat: 37.5445, userLon: 127.0557 },
+  );
+  assert.deepEqual(sorted.map((course) => course.id), ['near-db', 'far-db']);
+  assert.ok(outing.courseDistanceFromUser(nearByCoordinates, { userLat: 37.5445, userLon: 127.0557 }) < 1);
+});
+
+test('course exposure prioritizes unique image and name completeness', () => {
+  const ready = { id: 'ready', name: '완성 코스', image: 'https://example.com/ready.jpg', createdAt: '2026-09-01', stops: ['Far'], _dbPoints: [{ latitude: '37.7000', longitude: '127.2000' }] };
+  const imageOnly = { id: 'image-only', name: '', image: 'https://example.com/only-image.jpg', createdAt: '2026-09-02', stops: ['Mid'], _dbPoints: [{ latitude: '37.5500', longitude: '127.0600' }] };
+  const namedNoImageHighScore = { id: 'named-no-image', name: '가까운 코스', image: null, createdAt: '2026-09-03', stops: ['Near'], _dbPoints: [{ latitude: '37.5446', longitude: '127.0580' }] };
+  const empty = { id: 'empty', name: '', image: null, createdAt: '2026-09-04', stops: ['Empty'], _dbPoints: [{ latitude: '37.5450', longitude: '127.0585' }] };
+  const duplicateNameA = { id: 'duplicate-name-a', name: '중복 이름', image: 'https://example.com/name-duplicate-a.jpg', createdAt: '2026-09-05', stops: ['Name duplicate A'], _dbPoints: [{ latitude: '37.5450', longitude: '127.0585' }] };
+  const duplicateNameB = { id: 'duplicate-name-b', name: '중복 이름', image: 'https://example.com/name-duplicate-b.jpg', createdAt: '2026-09-06', stops: ['Name duplicate B'], _dbPoints: [{ latitude: '37.5450', longitude: '127.0585' }] };
+  const duplicateImageA = { id: 'duplicate-image-a', name: '중복 이미지 A', image: 'https://example.com/duplicate.jpg', createdAt: '2026-09-07', stops: ['Image duplicate A'], _dbPoints: [{ latitude: '37.5450', longitude: '127.0585' }] };
+  const duplicateImageB = { id: 'duplicate-image-b', name: '중복 이미지 B', image: 'https://example.com/duplicate.jpg', createdAt: '2026-09-08', stops: ['Image duplicate B'], _dbPoints: [{ latitude: '37.5450', longitude: '127.0585' }] };
+  const preference = { category: '카페', mood: '전체', companion: '전체', budget: 100000 };
+  const testTags = {
+    ready: { category: [], mood: [], companion: [], time: [], price: null },
+    'image-only': { category: [], mood: [], companion: [], time: [], price: null },
+    'named-no-image': { category: ['카페'], mood: [], companion: [], time: [], price: null },
+    empty: { category: [], mood: [], companion: [], time: [], price: null },
+    'duplicate-name-a': { category: [], mood: [], companion: [], time: [], price: null },
+    'duplicate-name-b': { category: [], mood: [], companion: [], time: [], price: null },
+    'duplicate-image-a': { category: [], mood: [], companion: [], time: [], price: null },
+    'duplicate-image-b': { category: [], mood: [], companion: [], time: [], price: null },
+  };
+  const input = [duplicateImageB, namedNoImageHighScore, duplicateNameA, imageOnly, empty, duplicateImageA, duplicateNameB, ready];
+  const sorted = outing.sort(
+    input,
+    'nearby',
+    preference,
+    (course) => testTags[course.id],
+    () => 0,
+    { userLat: 37.5445, userLon: 127.0557 },
+  );
+  assert.deepEqual(sorted.map((course) => course.id), ['ready', 'image-only', 'named-no-image', 'empty', 'duplicate-name-b', 'duplicate-name-a', 'duplicate-image-b', 'duplicate-image-a']);
+  assert.deepEqual(outing.rank(input, preference, (course) => testTags[course.id]).map((item) => item.course.id), ['ready', 'image-only', 'named-no-image', 'empty', 'duplicate-name-b', 'duplicate-name-a', 'duplicate-image-b', 'duplicate-image-a']);
+});
+
 test('taste match uses selected preferences and saved course tags instead of fixed percentages', () => {
   const preference = { category: '카페', mood: '전체', companion: '전체', time: '전체' };
   const before = outing.tasteSignals(preference);

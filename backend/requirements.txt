@@ -11,8 +11,8 @@ psycopg2-binary                 # Azure PostgreSQL Flexible Server(moov-postgres
 pgvector                        # PostgreSQL의 pgvector 확장을 Python에서 다루기 위한 라이브러리 (벡터 RAG 검색용)
 pydub                           # STT용 오디오 포맷 변환(webm→wav) — Azure Speech가 요구하는 WAV(16kHz mono)로 맞추는 데 사용, ffmpeg 필요
 audioop-lts                     # Python 3.13에서 pydub가 필요로 하는 audioop 대체 (3.13이 표준 audioop 모듈을 제거함)
-python-multipart                # FastAPI가 UploadFile(오디오 파일)을 받으려면 필요
-azure-storage-blob              # 코스 등록 사진을 Azure Blob Storage(course-images 컨테이너)에 업로드하기 위한 라이브러리
+python-multipart                # FastAPI가 UploadFile을 받으려면 필요 (루나 음성 파일, 나들이 코스 이미지 업로드)
+azure-storage-blob              # Azure Blob Storage 업로드 (course-images: 나들이 코스 사진 / taxiproductimage: 핫 상품 이미지)
 google-auth>=2.38,<3            # Google ID 토큰 서명·audience·issuer·만료 검증
 requests>=2.32,<3               # Google OAuth 코드 교환 및 공개 인증서 조회 (서버 전용)
 cryptography>=46,<51            # Google 로그인 프로필·OAuth 임시값 저장 암호화
