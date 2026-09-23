@@ -41,7 +41,8 @@ DEFAULT_CSV_PATH = (
 )
 
 EXPECTED_COLUMNS = [
-    "rank", "product_name", "this_month_qty", "last_month_qty",
+    "rank", "product_name", "image_filename",  # ← image_filename 추가
+    "this_month_qty", "last_month_qty",
     "mom_growth_rate", "forecast_next_month_qty", "learned_growth_rate",
     "current_display_qty_per_vehicle", "recommended_additional_qty_raw",
     "recommended_additional_qty_learned", "notice",
@@ -73,6 +74,7 @@ def read_rows(csv_path: Path) -> list[dict]:
             rows.append({
                 "rank": _to_int(raw["rank"]),
                 "product_name": raw["product_name"].strip(),
+                "image_filename": raw.get("image_filename", "").strip() or None,
                 "this_month_qty": _to_int(raw["this_month_qty"]),
                 "last_month_qty": _to_int(raw["last_month_qty"]),
                 "mom_growth_rate": raw["mom_growth_rate"].strip() or None,
@@ -126,6 +128,7 @@ def main():
                     generated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
                     rank INT NOT NULL,
                     product_name TEXT NOT NULL,
+                    image_filename TEXT,
                     this_month_qty INT,
                     last_month_qty INT,
                     mom_growth_rate TEXT,
@@ -148,12 +151,12 @@ def main():
                 cur.execute(
                     f"""
                     INSERT INTO {TABLE} (
-                        generated_at, rank, product_name, this_month_qty, last_month_qty,
+                        generated_at, rank, product_name, image_filename, this_month_qty, last_month_qty,
                         mom_growth_rate, forecast_next_month_qty, learned_growth_rate,
                         current_display_qty_per_vehicle, recommended_additional_qty_raw,
                         recommended_additional_qty_learned, notice
                     ) VALUES (
-                        %(generated_at)s, %(rank)s, %(product_name)s, %(this_month_qty)s, %(last_month_qty)s,
+                        %(generated_at)s, %(rank)s, %(product_name)s, %(image_filename)s, %(this_month_qty)s, %(last_month_qty)s,
                         %(mom_growth_rate)s, %(forecast_next_month_qty)s, %(learned_growth_rate)s,
                         %(current_display_qty_per_vehicle)s, %(recommended_additional_qty_raw)s,
                         %(recommended_additional_qty_learned)s, %(notice)s

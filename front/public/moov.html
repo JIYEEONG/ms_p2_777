@@ -3818,6 +3818,9 @@ document.addEventListener("click", (event) => {
           const current = item.current_display_qty_per_vehicle ?? product.stock;
           const additional = item.recommended_additional_qty_learned ?? 0;
           state.vendingStockOverrides[product.id] = current + additional;
+          if (item.image_filename) {
+            product.image = HOT_PRODUCTS_API + "/images/" + item.image_filename;
+          }
           matched += 1;
         });
         state.vendingRefreshedAt = "방금 전";

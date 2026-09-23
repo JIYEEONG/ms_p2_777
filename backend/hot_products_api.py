@@ -43,6 +43,7 @@ def ensure_table():
                     generated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
                     rank INT NOT NULL,
                     product_name TEXT NOT NULL,
+                    image_filename TEXT,
                     this_month_qty INT,
                     last_month_qty INT,
                     mom_growth_rate TEXT,
@@ -82,10 +83,10 @@ def get_latest_hot_products():
         with conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT rank, product_name, this_month_qty, last_month_qty,
-                       mom_growth_rate, forecast_next_month_qty, learned_growth_rate,
-                       current_display_qty_per_vehicle, recommended_additional_qty_raw,
-                       recommended_additional_qty_learned, notice
+                SELECT rank, product_name, image_filename, this_month_qty, last_month_qty,
+                    mom_growth_rate, forecast_next_month_qty, learned_growth_rate,
+                    current_display_qty_per_vehicle, recommended_additional_qty_raw,
+                    recommended_additional_qty_learned, notice
                 FROM {TABLE}
                 WHERE generated_at = (SELECT MAX(generated_at) FROM {TABLE})
                 ORDER BY rank
@@ -97,7 +98,7 @@ def get_latest_hot_products():
         if not rows:
             raise HTTPException(status_code=404, detail="아직 import된 hot products 데이터가 없습니다")
         columns = [
-            "rank", "product_name", "this_month_qty", "last_month_qty",
+            "rank", "product_name", "image_filename", "this_month_qty", "last_month_qty",
             "mom_growth_rate", "forecast_next_month_qty", "learned_growth_rate",
             "current_display_qty_per_vehicle", "recommended_additional_qty_raw",
             "recommended_additional_qty_learned", "notice",
