@@ -190,7 +190,8 @@
     const status = statusFor(product);
     const moving = product.currentLocation === '창고 이동 중';
     const canMove = product.stock > 0 && product.inventoryConfirmed && !moving;
-    return `<tr><td><span class="product-cell"><span class="product-thumb">${product.image ? `<img src="${escapeHTML(product.image)}" alt="" loading="lazy">` : escapeHTML(product.icon || '')}</span><span><strong>${escapeHTML(product.name)}</strong><small>${escapeHTML(product.sku)} · ${escapeHTML(product.category)}</small></span></span></td><td>${money(product.price)}</td><td><b>${escapeHTML(product.vehicle)}</b></td><td><span class="location ${moving ? 'location--moving' : ''}">${escapeHTML(product.currentLocation)}</span></td><td><span class="stock-number">${product.stock}개</span><small class="stock-confirmation">${product.inventoryConfirmed ? '확정됨' : '미확정'}</small></td><td><span class="stock-change ${product.change < 0 ? 'is-negative' : 'is-positive'}">${product.change > 0 ? '+' : ''}${product.change}개</span></td><td>${product.forecast}개</td><td><b>${product.recommended ? product.recommended + '개' : '-'}</b></td><td><span class="status status--${status}">${status}</span></td><td><span class="row-actions"><button class="table-action" data-restock-id="${product.id}" type="button">재고 관리</button><button class="table-action table-action--move" data-move-id="${product.id}" type="button" ${canMove ? '' : 'disabled'}>${moving ? '이동 중' : '창고 이동'}</button></span></td></tr>`;
+    const image = product.image || window.MoovAdminBridge?.productImages?.[product.sku];
+    return `<tr><td><span class="product-cell"><span class="product-thumb">${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy">` : escapeHTML(product.icon || '')}</span><span><strong>${escapeHTML(product.name)}</strong><small>${escapeHTML(product.sku)} · ${escapeHTML(product.category)}</small></span></span></td><td>${money(product.price)}</td><td><b>${escapeHTML(product.vehicle)}</b></td><td><span class="location ${moving ? 'location--moving' : ''}">${escapeHTML(product.currentLocation)}</span></td><td><span class="stock-number">${product.stock}개</span><small class="stock-confirmation">${product.inventoryConfirmed ? '확정됨' : '미확정'}</small></td><td><span class="stock-change ${product.change < 0 ? 'is-negative' : 'is-positive'}">${product.change > 0 ? '+' : ''}${product.change}개</span></td><td>${product.forecast}개</td><td><b>${product.recommended ? product.recommended + '개' : '-'}</b></td><td><span class="status status--${status}">${status}</span></td><td><span class="row-actions"><button class="table-action" data-restock-id="${product.id}" type="button">재고 관리</button><button class="table-action table-action--move" data-move-id="${product.id}" type="button" ${canMove ? '' : 'disabled'}>${moving ? '이동 중' : '창고 이동'}</button></span></td></tr>`;
   }
 
   function renderProducts() {
@@ -521,6 +522,7 @@
     const now = new Intl.DateTimeFormat('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'short' }).format(new Date());
     $('#current-date').textContent = now;
     window.addEventListener('moov-vehicles-updated', () => { renderDashboardLists(); updateDashboardOverview(); });
+    window.addEventListener('moov-product-images', renderProducts);
     drawRevenueChart(); renderDashboardLists(); renderProducts(); renderInventory(); renderMembers(); renderMemberUsageChart(); renderThemes(); refreshRestockOptions(); bindEvents(); updateDashboardOverview();
     setView(location.hash.slice(1) || 'dashboard');
   }
