@@ -296,19 +296,41 @@
     const hot = results.find((item) => item.path === "/api/hot-products");
     if (Array.isArray(hot?.data?.items)) {
       const products = read(KEYS.products, PRODUCT_SEED);
-      hot.data.items.forEach((item, index) => {
-        const appProductId = `hot-${String(item.rank || index + 1).padStart(2, "0")}`;
-        const existing = products.find((product) => product.appProductId === appProductId);
+      hot.data.items.forEach((item) => {
+        const name = String(item.product_name || "").trim();
+        if (!name) return;
+
         const values = {
-          appProductId,
-          name: item.product_name,
+          name,
           sold7: Number(item.this_month_qty) || 0,
           change: Number(item.recommended_additional_qty_learned) || 0,
           forecast: Number(item.forecast_next_month_qty) || Number(item.current_display_qty_per_vehicle) || 0,
           recommended: Number(item.recommended_additional_qty_learned) || 0,
         };
-        if (existing) Object.assign(existing, values);
-        else products.push({ id: 1000 + Number(item.rank || index + 1), sku: `HOT-${String(item.rank || index + 1).padStart(3, "0")}`, category: "인기 급상승", price: 0, stock: Number(item.current_display_qty_per_vehicle) || 0, vehicle: ["MOOV 24", "MOOV 18", "MOOV 31"][index % 3], currentLocation: "차량 진열", inventoryConfirmed: true, icon: "HOT", ...values });
+
+        // 순위가 아닌 상품명으로 매칭: 관리자가 입력한 재고·위치·차량은 유지
+        const existing = products.find((product) => product.category === "인기 급상승" && product.name === name);
+        if (existing) {
+          Object.assign(existing, values);
+          return;
+        }
+
+        // 새 상품: 기존 id와 겹치지 않게 최댓값 + 1
+        const id = Math.max(1000, ...products.map((product) => Number(product.id) || 0)) + 1;
+        const no = id - 1000;
+        products.push({
+          id,
+          sku: `HOT-${String(no).padStart(3, "0")}`,
+          appProductId: `hot-${String(no).padStart(2, "0")}`,
+          category: "인기 급상승",
+          price: 0,
+          stock: Number(item.current_display_qty_per_vehicle) || 0,
+          vehicle: ["MOOV 24", "MOOV 18", "MOOV 31"][no % 3],
+          currentLocation: "차량 진열",
+          inventoryConfirmed: true,
+          icon: "HOT",
+          ...values,
+        });
       });
       write(KEYS.products, products);
       queueServerState(KEYS.products, JSON.stringify(products));
