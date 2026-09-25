@@ -254,6 +254,8 @@
       const state = payload.state || {};
       for (const [serverKey, entry] of Object.entries(state)) if (entry && "data" in entry) cacheServerState(serverKey, entry.data);
       if (Array.isArray(payload.members)) write(KEYS.members, payload.members);
+      window.MoovAdminBridge.productImages = payload.productImages || {};
+      window.dispatchEvent(new CustomEvent("moov-product-images"));
 
       const seeds = new Map([
         ["products", localValue(KEYS.products)], ["config-ai", localValue(KEYS.aiConfig)],

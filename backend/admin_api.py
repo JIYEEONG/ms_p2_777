@@ -11,6 +11,7 @@ import mimetypes
 import os
 import uuid
 from datetime import datetime
+from urllib.parse import quote
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -26,6 +27,13 @@ else:
     from google_auth_api import require_auth_user
     from hot_products_api import IMAGE_CONTAINER
 
+IMAGE_BASE_URL = os.getenv("IMAGE_BASE_URL", "").rstrip("/")
+
+
+def to_image_url(filename: str | None) -> str | None:
+    if not filename or not IMAGE_BASE_URL:
+        return None
+    return f"{IMAGE_BASE_URL}/{quote(filename)}"
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 STATE_KEYS = {
@@ -222,10 +230,31 @@ def _member_rows() -> list[dict[str, Any]]:
         })
     return members
 
+def _product_image_map() -> dict[str, str]:
+    """taxi_products.products의 SKU → 이미지 URL"""
+    try:
+        conn = get_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT sku, image_filename FROM {PRODUCT_TABLE} WHERE image_filename IS NOT NULL")
+                rows = cur.fetchall()
+        finally:
+            release_conn(conn)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[admin] 상품 이미지 조회 실패: {exc}")
+        return {}
+    return {sku: url for sku, name in rows if (url := to_image_url(name))}
+
 
 @router.get("/bootstrap")
 def admin_bootstrap(user: dict = Depends(require_admin_user)):
-    return JSONResponse({"authenticated": True, "user": user, "state": _read_states(), "members": _member_rows()}, headers=PRIVATE_HEADERS)
+    return JSONResponse({
+        "authenticated": True,
+        "user": user,
+        "state": _read_states(),
+        "members": _member_rows(),
+        "productImages": _product_image_map(),
+    }, headers=PRIVATE_HEADERS)
 
 
 @router.get("/state/{key}")
