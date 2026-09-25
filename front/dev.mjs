@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { createConnection, createServer } from "node:net";
 import { join } from "node:path";
@@ -43,8 +43,10 @@ export async function startDev({
   mapsOnly = false,
 } = {}) {
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error("PORT must be between 0 and 65535.");
-  const python = process.env.MOOV_PYTHON || join(projectRoot, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
-  if (!process.env.MOOV_PYTHON && !existsSync(python)) {
+  const pythonSuffix = process.platform === "win32" ? "Scripts/python.exe" : "bin/python";
+  const candidates = [join(projectRoot, ".venv", pythonSuffix), join(projectRoot, ".venv314", pythonSuffix)];
+  const python = process.env.MOOV_PYTHON || candidates.find(candidate => existsSync(candidate) && spawnSync(candidate, ["--version"], { windowsHide: true, stdio: "ignore" }).status === 0);
+  if (!python) {
     throw new Error("Python environment missing. At the project root, run: python -m venv .venv, then install backend/requirements.txt (see README.md).");
   }
 

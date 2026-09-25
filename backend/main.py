@@ -11,12 +11,14 @@ if __package__:
     from .google_auth_api import router as auth_router
     from .survey_api import router as survey_router
     from .hot_products_api import router as hot_products_router, ensure_table as ensure_hot_products_table
+    from .admin_api import router as admin_router, ensure_admin_schema
 else:
     from outing_api import router as outing_router
     from naver_maps_api import router as maps_router
     from google_auth_api import router as auth_router
     from survey_api import router as survey_router
     from hot_products_api import router as hot_products_router, ensure_table as ensure_hot_products_table
+    from admin_api import router as admin_router, ensure_admin_schema
 
 app = FastAPI()
 app.include_router(outing_router)
@@ -24,6 +26,7 @@ app.include_router(maps_router)
 app.include_router(auth_router)
 app.include_router(survey_router)
 app.include_router(hot_products_router)
+app.include_router(admin_router)
 
 
 @app.on_event("startup")
@@ -34,6 +37,10 @@ def _ensure_hot_products_table():
         ensure_hot_products_table()
     except Exception as exc:  # noqa: BLE001
         print(f"[startup] hot_product_recommendations 테이블 준비 실패(연결 문제일 수 있음): {exc}")
+    try:
+        ensure_admin_schema()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[startup] admin schema preparation failed (database may be offline): {exc}")
 
 # 로컬 프론트 개발 서버 주소로 제한 (배포 시 실제 도메인으로 교체)
 app.add_middleware(

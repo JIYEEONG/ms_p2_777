@@ -30,7 +30,7 @@ export function createFrontendServer(backendUrl = process.env.MOOV_BACKEND_URL |
   return createServer((req, res) => {
     const url = new URL(req.url || "/", `http://localhost:${port}`);
     const requestedPath = decodeURIComponent(url.pathname);
-    if (["/api/outing/", "/api/maps/", "/api/auth/", "/api/luna/", "/api/hot-products"].some((prefix) => requestedPath.startsWith(prefix))) {
+    if (["/api/outing/", "/api/maps/", "/api/auth/", "/api/luna/", "/api/hot-products", "/api/admin/"].some((prefix) => requestedPath.startsWith(prefix))) {
       const upstream = new URL(requestedPath + url.search, backendUrl);
       const proxy = httpRequest(upstream, { method: req.method, headers: { ...req.headers, host: upstream.host } }, (upstreamResponse) => {
         res.writeHead(upstreamResponse.statusCode || 502, upstreamResponse.headers);

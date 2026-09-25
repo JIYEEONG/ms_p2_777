@@ -1756,6 +1756,43 @@ const products = [
   { id: "hot-30", name: "포도탄산 소형 고단백", desc: "소형 · 고단백", price: 1800, image: HOT_PRODUCTS_API + "/images/product-taxi-30-grape-soda-small-highprotein.jpg", category: "음료·간식", recommended: false, stock: 29, location: "냉장함 H-30", growth: 21, reason: "지난달 대비 판매량 +21%" },
 ];
 
+const ADMIN_BRIDGE_KEY = "moov_admin_bridge_v1";
+function readAdminBridge() {
+  try {
+    const value = JSON.parse(localStorage.getItem(ADMIN_BRIDGE_KEY) || "null");
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  } catch { return {}; }
+}
+function applyAdminProductBridge() {
+  const overrides = readAdminBridge().products;
+  if (!Array.isArray(overrides)) return;
+  overrides.forEach((override) => {
+    const product = products.find((item) => item.id === override.appProductId);
+    if (!product) return;
+    if (typeof override.name === "string" && override.name.trim()) product.name = override.name.trim();
+    if (typeof override.category === "string" && override.category.trim()) product.category = override.category.trim();
+    if (Number.isFinite(Number(override.price)) && Number(override.price) >= 0) product.price = Number(override.price);
+    if (Number.isSafeInteger(Number(override.stock)) && Number(override.stock) >= 0) product.stock = Number(override.stock);
+    if (typeof override.currentLocation === "string" && override.currentLocation.trim()) product.location = override.currentLocation.trim();
+  });
+}
+function adminThemeDefaults() {
+  const bridge = readAdminBridge();
+  const theme = Array.isArray(bridge.vehicleThemes) ? bridge.vehicleThemes.find((item) => item.id === bridge.selectedTheme) : null;
+  if (!theme) return {};
+  const names = { default: "기본", window: "윈도", content: "콘텐츠", wellness: "웰니스", sleep: "수면", private: "프라이빗" };
+  return {
+    theme: names[theme.id] || theme.name || "기본",
+    config: {
+      temperature: Number(theme.temperature) || 22,
+      tint: Number.isFinite(Number(theme.window)) ? Number(theme.window) : 60,
+      light: theme.lighting || "민트 앰비언트",
+      privacy: theme.privacy !== false,
+    },
+  };
+}
+applyAdminProductBridge();
+
 // 차량 자판기 물품판매 알고리즘(연령대별 수요 학습 + 진열 판단) 기반 추천값의 오프라인 대체값.
 // 정상 상태에서는 새로고침 시 HOT_PRODUCTS_API(백엔드 /api/hot-products, Postgres taxi_products
 // 스키마에 적재된 demand_report_v2.11 결과)를 호출해서 실시간 값을 쓰고, 이 객체는 서버 호출이
@@ -1813,6 +1850,7 @@ const defaultRecommendationPrefs = () => ({ category: "전체", mood: "전체", 
 const defaultOutingFilters = () => ({ category: "전체", mood: "전체", companion: "전체", purpose: "전체", time: "전체", budget: 100000 });
 function createAppState(saved = {}, user = null) {
 const outingSaved = readUserOuting(user?.id);
+const adminDefaults = adminThemeDefaults();
 return {
   isAuthenticated: Boolean(user),
   userId: user?.id || "",
@@ -1901,9 +1939,9 @@ return {
       { type: "목적지", name: "", photo: null },
     ],
   },
-  theme: saved.theme || "기본",
+  theme: saved.theme || adminDefaults.theme || "기본",
   pendingTheme: null,
-  themeConfig: saved.themeConfig || { temperature: 22, tint: 60, light: "민트 앰비언트", privacy: true },
+  themeConfig: saved.themeConfig || adminDefaults.config || { temperature: 22, tint: 60, light: "민트 앰비언트", privacy: true },
   username: saved.username || user?.name || "",
   profilePhoto: saved.profilePhoto || safeGooglePicture(user?.picture) || DEFAULT_PROFILE_PHOTO,
   pendingProfilePhoto: null,
@@ -1920,6 +1958,16 @@ function safeGooglePicture(value) {
   try { const url = new URL(value); return url.protocol === "https:" ? url.href : null; } catch { return null; }
 }
 const state = createAppState();
+window.addEventListener("storage", (event) => {
+  if (event.key !== ADMIN_BRIDGE_KEY) return;
+  applyAdminProductBridge();
+  const adminDefaults = adminThemeDefaults();
+  if (adminDefaults.theme && !state.tripActive) {
+    state.theme = adminDefaults.theme;
+    state.themeConfig = adminDefaults.config;
+  }
+  render();
+});
 let authGeneration = 0;
 let splashFinished = false;
 

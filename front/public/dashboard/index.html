@@ -1,44 +1,320 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f4f7f5" />
-    <meta name="description" content="MOOV 앱 구현 범위와 브라우저 상태를 확인하는 운영 대시보드" />
-    <title>MOOV 앱 운영 대시보드</title>
-    <link rel="stylesheet" href="./styles.css" />
-    <script src="./app.js" defer></script>
-  </head>
-  <body>
-    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
-    <div class="shell">
-      <aside class="sidebar" aria-label="대시보드 메뉴">
-        <div class="brand"><span>M</span><div><strong>MOOV</strong><small>APP OPERATIONS</small></div></div>
-        <nav id="nav"></nav>
-        <div class="scope-note"><strong>표시 원칙</strong><p>앱 코드와 현재 브라우저에 존재하는 상태만 표시합니다.</p></div>
-      </aside>
-
-      <div class="workspace">
-        <header class="topbar">
-          <button id="menuButton" class="mobile-menu" type="button" aria-label="메뉴 열기">메뉴</button>
-          <div><span class="eyebrow">MOOV CONTROL CENTER</span><strong id="pageTitle">앱 현황</strong></div>
-          <div class="top-actions">
-            <span id="updatedAt" class="updated-at"></span>
-            <button id="refreshButton" class="button secondary" type="button">새로고침</button>
-            <button id="themeButton" class="button icon" type="button" aria-label="색상 모드 전환">테마</button>
-          </div>
-        </header>
-
-        <main id="main" tabindex="-1">
-          <section class="page-heading">
-            <div><p id="breadcrumb">MOOV / 앱 현황</p><h1 id="heading">앱 현황</h1><p id="description">배포 앱에 구현된 기능과 현재 데이터 범위를 확인합니다.</p></div>
-            <span class="scope-badge">APP-SOURCED ONLY</span>
-          </section>
-          <section id="view" aria-live="polite"></section>
-        </main>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="MOOV 관리자 대시보드" />
+  <title>MOOV 운영 센터</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23111a2d'/%3E%3Cpath d='M15 45V19h8l9 14 9-14h8v26h-8V31l-9 13-9-13v14z' fill='%236fe3f5'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./styles.css" /><link rel="stylesheet" href="./manage.css" /><link rel="stylesheet" href="./content-management.css" /><link rel="stylesheet" href="./vehicle-management.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__top">
+        <a class="brand" href="#dashboard" aria-label="MOOV 관리자 홈">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>MOOV</span>
+          <small>CONTROL</small>
+        </a>
+        <button class="icon-button sidebar-close" type="button" id="sidebar-close" aria-label="메뉴 닫기">×</button>
       </div>
+
+      <nav class="nav" aria-label="관리자 메뉴">
+        <p class="nav__label">OVERVIEW</p>
+        <a class="nav__item is-active" href="#dashboard" data-view="dashboard">
+          <span class="nav__icon">⌂</span><span>대시보드</span>
+        </a>
+        <p class="nav__label">OPERATIONS</p>
+        <a class="nav__item" href="#vehicles" data-view="vehicles">
+          <span class="nav__icon">▱</span><span>무인차 관리</span><b class="nav__badge" id="vehicle-alert-badge">2</b>
+        </a>
+        <a class="nav__item" href="#products" data-view="products">
+          <span class="nav__icon">◇</span><span>공간 상품</span><b class="nav__badge" id="stock-alert-badge">3</b>
+        </a>
+        <a class="nav__item" href="#members" data-view="members">
+          <span class="nav__icon">◎</span><span>회원 관리</span>
+        </a>
+        <a class="nav__item" href="#ai" data-view="ai"><span class="nav__icon">◈</span><span>AI 말동무 관리</span></a><p class="nav__label">SYSTEM</p>
+        <a class="nav__item" href="#themes" data-view="themes">
+          <span class="nav__icon">◐</span><span>공간 테마 설정</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__footer">
+        <div class="admin-profile">
+          <span class="avatar">SS</span>
+          <div><strong>신승준 관리자</strong><small>Super Admin</small></div>
+          <button class="icon-button" type="button" aria-label="관리자 메뉴">⋮</button>
+        </div>
+        <a class="logout-link" href="../index.html">↪ 로그인 화면으로</a>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <header class="topbar">
+        <button class="icon-button menu-button" type="button" id="menu-button" aria-label="메뉴 열기">☰</button>
+        <div class="topbar__context">
+          <span class="live-dot"></span>
+          <span>앱·무인차 데이터 연결됨</span>
+          <span class="topbar__divider"></span>
+          <span id="current-date"></span>
+        </div>
+        <div class="topbar__actions">
+          <button class="icon-button notification-button" type="button" aria-label="알림">♢<b>4</b></button>
+          <button class="button button--ghost" type="button" data-action="quick-restock">+ 빠른 입고</button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <section class="view is-active" id="view-dashboard" data-view-panel="dashboard">
+          <div class="page-heading">
+            <div><p class="eyebrow">MOOV CONTROL CENTER</p><h1>오늘의 운영 현황</h1><p>MOOV 앱의 이동·공간·상품 데이터를 연결해 운영 우선순위를 확인합니다.</p></div>
+            <div class="period-control" aria-label="조회 기간">
+              <button class="is-active" type="button">7일</button><button type="button">30일</button><button type="button">90일</button>
+            </div>
+          </div>
+          <div class="data-notice"><span>DATA BASIS</span><strong>무인차·공간 상품·회원 관리 데이터 연결</strong><small>첫 화면 수치는 각 관리 메뉴의 현재 데이터와 함께 갱신됩니다.</small></div>
+
+          <div class="kpi-grid">
+            <article class="kpi-card kpi-card--accent">
+              <div class="kpi-card__top"><span class="kpi-icon">₩</span><span class="trend trend--up" id="dashboard-revenue-trend">연동 계산</span></div>
+              <p>연결 매출 합계</p><strong id="dashboard-total-revenue">₩ 0</strong><small>회원 결제 + 공간 상품 7일 판매</small>
+            </article>
+            <article class="kpi-card" data-view-target="vehicles" role="button" tabindex="0">
+              <div class="kpi-card__top"><span class="kpi-icon">▱</span><span class="trend trend--up" id="dashboard-vehicle-status">차량 동기화</span></div>
+              <p>무인차 관리</p><strong id="dashboard-vehicle-count">0 <em>대</em></strong><small id="dashboard-vehicle-detail">배차 가능 0 · 확인 필요 0</small>
+            </article>
+            <article class="kpi-card" data-view-target="products" role="button" tabindex="0">
+              <div class="kpi-card__top"><span class="kpi-icon">◇</span><span class="trend trend--up" id="dashboard-product-status">재고 연동</span></div>
+              <p>공간 상품</p><strong id="dashboard-product-sales">0 <em>건</em></strong><small id="dashboard-product-detail">상품 0종 · 입고 필요 0종</small>
+            </article>
+            <article class="kpi-card kpi-card--warning" data-view-target="members" role="button" tabindex="0">
+              <div class="kpi-card__top"><span class="kpi-icon">◎</span><span class="trend trend--down" id="dashboard-member-status">회원 연동</span></div>
+              <p>회원 관리</p><strong id="dashboard-member-count">0 <em>명</em></strong><small id="dashboard-member-detail">활성 0 · 주의 0</small>
+            </article>
+          </div>
+
+          <div class="dashboard-linked-grid" aria-label="연결 관리 메뉴">
+            <button class="linked-module-card" type="button" data-view-target="vehicles"><span>무인차 관리</span><strong id="linked-vehicles-main">배차 가능 0대</strong><small id="linked-vehicles-sub">지도·SOC·보안 상태 확인</small></button>
+            <button class="linked-module-card" type="button" data-view-target="products"><span>공간 상품</span><strong id="linked-products-main">입고 필요 0종</strong><small id="linked-products-sub">재고 확정·창고 이동 관리</small></button>
+            <button class="linked-module-card" type="button" data-view-target="members"><span>회원 관리</span><strong id="linked-members-main">활성 회원 0명</strong><small id="linked-members-sub">가입·결제·이용 이력 조회</small></button>
+          </div>
+
+          <div class="dashboard-grid dashboard-grid--top">
+            <article class="panel panel--wide">
+              <div class="panel__heading"><div><h2>매출 추이</h2><p>공간 상품과 모빌리티 매출 비교</p></div><div class="chart-legend"><span><i class="dot dot--primary"></i>공간 상품</span><span><i class="dot dot--secondary"></i>모빌리티</span></div></div>
+              <div class="line-chart" id="revenue-chart" role="img" aria-label="최근 7일 매출 추이 그래프"></div>
+            </article>
+            <article class="panel stock-health">
+              <div class="panel__heading"><div><h2>재고 건전성</h2><p>앱 노출 상품 10종 기준</p></div><span class="score-tag">점검 필요</span></div>
+              <div class="donut-wrap">
+                <div class="donut" id="stock-donut"><div><strong>86</strong><span>/ 100</span></div></div>
+                <ul class="donut-legend">
+                  <li><span><i class="dot dot--success"></i>안정</span><b id="stock-safe-count">4</b></li>
+                  <li><span><i class="dot dot--warning"></i>주의</span><b id="stock-warning-count">2</b></li>
+                  <li><span><i class="dot dot--danger"></i>위험</span><b id="stock-danger-count">4</b></li>
+                </ul>
+              </div>
+              <button class="button button--soft button--wide" type="button" data-view-target="products">상품·재고 상세 확인 →</button>
+            </article>
+          </div>
+
+          <div class="dashboard-grid dashboard-grid--bottom">
+            <article class="panel demand-panel">
+              <div class="panel__heading"><div><h2>상품별 수요 예측</h2><p>최근 판매 속도를 반영한 7일 예상</p></div><span class="ai-tag">AI 분석</span></div>
+              <div class="demand-list" id="demand-list"></div>
+            </article>
+            <article class="panel">
+              <div class="panel__heading"><div><h2>무인차 운영 현황</h2><p>차량 위치·배차 상태와 공간 상품 적재율</p></div><button class="text-button" type="button" data-view-target="vehicles">무인차 보기</button></div>
+              <div class="fleet-list" id="fleet-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="view-vehicles" data-view-panel="vehicles">
+          <div class="page-heading vehicle-heading">
+            <div><p class="eyebrow">AUTONOMOUS FLEET CONTROL</p><h1>무인차 관리</h1><p>차량 위치, 배차 가능 여부, SOC와 안전·보안 상태를 10초 단위로 확인합니다.</p></div>
+            <div class="heading-actions"><button class="button button--ghost" type="button" id="vehicle-export">CSV 내보내기</button><button class="button button--primary" type="button" id="vehicle-refresh">위치 새로고침</button></div>
+          </div>
+          <div class="vehicle-data-basis"><span class="vehicle-data-basis__live"><i></i>10초 갱신</span><strong>vehicle_current 계약 기준</strong><span>실차 API 연동 전 합성·연동 예시 데이터 · 위치·속도·SOC·상태·보안·관측시각</span><small id="vehicle-last-sync">마지막 갱신 계산 중</small></div>
+          <div class="vehicle-kpis" id="vehicle-kpis"></div>
+          <div class="vehicle-toolbar">
+            <label class="vehicle-search"><span>⌕</span><input id="vehicle-search" type="search" placeholder="차량 ID 또는 권역 검색" autocomplete="off" /><kbd>Enter</kbd></label>
+            <select id="vehicle-state-filter" aria-label="차량 상태 필터"><option value="all">전체 상태</option><option value="eligible">배차 가능</option><option value="active">운행·이동 중</option><option value="energy">충전·SOC 점검</option><option value="exception">격리·정비·오프라인</option></select>
+            <select id="vehicle-source-filter" aria-label="차량 데이터 원천 필터"><option value="all">전체 데이터</option><option value="real">실차 GPS</option><option value="synthetic">합성 차량</option></select>
+            <span class="vehicle-result" id="vehicle-result-count">0대 표시</span>
+          </div>
+          <div class="vehicle-workspace">
+            <article class="panel vehicle-map-panel">
+              <div class="panel__heading"><div><h2>실시간 차량 위치</h2><p>네이버 지도 · 차량 위치 10초 주기 · 교통 데이터 10분 주기</p></div><div class="vehicle-map-legend"><span><i class="is-ready"></i>배차 가능</span><span><i class="is-active"></i>운행 중</span><span><i class="is-exception"></i>확인 필요</span></div></div>
+              <div id="vehicle-map" class="vehicle-map" role="application" aria-label="서울 무인차 실시간 위치 지도"><div class="vehicle-map__loading">지도를 불러오는 중입니다.</div></div>
+              <div class="vehicle-map-foot"><span>GPS 최신성 기준: 10초</span><span>오래된 위치는 흐리게 표시</span><span>지도 데이터 © NAVER</span></div>
+            </article>
+            <aside class="panel vehicle-list-panel" aria-label="차량 목록과 상세">
+              <div class="vehicle-list-heading"><div><h2>차량 목록</h2><p>검색 결과에서 차량을 선택하세요.</p></div><button type="button" class="text-button" id="vehicle-fit-all">전체 위치</button></div>
+              <div class="vehicle-list" id="vehicle-list"></div>
+              <div class="vehicle-detail" id="vehicle-detail" aria-live="polite"></div>
+            </aside>
+          </div>
+          <div class="vehicle-lower-grid">
+            <article class="panel vehicle-allocation-panel"><div class="panel__heading"><div><h2>차량 풀 배분</h2><p>택시 예비량 확보 후 렌트·충전 가용량 계산</p></div><span class="ai-tag">rule v1.1</span></div><div id="fleet-allocation-chart" class="allocation-chart"></div></article>
+            <article class="panel vehicle-audit-panel"><div class="panel__heading"><div><h2>최근 운영 조치</h2><p>관리자 변경과 자동 상태 전이 이력</p></div><button class="text-button" type="button" id="vehicle-audit-clear">화면 기록 비우기</button></div><div class="vehicle-audit-list" id="vehicle-audit-list"></div></article>
+          </div>
+        </section>
+
+        <section class="view" id="view-products" data-view-panel="products"><details class="mx-tip"><summary>ⓘ 재고 상태 기준 Tip</summary><p>7일 예상 재고 = 현재 재고 + 예상 변화(최소 0개). <b>위험: 0~2개</b> · <b>주의: 3~5개</b> · <b>안정: 6개 이상</b>. 재고 확정 후 수량이 1개 이상이면 창고 이동을 시작할 수 있습니다.</p></details>
+          <div class="page-heading">
+            <div><p class="eyebrow">SPACE PRODUCTS & INVENTORY</p><h1>공간 상품</h1><p>상품 등록, 차량별 재고, 실시간 위치와 창고 이동을 한 화면에서 관리합니다.</p></div>
+            <div class="heading-actions"><button class="button button--ghost" type="button" id="export-inventory">CSV 내보내기</button><button class="button button--primary" type="button" data-action="add-product">+ 새 상품 등록</button></div>
+          </div>
+          <div class="inventory-overview">
+            <article><span>안정 재고</span><strong id="stock-safe-inline">4종</strong><small>7일 예상 6개 이상</small></article>
+            <article><span>주의 재고</span><strong id="stock-warning-inline">2종</strong><small>7일 예상 3~5개</small></article>
+            <article><span>위험 재고</span><strong id="stock-danger-inline">4종</strong><small>우선 입고 검토</small></article>
+            <article><span>창고 이동 중</span><strong id="warehouse-moving-count">1건</strong><small>재고 수정 가능</small></article>
+          </div>
+          <div class="insight-banner">
+            <span class="insight-banner__icon">✦</span>
+            <div><strong>상품과 입고 기능을 하나의 재고 운영 흐름으로 통합했습니다.</strong><p>재고 관리에서 수량을 확정한 뒤 창고 이동을 시작하며, 이동 중에도 수량을 다시 확정할 수 있습니다.</p></div>
+            <button class="button button--dark" type="button" id="apply-recommendations">추천 입고 검토</button>
+          </div>
+          <div class="filter-bar">
+            <label class="search-field"><span>⌕</span><input id="product-search" type="search" placeholder="상품명 또는 SKU 검색" /></label>
+            <select id="product-category" aria-label="상품 분류"><option value="all">전체 분류</option><option>음료·간식</option><option>식사</option><option>편의용품</option></select>
+            <details class="multi-filter"><summary><span id="status-filter-label">전체 상태</span><b>⌄</b></summary><div class="multi-filter__menu"><label><input id="status-all" type="checkbox" checked>전체</label><hr><label><input data-status-filter type="checkbox" value="안정" checked>안정</label><label><input data-status-filter type="checkbox" value="주의" checked>주의</label><label><input data-status-filter type="checkbox" value="위험" checked>위험</label></div></details>
+            <details class="multi-filter"><summary><span id="vehicle-filter-label">전체 차량</span><b>⌄</b></summary><div class="multi-filter__menu"><label><input id="vehicle-all" type="checkbox" checked>전체</label><hr><label><input data-vehicle-filter type="checkbox" value="MOOV 24" checked>MOOV 24</label><label><input data-vehicle-filter type="checkbox" value="MOOV 18" checked>MOOV 18</label><label><input data-vehicle-filter type="checkbox" value="MOOV 31" checked>MOOV 31</label></div></details>
+            <div class="filter-summary"><span class="live-dot"></span> <b id="product-filter-result">10개 상품 표시</b></div>
+          </div>
+          <article class="panel table-panel">
+            <div class="table-wrap"><table class="product-inventory-table"><thead><tr><th>상품</th><th>판매가</th><th>배치 차량</th><th>현재 위치</th><th>현재 재고</th><th>24시간 변화</th><th>7일 예상</th><th>권장 입고</th><th>상태</th><th>관리</th></tr></thead><tbody id="product-table-body"></tbody></table></div>
+          </article>
+          <article class="panel activity-panel">
+            <div class="panel__heading"><div><h2>최근 재고·이동 기록</h2><p>수량 확정과 창고 이동 이력</p></div><button class="text-button" type="button" data-action="quick-restock">빠른 재고 관리</button></div>
+            <div id="inventory-activity" class="activity-list"></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-members" data-view-panel="members"><div class="mx-tip">기존 회원 요약은 예시 데이터입니다. 실제 결제·거래 내역은 회원 상세에서 별도로 조회합니다. 거래 발생일 기준 5년 보관 정책을 적용합니다.</div><div id="payment-manager" class="mx"></div>
+          <div class="page-heading">
+            <div><p class="eyebrow">MEMBER CRM</p><h1>회원 관리</h1><p>일반·Google 가입 정보와 상품 구매, 택시·렌트, 공간 테마 이용을 통합 관리합니다.</p></div>
+            <button class="button button--ghost" type="button" id="export-members">회원 CSV 내보내기</button>
+          </div>
+          <div class="member-summary">
+            <div><span>전체 회원</span><strong>10,000</strong><small>앱 회원 데이터 기준</small></div>
+            <div><span>활성 회원</span><strong>6,940</strong><small>활성률 69.4%</small></div>
+            <div><span>Google 가입</span><strong>5,580</strong><small>전체의 55.8%</small></div>
+            <div><span>회원당 평균 결제</span><strong>₩84,200</strong><small>상품·택시·렌트 합계</small></div>
+          </div>
+          <div class="member-visuals">
+            <article class="panel channel-panel">
+              <div class="panel__heading"><div><h2>가입 채널 구성</h2><p>일반 회원가입과 Google 로그인 비중</p></div><span class="score-tag">10,000명</span></div>
+              <div class="channel-chart" role="img" aria-label="Google 가입 55.8%, 일반 가입 44.2%"><span style="--value:55.8%"><b>Google 55.8%</b></span><span style="--value:44.2%"><b>일반 44.2%</b></span></div>
+            </article>
+            <article class="panel usage-panel">
+              <div class="panel__heading"><div><h2>회원 이용 매출 구성</h2><p>상품·택시·렌트 결제 비중</p></div></div>
+              <div id="member-usage-chart" class="usage-chart" role="img" aria-label="회원 이용 매출 구성"></div>
+            </article>
+          </div>
+          <div class="filter-bar">
+            <label class="search-field"><span>⌕</span><input id="member-search" type="search" placeholder="회원번호, 이름, 이메일 검색" /></label>
+            <select id="member-auth" aria-label="가입 유형"><option value="all">전체 가입 유형</option><option value="일반">일반 회원</option><option value="Google">Google 로그인</option></select>
+            <select id="member-status" aria-label="회원 상태"><option value="all">전체 회원 상태</option><option value="활성">활성</option><option value="휴면">휴면</option><option value="주의">주의</option></select>
+          </div>
+          <article class="panel table-panel">
+            <div class="table-wrap"><table><thead><tr><th>회원</th><th>회원번호</th><th>가입 방식</th><th>상품 구매</th><th>택시 이용</th><th>렌트 이용</th><th>선호 테마</th><th>누적 결제</th><th>상태</th><th>상세</th></tr></thead><tbody id="member-table-body"></tbody></table></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-ai" data-view-panel="ai"><div class="page-heading"><div><p class="eyebrow">AI COMPANION</p><h1>AI 말동무 관리</h1><p>공통 정책과 네 페르소나, 차량별 이용 현황을 관리합니다.</p></div><span class="mx-badge">차량 서비스 미연동</span></div><div id="ai-manager" class="mx">설정을 불러오는 중입니다.</div></section><section class="view" id="view-themes" data-view-panel="themes">
+          <div class="page-heading">
+            <div><p class="eyebrow">SPACE EXPERIENCE</p><h1>공간 테마 설정</h1><p>moov 앱 콘텐츠 메뉴의 OTT, Wellness, Thema와 차량 환경 기본값을 통합 관리합니다.</p></div>
+            <button class="button button--primary" type="button" id="save-theme">차량 환경 저장</button>
+          </div>
+          <div id="content-theme-manager" class="mx">콘텐츠 테마 설정을 불러오는 중입니다.</div><details class="mx-env"><summary>기존 차량 환경 설정 · 브라우저에 저장</summary><div class="theme-layout">
+            <section>
+              <h2 class="section-title">기본 제공 테마</h2>
+              <div class="theme-grid" id="theme-grid"></div>
+              <article class="panel theme-editor">
+                <div class="panel__heading"><div><h2>선택 테마 편집</h2><p>앱의 공간 테마와 동일한 환경값을 조정합니다.</p></div><button class="text-button" id="reset-theme" type="button">기본값 복원</button></div>
+                <div class="theme-form">
+                  <label>테마 이름<input id="theme-name" type="text" maxlength="20" /></label>
+                  <label>주요 색상<span class="color-field"><input id="theme-primary" type="color" /><output id="theme-primary-output"></output></span></label>
+                  <label>보조 색상<span class="color-field"><input id="theme-secondary" type="color" /><output id="theme-secondary-output"></output></span></label>
+                  <label>배경 색상<span class="color-field"><input id="theme-background" type="color" /><output id="theme-background-output"></output></span></label>
+                  <label>모서리 스타일<select id="theme-radius"><option value="8">단정하게</option><option value="16">부드럽게</option><option value="28">라운드</option></select></label>
+                  <label>정보 밀도<select id="theme-density"><option value="compact">촘촘하게</option><option value="comfortable">기본</option><option value="spacious">여유롭게</option></select></label>
+                  <label>실내 온도 <output id="theme-temperature-output">22℃</output><input id="theme-temperature" type="range" min="18" max="28" step="1" /></label>
+                  <label>창문 투명도 <output id="theme-window-output">60%</output><input id="theme-window" type="range" min="0" max="100" step="5" /></label>
+                  <label>조명<select id="theme-lighting"><option>민트 앰비언트</option><option>따뜻한 독서등</option><option>콘텐츠 몰입등</option><option>수면 저조도</option></select></label>
+                  <label class="toggle-field">프라이버시 글라스<span><input id="theme-privacy" type="checkbox" /> 외부 시야 차단</span></label>
+                </div>
+              </article>
+            </section>
+            <aside class="theme-preview-panel">
+              <div class="preview-heading"><span>LIVE PREVIEW</span><b>앱 미리보기</b></div>
+              <div class="phone-preview" id="phone-preview">
+                <div class="phone-screen">
+                  <div class="phone-status"><span>9:41</span><span>● ◔ ▰</span></div>
+                  <div class="phone-copy"><small>MOOV SPACE</small><h3 id="preview-title">도시의 틈에서<br />잠시 쉬어가세요.</h3><p id="preview-description">이동 중에도 나만의 공간을 경험합니다.</p></div>
+                  <div class="preview-card"><span>공간 모드</span><strong id="preview-theme-name">기본 모드 적용 중</strong><div class="preview-env"><b id="preview-temperature">22℃</b><b id="preview-window">창문 60%</b><b id="preview-lighting">민트 앰비언트</b></div></div>
+                  <button type="button">차량에 적용</button>
+                  <div class="preview-tabs"><span>⌂<small>홈</small></span><span>◇<small>공간</small></span><span>◎<small>MY</small></span></div>
+                </div>
+              </div>
+              <p class="preview-note">실제 앱에서는 콘텐츠와 기기 설정에 따라 다르게 보일 수 있습니다.</p>
+            </aside>
+          </div>
+        </details></section>
+      </main>
     </div>
-    <button id="overlay" class="overlay" type="button" aria-label="메뉴 닫기" hidden></button>
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  </body>
+  </div>
+
+  <div class="modal" id="product-modal" role="dialog" aria-modal="true" aria-labelledby="product-modal-title" hidden>
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__panel">
+      <div class="modal__heading"><div><p class="eyebrow">NEW PRODUCT</p><h2 id="product-modal-title">새 공간 상품 등록</h2></div><button class="icon-button" type="button" data-close-modal aria-label="닫기">×</button></div>
+      <form id="product-form" class="form-grid">
+        <label class="span-2">상품명<input name="name" required placeholder="예: 무라벨 생수" /></label>
+        <label>SKU<input name="sku" required placeholder="MV-DR-011" /><small id="product-sku-message" class="field-message" aria-live="polite"></small></label>
+        <label>분류<select name="category"><option>음료·간식</option><option>식사</option><option>편의용품</option></select></label>
+        <label>판매가<input name="price" required type="number" min="0" step="100" value="5000" /></label>
+        <label>초기 재고<input name="stock" required type="number" min="0" value="20" /></label>
+        <label class="span-2">초기 배치 차량<select name="vehicle"><option>MOOV 24</option><option>MOOV 18</option><option>MOOV 31</option></select></label>
+        <div class="form-actions span-2"><button class="button button--ghost" type="button" data-close-modal>취소</button><button class="button button--primary" type="submit">상품 등록</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="restock-modal" role="dialog" aria-modal="true" aria-labelledby="restock-modal-title" hidden>
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__panel">
+      <div class="modal__heading"><div><p class="eyebrow">STOCK IN</p><h2 id="restock-modal-title">입고 및 재고 조정</h2></div><button class="icon-button" type="button" data-close-modal aria-label="닫기">×</button></div>
+      <form id="restock-form" class="form-grid">
+        <label class="span-2">상품<select name="productId" id="restock-product" required></select></label>
+        <div class="stock-modal-summary span-2"><span>현재 재고 <b id="restock-current">-</b></span><span>예상 변화 <b id="restock-change">-</b></span><span>권장 수량 <b id="restock-recommended">-</b></span><span>현재 위치 <b id="restock-location">-</b></span></div>
+        <p class="span-2 moving-note" id="restock-moving-note" hidden>창고 이동 중에도 재고 수량과 배치 차량을 변경하고 다시 확정할 수 있습니다.</p>
+        <label>조정 유형<select name="type"><option value="입고">입고</option><option value="차감">차감</option><option value="실사 조정">실사 조정</option></select></label>
+        <label>수량<input name="quantity" id="restock-quantity" type="number" min="1" required /></label>
+        <label class="span-2">배치 차량<select name="vehicle"><option>MOOV 24</option><option>MOOV 18</option><option>MOOV 31</option></select></label>
+        <label class="span-2">관리 메모<textarea name="memo" rows="3" placeholder="입고 사유 또는 확인 사항"></textarea></label>
+        <div class="form-actions span-2"><button class="button button--ghost" type="button" data-close-modal>취소</button><button class="button button--primary" type="submit">재고 확정</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="member-modal" role="dialog" aria-modal="true" aria-labelledby="member-modal-title" hidden>
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__panel modal__panel--wide"><div id="member-detail"></div></div>
+  </div>
+
+  <div class="toast-region" id="toast-region" aria-live="polite"></div>
+  <script src="../naver-map.js"></script><script src="./integration.js"></script><script>
+    Promise.resolve(window.MoovAdminBridge?.ready).catch(() => {}).finally(async () => {
+      for (const source of ['./app.js', './manage.js', './vehicle-management.js']) {
+        await new Promise(resolve => { const script = document.createElement('script'); script.src = source; script.onload = script.onerror = resolve; document.body.append(script); });
+      }
+    });
+  </script>
+</body>
 </html>
