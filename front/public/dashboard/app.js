@@ -190,7 +190,7 @@
     const status = statusFor(product);
     const moving = product.currentLocation === '창고 이동 중';
     const canMove = product.stock > 0 && product.inventoryConfirmed && !moving;
-    return `<tr><td><span class="product-cell"><span class="product-thumb">${product.icon}</span><span><strong>${escapeHTML(product.name)}</strong><small>${escapeHTML(product.sku)} · ${escapeHTML(product.category)}</small></span></span></td><td>${money(product.price)}</td><td><b>${escapeHTML(product.vehicle)}</b></td><td><span class="location ${moving ? 'location--moving' : ''}">${escapeHTML(product.currentLocation)}</span></td><td><span class="stock-number">${product.stock}개</span><small class="stock-confirmation">${product.inventoryConfirmed ? '확정됨' : '미확정'}</small></td><td><span class="stock-change ${product.change < 0 ? 'is-negative' : 'is-positive'}">${product.change > 0 ? '+' : ''}${product.change}개</span></td><td>${product.forecast}개</td><td><b>${product.recommended ? product.recommended + '개' : '-'}</b></td><td><span class="status status--${status}">${status}</span></td><td><span class="row-actions"><button class="table-action" data-restock-id="${product.id}" type="button">재고 관리</button><button class="table-action table-action--move" data-move-id="${product.id}" type="button" ${canMove ? '' : 'disabled'}>${moving ? '이동 중' : '창고 이동'}</button></span></td></tr>`;
+    return `<tr><td><span class="product-cell"><span class="product-thumb">${product.image ? `<img src="${escapeHTML(product.image)}" alt="" loading="lazy">` : escapeHTML(product.icon || '')}</span><span><strong>${escapeHTML(product.name)}</strong><small>${escapeHTML(product.sku)} · ${escapeHTML(product.category)}</small></span></span></td><td>${money(product.price)}</td><td><b>${escapeHTML(product.vehicle)}</b></td><td><span class="location ${moving ? 'location--moving' : ''}">${escapeHTML(product.currentLocation)}</span></td><td><span class="stock-number">${product.stock}개</span><small class="stock-confirmation">${product.inventoryConfirmed ? '확정됨' : '미확정'}</small></td><td><span class="stock-change ${product.change < 0 ? 'is-negative' : 'is-positive'}">${product.change > 0 ? '+' : ''}${product.change}개</span></td><td>${product.forecast}개</td><td><b>${product.recommended ? product.recommended + '개' : '-'}</b></td><td><span class="status status--${status}">${status}</span></td><td><span class="row-actions"><button class="table-action" data-restock-id="${product.id}" type="button">재고 관리</button><button class="table-action table-action--move" data-move-id="${product.id}" type="button" ${canMove ? '' : 'disabled'}>${moving ? '이동 중' : '창고 이동'}</button></span></td></tr>`;
   }
 
   function renderProducts() {
@@ -428,13 +428,55 @@
     $('#restock-product').addEventListener('change', updateRestockSummary);
     $('#product-form [name="sku"]').addEventListener('input', validateProductSku);
 
-    $('#product-form').addEventListener('submit', event => {
+    $('#product-form').addEventListener('submit', async event => {
       event.preventDefault();
-      const data = new FormData(event.currentTarget);
-      if (!validateProductSku()) { event.currentTarget.reportValidity(); return; }
-      const stock = Number(data.get('stock'));
-      products.unshift({ id: Date.now(), name: data.get('name'), sku: String(data.get('sku')).trim().toUpperCase(), category: data.get('category'), price: Number(data.get('price')), sold7: 0, stock, change: 0, forecast: stock, recommended: stock <= 5 ? 12 - stock : 0, vehicle: data.get('vehicle'), currentLocation: '차고지 대기', inventoryConfirmed: false, icon: '◇' });
-      persistProducts(); renderProducts(); renderInventory(); renderDashboardLists(); refreshRestockOptions(); closeModals(); event.currentTarget.reset(); showToast('새 공간 상품을 등록했습니다.');
+      const form = event.currentTarget; // await 이후 currentTarget이 null이 되므로 미리 저장
+      const data = new FormData(form);
+      if (!validateProductSku()) { form.reportValidity(); return; }
+
+      const submitButton = form.querySelector('[type="submit"]');
+      if (submitButton) submitButton.disabled = true; // 중복 등록 방지
+
+      try {
+        // ① 이미지 업로드 (선택)
+        let imageFilename = null;
+        let image = '';
+        const file = data.get('image');
+        if (file && file.size > 0) {
+          if (file.size > 20 * 1024 * 1024) { showToast('이미지는 20MB 이하만 등록할 수 있습니다.'); return; }
+          const uploaded = await fetch('/api/admin/product-images', {
+            method: 'POST',
+            headers: { 'Content-Type': file.type || 'application/octet-stream' },
+            body: file,
+            credentials: 'same-origin',
+          });
+          if (!uploaded.ok) { showToast('이미지 업로드에 실패했습니다. 관리자 로그인 상태를 확인하세요.'); return; }
+          const result = await uploaded.json();
+          imageFilename = result.image_filename;
+          image = result.url;
+        }
+
+        // ② 상품 DB 저장
+        const sku = String(data.get('sku')).trim().toUpperCase();
+        const saved = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sku, name: data.get('name'), category: data.get('category'), price: Number(data.get('price')), image_filename: imageFilename }),
+          credentials: 'same-origin',
+        });
+        if (saved.status === 409) { showToast('이미 등록된 SKU입니다.'); return; }
+        if (!saved.ok) { showToast('상품을 저장하지 못했습니다.'); return; }
+        const { app_product_id } = await saved.json();
+
+        // ③ 관리자 화면 목록에 반영 (재고·위치는 기존처럼 관리자 상태에 저장)
+        const stock = Number(data.get('stock'));
+        products.unshift({ id: Date.now(), name: data.get('name'), sku, category: data.get('category'), price: Number(data.get('price')), sold7: 0, stock, change: 0, forecast: stock, recommended: stock <= 5 ? 12 - stock : 0, vehicle: data.get('vehicle'), currentLocation: '차고지 대기', inventoryConfirmed: false, icon: '◇', image, appProductId: app_product_id });
+        persistProducts(); renderProducts(); renderInventory(); renderDashboardLists(); refreshRestockOptions(); closeModals(); form.reset(); showToast('새 공간 상품을 등록했습니다.');
+      } catch {
+        showToast('네트워크 오류로 등록하지 못했습니다.');
+      } finally {
+        if (submitButton) submitButton.disabled = false;
+      }
     });
 
     $('#restock-form').addEventListener('submit', event => {

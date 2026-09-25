@@ -15,14 +15,16 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 if __package__:
     from .db import get_conn, release_conn
     from .google_auth_api import require_auth_user
+    from .hot_products_api import IMAGE_CONTAINER
 else:
     from db import get_conn, release_conn
     from google_auth_api import require_auth_user
+    from hot_products_api import IMAGE_CONTAINER
 
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -471,3 +473,75 @@ def get_asset(asset_id: uuid.UUID, user: dict = Depends(require_auth_user)):
     except Exception:
         raise HTTPException(503, "관리자 파일을 불러오지 못했습니다.") from None
     return Response(data, media_type=row[1], headers={"Cache-Control": "private, max-age=3600"})
+
+PRODUCT_TABLE = "taxi_products.products"
+
+
+def _product_image_container():
+    from azure.storage.blob import BlobServiceClient
+    client = BlobServiceClient.from_connection_string(os.environ["AZURE_STORAGE_CONNECTION_STRING"])
+    return client.get_container_client(IMAGE_CONTAINER)
+
+
+@router.post("/product-images")
+async def upload_product_image(request: Request, user: dict = Depends(require_admin_user)):
+    del user
+    body = await request.body()
+    content_type = request.headers.get("content-type", "").split(";", 1)[0].lower()
+    if not body or len(body) > MAX_ASSET_BYTES:
+        raise HTTPException(413, "이미지는 1바이트 이상 20MB 이하여야 합니다.")
+    if not content_type.startswith("image/"):
+        raise HTTPException(415, "이미지 파일만 업로드할 수 있습니다.")
+
+    extension = mimetypes.guess_extension(content_type) or ".jpg"
+    filename = f"product-{uuid.uuid4().hex}{extension}"
+    try:
+        from azure.storage.blob import ContentSettings
+        _product_image_container().upload_blob(filename, body, overwrite=False, content_settings=ContentSettings(content_type=content_type))
+    except Exception:
+        raise HTTPException(503, "상품 이미지를 저장하지 못했습니다.") from None
+    return {"image_filename": filename, "url": f"/api/hot-products/images/{filename}"}
+
+
+class ProductCreate(BaseModel):
+    sku: str = Field(min_length=1, max_length=50)
+    name: str = Field(min_length=1, max_length=100)
+    category: str = Field(min_length=1, max_length=50)
+    price: int = Field(ge=0)
+    description: str = Field(default="", max_length=200)
+    image_filename: str | None = None
+
+
+@router.post("/products")
+def create_product(product: ProductCreate, user: dict = Depends(require_admin_user)):
+    del user
+    sku = product.sku.strip().upper()
+    app_product_id = sku.lower()
+    if product.image_filename and ("/" in product.image_filename or ".." in product.image_filename):
+        raise HTTPException(400, "잘못된 이미지 파일명입니다.")
+
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f"SELECT 1 FROM {PRODUCT_TABLE} WHERE sku=%s OR app_product_id=%s", (sku, app_product_id))
+            if cur.fetchone():
+                raise HTTPException(409, "이미 등록된 SKU입니다.")
+            cur.execute(
+                f"""
+                INSERT INTO {PRODUCT_TABLE} (sku, app_product_id, name, description, category, price, image_filename)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (sku, app_product_id, product.name.strip(), product.description.strip(), product.category, product.price, product.image_filename),
+            )
+            (product_id,) = cur.fetchone()
+        conn.commit()
+    except HTTPException:
+        conn.rollback()
+        raise
+    except Exception:
+        conn.rollback()
+        raise HTTPException(500, "상품을 저장하지 못했습니다.") from None
+    finally:
+        release_conn(conn)
+    return {"id": product_id, "sku": sku, "app_product_id": app_product_id}
