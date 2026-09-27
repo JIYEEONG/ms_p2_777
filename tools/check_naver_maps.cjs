@@ -1050,7 +1050,8 @@ async function main() {
   }
   assert.ok(fs.existsSync(portFile), 'Edge debugging port did not start');
   debuggingPort = Number(fs.readFileSync(portFile, 'utf8').split('\n')[0]);
-  if(process.argv.includes('--photo-review'))await require('./photo_review_browser_checks.cjs')({openPage,base,passed});
+  if(process.argv.includes('--english-route'))await require('./english_map_browser_checks.cjs')({openPage,base,mapReady,passed});
+  else if(process.argv.includes('--photo-review'))await require('./photo_review_browser_checks.cjs')({openPage,base,passed});
   else if(process.argv.includes('--account-snapshot'))await require('./account_snapshot_browser_checks.cjs')({openPage,base,passed});
   else if(process.argv.includes('--map-location'))await require('./map_location_browser_checks.cjs')({openPage,base,mapReady,passed});
   else if(process.argv.includes('--login-survey'))await require('./login_survey_browser_checks.cjs')({openPage,base,passed});

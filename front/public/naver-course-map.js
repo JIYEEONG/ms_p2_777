@@ -42,9 +42,10 @@
         pin.className = 'naver-course-marker' + (index === course.points.length - 1 ? ' destination' : '');
         pin.dataset.courseId = course.id;
         pin.textContent = String(index + 1);
-        const marker = MoovNaverMap.marker(point, { element: pin, size: [30, 30], title: `${course.name} · ${point.name}` }).addTo(map);
+        const label = window.MoovI18n?.translate(`${course.name} · ${point.name}`) ?? `${course.name} · ${point.name}`;
+        const marker = MoovNaverMap.marker(point, { element: pin, size: [30, 30], title: label }).addTo(map);
         if (onSelect) marker.on('click', () => { if (current()) onSelect(course.id); });
-        marker.bindTooltip(`${course.name} · ${point.name}`);
+        marker.bindTooltip(label);
       }
       MoovNaverMap.fitRoute(map, points);
       element.dataset.mapState = 'ready';

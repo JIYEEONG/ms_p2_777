@@ -4,7 +4,7 @@
   const english = window.MOOV_EN || {};
   const textState = new WeakMap();
   const attributeState = new WeakMap();
-  const attributes = ["aria-label", "alt", "placeholder", "title"];
+  const attributes = ["aria-label", "alt", "placeholder", "title", "label"];
   const skippedTags = new Set(["SCRIPT", "STYLE", "NOSCRIPT"]);
   const templates = Object.entries(english)
     .filter(([ko, en]) => ko.includes("{value}") && ko.split("{value}").length === en.split("{value}").length)
@@ -34,6 +34,7 @@
   function dictionaryValue(source) {
     const normalized = source.replace(/\s+/g, " ").trim();
     if (Object.prototype.hasOwnProperty.call(english, normalized)) return english[normalized];
+    if (normalized.includes('→')) return normalized.split('→').map(part => translateCore(part.trim())).join(' → ');
     const date = normalized.match(/^(?:(\d{4})년\s*)?(\d{1,2})월\s*(\d{1,2})일\s*\(?([일월화수목금토])(?:요일)?\)?$/);
     if (date) {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -183,6 +184,29 @@
     return match[1] + translateCore(match[2]) + match[3];
   }
 
+  // Location labels only: keep canonical Korean names/addresses in trip data
+  // and search requests. Unknown proper names use a readable romanization.
+  function place(source) {
+    source = String(source ?? '');
+    if (language !== 'en') return source;
+    let result = translate(source);
+    const cities = { 서울특별시: 'Seoul', 서울: 'Seoul', 경기도: 'Gyeonggi-do', 인천광역시: 'Incheon', 부산광역시: 'Busan' };
+    const initial = ['g','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h'];
+    const vowel = ['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+    const final = ['','k','k','k','n','n','n','t','l','k','m','l','l','l','p','l','m','p','p','t','t','ng','t','t','k','t','p','t'];
+    return result.replace(/[가-힣]+/g, word => {
+      if (cities[word]) return cities[word];
+      if (english[word]) return english[word];
+      const suffix = word.match(/^(.+)(대로|번길|로|길|동|구|시|군|읍|면|리)$/);
+      const romanize = value => [...value].map(c => {
+        const code = c.charCodeAt(0) - 0xac00;
+        return initial[Math.floor(code / 588)] + vowel[Math.floor(code / 28) % 21] + final[code % 28];
+      }).join('');
+      const label = suffix ? romanize(suffix[1]) + '-' + romanize(suffix[2]) : romanize(word);
+      return label.charAt(0).toUpperCase() + label.slice(1);
+    });
+  }
+
   function skip(element) {
     return !element || skippedTags.has(element.tagName) || !!element.closest("[data-i18n-skip], [contenteditable], .detail-message-row.user");
   }
@@ -193,7 +217,7 @@
     if (!state || node.nodeValue !== state.rendered) state = { source: node.nodeValue, rendered: node.nodeValue };
     const explicit = node.parentElement.closest("[data-i18n-en]");
     const override = explicit && explicit.textContent.trim() === node.nodeValue.trim() ? explicit.dataset.i18nEn : null;
-    const next = language === "en" ? override || translate(state.source) : state.source;
+    const next = language === "en" ? override || (node.parentElement.closest('[data-i18n-place]') ? place(state.source) : translate(state.source)) : state.source;
     state.rendered = next;
     textState.set(node, state);
     if (node.nodeValue !== next) node.nodeValue = next;
@@ -264,6 +288,7 @@
     getLanguage: () => language,
     locale: () => language === "en" ? "en-US" : "ko-KR",
     translate,
+    place,
     refresh,
     setLanguage,
     utterance

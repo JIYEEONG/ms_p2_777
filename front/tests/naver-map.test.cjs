@@ -81,6 +81,15 @@ test('taxi and rental match venue names with spacing variations without choosing
   assert.equal(provider.matchPlace('세종대로 110',[address]),address);
 });
 
+test('station lookup accepts one line suffix but never guesses an exit or ambiguous station', () => {
+  const {provider} = setup();
+  const anguk = {name:'안국역 3호선', lat:37.5765389, lng:126.9855095};
+  const cafe = {name:'안국역 카페', lat:37.577, lng:126.986};
+  assert.equal(provider.matchPlace('안국역', [cafe, anguk]), anguk);
+  assert.equal(provider.matchPlace('안국역', [cafe, {...anguk,name:'안국역 1번출구'}]), null);
+  assert.equal(provider.matchPlace('안국역', [anguk, {...anguk,lat:37.58}]), null);
+});
+
 test('shared full-course directions combine distance and time across API batches in order',async()=>{
   const {provider}=setup(),calls=[];
   provider.directions=async r=>{calls.push(r);return {points:[r.start,...r.waypoints,r.goal].map(p=>[p.lat,p.lng]),distanceMeters:1234,durationSeconds:101};};

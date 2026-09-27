@@ -22,6 +22,8 @@ state.rentalHours = Math.max(RENTAL_MIN_HOURS, Math.min(RENTAL_MAX_HOURS, Number
 state.rentalUX = Object.assign({dispatch:{status:'idle'}, route:null, recent:[], draftPickup:null, routeEdit:null}, saved.rentalUX || {});
 state.rentalUX.draftPickup = null;
 state.rentalUX.routeEdit = null;
+// Failed lookups from a previous visit may now resolve (e.g. station aliases).
+if (state.rentalUX.route?.unresolved) delete state.rentalUX.route.locationLookupDone;
 if(state.rentalUX.dispatch.approachRoute?.provider!=='naver')delete state.rentalUX.dispatch.approachRoute;
 let rentalPickerMap = null, rentalPickerMarker = null, rentalCarMarker = null, rentalApproachLine = null;
 let rentalMapLoadId = 0;
@@ -161,7 +163,7 @@ function retryRentalRoadRoute() {
 }
 function renderRentalRouteRetry(route) {
   if(route.unresolved){
-    const missing=route.stops.filter(p=>!Number.isFinite(p.lat)||!Number.isFinite(p.lng)).map(p=>p.name).join(' · ');
+    const missing=route.stops.filter(p=>!Number.isFinite(p.lat)||!Number.isFinite(p.lng)).map(p=>window.MoovI18n?.place(p.name)??p.name).join(' · ');
     const text=route.locationLookupDone?rentalMapText(`위치를 확인하지 못한 장소: ${missing}. 해당 입력칸에서 검색 결과를 선택해 주세요.`,`Location needed: ${missing}. Select a search result in its field.`):rentalMapText('경유지·목적지 위치를 확인하고 경로를 불러오는 중…','Finding stops and loading your route…');
     return `<div class="rux-note" role="status" data-i18n-skip><p>${escapeHtml(text)}</p>${route.locationLookupDone?`<button class="ghost-button" data-action="retry-rental-route">${rentalMapText('위치 다시 확인','Retry locations')}</button>`:''}</div>`;
   }
@@ -302,7 +304,7 @@ function renderRentalJourneyStep(step,v) {
 ].map(p=>`<button aria-pressed="${state.rentalHours===p.h}" class="${state.rentalHours===p.h?'active':''}" data-action="rent-set-hours" data-value="${p.h}">${p.label}</button>`).join('')}</div><p class="rux-note">주행요금 포함 · 장시간 패키지 할인 자동 적용</p></section>`;
   }
   if(step==='vehicle')return `<section class="rental-step-card vehicle-select-card">${renderRentalVehicleCards(v.id)}</section>`;
-  if(step==='pickup')return `<section class="rental-step-card rux-map-card"><div class="rux-card-title"><h3>어디에서 만날까요?</h3><p>위치를 확인하고 차량을 요청해 주세요.</p></div><div id="rental-pickup-naver" class="rental-naver-map" aria-label="출발 위치 지도"></div><div class="pickup-confirm-sheet"><div class="pickup-location-line"><span class="pickup-location-icon">${icon('pin')}</span><div><small>확정된 출발 위치</small><strong>${escapeHtml(state.pickupLocation)}</strong></div><button data-action="open-pin-picker">수정</button></div><p class="rux-note">${escapeHtml(v.name)} · ${state.rentalHours}시간 · ${rentalMoney(rentalTotalFare())}</p><div class="pickup-secondary-actions"><button class="ghost-button" data-action="locate-rental">현재 위치</button><button class="ghost-button" data-action="open-pin-picker">검색·최근 위치</button></div><small class="rux-note">체험 배차이며 실제 차량 호출·결제는 발생하지 않습니다.</small></div></section>`;
+  if(step==='pickup')return `<section class="rental-step-card rux-map-card"><div class="rux-card-title"><h3>어디에서 만날까요?</h3><p>위치를 확인하고 차량을 요청해 주세요.</p></div><div id="rental-pickup-naver" class="rental-naver-map" aria-label="출발 위치 지도"></div><div class="pickup-confirm-sheet"><div class="pickup-location-line"><span class="pickup-location-icon">${icon('pin')}</span><div><small>확정된 출발 위치</small><strong data-i18n-place>${escapeHtml(state.pickupLocation)}</strong></div><button data-action="open-pin-picker">수정</button></div><p class="rux-note">${escapeHtml(v.name)} · ${state.rentalHours}시간 · ${rentalMoney(rentalTotalFare())}</p><div class="pickup-secondary-actions"><button class="ghost-button" data-action="locate-rental">현재 위치</button><button class="ghost-button" data-action="open-pin-picker">검색·최근 위치</button></div><small class="rux-note">체험 배차이며 실제 차량 호출·결제는 발생하지 않습니다.</small></div></section>`;
   if(step==='matching')return `<section class="rental-step-card rux-map-card"><div id="rental-matching-naver" class="rental-naver-map" aria-label="출발 주변 지도"></div><div class="system-status-sheet" role="status"><span class="rux-spinner" aria-hidden="true"></span><h3>가까운 차량을 찾고 있어요</h3><p>${escapeHtml(state.pickupLocation)} 주변의 ${escapeHtml(v.category)} 차량을 확인하고 있어요.</p><div class="matching-progress" aria-hidden="true"><span></span></div><p class="rux-note">체험 배차 진행 중</p><button class="ghost-button full" data-action="cancel-rent-match">요청 취소</button></div></section>`;
   if(step==='error')return `<section class="rental-step-card rux-error" role="alert"><span aria-hidden="true">!</span><h3>배차를 완료하지 못했어요</h3><p>${escapeHtml(state.rentalUX.dispatch.message||'잠시 후 다시 요청해 주세요.')}</p><button class="primary-button full" data-action="request-rent-flow">다시 요청</button><button class="ghost-button full" data-action="cancel-rent-match">출발 위치로 돌아가기</button></section>`;
   if(step==='assigned')return `<section class="rental-step-card"><span class="dispatch-complete-label">✓ 배차 완료</span><h3>차량이 배정됐어요</h3>${rentalIdentity(v)}<p>잠시 후 차량 접근 화면으로 이동합니다.</p><button class="ghost-button full" data-action="cancel-rent-match">배차 취소</button></section>`;
@@ -312,7 +314,7 @@ function renderRentalJourneyStep(step,v) {
 }
 function rentalStopPopover() {
   const index=state.rentalStopPopup, p=ensureRentalRoute().stops[index];
-  return p?`<div class="rental-stop-popover" role="region" aria-label="선택한 장소 정보" tabindex="-1"><button class="rental-stop-close" data-action="rental-stop-close" aria-label="장소 정보 닫기">${icon('x')}</button><strong>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.category)} · 체류 ${p.dwell||0}분</small><button class="rux-link" data-action="rental-change-stop" data-value="${index}">이 지점 변경</button></div>`:'';
+  return p?`<div class="rental-stop-popover" role="region" aria-label="선택한 장소 정보" tabindex="-1"><button class="rental-stop-close" data-action="rental-stop-close" aria-label="장소 정보 닫기">${icon('x')}</button><strong data-i18n-place>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.category)} · 체류 ${p.dwell||0}분</small><button class="rux-link" data-action="rental-change-stop" data-value="${index}">이 지점 변경</button></div>`:'';
 }
 function showRentalStop(index) {
   const previous=state.rentalStopPopup; state.rentalStopPopup=index;
@@ -377,7 +379,7 @@ function openMapPinPicker(candidate=null) {
   state.rentalUX.draftPickup=candidate?rentalClone(candidate):rentalPickup();
   rentalModalKind='pickup';
   const recents=(state.rentalUX.recent.length?state.rentalUX.recent:state.rentalRecentPickups.map(rentalKnownPlace).filter(Boolean)).slice(0,5);
-  openModal({title:'출발 위치 수정',iconName:'pin',body:`<form id="rux-pickup-form" class="rux-search-form"><label class="sr-only" for="rental-pickup-search">주소 또는 장소 검색</label><input id="rental-pickup-search" type="search" placeholder="도로명·지번 주소 검색"/><button class="ghost-button" type="submit">검색</button></form><p class="rux-note">주소 검색 · 지도에서 직접 선택 가능</p><div id="rux-pickup-results" class="rental-search-results" aria-live="polite"></div><div id="rental-picker-osm" class="rental-naver-map picker" aria-label="출발 후보 선택 지도"></div><p id="rux-draft-label" class="rux-draft-label" aria-live="polite">선택 후보: ${escapeHtml(state.rentalUX.draftPickup.name)}</p><h4>최근 위치</h4><div class="rental-search-results">${recents.map(p=>`<button data-action="rux-recent" data-id="${escapeHtml(p.id)}"><strong>${escapeHtml(p.name)}</strong><small>이 위치 미리보기</small></button>`).join('')}</div>`,primary:'이 위치로 확정',secondary:'취소',onConfirm:()=>{const p=state.rentalUX.draftPickup;if(!p)return false;applyPickupLocation(p.name,p);toast('출발 위치를 확정했어요.');}});
+  openModal({title:'출발 위치 수정',iconName:'pin',body:`<form id="rux-pickup-form" class="rux-search-form"><label class="sr-only" for="rental-pickup-search">주소 또는 장소 검색</label><input id="rental-pickup-search" type="search" placeholder="도로명·지번 주소 검색"/><button class="ghost-button" type="submit">검색</button></form><p class="rux-note">주소 검색 · 지도에서 직접 선택 가능</p><div id="rux-pickup-results" class="rental-search-results" aria-live="polite"></div><div id="rental-picker-osm" class="rental-naver-map picker" aria-label="출발 후보 선택 지도"></div><p id="rux-draft-label" class="rux-draft-label" aria-live="polite">선택 후보: ${escapeHtml(state.rentalUX.draftPickup.name)}</p><h4>최근 위치</h4><div class="rental-search-results">${recents.map(p=>`<button data-action="rux-recent" data-id="${escapeHtml(p.id)}"><strong data-i18n-place>${escapeHtml(p.name)}</strong><small>이 위치 미리보기</small></button>`).join('')}</div>`,primary:'이 위치로 확정',secondary:'취소',onConfirm:()=>{const p=state.rentalUX.draftPickup;if(!p)return false;applyPickupLocation(p.name,p);toast('출발 위치를 확정했어요.');}});
   requestAnimationFrame(initRentalPickerMap);
 }
 async function initRentalPickerMap() {
@@ -451,7 +453,7 @@ async function searchRentalPlaces(kind,query) {
     const results=await rentalServices.search(query);
     if(token!==rentalSearchToken||!el.isConnected)return;
     rentalSearchResults=results;
-    el.innerHTML=results.length?results.map(p=>`<button data-action="rux-select-place" data-kind="${kind}" data-id="${escapeHtml(p.id)}"><strong>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.category)}</small></button>`).join(''):'<p>검색 결과가 없어요. 다른 검색어를 입력하거나 지도에서 직접 선택해 주세요.</p>';
+    el.innerHTML=results.length?results.map(p=>`<button data-action="rux-select-place" data-kind="${kind}" data-id="${escapeHtml(p.id)}"><strong data-i18n-place>${escapeHtml(p.name)}</strong><small>${escapeHtml(p.category)}</small></button>`).join(''):'<p>검색 결과가 없어요. 다른 검색어를 입력하거나 지도에서 직접 선택해 주세요.</p>';
   } catch(e) {if(token===rentalSearchToken&&el.isConnected)el.innerHTML='<p role="alert">검색을 완료하지 못했어요. 다시 검색하거나 지도에서 선택해 주세요.</p>';}
 }
 function openRentalDestinationSearch(targetIndex=null) {
@@ -492,7 +494,7 @@ async function previewRentalRoute(p) {
     const next=await rentalServices.calculateRoute(stops);
     if(state.rentalUX.routeEdit!==edit||edit.token!==token)return;
     edit.preview=next;edit.status='ready';const old=ensureRentalRoute();
-    container.innerHTML=`<strong>${escapeHtml(p.name)}</strong><table class="rux-preview-table"><caption>코스 변경 미리보기</caption><thead><tr><th>항목</th><th>현재</th><th>변경 후</th></tr></thead><tbody><tr><th>거리</th><td>${old.distance??'—'} km</td><td>${next.distance??'—'} km</td></tr><tr><th>이동 시간</th><td>${old.minutes??'—'}분</td><td>${next.minutes??'—'}분</td></tr></tbody></table><p>${rentalRouteDelta(old,next)}</p><small class="rux-note">${rentalRouteNote(next)}</small>`;
+    container.innerHTML=`<strong data-i18n-place>${escapeHtml(p.name)}</strong><table class="rux-preview-table"><caption>코스 변경 미리보기</caption><thead><tr><th>항목</th><th>현재</th><th>변경 후</th></tr></thead><tbody><tr><th>거리</th><td>${old.distance??'—'} km</td><td>${next.distance??'—'} km</td></tr><tr><th>이동 시간</th><td>${old.minutes??'—'}분</td><td>${next.minutes??'—'}분</td></tr></tbody></table><p>${rentalRouteDelta(old,next)}</p><small class="rux-note">${rentalRouteNote(next)}</small>`;
     confirm.disabled=false;
     drawRentalRoutePreview(next);
     container.scrollIntoView({block:'nearest',behavior:rentalReducedMotion()?'instant':'smooth'});

@@ -2744,6 +2744,7 @@ async function resolveTaxiPoint(label, pickup = false) {
 
 function taxiMapMarker(session, point, kind, label, draggable = false) {
   const maps = window.naver.maps;
+  label = window.MoovI18n?.place(label) ?? label;
   const displayLabel = kind === "start" ? taxiMapText("출발", "Start") : kind === "goal" ? taxiMapText("도착", "End") : kind === "waypoint" ? label.split(" · ")[0] : label;
   const marker = new maps.Marker({ map: session.map, draggable, position: new maps.LatLng(point.lat, point.lng), title: label, icon: { content: `<div class="taxi-map-marker ${kind}" style="transform:translateX(-50%)" data-i18n-skip>${kind === "vehicle" ? icon("car") : ""}<span>${escapeHtml(displayLabel)}</span></div>`, anchor: new maps.Point(0, kind === "waypoint" ? 22 : kind === "goal" ? 17 : 18) } });
   session.markers.push(marker);
@@ -2825,15 +2826,15 @@ function renderRoutePlanner(route) {
   const stops = state.routeStops.length > 1 ? state.routeStops : [state.pickupLocation, ""];
   return `<div class="route-tools" data-i18n-skip><button data-action="locate-home">${icon("pin")} ${taxiMapText("내 위치", "My location")}</button><button data-action="choose-saved-course">${icon("bookmark")} ${taxiMapText("관심 코스", "Saved trips")}</button><button data-action="browse-courses-home">${icon("compass")} ${taxiMapText("나들이 코스", "Explore trips")}</button></div><div class="route-planner">${stops.map((value,index) => MoovLocationPicker.field({
     index, value, kind: index===0?"pickup":index===stops.length-1?"destination":"waypoint",
-    address:index===0&&state.taxiPickupDetails?.name===value?state.taxiPickupDetails.address:'',
+    address:index===0&&state.taxiPickupDetails?.name===value?state.taxiPickupDetails.address:state.taxiSearchPlaces?.[value]?.address||taxiPlaceCache.get(value)?.address||'',
     label: index===0?taxiMapText("출발지","Pickup"):index===stops.length-1?taxiMapText("목적지","Destination"):taxiMapText(`경유지 ${index}`,`Stop ${index}`),
   })).join("")}</div>`;
 }
 
 function renderActiveRoute(route) {
   if (taxiApproachPending()) return renderTaxiApproach();
-  const waypoints = state.routeStops.slice(1, -1).filter(Boolean).map((stop, index) => `<div class="active-route-line waypoint"><span class="route-mark"></span><div><small>경유지 ${index + 1}</small><strong>${escapeHtml(stop)}</strong></div></div>`).join("");
-  return `<div class="active-route">${state.homeMode === "taxi" ? renderActiveTaxiFare() : ""}<div class="active-route-line"><span class="route-mark"></span><div><small>출발 위치</small><strong>${escapeHtml(state.pickupLocation)}</strong></div></div>${waypoints}<div class="active-route-line destination"><span class="route-mark"></span><div><small>목적지</small><strong>${escapeHtml(route ? route.name : state.routeStops.at(-1))}</strong></div></div><div class="vehicle-health"><span>${icon("car")} MOOV 24</span><span>충전량 <strong>78%</strong></span><span>보안 점검 완료</span></div>${state.homeMode === "taxi" ? `<button class="ghost-button full" data-action="finish-trip">택시 이용 종료</button>` : `<button class="ghost-button full" data-action="finish-trip">렌트 종료 요청</button>`}</div>`;
+  const waypoints = state.routeStops.slice(1, -1).filter(Boolean).map((stop, index) => `<div class="active-route-line waypoint"><span class="route-mark"></span><div><small>경유지 ${index + 1}</small><strong data-i18n-place>${escapeHtml(stop)}</strong></div></div>`).join("");
+  return `<div class="active-route">${state.homeMode === "taxi" ? renderActiveTaxiFare() : ""}<div class="active-route-line"><span class="route-mark"></span><div><small>출발 위치</small><strong data-i18n-place>${escapeHtml(state.pickupLocation)}</strong></div></div>${waypoints}<div class="active-route-line destination"><span class="route-mark"></span><div><small>목적지</small><strong data-i18n-place>${escapeHtml(route ? route.name : state.routeStops.at(-1))}</strong></div></div><div class="vehicle-health"><span>${icon("car")} MOOV 24</span><span>충전량 <strong>78%</strong></span><span>보안 점검 완료</span></div>${state.homeMode === "taxi" ? `<button class="ghost-button full" data-action="finish-trip">택시 이용 종료</button>` : `<button class="ghost-button full" data-action="finish-trip">렌트 종료 요청</button>`}</div>`;
 }
 
 function renderPickupCard() {
@@ -2841,7 +2842,7 @@ function renderPickupCard() {
 }
 
 function renderDestinationCard(route) {
-  return `<section class="card search-panel"><div class="row"><div><span class="small muted">목적지 선택</span><h3 style="margin:4px 0">${route ? escapeHtml(route.name) : escapeHtml(state.routeStops.at(-1) || "목적지를 선택해 주세요")}</h3></div><button class="mini-action" data-action="open-destination">직접 설정</button></div>${state.routeStops.length ? `<div class="selected-route">${state.routeStops.map((stop, index) => `<div class="route-stop"><span class="route-number">${index + 1}</span><strong>${escapeHtml(stop)}</strong><span>${index === state.routeStops.length - 1 ? "목적지" : index === 0 ? "출발" : "경유"}</span></div>`).join("")}</div>` : ""}<div class="destination-actions"><button data-action="choose-saved-course">${icon("bookmark")}<span><strong>관심 코스</strong><small>저장한 전체 코스 가져오기</small></span></button><button data-action="browse-courses-home">${icon("compass")}<span><strong>나들이 코스</strong><small>AI 코스 추천에서 따라가기</small></span></button></div></section>`;
+  return `<section class="card search-panel"><div class="row"><div><span class="small muted">목적지 선택</span><h3 style="margin:4px 0">${route ? escapeHtml(route.name) : escapeHtml(state.routeStops.at(-1) || "목적지를 선택해 주세요")}</h3></div><button class="mini-action" data-action="open-destination">직접 설정</button></div>${state.routeStops.length ? `<div class="selected-route">${state.routeStops.map((stop, index) => `<div class="route-stop"><span class="route-number">${index + 1}</span><strong data-i18n-place>${escapeHtml(stop)}</strong><span>${index === state.routeStops.length - 1 ? "목적지" : index === 0 ? "출발" : "경유"}</span></div>`).join("")}</div>` : ""}<div class="destination-actions"><button data-action="choose-saved-course">${icon("bookmark")}<span><strong>관심 코스</strong><small>저장한 전체 코스 가져오기</small></span></button><button data-action="browse-courses-home">${icon("compass")}<span><strong>나들이 코스</strong><small>AI 코스 추천에서 따라가기</small></span></button></div></section>`;
 }
 
 function renderUsageStatus() {
@@ -3767,7 +3768,7 @@ function openCourseStopDetail(course, index) {
   openModal({
     title: stop,
     iconName: "pin",
-    body: `<div class="stop-detail-role"><span>${index + 1}</span><div><small>${role}</small><strong>${escapeHtml(course.name)}</strong></div></div><div class="stop-detail-image"><img src="${escapeHtml(image)}" alt="${escapeHtml(stop)} 장소 이미지" /></div>${coursePhotoCredits(course)}<div class="stop-detail-copy"><strong>${escapeHtml(stop)}</strong><p>${escapeHtml(getCourseStopDescription(course, stop, index))}</p></div><div class="receipt-info"><span>장소 구분</span><strong>${role}</strong><span>추천 체류</span><strong>${escapeHtml(course.dwell?.[index] || "60분")}</strong><span>방문 순서</span><strong>${index + 1} / ${course.stops.length}</strong></div><div class="recommend-box"><strong>${icon("pin")} 장소 추천</strong><p>${escapeHtml(getCourseStopTip(stop))}</p></div>`,
+    body: `<div class="stop-detail-role"><span>${index + 1}</span><div><small>${role}</small><strong>${escapeHtml(course.name)}</strong></div></div><div class="stop-detail-image"><img src="${escapeHtml(image)}" alt="${escapeHtml(stop)} 장소 이미지" /></div>${coursePhotoCredits(course)}<div class="stop-detail-copy"><strong data-i18n-place>${escapeHtml(stop)}</strong><p>${escapeHtml(getCourseStopDescription(course, stop, index))}</p></div><div class="receipt-info"><span>장소 구분</span><strong>${role}</strong><span>추천 체류</span><strong>${escapeHtml(course.dwell?.[index] || "60분")}</strong><span>방문 순서</span><strong>${index + 1} / ${course.stops.length}</strong></div><div class="recommend-box"><strong>${icon("pin")} 장소 추천</strong><p>${escapeHtml(getCourseStopTip(stop))}</p></div>`,
     primary: "코스 상세로 돌아가기",
     secondary: null,
     onConfirm: () => setTimeout(() => openCourseDetail(course), 0),
@@ -3778,7 +3779,7 @@ function openCourseDetail(course) {
   state.activeDetailCourse = course;
   const stops = course.stops.map((stop, index) => {
     const role = getCourseStopRole(index, course.stops.length);
-    return `<button class="course-detail-stop ${index === 0 ? "start" : index === course.stops.length - 1 ? "destination" : "waypoint"}" data-action="course-stop-detail" data-value="${index}"><span>${index + 1}</span><div><small>${role}</small><strong>${escapeHtml(stop)}</strong><em>${escapeHtml(course.dwell?.[index] || "60분")} 머무름</em></div>${icon("chevron")}</button>`;
+    return `<button class="course-detail-stop ${index === 0 ? "start" : index === course.stops.length - 1 ? "destination" : "waypoint"}" data-action="course-stop-detail" data-value="${index}"><span>${index + 1}</span><div><small>${role}</small><strong data-i18n-place>${escapeHtml(stop)}</strong><em>${escapeHtml(course.dwell?.[index] || "60분")} 머무름</em></div>${icon("chevron")}</button>`;
   }).join("");
   const cover = getCourseCoverImage(course) || getCourseStopImage(course, course.stops[0] || "", 0);
   openModal({ title: course.name, iconName: "compass", body: `<div class="detail-cover"><img src="${escapeHtml(cover)}" alt="${escapeHtml(course.name)}" /></div>${coursePhotoCredits(course)}<p>${escapeHtml(course.desc)}</p>${buildCourseMap(course)}<div class="course-detail-meta"><div><small>전체 시간</small><strong>${escapeHtml(course.time)}</strong></div><div><small>장소</small><strong>${course.stops.length}곳</strong></div><div><small>추천 순서</small><strong>번호 순서대로</strong></div></div><div class="course-route-heading"><strong>빠른 이동 경로</strong><small>장소를 누르면 상세 내용을 볼 수 있어요.</small></div><div class="detail-stop-list">${stops}</div><div class="recommend-box"><strong>${icon("heart")} MOOV 추천</strong><p>${escapeHtml(course.recommend || "여유 있게 출발해 각 장소의 운영시간을 확인해 주세요.")}</p></div>`, primary: courseFollowLabel(), secondary: "닫기", onConfirm: () => useCourseForHome(course) });
@@ -4188,7 +4189,7 @@ function openUsageDetail(id) {
     return;
   }
   const route = historyRoutes.find((item) => item.id === id);
-  if (route) openModal({ title: route.name, iconName: route.meta.includes("렌트") ? "key" : "car", body: `<p>${route.meta}</p><div class="receipt-items">${route.stops.map((stop, index) => `<div class="receipt-line"><span>${index === route.stops.length - 1 ? "목적지" : "경유지"}</span><strong>${escapeHtml(stop)}</strong></div>`).join("")}</div>`, primary: "코스로 등록", secondary: "닫기", onConfirm: () => { state.courseDraft.title = route.name; state.courseDraft.stops = route.stops.map((name, index) => ({ type: index === route.stops.length - 1 ? "목적지" : "경유지", name, photo: null })); state.outingSub = "register"; setTab("outing"); } });
+  if (route) openModal({ title: route.name, iconName: route.meta.includes("렌트") ? "key" : "car", body: `<p>${route.meta}</p><div class="receipt-items">${route.stops.map((stop, index) => `<div class="receipt-line"><span>${index === route.stops.length - 1 ? "목적지" : "경유지"}</span><strong data-i18n-place>${escapeHtml(stop)}</strong></div>`).join("")}</div>`, primary: "코스로 등록", secondary: "닫기", onConfirm: () => { state.courseDraft.title = route.name; state.courseDraft.stops = route.stops.map((name, index) => ({ type: index === route.stops.length - 1 ? "목적지" : "경유지", name, photo: null })); state.outingSub = "register"; setTab("outing"); } });
 }
 
 function subtabs(items, active, action) { return `<div class="subtabs" role="tablist">${items.map(([id, label]) => `<button class="${active === id ? "active" : ""}" data-action="${action}" data-value="${id}">${label}</button>`).join("")}</div>`; }

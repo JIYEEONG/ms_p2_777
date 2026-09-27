@@ -1,4 +1,4 @@
-/* Isolated browser checks. API requests are mocked; no real accounts are used. */
+/* Isolated browser checks; --live-courses reads public course fixtures only. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -52,9 +52,9 @@ const scan = `(() => {
     if (!el.getClientRects().length || getComputedStyle(el).visibility==='hidden') continue;
     if (/[가-힣]/.test(node.nodeValue)) out.add(node.nodeValue.trim());
   }
-  for(const el of document.querySelectorAll('[placeholder],[aria-label],[alt],[title]')) {
+  for(const el of document.querySelectorAll('[placeholder],[aria-label],[alt],[title],optgroup[label]')) {
     if(!el.getClientRects().length || el.closest('[data-i18n-skip]'))continue;
-    for(const name of ['placeholder','aria-label','alt','title']) {
+    for(const name of ['placeholder','aria-label','alt','title','label']) {
       const value=el.getAttribute(name); if(value && /[가-힣]/.test(value))out.add(name+': '+value);
     }
   }
@@ -90,6 +90,7 @@ async function main() {
   await new Promise(resolve=>socket.addEventListener('open',resolve,{once:true}));
   client=new CDP(socket);
   await client.send('Page.enable'); await client.send('Runtime.enable');
+  await client.send('Emulation.setFocusEmulationEnabled',{enabled:true});
   await client.send('Emulation.setDeviceMetricsOverride',{width:430,height:932,deviceScaleFactor:1,mobile:false});
   await installBrowserAuthFixture(client,base);
   await navigate(base,'/moov.html');
@@ -97,6 +98,8 @@ async function main() {
   await client.wait("document.querySelector('#app').classList.contains('screen-active')",'visible app after survey');
   assert.equal(await client.evaluate('MoovI18n.getLanguage()'),'en','English is the branch default');
   assert.equal(await client.evaluate("MoovI18n.translate('미등록공원')"),'미등록공원','Unknown place names are not treated as currency');
+  assert.equal(await client.evaluate("MoovI18n.place('예술의전당오페라하우스')"),'Seoul Arts Center Opera House','NAVER venue spacing aliases use reviewed English');
+  assert.equal(await client.evaluate("MoovI18n.place('예술의전당오페라하우스주차장')"),'Seoul Arts Center Opera House Parking');
   // Nested explicit labels, editable content, option values and live mutations.
   await client.evaluate(`(()=>{
     const host=document.createElement('section');host.id='translation-fixture';
@@ -105,10 +108,45 @@ async function main() {
   })()`);
   assert.deepEqual(await client.evaluate(`(()=>{const h=document.querySelector('#translation-fixture');return [h.querySelector('span').textContent,h.querySelector('textarea').placeholder,h.querySelector('textarea').value,h.querySelector('option').value,h.querySelector('option').textContent,h.querySelector('p').textContent]})()`),['Saved trips','Describe your trip','내가 작성한 문장','배리어프리','Accessible','8 products need restocking']);
   await client.evaluate("document.querySelector('#dynamic-label').textContent='입고 필요 9종'");
+  await client.evaluate(`document.querySelector('#translation-fixture').insertAdjacentHTML('beforeend','<strong id="custom-location" data-i18n-place>새로운장소</strong>');MoovI18n.refresh()`);
+  assert.doesNotMatch(await client.evaluate("document.querySelector('#custom-location').textContent"),/[가-힣]/,'Unlisted route location has a readable display label');
   await client.wait("document.querySelector('#dynamic-label').textContent==='9 products need restocking'",'live text translation');
   await client.evaluate("MoovI18n.setLanguage('ko')");
   assert.equal(await client.evaluate("document.querySelector('#dynamic-label').textContent"),'입고 필요 9종');
+  assert.equal(await client.evaluate("document.querySelector('#custom-location').textContent"),'새로운장소');
   await client.evaluate("document.querySelector('#translation-fixture').remove();MoovI18n.setLanguage('en')");
+  const courseFixtures = process.argv.includes('--live-courses')
+    ? (await (await fetch('http://127.0.0.1:8000/api/outing/courses')).json()).courses
+    : [{id:'english-regression',title:'엘씨오 → 성동 AI미래기술체험센터 → 동대문디자인플라자 디자인전시관 코스',points:['엘씨오','성동 AI미래기술체험센터','동대문디자인플라자 디자인전시관'].map((place_name,index)=>({place_name,sequence_no:index})),tags:{}}];
+  await client.evaluate(`window.englishCourses=${JSON.stringify(courseFixtures)};dbCourses=englishCourses.map(MoovOutingData.fromDatabase)`);
+  assert.deepEqual(await client.evaluate(`englishCourses.flatMap(c=>[c.title,...c.points.map(p=>p.place_name)]).filter(s=>/[가-힣]/.test(MoovI18n.translate(s)))`),[], 'All public course titles and stops translated');
+  await client.evaluate(`state.activeTab='outing';state.outingSub='community';render()`);
+  await snapshot('public-community-courses');
+  await client.evaluate(`openCourseDetail(dbCourses.find(c=>c.name.includes('엘씨오'))||dbCourses[0])`);
+  await snapshot('public-course-detail');
+  await client.evaluate(`openCourseStopDetail(state.activeDetailCourse,0)`);
+  await snapshot('public-course-stop-detail');
+  await client.evaluate('closeModal()');
+  // Editable location labels use English presentation and canonical search terms.
+  await client.evaluate(`(()=>{
+    const host=document.createElement('section');host.id='picker-fixture';
+    host.innerHTML=[0,1,2].map(index=>MoovLocationPicker.field({index,value:'안국역',label:'Stop',kind:'waypoint'})).join('');
+    document.querySelector('#app-content').replaceChildren(host);window.pickerQueries=[];window.selectedPlace=null;
+    MoovLocationPicker.configureRouteSearch({search:async query=>{pickerQueries.push(query);return [{name:'안국역 3호선',address:'서울특별시 종로구 율곡로 62',lat:37.5765389,lng:126.9855095}]},onSelect:place=>{window.selectedPlace=place}});
+    host.querySelector('input').focus();
+  })()`);
+  await client.wait("!!document.querySelector('#picker-fixture .route-location-results button')",'existing pickup lookup on focus').catch(async error=>{console.log(await client.evaluate("({queries:pickerQueries,active:document.activeElement.outerHTML,html:document.querySelector('#picker-fixture').innerHTML})"));throw error;});
+  assert.equal(await client.evaluate("document.querySelector('#picker-fixture input').value"),'Anguk Station');
+  assert.deepEqual(await client.evaluate('pickerQueries'),['안국역']);
+  assert.doesNotMatch(await client.evaluate("document.querySelector('#picker-fixture .route-location-results').textContent"),/[가-힣]/);
+  await client.evaluate(`document.querySelectorAll('#picker-fixture input')[1].dispatchEvent(new PointerEvent('pointerover',{bubbles:true}));document.querySelectorAll('#picker-fixture input')[2].focus()`);
+  await client.wait('pickerQueries.length===3','stop hover and destination focus');
+  await client.evaluate("document.querySelectorAll('#picker-fixture .route-location-results button')[1].click()");
+  assert.equal(await client.evaluate('selectedPlace.name'),'안국역 3호선','Selection preserves canonical name');
+  await client.evaluate(`const edited=document.querySelector('#picker-fixture input');edited.value='My custom place';MoovI18n.setLanguage('ko')`);
+  assert.equal(await client.evaluate("document.querySelector('#picker-fixture input').value"),'My custom place');
+  assert.equal(await client.evaluate("document.querySelectorAll('#picker-fixture input')[1].value"),'안국역');
+  await client.evaluate("document.querySelector('#picker-fixture').remove();MoovI18n.setLanguage('en')");
   for(const tab of ['home','ai','space','outing','profile']) {
     await client.evaluate(`state.activeTab=${JSON.stringify(tab)};render()`);
     await snapshot(tab);
@@ -139,6 +177,7 @@ async function main() {
   await navigate(base,'/space-content/index.html?lang=en');
   for(const hash of ['ott','wellness','window','purchase']) {
     await client.evaluate(`location.hash=${JSON.stringify(hash)}`);await delay(200);await snapshot('space-'+hash);
+    if(hash==='window')assert.deepEqual(await client.evaluate("[...document.querySelectorAll('optgroup')].map(el=>el.label).filter(label=>/[가-힣]/.test(label))"),[],'Native sound menu groups translated');
   }
   await client.send('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   await navigate(base,'/dashboard/index.html?lang=en');

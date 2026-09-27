@@ -4,6 +4,7 @@ Run from the repository root: python tools/export_site_translations.py
 """
 
 import json
+import re
 from pathlib import Path
 
 from openpyxl import load_workbook
@@ -30,6 +31,11 @@ def main():
     translations.update({key: value for key, value in json.loads(OVERRIDES.read_text(encoding="utf-8")).items() if key in active})
     translations.update({key: value for key, value in reviewed_translations().items() if key in active})
     translations.update(json.loads((ROOT / "translations" / "runtime-en.json").read_text(encoding="utf-8")))
+    # Public course/venue names arrive from the API rather than source literals.
+    places = json.loads((ROOT / "translations" / "places-en.json").read_text(encoding="utf-8"))
+    translations.update(places)
+    # NAVER search and public course records use different spacing for venues.
+    translations.update({re.sub(r"\s+", "", ko): en for ko, en in places.items()})
     output = json.dumps(dict(sorted(translations.items())), ensure_ascii=False, indent=2)
     OUTPUT.write_text(f"// Generated from translations/moov-ko-en.xlsx. Do not edit by hand.\nwindow.MOOV_EN = Object.freeze({output});\n", encoding="utf-8")
     print(f"Exported {len(translations)} phrases to {OUTPUT.relative_to(ROOT)}")

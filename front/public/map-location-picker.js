@@ -1,6 +1,7 @@
 /* Shared coordinate picker for taxi and rental journeys. */
 (() => {
   const text = (ko, en) => document.documentElement.lang === 'en' ? en : ko;
+  const display = value => window.MoovI18n?.place(value) ?? String(value ?? '');
   let dispose = null;
   function open({ openModal, closeModal, center, role = 'pickup', chooseRole = true, onSelect }) {
     dispose?.();
@@ -46,7 +47,7 @@
       status.textContent = text('위치를 확인하는 중…', 'Checking location…');
       const place = named ? p : await MoovNaverMap.describePoint(p);
       if (!current() || version !== selectionVersion) return;
-      selected = place; status.textContent = place.name;
+      selected = place; status.textContent = display(place.name);
       if (confirm) confirm.disabled = false;
     }
     root.querySelector('form').addEventListener('submit', async event => {
@@ -60,7 +61,7 @@
         if (!places.length) results.textContent = text('검색 결과가 없어요. 도로명·지번 주소로 검색하거나 지도에서 선택해 주세요.', 'No results. Try a street or parcel address, or select on the map.');
         places.forEach(place => {
           const button = document.createElement('button'); button.type = 'button';
-          button.textContent = [place.name, place.address].filter(Boolean).join(' · ');
+          button.textContent = [place.name, place.address].filter(Boolean).map(display).join(' · ');
           button.onclick = () => void select(place, true); results.append(button);
         });
       } catch (error) { if (current() && version === searchVersion) results.textContent = error.message; }
@@ -86,17 +87,21 @@
     // Format old saved pickup labels without altering stored trip/fare records.
     if(index===0)value=String(value??'').replace(/\s+인근$/,'').replace(/^Near\s+/,'');
     return `<form class="route-location-form" data-route-index="${index}" data-i18n-skip>
-      <div class="route-line ${kind}"><span class="route-mark"></span><label><small>${escape(label)}</small><input type="search" enterkeyhint="search" maxlength="200" value="${escape(value)}" aria-label="${escape(label)}" placeholder="${text('주소 또는 장소 검색', 'Search address or place')}" autocomplete="off" /></label></div>
-      ${address && address !== value ? `<p class="route-pickup-address">${escape(address)}</p>` : ''}<div class="route-location-results" aria-live="polite" hidden></div></form>`;
+      <div class="route-line ${kind}"><span class="route-mark"></span><label><small>${escape(label)}</small><input type="search" enterkeyhint="search" maxlength="200" data-source-value="${escape(value)}" data-display-value="${escape(display(value))}" value="${escape(display(value))}" aria-label="${escape(label)}" placeholder="${text('주소 또는 장소 검색', 'Search address or place')}" autocomplete="off" /></label></div>
+      ${address && address !== value ? `<p class="route-pickup-address">${escape(display(address))}</p>` : ''}<div class="route-location-results" aria-live="polite" hidden></div></form>`;
   }
   function formState(form) {
     if (!forms.has(form)) forms.set(form, { version: 0, timer: null });
     return forms.get(form);
   }
-  async function search(form) {
+  async function search(form, reuse = false) {
     const state = formState(form); clearTimeout(state.timer);
-    const version = ++state.version, query = form.querySelector('input').value.trim();
+    const input = form.querySelector('input');
+    const query = (input.value === input.dataset.displayValue ? input.dataset.sourceValue : input.value).trim();
     const results = form.querySelector('.route-location-results');
+    if (reuse && state.query === query && !results.hidden) return;
+    state.query = query;
+    const version = ++state.version;
     const current = () => form.isConnected && state.version === version;
     results.hidden = false; results.textContent = text('검색 중…', 'Searching…');
     try {
@@ -107,7 +112,7 @@
       if (!places.length) results.textContent = text('검색 결과가 없어요. 도로명·지번 주소로 검색하거나 지도에서 선택하세요.', 'No results. Try a street or parcel address, or choose on the map.');
       places.forEach(place => {
         const button = document.createElement('button'); button.type = 'button';
-        button.textContent = [place.name, place.address].filter(Boolean).join(' · ');
+        button.textContent = [place.name, place.address].filter(Boolean).map(display).join(' · ');
         button.onclick = async () => {
           const ticket = ++selection;
           const valid = () => current() && ticket === selection;
@@ -125,7 +130,7 @@
         };
         results.append(button);
       });
-    } catch (error) { if (current()) results.textContent = error.message; }
+    } catch (error) { if (current()) { state.query = null; results.textContent = error.message; } }
   }
   document.addEventListener('submit', event => {
     if (!event.target.matches('.route-location-form')) return;
@@ -141,7 +146,24 @@
     const form=event.target.closest('.route-location-form');if(form)void search(form);
   });
   document.addEventListener('focusin', event => {
-    if (event.target.matches('.route-location-form input')) event.target.select();
+    if (event.target.matches('.route-location-form input')) {
+      event.target.select();
+      if (event.target.value.trim().length >= 2) void search(event.target.closest('form'), true);
+    }
+  });
+  document.addEventListener('pointerover', event => {
+    const form = event.target.closest?.('.route-location-form');
+    if (!form || form.contains(event.relatedTarget)) return;
+    if (form.querySelector('input').value.trim().length >= 2) void search(form, true);
+  });
+  window.addEventListener('moov:language-change', () => {
+    document.querySelectorAll('.route-location-form input[data-source-value]').forEach(input => {
+      if (input.value !== input.dataset.displayValue) return; // Preserve edits.
+      input.value = input.dataset.displayValue = display(input.dataset.sourceValue);
+      const form = input.closest('form');
+      formState(form).version++;
+      form.querySelector('.route-location-results').hidden = true;
+    });
   });
   let cancelMapSelection = null;
   let chooseExistingPoint = null;
@@ -184,7 +206,7 @@
       }else pin.setLatLng(point);
       const place=await MoovNaverMap.describePoint(point);
       if(!current()||request!==version)return;
-      selected=place;status.textContent=`${label} · ${place.name}`;confirm.disabled=false;
+      selected=place;status.textContent=`${label} · ${display(place.name)}`;confirm.disabled=false;
     }
     confirm.onclick=async()=>{
       if(!selected||!current())return;
@@ -247,8 +269,8 @@
       lastKey = key; busy(); const request = version;
       const place = named?.name && named.category !== '주소' ? { ...named, ...point } : await MoovNaverMap.describePoint(point);
       if (!current() || request !== version) return;
-      selected = place; status.textContent = place.name;
-      address.textContent = place.address && place.address !== place.name ? place.address : text('핀 위치를 확인하고 확정해 주세요.', 'Check the pin position before confirming.');
+      selected = place; status.textContent = display(place.name);
+      address.textContent = place.address && place.address !== place.name ? display(place.address) : text('핀 위치를 확인하고 확정해 주세요.', 'Check the pin position before confirming.');
       confirm.disabled = false;
     }
     function move(point) {

@@ -99,7 +99,7 @@
         const timer = setTimeout(() => fail('timeout'), 18000);
         window.navermap_authFailure = authFailed;
         script.async = true;
-        script.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + encodeURIComponent(config.clientId.trim());
+        script.src = 'https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=' + encodeURIComponent(config.clientId.trim()) + '&language=' + (english() ? 'en' : 'ko');
         // Wait for the base script to finish assigning the naver.maps namespace.
         script.onload = loaded;
         script.onerror = () => fail('connection');
@@ -128,6 +128,17 @@
       mapDataControlOptions: { position: maps.Position.BOTTOM_LEFT },
       scaleControl: true,
     });
+    // Change only the base tiles; retain route overlays, viewport and selection.
+    const updateLanguage = () => {
+      if (!maps.NaverStyleMapTypeOptions || !map.mapTypes) return;
+      const id = english() ? 'moov-en' : 'moov-ko';
+      map.mapTypes.set(id, maps.NaverStyleMapTypeOptions.getNormalMap({
+        overlayType: 'bg.ol.ts.' + (english() ? 'len' : 'lko'),
+      }));
+      map.setMapTypeId(id);
+    };
+    updateLanguage();
+    window.addEventListener?.('moov:language-change', updateLanguage);
     element.addEventListener('pointerdown', () => { map.moovInteracted = true; }, { passive: true });
     element.addEventListener('touchstart', () => { map.moovInteracted = true; }, { passive: true });
     element.addEventListener('wheel', () => { map.moovInteracted = true; }, { passive: true, capture: true });
@@ -135,6 +146,7 @@
     deviceLocations.set(map, location);
     const destroy = map.destroy.bind(map);
     map.destroy = () => {
+      window.removeEventListener?.('moov:language-change', updateLanguage);
       location.removed = true;
       location.token++;
       location.marker?.setMap(null);
@@ -285,7 +297,7 @@
     const size = options.size || [44, 44];
     const anchor = options.anchor || [size[0] / 2, size[1] / 2];
     const native = new maps.Marker({
-      position: latLng(value), title: options.title || '', clickable: true, draggable: options.draggable === true,
+      position: latLng(value), title: window.MoovI18n?.place(options.title || '') ?? (options.title || ''), clickable: true, draggable: options.draggable === true,
       icon: { content: element, size: new maps.Size(...size), anchor: new maps.Point(...anchor) },
     });
     const wrapper = layer(native);
@@ -314,7 +326,7 @@
       const template = document.createElement('template');
       template.innerHTML = String(html);
       tooltip = document.createElement('div');
-      tooltip.textContent = template.content.textContent;
+      tooltip.textContent = window.MoovI18n?.place(template.content.textContent) ?? template.content.textContent;
       tooltip.className = tooltipOptions.className || '';
       tooltip.style.cssText = 'position:absolute;top:50%;transform:translateY(-50%);white-space:nowrap;pointer-events:none;background:white;color:#243429;border:1px solid #d8dfda;border-radius:8px;padding:5px 8px;font-size:12px;box-shadow:0 2px 8px #0002;';
       tooltip.style[tooltipOptions.direction === 'left' ? 'right' : 'left'] = 'calc(100% + 8px)';
@@ -372,6 +384,14 @@
     const distinct=items=>[...new Map(items.map(item=>[`${item.lat},${item.lng}`,item])).values()];
     const matches=distinct(exact);
     if(matches.length)return matches.length===1?matches[0]:null;
+    // NAVER appends the subway line to station names. Only accept one station,
+    // never a business containing its name or a particular station exit.
+    if (/역$/.test(query.trim())) {
+      const stations = distinct(valid.filter(item =>
+        normalize(item.name).replace(/(?:\d+호선|경의중앙선|수인분당선|신분당선|공항철도|경춘선|우이신설선|신림선)$/, '') === normalize(query)
+      ));
+      if (stations.length) return stations.length === 1 ? stations[0] : null;
+    }
     // A single geocoded street/parcel address is usable, but never guess a POI
     // from search ranking when several similarly named businesses exist.
     const addresses=distinct(valid.filter(item=>item.category==='주소'));
