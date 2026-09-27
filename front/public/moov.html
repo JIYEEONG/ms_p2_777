@@ -1520,15 +1520,15 @@ async function findPixabayImageForCourse(course, usedOriginals = new Set(), used
   const payload = {
     title,
     stops: options.titleFirst && title ? [title] : (course.stops || []).filter(Boolean).slice(0, 6),
-    place_names_kr: options.titleFirst ? [] : dbPlaceNames.slice(0, 6),
+    place_names_kr: options.titleFirst ? [] : [...new Set(dbPlaceNames)].slice(0, 6),
     tags: {
       category: tags.category || [],
       purpose: tags.purpose || [],
       mood: tags.mood || [],
       time: tags.time || [],
     },
-    exclude_original_urls: [...usedOriginals],
-    exclude_page_urls: [...usedPages],
+    exclude_original_urls: [...usedOriginals].slice(-80),
+    exclude_page_urls: [...usedPages].slice(-80),
   };
   const key = JSON.stringify(payload);
   if (pixabayImageCache.has(key)) return pixabayImageCache.get(key);
