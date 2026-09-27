@@ -94,6 +94,16 @@
     if (!forms.has(form)) forms.set(form, { version: 0, timer: null });
     return forms.get(form);
   }
+  function dismiss(form) {
+    const state = formState(form);
+    clearTimeout(state.timer); state.version++; state.query = null;
+    form.querySelector('.route-location-results').hidden = true;
+  }
+  function dismissOthers(keep) {
+    document.querySelectorAll('.route-location-form').forEach(form => {
+      if (form !== keep) dismiss(form);
+    });
+  }
   async function search(form, reuse = false) {
     const state = formState(form); clearTimeout(state.timer);
     const input = form.querySelector('input');
@@ -123,7 +133,10 @@
               await routeHandlers.onPreviewPickup(place);
               results.hidden = true;
               results.querySelectorAll('button').forEach(b => { b.disabled = false; });
-            } else await routeHandlers.onSelect?.(place, index, valid);
+            } else {
+              await routeHandlers.onSelect?.(place, index, valid);
+              if (valid()) dismiss(form);
+            }
           } catch (error) {
             if (valid()) { results.textContent = text('경로를 확인하지 못했어요. 다시 검색하거나 다른 위치를 선택하세요.', 'Could not find a route. Search again or choose another location.'); }
           }
@@ -146,15 +159,26 @@
     const form=event.target.closest('.route-location-form');if(form)void search(form);
   });
   document.addEventListener('focusin', event => {
+    dismissOthers(event.target.closest?.('.route-location-form'));
     if (event.target.matches('.route-location-form input')) {
       event.target.select();
-      if (event.target.value.trim().length >= 2) void search(event.target.closest('form'), true);
     }
   });
-  document.addEventListener('pointerover', event => {
+  document.addEventListener('pointerdown', event => {
+    dismissOthers(event.target.closest?.('.route-location-form'));
+  });
+  document.addEventListener('click', event => {
+    if (!event.target.matches('.route-location-form input')) return;
+    dismissOthers(event.target.closest('form'));
+    if (event.target.value.trim().length >= 2) void search(event.target.closest('form'), true);
+  });
+  document.addEventListener('keydown', event => {
     const form = event.target.closest?.('.route-location-form');
-    if (!form || form.contains(event.relatedTarget)) return;
-    if (form.querySelector('input').value.trim().length >= 2) void search(form, true);
+    if (!form) return;
+    if (event.key === 'Escape') { event.preventDefault(); dismiss(form); }
+    if (event.key === 'ArrowDown' && event.target.matches('input')) {
+      event.preventDefault(); void search(form, true);
+    }
   });
   window.addEventListener('moov:language-change', () => {
     document.querySelectorAll('.route-location-form input[data-source-value]').forEach(input => {
