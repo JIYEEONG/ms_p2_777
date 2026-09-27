@@ -69,6 +69,14 @@ def require_admin_user(user: dict = Depends(require_auth_user)) -> dict:
     return user
 
 
+DEMO_ADMIN = {"id": "demo:moov", "name": "MOOV 체험", "email": "", "picture": ""}
+
+
+def demo_admin_user() -> dict:
+    """시연용: 로그인 없이 누구나 관리자로 접근. 원복하려면 아래 Depends를 require_admin_user로 되돌리면 됨."""
+    return DEMO_ADMIN
+
+
 def ensure_admin_schema() -> None:
     global _schema_ready
     if _schema_ready:
@@ -247,7 +255,7 @@ def _product_image_map() -> dict[str, str]:
 
 
 @router.get("/bootstrap")
-def admin_bootstrap(user: dict = Depends(require_admin_user)):
+def admin_bootstrap(user: dict = Depends(demo_admin_user)):
     return JSONResponse({
         "authenticated": True,
         "user": user,
@@ -258,7 +266,7 @@ def admin_bootstrap(user: dict = Depends(require_admin_user)):
 
 
 @router.get("/state/{key}")
-def get_state(key: str, user: dict = Depends(require_admin_user)):
+def get_state(key: str, user: dict = Depends(demo_admin_user)):
     del user
     state = _read_states({key}).get(key)
     if state is None:
@@ -267,12 +275,12 @@ def get_state(key: str, user: dict = Depends(require_admin_user)):
 
 
 @router.put("/state/{key}")
-def put_state(key: str, payload: StateBody, request: Request, user: dict = Depends(require_admin_user)):
+def put_state(key: str, payload: StateBody, request: Request, user: dict = Depends(demo_admin_user)):
     return _save_state(key, payload.data, user, request.headers.get("if-match"))
 
 
 @router.get("/config/{section}")
-def get_config(section: str, user: dict = Depends(require_admin_user)):
+def get_config(section: str, user: dict = Depends(demo_admin_user)):
     del user
     key = CONFIG_KEYS.get(section)
     if not key:
@@ -284,7 +292,7 @@ def get_config(section: str, user: dict = Depends(require_admin_user)):
 
 
 @router.put("/config/{section}")
-async def put_config(section: str, request: Request, user: dict = Depends(require_admin_user)):
+async def put_config(section: str, request: Request, user: dict = Depends(demo_admin_user)):
     key = CONFIG_KEYS.get(section)
     if not key:
         raise HTTPException(404, "지원하지 않는 설정입니다.")
@@ -303,7 +311,7 @@ def _validate_import_rows(value: Any, kind: str) -> list[dict[str, Any]]:
 
 
 @router.get("/events")
-def get_events(user: dict = Depends(require_admin_user)):
+def get_events(user: dict = Depends(demo_admin_user)):
     del user
     ensure_admin_schema()
     conn = get_conn()
@@ -317,7 +325,7 @@ def get_events(user: dict = Depends(require_admin_user)):
 
 
 @router.post("/events")
-async def post_events(request: Request, user: dict = Depends(require_admin_user)):
+async def post_events(request: Request, user: dict = Depends(demo_admin_user)):
     try:
         rows = _validate_import_rows(await request.json(), "운영 이벤트")
     except json.JSONDecodeError:
@@ -351,7 +359,7 @@ async def post_events(request: Request, user: dict = Depends(require_admin_user)
 
 
 @router.get("/payments")
-def get_payments(user: dict = Depends(require_admin_user)):
+def get_payments(user: dict = Depends(demo_admin_user)):
     del user
     ensure_admin_schema()
     conn = get_conn()
@@ -365,7 +373,7 @@ def get_payments(user: dict = Depends(require_admin_user)):
 
 
 @router.post("/payments")
-async def post_payments(request: Request, user: dict = Depends(require_admin_user)):
+async def post_payments(request: Request, user: dict = Depends(demo_admin_user)):
     try:
         rows = _validate_import_rows(await request.json(), "결제")
     except json.JSONDecodeError:
@@ -426,7 +434,7 @@ def _parse_python_prompts(source: str) -> dict[str, str]:
 
 
 @router.post("/python")
-async def parse_python(request: Request, user: dict = Depends(require_admin_user)):
+async def parse_python(request: Request, user: dict = Depends(demo_admin_user)):
     del user
     try:
         source = (await request.body()).decode("utf-8", errors="strict")
@@ -450,7 +458,7 @@ def _asset_container():
 
 
 @router.post("/assets")
-async def upload_asset(request: Request, user: dict = Depends(require_admin_user)):
+async def upload_asset(request: Request, user: dict = Depends(demo_admin_user)):
     body = await request.body()
     content_type = request.headers.get("content-type", "application/octet-stream").split(";", 1)[0].lower()
     if not body or len(body) > MAX_ASSET_BYTES:
@@ -486,7 +494,7 @@ async def upload_asset(request: Request, user: dict = Depends(require_admin_user
 
 
 @router.get("/assets/{asset_id}")
-def get_asset(asset_id: uuid.UUID, user: dict = Depends(require_auth_user)):
+def get_asset(asset_id: uuid.UUID, user: dict = Depends(demo_admin_user)):
     del user
     ensure_admin_schema()
     conn = get_conn()
@@ -513,7 +521,7 @@ def _product_image_container():
 
 
 @router.post("/product-images")
-async def upload_product_image(request: Request, user: dict = Depends(require_admin_user)):
+async def upload_product_image(request: Request, user: dict = Depends(demo_admin_user)):
     del user
     body = await request.body()
     content_type = request.headers.get("content-type", "").split(";", 1)[0].lower()
@@ -542,7 +550,7 @@ class ProductCreate(BaseModel):
 
 
 @router.post("/products")
-def create_product(product: ProductCreate, user: dict = Depends(require_admin_user)):
+def create_product(product: ProductCreate, user: dict = Depends(demo_admin_user)):
     del user
     sku = product.sku.strip().upper()
     app_product_id = sku.lower()
