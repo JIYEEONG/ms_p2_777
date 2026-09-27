@@ -25,9 +25,29 @@ from pydantic import BaseModel, Field
 if __package__:
     from .db import get_conn, release_conn
     from .google_auth_api import require_auth_user
+    from .preference_scoring import (
+        DEFAULT_AHP_CONFIG,
+        CATEGORY_DIMENSIONS,
+        aggregate_behavior_vector,
+        build_place_vector,
+        build_survey_vector,
+        build_user_preference_vector,
+        calculate_ahp_weights,
+        rank_candidates,
+    )
 else:
     from db import get_conn, release_conn
     from google_auth_api import require_auth_user
+    from preference_scoring import (
+        DEFAULT_AHP_CONFIG,
+        CATEGORY_DIMENSIONS,
+        aggregate_behavior_vector,
+        build_place_vector,
+        build_survey_vector,
+        build_user_preference_vector,
+        calculate_ahp_weights,
+        rank_candidates,
+    )
 
 router = APIRouter(prefix="/api/outing", tags=["outing"])
 
@@ -204,6 +224,26 @@ def _normalize_profile(raw: dict[str, Any] | None, fallback: dict[str, Any] | No
     }
 
 
+def _profile_categories(profile: dict[str, Any]) -> list[str]:
+    raw = profile.get("raw") if isinstance(profile.get("raw"), dict) else {}
+    survey = profile.get("survey") if isinstance(profile.get("survey"), dict) else {}
+    values = []
+    raw_categories = raw.get("categories")
+    values.extend(list(raw_categories.keys()) if isinstance(raw_categories, dict) else _flatten_strings(raw_categories))
+    values.extend(_flatten_strings(raw.get("category")))
+    values.extend(_flatten_strings(raw.get("answers", {}).get("categories") if isinstance(raw.get("answers"), dict) else []))
+    values.extend(_flatten_strings(survey.get("answers", {}).get("categories") if isinstance(survey.get("answers"), dict) else []))
+    values.extend([tag for tag in profile.get("tags", []) if tag in CATEGORY_DIMENSIONS])
+    return _dedupe([value for value in values if value in CATEGORY_DIMENSIONS])
+
+
+def _prior_strength() -> float:
+    try:
+        return max(0.0, float(os.getenv("MOOV_SURVEY_PRIOR_STRENGTH", "1.0")))
+    except ValueError:
+        return 1.0
+
+
 def _load_user_preference(user_id: str, fallback: dict[str, Any]) -> dict[str, Any]:
     preference_queries = [
         ("moov.user_preference.profile_json", "SELECT profile_json FROM moov.user_preference WHERE user_id = %s"),
@@ -317,21 +357,12 @@ def _load_candidate_places(profile: dict[str, Any], user_lat: float | None, user
             place["tag_names"].append(value)
             available_tags.add(value)
 
-    preferred = {tag.casefold() for tag in profile["tags"]}
-    activity_tag_weights = {
-        str(tag).casefold(): float(weight or 0)
-        for tag, weight in (profile.get("activity_weights", {}).get("tag_weights") or {}).items()
-    }
-    activity_type_weights = {
-        str(tag_type).casefold(): float(weight or 0)
-        for tag_type, weight in (profile.get("activity_weights", {}).get("tag_type_weights") or {}).items()
-    }
+    user_vector = profile.get("final_user_vector") or build_survey_vector(_profile_categories(profile))
     excluded = {tag.casefold() for tag in profile["excluded_tags"]}
     excluded_regions = profile["excluded_regions"]
-    preferred_regions = profile["preferred_regions"]
     max_distance_km = float(os.getenv("MOOV_RECOMMEND_MAX_DISTANCE_KM", "25"))
 
-    scored: list[dict[str, Any]] = []
+    eligible: list[dict[str, Any]] = []
     for place in by_place.values():
         haystack = " ".join([place["name"], place["address"], *place["tag_names"]]).casefold()
         if any(region.casefold() in haystack for region in excluded_regions):
@@ -341,23 +372,16 @@ def _load_candidate_places(profile: dict[str, Any], user_lat: float | None, user
         distance_km = _haversine_km(user_lat, user_lon, place["latitude"], place["longitude"])
         if distance_km is not None and distance_km > max_distance_km:
             continue
-        matched_tags = [tag for tag in place["tag_names"] if tag.casefold() in preferred]
-        region_match = [region for region in preferred_regions if region.casefold() in haystack]
-        tag_score = len(set(matched_tags)) * 10
-        activity_score = sum(activity_tag_weights.get(tag.casefold(), 0) for tag in place["tag_names"])
-        activity_score += sum(activity_type_weights.get(str(tag_type).casefold(), 0) for tag_type in place["tags"].keys())
-        region_score = 5 if region_match else 0
-        distance_score = max(0, 8 - distance_km) if distance_km is not None else 0
+        place_vector = build_place_vector(place["tags"])
+        matched_tags = [tag for tag in place["tag_names"] if float(user_vector.get(tag, 0.0)) > 0]
         place["matched_tags"] = _dedupe(matched_tags)
-        place["activity_weight_score"] = round(activity_score, 2)
-        place["region_match"] = region_match
+        place["activity_weight_score"] = 0.0
+        place["region_match"] = []
         place["distance_km"] = round(distance_km, 2) if distance_km is not None else None
-        place["score"] = tag_score + activity_score + region_score + distance_score
-        if place["score"] > 0 or not preferred:
-            scored.append(place)
+        place["place_vector"] = place_vector
+        eligible.append(place)
 
-    scored.sort(key=lambda item: (-item["score"], item["distance_km"] if item["distance_km"] is not None else 999, item["name"]))
-    return scored[:30], sorted(available_tags)
+    return rank_candidates(eligible, user_vector)[:30], sorted(available_tags)
 
 
 def _category_order(place: dict[str, Any]) -> int:
@@ -788,72 +812,34 @@ def _ensure_weekly_activity_table(conn) -> bool:
         return False
 
 
-def _activity_event_weight(event_type: str) -> float:
-    return {
-        "course_select": 1.0,
-        "course_like": 3.0,
-        "course_unlike": -2.0,
-        "course_save": 4.0,
-        "course_unsave": -3.0,
-        "follow_intent": 2.0,
-        "follow_route_applied": 5.0,
-        "course_publish": 5.0,
-    }.get(event_type, 0.0)
+def _ahp_config() -> dict[str, Any]:
+    raw = os.getenv("MOOV_AHP_CONFIG_JSON")
+    if not raw:
+        return DEFAULT_AHP_CONFIG
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        print("MOOV_AHP_CONFIG_JSON is invalid JSON; falling back to DEFAULT_AHP_CONFIG")
+        return DEFAULT_AHP_CONFIG
+    return parsed if isinstance(parsed, dict) else DEFAULT_AHP_CONFIG
 
 
-def _rule_weekly_activity_weights(activity_signals: list[dict[str, Any]], week_start: datetime) -> dict[str, Any]:
-    tag_weights: dict[str, float] = {}
-    tag_type_weights: dict[str, float] = {}
-    event_count = 0
-    for signal in activity_signals:
-        weight = float(signal.get("weight") or 0)
-        if weight == 0:
-            continue
-        event_count += int(signal.get("count") or 1)
-        tag = str(signal.get("tag_name") or "").strip()
-        tag_type = str(signal.get("tag_type") or "").strip().lower()
-        if tag:
-            tag_weights[tag] = tag_weights.get(tag, 0.0) + weight
-        if tag_type:
-            tag_type_weights[tag_type] = tag_type_weights.get(tag_type, 0.0) + weight
+def _weekly_activity_profile(profile: dict[str, Any], activity_events: list[dict[str, Any]], week_start: datetime) -> dict[str, Any]:
+    ahp = calculate_ahp_weights(_ahp_config())
+    survey_vector = build_survey_vector(_profile_categories(profile))
+    behavior = aggregate_behavior_vector(activity_events, ahp["weights"])
+    final_vector = build_user_preference_vector(survey_vector, behavior["vector"], _prior_strength())
     return {
-        "source": "rule",
+        "source": "python-ahp",
         "week_start": week_start.date().isoformat(),
-        "tag_weights": {k: round(max(0.0, v), 2) for k, v in sorted(tag_weights.items(), key=lambda item: -item[1]) if v > 0},
-        "tag_type_weights": {k: round(max(0.0, v), 2) for k, v in sorted(tag_type_weights.items(), key=lambda item: -item[1]) if v > 0},
-        "event_count": event_count,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-    }
-
-
-def _azure_weekly_activity_weights(profile: dict[str, Any], activity_signals: list[dict[str, Any]], week_start: datetime) -> dict[str, Any] | None:
-    if not activity_signals:
-        return None
-    prompt = f"""
-Create weekly recommendation weights for one MOOV user.
-Use user_profile and weekly_activity_signals. Activity signals come from app_events joined to place_tags.
-Return JSON only with keys: tag_weights, tag_type_weights, activity_summary.
-tag_weights must be an object of tag name to numeric weight from 0 to 10.
-tag_type_weights must be an object of tag_type to numeric weight from 0 to 10.
-activity_summary must be a short Korean array explaining what changed this week.
-Do not invent tags that are not present in weekly_activity_signals.
-
-week_start={week_start.date().isoformat()}
-user_profile={json.dumps(profile, ensure_ascii=False)}
-weekly_activity_signals={json.dumps(activity_signals[:120], ensure_ascii=False)}
-"""
-    result = _azure_openai_json(prompt)
-    if not result:
-        return None
-    tag_weights = result.get("tag_weights") if isinstance(result.get("tag_weights"), dict) else {}
-    tag_type_weights = result.get("tag_type_weights") if isinstance(result.get("tag_type_weights"), dict) else {}
-    return {
-        "source": "azure-openai",
-        "week_start": week_start.date().isoformat(),
-        "tag_weights": {str(k): max(0.0, min(10.0, float(v or 0))) for k, v in tag_weights.items()},
-        "tag_type_weights": {str(k): max(0.0, min(10.0, float(v or 0))) for k, v in tag_type_weights.items()},
-        "activity_summary": _flatten_strings(result.get("activity_summary"))[:5],
-        "event_count": sum(int(item.get("count") or 1) for item in activity_signals),
+        "survey_vector": survey_vector,
+        "behavior_vector": behavior["vector"],
+        "behavior_raw_vector": behavior["raw_vector"],
+        "final_user_vector": final_vector,
+        "ahp_weight_version": ahp["version"],
+        "ahp_behavior_weights": ahp["weights"],
+        "ahp_consistency_ratio": ahp["consistency_ratio"],
+        "valid_event_count": behavior["valid_event_count"],
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -863,7 +849,7 @@ def _load_activity_signals(conn, user_id: str, since: datetime) -> list[dict[str
         with conn.cursor() as cur:
             cur.execute("""
                 WITH events AS (
-                    SELECT event_type, aggregate_id, COUNT(*) AS event_count
+                    SELECT idempotency_key, event_type, aggregate_id, occurred_at
                     FROM moov.app_events
                     WHERE user_id = %s
                       AND aggregate_type = 'course'
@@ -871,11 +857,10 @@ def _load_activity_signals(conn, user_id: str, since: datetime) -> list[dict[str
                       AND event_type IN (
                           'course_select', 'course_like', 'course_unlike',
                           'course_save', 'course_unsave', 'follow_intent',
-                          'follow_route_applied', 'course_publish'
+                          'follow_route_applied'
                       )
-                    GROUP BY event_type, aggregate_id
                 )
-                SELECT e.event_type, e.aggregate_id, e.event_count, pt.tag_type, pt.tag_name
+                SELECT e.idempotency_key, e.event_type, e.aggregate_id, e.occurred_at, pt.tag_type, pt.tag_name
                 FROM events e
                 LEFT JOIN moov.course_points cp ON cp.course_id = e.aggregate_id
                 LEFT JOIN LATERAL (
@@ -897,20 +882,22 @@ def _load_activity_signals(conn, user_id: str, since: datetime) -> list[dict[str
         conn.rollback()
         return []
 
-    signals = []
-    for event_type, course_id, count, tag_type, tag_name in rows:
-        base_weight = _activity_event_weight(event_type)
-        if base_weight == 0:
-            continue
-        signals.append({
-            "event_type": event_type,
-            "course_id": str(course_id),
-            "count": int(count or 1),
-            "tag_type": tag_type,
-            "tag_name": tag_name,
-            "weight": round(base_weight * int(count or 1), 2),
+    by_event: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for event_id, event_type, course_id, occurred_at, tag_type, tag_name in rows:
+        key = (str(event_id or ""), str(event_type or ""), str(course_id or ""))
+        event = by_event.setdefault(key, {
+            "event_id": str(event_id or ""),
+            "event_type": str(event_type or ""),
+            "course_id": str(course_id or ""),
+            "occurred_at": occurred_at.isoformat() if hasattr(occurred_at, "isoformat") else str(occurred_at),
+            "tags": {"category": []},
+            "tag_names": [],
         })
-    return signals
+        if tag_name:
+            event["tag_names"].append(str(tag_name))
+        if tag_type and str(tag_type).upper() == "CATEGORY" and tag_name:
+            event["tags"]["category"].append(str(tag_name))
+    return list(by_event.values())
 
 
 def _load_weekly_activity_weights(user_id: str, profile: dict[str, Any]) -> dict[str, Any]:
@@ -933,7 +920,7 @@ def _load_weekly_activity_weights(user_id: str, profile: dict[str, Any]) -> dict
                         return cached
 
         signals = _load_activity_signals(conn, user_id, week_start)
-        weights = _azure_weekly_activity_weights(profile, signals, week_start) or _rule_weekly_activity_weights(signals, week_start)
+        weights = _weekly_activity_profile(profile, signals, week_start)
         weights["cache"] = "miss"
         if table_ready:
             with conn.cursor() as cur:
@@ -944,6 +931,7 @@ def _load_weekly_activity_weights(user_id: str, profile: dict[str, Any]) -> dict
                     DO UPDATE SET weights_json = EXCLUDED.weights_json, updated_at = now()
                 """, (user_id, week_start.date(), json.dumps(weights, ensure_ascii=False)))
             conn.commit()
+        # TODO: persist final_user_vector into moov.user_preference after a vector/profile JSON column migration is available.
         return weights
     finally:
         release_conn(conn)
@@ -956,18 +944,15 @@ def _llm_route(profile: dict[str, Any], candidates: list[dict[str, Any]], availa
         "address": p["address"],
         "tags": p["tag_names"][:10],
         "matched_tags": p["matched_tags"],
-        "activity_weight_score": p.get("activity_weight_score", 0),
         "distance_km": p["distance_km"],
-        "score": round(p["score"], 2),
-    } for p in candidates[:20]]
+        "python_match_score": p.get("match_score", round(float(p.get("score") or 0) * 100)),
+    } for p in candidates[:limit + 1]]
     prompt = f"""
-Score candidate_places for this specific user, then choose 3-4 places.
-Do not use a fixed global flow. Create a personalized flow_order from user_preference, tags, matched_tags, distance_km, and available categories.
+Write Korean explanation text for the already-ranked candidate_places.
+Do not score, reorder, add, remove, or replace places. Python already calculated AHP weights, vectors, cosine similarity, and final ranking.
 Use only given place_id values.
-Calculate match_score from 0 to 100 for each useful candidate. The score must reflect user_preference versus place tags, weekly activity_weights, exclusions, distance, and how well the place fits the personalized flow.
-Return JSON only with keys: title, summary, flow_order, scored_places, place_ids, reasons.
-flow_order must be an array of Korean category/tag names in the chosen visit order.
-scored_places must be an array of objects: place_id, match_score, matched_tags, reason.
+Return JSON only with keys: title, summary, flow_order, reasons.
+flow_order must be an array of Korean category/tag names that describe the given order.
 reasons must be an object keyed by place_id in Korean.
 
 user_preference={json.dumps(profile, ensure_ascii=False)}
@@ -980,36 +965,12 @@ max_places={limit + 1}
     if not result:
         provider = "ollama"
         result = _ollama_json(prompt)
-    if not result or not isinstance(result.get("place_ids"), list):
+    if not result:
         return None
-    allowed = {p["place_id"] for p in candidates}
-    place_ids = [str(pid) for pid in result["place_ids"] if str(pid) in allowed]
-    if len(place_ids) < 2:
-        return None
-    scored_places = []
-    if isinstance(result.get("scored_places"), list):
-        for item in result["scored_places"]:
-            if not isinstance(item, dict):
-                continue
-            place_id = str(item.get("place_id") or "")
-            if place_id not in allowed:
-                continue
-            try:
-                match_score = max(0.0, min(100.0, float(item.get("match_score") or 0)))
-            except (TypeError, ValueError):
-                match_score = 0.0
-            scored_places.append({
-                "place_id": place_id,
-                "match_score": match_score,
-                "matched_tags": _dedupe(_flatten_strings(item.get("matched_tags"))),
-                "reason": str(item.get("reason") or "")[:300],
-            })
     return {
         "title": str(result.get("title") or "내 취향을 반영한 코스")[:120],
         "summary": str(result.get("summary") or "설문 취향과 장소 태그를 바탕으로 구성한 코스입니다.")[:300],
         "flow_order": result.get("flow_order") if isinstance(result.get("flow_order"), list) else [],
-        "place_ids": place_ids[:limit + 1],
-        "scored_places": scored_places,
         "reasons": result.get("reasons") if isinstance(result.get("reasons"), dict) else {},
         "provider": provider,
     }
@@ -1017,23 +978,12 @@ max_places={limit + 1}
 
 def _build_recommended_course(profile: dict[str, Any], candidates: list[dict[str, Any]], available_tags: list[str], limit: int) -> dict[str, Any]:
     llm = _llm_route(profile, candidates, available_tags, limit)
-    selected = []
+    selected = _rule_based_route(profile, candidates, limit)
     reasons = {}
     if llm:
-        by_id = {place["place_id"]: place for place in candidates}
-        for scored in llm.get("scored_places", []):
-            place = by_id.get(scored["place_id"])
-            if not place:
-                continue
-            place["llm_match_score"] = scored["match_score"]
-            if scored["matched_tags"]:
-                place["matched_tags"] = scored["matched_tags"]
-            if scored["reason"]:
-                reasons[scored["place_id"]] = scored["reason"]
-        selected = [by_id[place_id] for place_id in llm["place_ids"] if place_id in by_id]
         title = llm["title"]
         summary = llm["summary"]
-        reasons = {**llm["reasons"], **reasons}
+        reasons = llm["reasons"]
         provider = llm.get("provider", "llm")
         flow_order = [str(item) for item in llm.get("flow_order", []) if str(item).strip()]
     else:
@@ -1052,7 +1002,8 @@ def _build_recommended_course(profile: dict[str, Any], candidates: list[dict[str
             if key in tags_by_type:
                 tags_by_type[key].update(values)
         matched_tag_values.update(place["matched_tags"])
-        match_score += float(place.get("llm_match_score") if place.get("llm_match_score") is not None else place.get("score") or 0)
+        display_score = float(place.get("match_score") if place.get("match_score") is not None else float(place.get("score") or 0) * 100)
+        match_score += display_score
         reason = reasons.get(place["place_id"]) or ", ".join(place["matched_tags"][:3]) or "취향 태그와 위치 조건을 기준으로 선택했어요."
         points.append({
             "sequence_no": index,
@@ -1064,7 +1015,7 @@ def _build_recommended_course(profile: dict[str, Any], candidates: list[dict[str
             "close_time": place["close_time"],
             "reason": reason,
             "matched_tags": place["matched_tags"],
-            "match_score": round(float(place.get("llm_match_score") if place.get("llm_match_score") is not None else place.get("score") or 0), 2),
+            "match_score": round(display_score, 2),
         })
     distance_values = [p["distance_km"] for p in selected if p["distance_km"] is not None]
     now = datetime.now(timezone.utc)
@@ -1168,6 +1119,8 @@ def outing_recommendations(payload: RecommendationInput, user: dict = Depends(re
         raise HTTPException(403, "The recommendation must belong to the signed-in account.")
     profile = _load_user_preference(user["id"], payload.preference)
     profile["activity_weights"] = _load_weekly_activity_weights(user["id"], profile)
+    profile["survey_vector"] = profile["activity_weights"].get("survey_vector") or build_survey_vector(_profile_categories(profile))
+    profile["final_user_vector"] = profile["activity_weights"].get("final_user_vector") or profile["survey_vector"]
     candidates, available_tags = _load_candidate_places(profile, payload.user_lat, payload.user_lon)
     if not candidates:
         return {
