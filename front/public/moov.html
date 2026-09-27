@@ -838,11 +838,18 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
 .course-visual { position: relative; width: 100%; height: 176px; overflow: hidden; display: block; padding: 0; border: 0; background: #eee; }
 .course-visual img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .course-visual.no-image { display: grid; place-items: center; color: #888; }
+.best-course-badge { position: absolute; left: 12px; top: 12px; z-index: 3; padding: 6px 9px; border-radius: 7px; background: var(--green); color: white; font-size: .58rem; font-weight: 950; letter-spacing: .02em; box-shadow: 0 5px 14px rgba(31,130,76,.28); }
 .photo-detail-hint { position: absolute; right: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 5px; padding: 6px 9px; border-radius: 999px; background: rgba(24,23,37,.7); color: white; font-size: .6rem; font-weight: 900; backdrop-filter: blur(8px); }
 .photo-detail-hint svg { width: 14px; height: 14px; }
-.course-body { padding: 14px; }
+.course-body { position: relative; padding: 14px 76px 14px 14px; }
+.course-main { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; }
 .course-body h4 { margin: 5px 0 6px; font-size: .95rem; }
 .course-body p { margin: 0; color: var(--muted); font-size: .72rem; line-height: 1.48; }
+.match-badge { width: 52px; height: 52px; flex: 0 0 52px; display: grid; place-items: center; border: 4px solid #57bd7b; border-radius: 50%; background: white; color: var(--green-dark); text-align: center; font-weight: 950; line-height: .9; box-shadow: 0 4px 12px rgba(24,23,37,.08); }
+.match-badge strong { display: block; font-size: .84rem; }
+.match-badge span { display: block; margin-top: 2px; font-size: .43rem; letter-spacing: .02em; }
+.match-badge.best { border-color: var(--green); background: #f7fff9; }
+.course-body > .match-badge { position: absolute; right: 14px; top: 43px; }
 .course-stats { display: flex; gap: 12px; margin-top: 10px; color: #777; font-size: .64rem; }
 .course-stats span { display: inline-flex; align-items: center; gap: 4px; }
 .course-stats svg { width: 14px; height: 14px; }
@@ -919,12 +926,16 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
 .taste-ia-tabs .active small { color: var(--green-dark); }
 .taste-builder-status { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; border: 1px solid rgba(83,177,117,.22); border-radius: 13px; background: #f7fcf9; }
 .taste-place-grid { display: grid; gap: 10px; }
-.taste-place-card { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 11px; width: 100%; padding: 9px; border: 1px solid var(--line); border-radius: 14px; background: white; text-align: left; }
+.taste-place-card { position: relative; display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; align-items: center; gap: 11px; width: 100%; padding: 9px; border: 1px solid var(--line); border-radius: 14px; background: white; text-align: left; }
 .taste-place-card.selected { border-color: var(--green); background: var(--green-soft); }
 .taste-place-card img { width: 76px; height: 62px; border-radius: 10px; object-fit: cover; background: #eef1ef; }
 .taste-place-card strong, .taste-place-card small { display: block; min-width: 0; }
 .taste-place-card strong { font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .taste-place-card small { margin-top: 4px; color: var(--muted); font-size: .65rem; line-height: 1.35; }
+.taste-place-side { display: grid; justify-items: center; gap: 6px; }
+.taste-place-side .match-badge { width: 44px; height: 44px; border-width: 3px; }
+.taste-place-side .match-badge strong { font-size: .68rem; }
+.taste-place-side .match-badge span { font-size: .36rem; }
 .taste-place-order { width: 30px; height: 30px; border-radius: 999px; display: grid; place-items: center; background: #eef2ef; color: var(--muted); font-weight: 900; font-size: .72rem; }
 .taste-place-card.selected .taste-place-order { background: var(--green); color: white; }
 .selected-place-list { display: grid; gap: 8px; }
@@ -3624,16 +3635,52 @@ function renderCourseBrowse() {
   return `${renderOutingFilterBar(visible.length)}${state.outingMapOpen ? renderOutingMap(list) : ""}<div class="filter-chips course-sort" style="margin-top:10px">${sorts.map(([id, label]) => `<button class="${state.outingSort === id ? "selected" : ""}" data-action="course-sort" data-value="${id}">${label}</button>`).join("")}</div>${tasteFilters}${cards ? `<div class="stack">${cards}</div>` : emptyState("search", "검색 결과가 없어요", "조건을 직접 넓히거나 다른 취향 유형을 선택해 주세요.")}`;
 }
 
+function clampMatchPercent(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return null;
+  return Math.max(1, Math.min(100, Math.round(numeric)));
+}
+
+function renderMatchBadge(percent) {
+  if (percent == null) return "";
+  return `<span class="match-badge ${percent >= 90 ? "best" : ""}" aria-label="${percent}% 일치"><strong>${percent}%</strong><span>MATCH</span></span>`;
+}
+
+function courseMatchPercent(course) {
+  const pointScores = (course._dbPoints || []).map((point) => Number(point.match_score)).filter(Number.isFinite);
+  if (pointScores.length) return clampMatchPercent(pointScores.reduce((sum, value) => sum + value, 0) / pointScores.length);
+  if (Number.isFinite(Number(course._tagMatchScore)) && Number(course._tagMatchScore) > 0) {
+    const divisor = Number(course._tagMatchScore) > 100 ? Math.max(1, course.stops?.length || 1) : 1;
+    return clampMatchPercent(Number(course._tagMatchScore) / divisor);
+  }
+  return clampMatchPercent(MoovOutingData.score(course, state.recommendationPrefs, getCourseTags(course), outingDistanceContext()) * 100);
+}
+
+function placeMatchPercent(place) {
+  const tags = {
+    category: [place.category].filter(Boolean),
+    subcategory: [place.subCategory, ...(place.tags || [])].filter(Boolean),
+    mood: place.tags || [],
+    purpose: place.tags || [],
+    companion: [],
+    time: [],
+    price: null,
+  };
+  return clampMatchPercent(MoovOutingData.score({ id: place.id, name: place.name, stops: [place.name], duration_seconds: 3600 }, state.recommendationPrefs, tags, outingDistanceContext()) * 100);
+}
+
 function courseCard(course) {
   const savedCourse = state.savedCourseIds.has(course.id);
   const likedCourse = state.likedCourseIds.has(course.id);
   const distanceLabel = courseDistanceLabel(course);
+  const matchPercent = courseMatchPercent(course);
+  const bestBadge = matchPercent >= 90 ? `<span class="best-course-badge">BEST COURSE</span>` : "";
 const cover = getCourseCoverImage(course);
 const visual = cover
-  ? `<button class="course-visual" data-action="course-detail" data-value="${escapeHtml(course.id)}" aria-label="${escapeHtml(course.name)} 상세 보기"><img src="${escapeHtml(cover)}" alt="${escapeHtml(course.name)} 코스 이미지" loading="lazy" /><span class="photo-detail-hint">${icon("search")} 상세 보기</span></button>`
-  : `<button class="course-visual no-image" data-action="course-detail" data-value="${escapeHtml(course.id)}">${icon("pin")}<span class="small" data-i18n-en="View course map">코스 지도 보기</span></button>`;
+  ? `<button class="course-visual" data-action="course-detail" data-value="${escapeHtml(course.id)}" aria-label="${escapeHtml(course.name)} 상세 보기">${bestBadge}<img src="${escapeHtml(cover)}" alt="${escapeHtml(course.name)} 코스 이미지" loading="lazy" /><span class="photo-detail-hint">${icon("search")} 상세 보기</span></button>`
+  : `<button class="course-visual no-image" data-action="course-detail" data-value="${escapeHtml(course.id)}">${bestBadge}${icon("pin")}<span class="small" data-i18n-en="View course map">코스 지도 보기</span></button>`;
   const stopPhotos = course.stopDetails ? `<div class="registered-stops">${course.stopDetails.map((stop,index) => {const photo=stop.photo || getMatchedCoursePlaceImage(stop.name);return `<div>${photo ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(stop.name)} 사진" loading="lazy" />` : `<span class="no-stop-photo">${icon("image")}</span>`}<small>${escapeHtml(stop.type)} · ${escapeHtml(stop.name)}</small></div>`;}).join("")}</div>` : "";
-  return `<article class="course-card">${visual}<div class="course-body"><div class="row"><span class="small muted">${escapeHtml(course.author || state.username)}님의 코스 · ${distanceLabel}</span><span class="badge orange">${escapeHtml(course.time || `${course.stops.length}곳`)}</span></div><h4>${escapeHtml(course.name)}</h4><p>${escapeHtml(course.desc)}</p>${stopPhotos}${coursePhotoCredits(course)}<div class="course-stats"><span>${icon("heart")} 최근 7일 ${state.popularityAt ? (state.popularityCounts[course.id] || 0) : "—"}</span><span>${icon("compass")} ${course.stops.length}개 장소</span><span>가격·시간 확인 필요</span></div><div class="course-actions"><button class="${likedCourse ? "liked" : ""}" data-action="course-like" data-value="${escapeHtml(course.id)}">${icon("heart")}<span>${likedCourse ? "좋아요 취소" : "좋아요"}</span></button><button class="${savedCourse ? "saved" : ""}" data-action="course-save" data-value="${escapeHtml(course.id)}">${icon("bookmark")}<span>${savedCourse ? "저장됨" : "관심 저장"}</span></button><button class="follow" data-action="follow-course" data-value="${escapeHtml(course.id)}">${icon("pin")}<span data-i18n-skip>${courseFollowLabel()}</span></button></div></div></article>`;
+  return `<article class="course-card">${visual}<div class="course-body"><div class="row"><span class="small muted">${escapeHtml(course.author || state.username)}님의 코스 · ${distanceLabel}</span><span class="badge orange">${escapeHtml(course.time || `${course.stops.length}곳`)}</span></div>${renderMatchBadge(matchPercent)}<h4>${escapeHtml(course.name)}</h4><p>${escapeHtml(course.desc)}</p>${stopPhotos}${coursePhotoCredits(course)}<div class="course-stats"><span>${icon("heart")} 최근 7일 ${state.popularityAt ? (state.popularityCounts[course.id] || 0) : "—"}</span><span>${icon("compass")} ${course.stops.length}개 장소</span><span>가격·시간 확인 필요</span></div><div class="course-actions"><button class="${likedCourse ? "liked" : ""}" data-action="course-like" data-value="${escapeHtml(course.id)}">${icon("heart")}<span>${likedCourse ? "좋아요 취소" : "좋아요"}</span></button><button class="${savedCourse ? "saved" : ""}" data-action="course-save" data-value="${escapeHtml(course.id)}">${icon("bookmark")}<span>${savedCourse ? "저장됨" : "관심 저장"}</span></button><button class="follow" data-action="follow-course" data-value="${escapeHtml(course.id)}">${icon("pin")}<span data-i18n-skip>${courseFollowLabel()}</span></button></div></div></article>`;
 }
 
 function courseDistanceLabel(course) {
@@ -3999,7 +4046,8 @@ function renderTastePlaceFinder() {
     const selectedClass = selectedIndex >= 0 ? "selected" : "";
     const disabled = selectedIndex < 0 && selected.length >= state.tasteCourseSteps;
     const distance = Number.isFinite(place.distanceKm) ? `${Math.round(place.distanceKm * 10) / 10}km` : "거리 미확인";
-    return `<button class="taste-place-card ${selectedClass}" data-action="toggle-taste-place" data-value="${escapeHtml(place.id)}" ${disabled ? "disabled" : ""}><img src="${escapeHtml(placeImage(place))}" alt="${escapeHtml(place.name)} 이미지" loading="lazy" /><span><strong>${escapeHtml(place.name)}</strong><small>${escapeHtml(place.category)}${place.subCategory ? ` · ${escapeHtml(place.subCategory)}` : ""}</small><small>${distance}${place.tags?.length ? ` · ${escapeHtml(place.tags.slice(0, 3).join(", "))}` : ""}</small></span><span class="taste-place-order">${selectedIndex >= 0 ? selectedIndex + 1 : "+"}</span></button>`;
+    const matchPercent = placeMatchPercent(place);
+    return `<button class="taste-place-card ${selectedClass}" data-action="toggle-taste-place" data-value="${escapeHtml(place.id)}" ${disabled ? "disabled" : ""}>${matchPercent >= 90 ? `<span class="best-course-badge">BEST COURSE</span>` : ""}<img src="${escapeHtml(placeImage(place))}" alt="${escapeHtml(place.name)} 이미지" loading="lazy" /><span><strong>${escapeHtml(place.name)}</strong><small>${escapeHtml(place.category)}${place.subCategory ? ` · ${escapeHtml(place.subCategory)}` : ""}</small><small>${distance}${place.tags?.length ? ` · ${escapeHtml(place.tags.slice(0, 3).join(", "))}` : ""}</small></span><span class="taste-place-side">${renderMatchBadge(matchPercent)}<span class="taste-place-order">${selectedIndex >= 0 ? selectedIndex + 1 : "+"}</span></span></button>`;
   }).join("");
   return `<section class="section-lead compact"><h3>코스 취향 찾기</h3><p>취향에 맞는 장소를 필터링하고 원하는 단계 수만큼 골라 코스로 저장하거나 바로 이용해요.</p></section>${renderOutingFilterBar(list.length, { courseSteps: true })}${status}${selectedList}<section class="card padded stack"><div class="row"><strong>장소 목록</strong><span class="small muted">${dbPlaces.length ? `${list.length}개 표시` : "불러오는 중"}</span></div>${cards ? `<div class="taste-place-grid">${cards}</div>` : emptyState("search", "조건에 맞는 장소가 없어요", "필터를 줄이거나 검색어를 바꿔 주세요.")}</section>`;
 }

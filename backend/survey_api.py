@@ -10,9 +10,11 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 if __package__:
     from .db import ensure_online_schema, get_conn, release_conn
     from .google_auth_api import require_auth_user
+    from .preference_scoring import build_survey_vector
 else:
     from db import ensure_online_schema, get_conn, release_conn
     from google_auth_api import require_auth_user
+    from preference_scoring import build_survey_vector
 
 router = APIRouter(prefix='/api/outing/survey', tags=['survey'])
 SNAPSHOT_DIR = Path(__file__).with_name('account_snapshots')
@@ -165,6 +167,7 @@ def _store_survey(user_id: str, body: SurveyInput):
         'excluded_tags': profile['excludedTags'],
         'answers': answers,
     }
+    survey_vector = build_survey_vector(answers['categories'])
     conn = get_conn()
     try:
         with conn.cursor() as cur:
@@ -180,12 +183,13 @@ def _store_survey(user_id: str, body: SurveyInput):
             updated = cur.fetchone()[0]
             cur.execute("DELETE FROM moov.user_preference WHERE user_id=%s AND upper(coalesce(source,''))='SURVEY'", (user_id,))
             for tag_type, tag_name in _preference_rows(profile):
+                score = survey_vector.get(tag_name, 0.0) if tag_type == 'CATEGORY' else 1.0
                 cur.execute('''INSERT INTO moov.user_preference
                     (user_id, tag_type, tag_name, score, source, score_source, updated_at)
-                    VALUES (%s, %s, %s, 1.0, 'SURVEY', 'SURVEY', now())
+                    VALUES (%s, %s, %s, %s, 'SURVEY', 'SURVEY', now())
                     ON CONFLICT (user_id, tag_type, tag_name) DO UPDATE SET
                         score=EXCLUDED.score, source='SURVEY', score_source='SURVEY', updated_at=now()''',
-                    (user_id, tag_type, tag_name))
+                    (user_id, tag_type, tag_name, score))
         conn.commit()
     except Exception:
         conn.rollback()
