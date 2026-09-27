@@ -8,70 +8,6 @@
   const deviceLocations = new WeakMap();
   const english = () => document.documentElement.lang === 'en';
   const message = (ko, en) => english() ? en : ko;
-  let areaLabelsPromise;
-  function englishLabels(map, element) {
-    if (!map.getProjection || !map.getBounds) return null;
-    const maps = sdk(), tracked = new Map();
-    let areas = [], labels = [], disposed = false;
-    function clear() { labels.forEach(label => label.setMap(null)); labels = []; }
-    function refresh() {
-      clear();
-      if (disposed || !english()) return;
-      const zoom = map.getZoom(), projection = map.getProjection();
-      const width = element.clientWidth, height = element.clientHeight;
-      if (!projection || !width || !height) return;
-      const candidates = [];
-      for (const [marker, record] of tracked) {
-        if (marker.getMap() !== map) continue;
-        const position = marker.getPosition();
-        const name = (window.MoovI18n?.place(record.name) ?? record.name).replace(/^Current location\s*·\s*/, '');
-        if (/^(Car|Taxi|Vehicle|Pin|Start|End)$/i.test(name)) continue;
-        candidates.push({name,position,route:true});
-      }
-      candidates.push(...areas.filter(p => p.kind === 'district' ? zoom >= 9 && zoom <= 14 : zoom >= 14)
-        .map(p => ({...p,position:latLng(p)})));
-      const occupied = [], names = new Set();
-      for (const p of candidates) {
-        if (!p.name || /[가-힣]/.test(p.name) || names.has(p.name)) continue;
-        const offset = projection.fromCoordToOffset(p.position);
-        if (offset.x < 0 || offset.y < 0 || offset.x > width || offset.y > height) continue;
-        const w = Math.min(p.route?150:180, Math.max(55, p.name.length * 6.6+12)), h = p.route && p.name.length > 22 ? 32 : 18;
-        const x = Math.max(6, Math.min(width-w-6, offset.x-w/2));
-        const y = Math.max(6, Math.min(height-h-32, offset.y+(p.route?24:-h/2)));
-        const box = {x,y,w,h};
-        if (occupied.some(b=>x < b.x+b.w+8 && x+w+8 > b.x && y < b.y+b.h+5 && y+h+5 > b.y)) continue;
-        occupied.push(box); names.add(p.name);
-        const content = document.createElement('div');
-        content.className = 'moov-english-map-label';
-        content.textContent = p.name;
-        content.style.cssText = `width:${w}px;pointer-events:none;text-align:center;white-space:${p.route?'normal':'nowrap'};overflow-wrap:anywhere;font:600 ${p.route?11:12}px/16px Arial,sans-serif;color:${p.route?'#205c40':'#596a78'};text-shadow:0 1px 2px white,0 -1px 2px white,1px 0 2px white,-1px 0 2px white;`;
-        labels.push(new maps.Marker({map,position:p.position,clickable:false,zIndex:5,
-          icon:{content,size:new maps.Size(w,h),anchor:new maps.Point(offset.x-x,offset.y-y)}}));
-        if (labels.length >= 16) break;
-      }
-    }
-    const idle = maps.Event.addListener(map,'idle',refresh);
-    areaLabelsPromise ??= fetch('/map-en-labels.json').then(r=>r.ok?r.json():{labels:[]}).then(data=>data.labels||[]).catch(()=>[]);
-    areaLabelsPromise.then(data=>{if(!disposed){areas=data;refresh();}});
-    return {refresh,track(marker,name) {
-      if (tracked.has(marker)) return;
-      const listeners = [maps.Event.addListener(marker,'position_changed',refresh),maps.Event.addListener(marker,'map_changed',()=>{
-        if (marker.getMap() !== map) {
-          tracked.get(marker)?.listeners.forEach(maps.Event.removeListener);
-          tracked.delete(marker); refresh();
-        }
-      })];
-      tracked.set(marker,{name,listeners}); refresh();
-    },dispose() {
-      disposed=true;clear();maps.Event.removeListener(idle);
-      tracked.forEach(record=>record.listeners.forEach(maps.Event.removeListener));tracked.clear();
-    }};
-  }
-  function labelMarker(map, marker, name) {
-    // Moving vehicle icons already have a label; track geographic places only.
-    if (!name || /^(차량|택시|선택|출발|도착|Car|Taxi|Vehicle|Pin|Start|End)$/i.test(name)) return;
-    (map.native||map).moovEnglishLabels?.track(marker,name);
-  }
   // Current-location demo fixture shared by taxi, rental and pickup selection.
   // Uses the existing Seongsu Station exit 3 test coordinates, never device GPS.
   function getCurrentPosition(success) {
@@ -192,18 +128,14 @@
       mapDataControlOptions: { position: maps.Position.BOTTOM_LEFT },
       scaleControl: true,
     });
-    map.moovEnglishLabels = englishLabels(map,element);
     // Change only the base tiles; retain route overlays, viewport and selection.
     const updateLanguage = () => {
       if (!maps.NaverStyleMapTypeOptions || !map.mapTypes) return;
       const id = english() ? 'moov-en' : 'moov-ko';
       map.mapTypes.set(id, maps.NaverStyleMapTypeOptions.getNormalMap({
-        // NAVER's len tiles contain Korean too. English mode uses geometry
-        // only, with our area and route labels placed above it.
-        overlayType: english() ? 'bg.ol' : 'bg.ol.ts.lko',
+        overlayType: 'bg.ol.ts.' + (english() ? 'len' : 'lko'),
       }));
       map.setMapTypeId(id);
-      map.moovEnglishLabels?.refresh();
     };
     updateLanguage();
     window.addEventListener?.('moov:language-change', updateLanguage);
@@ -214,7 +146,6 @@
     deviceLocations.set(map, location);
     const destroy = map.destroy.bind(map);
     map.destroy = () => {
-      map.moovEnglishLabels?.dispose();
       window.removeEventListener?.('moov:language-change', updateLanguage);
       location.removed = true;
       location.token++;
@@ -370,12 +301,6 @@
       icon: { content: element, size: new maps.Size(...size), anchor: new maps.Point(...anchor) },
     });
     const wrapper = layer(native);
-    const addTo = wrapper.addTo;
-    wrapper.addTo = view => {
-      addTo(view);
-      labelMarker(view,native,value?.name || options.title || '');
-      return wrapper;
-    };
     let tooltip = null;
     let keyboardHandler = null;
     const elementListeners = [];
@@ -564,5 +489,5 @@
     const lat=a[0]+(b[0]-a[0])*t,lng=a[1]+(b[1]-a[1])*t;
     return {lat,lng,remainingMeters:Math.max(0,route.distanceMeters*(1-progress)),remainingPoints:[[lat,lng],...route.points.slice(i)]};
   }
-  window.MoovNaverMap = { ready, createMap, createView, fitRoute, locateOnMap, getCurrentPosition, marker, labelMarker, polyline, circle, geocode, searchPlaces, matchPlace, describePoint, reverseGeocode, directions, directionsForStops, approachRoute, pickupApproach, approachPosition };
+  window.MoovNaverMap = { ready, createMap, createView, fitRoute, locateOnMap, getCurrentPosition, marker, polyline, circle, geocode, searchPlaces, matchPlace, describePoint, reverseGeocode, directions, directionsForStops, approachRoute, pickupApproach, approachPosition };
 })();

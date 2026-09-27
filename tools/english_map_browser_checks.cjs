@@ -34,10 +34,9 @@ module.exports = async ({openPage,base,mapReady,passed}) => {
   assert.equal(await client.evaluate('state.rentalUX.route.provider'),'naver',JSON.stringify(await client.evaluate('state.rentalUX.route')));
   await client.wait(mapReady('#home-booking-map'),'English rental map');
   assert.equal(await client.evaluate('rentalMapView.native.getMapTypeId()'),'moov-en');
-  await client.wait("[...document.querySelectorAll('#home-booking-map img')].some(i=>i.complete&&i.naturalWidth>0&&new URL(i.src).searchParams.get('mt')==='bg.ol')",'NAVER geometry-only tiles loaded');
-  await client.wait("document.querySelectorAll('.moov-english-map-label').length>0",'English area labels');
+  await client.wait("[...document.querySelectorAll('#home-booking-map img')].some(i=>i.complete&&i.naturalWidth>0&&new URL(i.src).searchParams.get('mt')==='bg.ol.ts.len')",'NAVER detailed English tiles loaded');
   assert.doesNotMatch(await client.evaluate("[...document.querySelectorAll('.moov-english-map-label')].map(el=>el.textContent).join(' ')"),/[가-힣]/);
-  await client.screenshot('english-only-rental-map');
+  await client.screenshot('detailed-english-rental-map');
   assert.deepEqual(await client.evaluate("[...document.querySelectorAll('.route-location-form input')].map(i=>i.value).filter(v=>/[가-힣]/.test(v))"),[]);
   const route = await client.evaluate('state.rentalUX.route.stops.map(p=>[p.name,p.lat,p.lng])');
   await client.evaluate("document.querySelector('.route-location-form[data-route-index=\"1\"] input').click()");
@@ -63,8 +62,7 @@ module.exports = async ({openPage,base,mapReady,passed}) => {
   await taxi.evaluate(`enterAuthenticatedScreen();state.tripActive=false;state.homeMode='taxi';state.homeStep='setup';state.activeTab='home';state.selectedCourse=null;state.taxiSearchPlaces={};state.taxiPickupCoords={lat:37.5446,lng:127.0557};state.pickupLocation='현재 위치 · 서울 성수동';state.routeStops=[state.pickupLocation,'한가람미술관','예술의전당 오페라하우스','서래마을'];render()`);
   await taxi.wait('!!currentTaxiQuote()','English taxi route and quote',45000);
   await taxi.wait(mapReady('#taxi-naver-map'),'English taxi map');
-  await taxi.wait("document.querySelectorAll('#taxi-naver-map .moov-english-map-label').length>0",'English taxi route labels');
-  await taxi.screenshot('english-only-taxi-map');
+  await taxi.screenshot('detailed-english-taxi-map');
   assert.equal(await taxi.evaluate('taxiMapSession.map.getMapTypeId()'),'moov-en');
   assert.deepEqual(await taxi.evaluate("[...document.querySelectorAll('.route-location-form input')].map(i=>i.value)"),['Current location · Seongsu-dong, Seoul','Hangaram Art Museum','Seoul Arts Center Opera House','Seorae Village']);
   await taxi.evaluate("document.querySelector('.route-location-form[data-route-index=\"2\"] input').click()");
@@ -72,5 +70,14 @@ module.exports = async ({openPage,base,mapReady,passed}) => {
   assert.doesNotMatch(await taxi.evaluate("document.querySelector('.route-location-form[data-route-index=\"2\"] .route-location-results').textContent"),/[가-힣]/);
   await taxi.screenshot('english-taxi-opera-route-addresses');
   await checkAddressInteraction(taxi,'taxi');
+  // Inspect detailed street/business tiles at both neighborhood and building zoom.
+  for (const [page,map,selector,kind] of [[client,'rentalMapView.native','#home-booking-map','rental'],[taxi,'taxiMapSession.map','#taxi-naver-map','taxi']]) {
+    for (const zoom of [16,18]) {
+      await page.evaluate(`${map}.updateBy(new naver.maps.LatLng(37.5446,127.0557),${zoom});document.querySelector('${selector}').scrollIntoView({block:'center',behavior:'instant'})`);
+      await page.wait(`[...document.querySelectorAll('${selector} img')].some(i=>i.complete&&i.naturalWidth>0&&new URL(i.src).searchParams.get('mt')==='bg.ol.ts.len'&&new URL(i.src).pathname.includes('/${zoom}/'))`,'detailed '+kind+' tiles at zoom '+zoom);
+      await page.screenshot('detailed-'+kind+'-zoom-'+zoom);
+    }
+  }
+  passed('Detailed English NAVER tiles retained at neighborhood and building zoom levels');
   passed('English taxi course names, real multi-stop route and address lookup without retyping');
 };

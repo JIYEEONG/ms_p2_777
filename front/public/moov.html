@@ -2748,7 +2748,6 @@ function taxiMapMarker(session, point, kind, label, draggable = false) {
   const displayLabel = kind === "start" ? taxiMapText("출발", "Start") : kind === "goal" ? taxiMapText("도착", "End") : kind === "waypoint" ? label.split(" · ")[0] : label;
   const marker = new maps.Marker({ map: session.map, draggable, position: new maps.LatLng(point.lat, point.lng), title: label, icon: { content: `<div class="taxi-map-marker ${kind}" style="transform:translateX(-50%)" data-i18n-skip>${kind === "vehicle" ? icon("car") : ""}<span>${escapeHtml(displayLabel)}</span></div>`, anchor: new maps.Point(0, kind === "waypoint" ? 22 : kind === "goal" ? 17 : 18) } });
   session.markers.push(marker);
-  if (kind !== 'vehicle') window.MoovNaverMap.labelMarker(session.map, marker, point.name || label);
   return marker;
 }
 
