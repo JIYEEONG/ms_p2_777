@@ -9,10 +9,21 @@ function parse(code, offset = 0) {
   const tree = acorn.parse(code, { ecmaVersion: "latest", sourceType: "module" });
   function walk(node) {
     if (!node || typeof node !== "object") return;
+    if (node.type === "CallExpression" && /^(text|taxiText|taxiMapText)$/.test(node.callee.name || "")) {
+      const [ko, en] = node.arguments;
+      if (typeof ko?.value === "string" && typeof en?.value === "string") {
+        results.push({ text: ko.value, english: en.value, position: offset + node.start });
+      }
+    }
     if (node.type === "Literal" && typeof node.value === "string") {
       results.push({ text: node.value, position: offset + node.start });
-    } else if (node.type === "TemplateElement") {
-      results.push({ text: node.value.raw, position: offset + node.start });
+    } else if (node.type === "TemplateLiteral") {
+      const text = node.quasis.map((q, index) => {
+        const expression = node.expressions[index];
+        const icon = expression?.type === "CallExpression" && expression.callee.name === "icon";
+        return (q.value.cooked ?? q.value.raw) + (expression && !icon ? "${value}" : "");
+      }).join("");
+      results.push({ text, position: offset + node.start });
     }
     for (const [key, value] of Object.entries(node)) {
       if (key === "start" || key === "end" || key === "loc") continue;

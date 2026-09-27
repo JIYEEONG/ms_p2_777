@@ -25,6 +25,26 @@ HTML_ATTRIBUTE = re.compile(r'(?:alt|title|placeholder|aria-label)=["\']([^"\']+
 TAG = re.compile(r"<[^>]+>")
 INTERPOLATION = re.compile(r"\$\{[^{}]*\}")
 WHITESPACE = re.compile(r"\s+")
+INLINE_TRANSLATIONS = {}
+
+
+def reviewed_translations():
+    path = ROOT / "translations" / "current-en.tsv"
+    return dict(line.split("\t", 1) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()) if path.exists() else {}
+
+
+def translate_template(source, translations):
+    for korean, english in sorted(translations.items(), key=lambda item: -len(item[0].replace("{value}", ""))):
+        if "{value}" not in korean:
+            continue
+        pattern = "(.+?)".join(re.escape(part) for part in korean.split("{value}"))
+        match = re.fullmatch(pattern, source)
+        if match:
+            values = iter(translations.get(value, value) for value in match.groups())
+            result = re.sub(r"\{value\}", lambda _: next(values), english)
+            if not HANGUL.search(result):
+                return result
+    return ""
 
 
 def fragments(raw):
@@ -34,7 +54,7 @@ def fragments(raw):
         candidate = TAG.sub(" ", candidate)
         candidate = INTERPOLATION.sub("{value}", candidate)
         candidate = WHITESPACE.sub(" ", candidate).strip().strip('"\'<> ')
-        if candidate.startswith(("./", "/", "assets/")):
+        if candidate.startswith(("./", "../", "/", "assets/", "File:")):
             continue
         if HANGUL.search(candidate) and len(candidate) <= 350:
             yield candidate
@@ -54,6 +74,8 @@ class VisibleHTML(HTMLParser):
         for name, value in attrs:
             if name in {"alt", "title", "placeholder", "aria-label"} and value:
                 self.entries.append((value, self.getpos()[0]))
+        if tag == "meta" and dict(attrs).get("name") == "description":
+            self.entries.append((dict(attrs).get("content", ""), self.getpos()[0]))
 
     def handle_endtag(self, tag):
         if tag in {"script", "style"}:
@@ -66,9 +88,12 @@ class VisibleHTML(HTMLParser):
 
 def inventory():
     entries = defaultdict(set)
-    paths = [FRONT / "app.js", FRONT / "index.html", FRONT / "public" / "moov.html"]
-    paths += sorted((FRONT / "public" / "space-content").rglob("*.js"))
-    paths += sorted((FRONT / "public" / "space-content").rglob("*.html"))
+    # Follow the current public entry points; the old front/app.js was removed.
+    paths = sorted(path for path in (FRONT / "public").rglob("*")
+                   if path.suffix in {".js", ".html"}
+                   and "moov-home" not in path.parts
+                   and not path.name.startswith("i18n")
+                   and "assets" not in path.parts)
     for path in paths:
         source = path.read_text(encoding="utf-8")
         relative = path.relative_to(ROOT).as_posix()
@@ -76,6 +101,8 @@ def inventory():
             ["node", str(ROOT / "tools" / "extract_js_strings.cjs"), str(path)], cwd=ROOT
         ))
         for entry in js_entries:
+            if entry.get("english"):
+                INLINE_TRANSLATIONS[WHITESPACE.sub(" ", entry["text"]).strip()] = entry["english"]
             line = source.count("\n", 0, entry["position"]) + 1
             for phrase in fragments(entry["text"]):
                 entries[phrase].add(f"{relative}:{line}")
@@ -91,6 +118,11 @@ def inventory():
 def main():
     entries = inventory()
     translations = json.loads((ROOT / "translations" / "wellness-en.json").read_text(encoding="utf-8"))
+    translations.update(INLINE_TRANSLATIONS)
+    translations.update(json.loads((ROOT / "translations" / "site-overrides.json").read_text(encoding="utf-8")))
+    translations.update(reviewed_translations())
+    translations.update(json.loads((ROOT / "translations" / "runtime-en.json").read_text(encoding="utf-8")))
+    reviewed = reviewed_translations()
     existing = {}
     if OUTPUT.exists():
         workbook = load_workbook(OUTPUT)
@@ -111,6 +143,9 @@ def main():
     sheet.append(["ID", "한국어", "English", "2차변경", "검수 상태", "원본 위치"])
     for index, (korean, locations) in enumerate(sorted(entries.items()), start=1):
         english, second_pass, status = existing.get(korean, (translations.get(korean, ""), "", "검수 필요" if korean in translations else "번역 필요"))
+        english = translations.get(korean) or english or translate_template(korean, translations)
+        if korean in reviewed:
+            status = "최신 원문 번역"
         sheet.append([f"MOOV-{index:04d}", korean, english, second_pass, status, "\n".join(sorted(locations))])
     sheet.freeze_panes = "C2"
     sheet.auto_filter.ref = sheet.dimensions

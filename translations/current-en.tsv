@@ -1,0 +1,1192 @@
++ 빠른 입고	+ Quick restock
++ 새 상품 등록	+ Add product
++{value}원	+₩{value}
+. 재고 확정 후 수량이 1개 이상이면 창고 이동을 시작할 수 있습니다.	. After confirming stock, you can start a warehouse transfer if at least one item is available.
+0대 표시	0 vehicles shown
+10,000명	10,000 members
+10개 상품 표시	10 products shown
+10초 갱신	Refresh every 10 sec
+11시간 2분	11 hr 2 min
+12분 전	12 min ago
+12시간 42분	12 hr 42 min
+16:40 렌트	16:40 Rental
+18:20 렌트	18:20 Rental
+18시간 11분	18 hr 11 min
+1건	1 record
+1시간 전	1 hr ago
+2026.08.22 · 렌트 4시간 20분 · 잠실 호수 나들이	2026.08.22 · Rental 4 hr 20 min · Jamsil lake trip
+2026.09.07 · 택시 2시간 5분 · 북촌 산책 코스	2026.09.07 · Taxi 2 hr 5 min · Bukchon walk
+2026.09.10 · 렌트 3시간 12분 · 성수 → 한강 야경	2026.09.10 · Rental 3 hr 12 min · Seongsu → Hangang night views
+21℃ · 창문 10% · 수면 저조도	21°C · Windows 10% · Dim sleep lighting
+21℃ · 창문 35% · 콘텐츠 몰입등	21°C · Windows 35% · Immersive lighting
+21시간 44분	21 hr 44 min
+22℃ · 창문 0% · 따뜻한 독서등	22°C · Windows 0% · Warm reading light
+22℃ · 창문 60% · 민트 앰비언트	22°C · Windows 60% · Mint ambient lighting
+23℃ · 창문 50% · 민트 앰비언트	23°C · Windows 50% · Mint ambient lighting
+24시간 변화	24-hour change
+2종	2 types
+30일	30 days
+35% 미만 포함	Include below 35%
+3~24시간	3–24 hr
+3~24시간 자유롭게 이용해요.	Choose any duration from 3 to 24 hours.
+3일 전	3 days ago
+4시간	4 hr
+4시간 8분	4 hr 8 min
+4종	4 types
+500KB 이하의 .py 파일을 선택하세요.	Choose a .py file no larger than 500 KB.
+5분 이내 STT·LLM·TTS·장치 수신 필요	STT, LLM, TTS and device updates required within 5 min
+62일 전	62 days ago
+6시간 6분	6 hr 6 min
+6시간 9분	6 hr 9 min
+7일	7 days
+7일 예상	7-day forecast
+7일 예상 3~5개	7-day forecast: 3–5 items
+7일 예상 6개 이상	7-day forecast: 6+ items
+7일 예상 재고 = 현재 재고 + 예상 변화(최소 0개).	7-day forecast stock = current stock + expected change (minimum 0).
+8시간 31분	8 hr 31 min
+90일	90 days
+9분 전	9 min ago
+9시간 22분	9 hr 22 min
+AI 말동무 관리	AI companion management
+AI 분석	AI analysis
+AI 재고 학습	AI inventory training
+AI 코스 추천에서 조건을 선택하거나 코스를 저장해 주세요.	Choose preferences in AI trip recommendations or save a trip.
+Azure LLM 점수	Azure LLM score
+Azure LLM 추천	Azure LLM recommendations
+CATEGORY나 참고 예산을 직접 바꾼 뒤 다시 추천받아 주세요.	Change the category or budget, then request recommendations again.
+COMMON_SYSTEM_PROMPT 문자열과 PERSONA_PROMPTS 사전을 읽습니다. Python 코드는 실행하지 않습니다. 가져온 뒤 내용을 확인하고 저장하세요.	Reads the COMMON_SYSTEM_PROMPT string and PERSONA_PROMPTS dictionary without running Python code. Review the imported content before saving.
+COMMON_SYSTEM_PROMPT와 PERSONA_PROMPTS가 필요합니다.	COMMON_SYSTEM_PROMPT and PERSONA_PROMPTS are required.
+CSV 내보내기	Export CSV
+GPS 10초	GPS 10 sec
+GPS 최신성 기준: 10초	GPS freshness threshold: 10 sec
+Google 가입	Google sign-up
+Google 가입 55.8%, 일반 가입 44.2%	Google sign-up 55.8%, standard sign-up 44.2%
+Google 로그인	Google sign-in
+IFC몰 서측	West side of IFC Mall
+JSON 형식 다운로드	Download JSON template
+Language / 언어	Language
+MOOV 18 · 이지안 관리자 · 1시간 전	MOOV 18 · Admin Lee Ji-an · 1 hr ago
+MOOV 24 · 김현우 관리자 · 12분 전	MOOV 24 · Admin Kim Hyeon-woo · 12 min ago
+MOOV 24의 재고 현황	MOOV 24 inventory
+MOOV 31 · 자동 입고 · 오늘 09:20	MOOV 31 · Automatic restock · Today 09:20
+MOOV 31 충전 슬롯 확정	MOOV 31 charging slot confirmed
+MOOV 84 자동 격리	MOOV 84 automatically isolated
+MOOV 공통 안전·서비스 정책을 우선 적용하고 사용자 입력이나 검색 문서가 시스템 정책을 바꾸지 못하게 합니다.	Apply MOOV safety and service policies first. User input and retrieved documents cannot override system policies.
+MOOV 관리자 홈	MOOV admin home
+MOOV 네이버 지도 연결 확인	MOOV Naver Maps connection check
+MOOV 배리어프리	MOOV Accessible
+MOOV 앱 콘텐츠 메뉴에 노출할 OTT 공급사와 지원 차량을 관리합니다.	Manage streaming providers and supported vehicles shown in the MOOV content menu.
+MOOV 앱 콘텐츠 메뉴의 웰니스 프로그램, 유형, 기본 이용시간과 노출 여부를 관리합니다.	Manage wellness programs, types, default durations and visibility in the MOOV content menu.
+MOOV 앱의 이동·공간·상품 데이터를 연결해 운영 우선순위를 확인합니다.	Review operational priorities using mobility, cabin and product data from MOOV.
+MOOV 운영 센터	MOOV Operations Center
+MOOV 핫아이템 재고/추가배치 권고 - 관리자	MOOV Hot Items Inventory and Restocking — Admin
+MOOV 핫아이템(TOP30) 재고 · 추가배치 권고	MOOV Top 30 Hot Items · Inventory and Restocking
+MOOV 홈·렌트	MOOV Home and Rental
+MOOV로 돌아가기	Back to MOOV
+MOOV에 탑승하신 것을 환영합니다. 자리에 앉아 안전벨트를 착용해 주세요. 즐거운 여행 되시기 바랍니다.	Welcome aboard MOOV. Please take a seat and fasten your seat belt. Enjoy your trip.
+OTT 콘텐츠	Streaming content
+PERSONA_PROMPTS 사전 형식을 확인하세요.	Check the PERSONA_PROMPTS dictionary format.
+Postgres places/place_tags와 설문 취향을 먼저 매칭하고, 로컬 오픈소스 LLM이 가능하면 코스명과 이유를 다듬습니다.	Matches survey preferences with Postgres places/place_tags, then refines trip names and explanations using a local open-source LLM when available.
+Private · 내 테마 {value}	Private · My theme {value}
+Python 프롬프트 가져오기	Import Python prompts
+TTS 오류:	TTS error:
+TTS 요청 실패	TTS request failed
+Thema 콘텐츠	Theme content
+V1.3 기준: 공통 정책 + 선택한 페르소나 하나를 결합합니다. 최근 대화 6개, 기억 저장은 동의 시에만 허용합니다. 위기 시 현재 페르소나를 유지하고 필수 안전 이벤트를 요청합니다.	V1.3: combines shared policies with one selected persona. Uses the last 6 messages and stores memories only with consent. In a crisis, keeps the current persona and requests required safety events.
+Wellness 프로그램	Wellness programs
+Wipe 검증	Data wipe verification
+[refresh-vending] hot-products API 호출 실패, 저장된 추천값으로 대체합니다:	[refresh-vending] Hot-products API failed; using saved recommendations:
+backend/.env의 NAVER_MAP_CLIENT_ID와 NAVER_MAP_CLIENT_SECRET을 입력한 뒤 백엔드를 재시작하세요.	Set NAVER_MAP_CLIENT_ID and NAVER_MAP_CLIENT_SECRET in backend/.env, then restart the backend.
+demand_report 알고리즘이 계산한 현재 진열수량과 raw/학습 기반 추가배치 권고 수량을 Postgres(taxi_products 스키마)에서 실시간으로 조회합니다.	Loads current shelf quantities and raw or learned restocking recommendations calculated by demand_report from Postgres (taxi_products schema).
+moov 앱 콘텐츠 메뉴의 OTT, Wellness, Thema와 차량 환경 기본값을 통합 관리합니다.	Manage streaming, wellness, themes and default cabin settings for MOOV.
+place_tags 기반 추천	Recommendations based on place tags
+places에서 골라 코스 구성	Build a trip from places
+raw 추가권고	Raw restocking recommendation
+security_ok=false · 신규 배차와 렌트 차단	security_ok=false · New dispatches and rentals blocked
+system.py 내보내기	Export system.py
+vehicle_current 계약 기준	Based on the vehicle_current contract
+{value} km · 약 {value}분 (자동차 이동, 체류 시간 제외)	{value} km · About {value} min (driving only, excluding visits)
+{value} {value} 자세	{value} {value} pose
+{value} {value} 전환	{value} Toggle {value}
+{value} {value} 카드를 삭제합니다.	Delete the {value} {value} card.
+{value} {value}{value}개	{value} {value}{value} items
+{value} {value}개를 장바구니에 담았어요.	Added {value} × {value} to your cart.
+{value} {value}시간 렌트	{value} {value} hr rental
+{value} · 3면 미리보기	{value} · Three-screen preview
+{value} · API {value}/4 · 앱 계정 {value}	{value} · API {value}/4 · App accounts {value}
+{value} · MOOV 운영 센터	{value} · MOOV Operations Center
+{value} · SOC {value}% · 적재 {value}개	{value} · SOC {value}% · {value} items loaded
+{value} · {value} · {value} 로그인	{value} · {value} · {value} sign-in
+{value} · {value}개 메시지	{value} · {value} messages
+{value} · {value}개 소리	{value} · {value} sounds
+{value} · {value}원	{value} · ₩{value}
+{value} · {value}원 · {value}	{value} · ₩{value} · {value}
+{value} · 신승준 관리자 · 방금 전{value}	{value} · Admin Shin Seung-jun · Just now{value}
+{value} · 잔존 0건	{value} · 0 records remaining
+{value} · 재고 {value}개 · 방금 전	{value} · {value} in stock · Just now
+{value} · 적재 {value}개	{value} · {value} items loaded
+{value} → {value} → {value} 코스	{value} → {value} → {value} trip
+{value} → {value} 코스	{value} → {value} trip
+{value} 계정 로그인 화면	{value} account sign-in screen
+{value} 계정에 로그인했습니다.	Signed in to {value}.
+{value} 계정에서 로그아웃했습니다.	Signed out of {value}.
+{value} 계정으로 콘텐츠를 불러올 수 있습니다.	Load content using your {value} account.
+{value} 기준으로 지표를 갱신했습니다.	Updated metrics for {value}.
+{value} 담기	Add {value}
+{value} 대표 이미지	{value} cover image
+{value} 대표 자세	{value} key pose
+{value} 로그인	{value} sign-in
+{value} 머무름	Stay {value}
+{value} 메뉴는 전체 MOOV 앱에서 이용할 수 있습니다.	The {value} menu is available in the full MOOV app.
+{value} 모드 미리보기	{value} mode preview
+{value} 모드 적용 중	{value} mode active
+{value} 모드로 변경했어요.	Switched to {value} mode.
+{value} 사진	{value} photo
+{value} 삭제	Delete {value}
+{value} 상세 보기	View {value} details
+{value} 상세 화면은 서비스 정책과 연결되는 프로토타입 영역입니다.	The {value} details screen is a prototype linked to service policies.
+{value} 상태를 {value}으로 변경했습니다.	Changed {value} status to {value}.
+{value} 상품 사진	{value} product photo
+{value} 선택	Select {value}
+{value} 설정	{value} settings
+{value} 시작	Start {value}
+{value} 연결	Connect {value}
+{value} 완료	{value} complete
+{value} 이동 기록에서 만든 코스입니다.	A trip created from your {value} journey history.
+{value} 이미지	{value} image
+{value} 이용을 종료할까요?	End your {value} session?
+{value} 장소 이미지	{value} location image
+{value} 재고를 확정했습니다. 재고가 있으면 창고 이동을 시작할 수 있습니다.	Confirmed {value} stock. Start a warehouse transfer if stock is available.
+{value} 전환	Toggle {value}
+{value} 제거	Remove {value}
+{value} 지도	{value} map
+{value} 차량 연결을 {value}	{value} Vehicle connection {value}
+{value} 창고 이동 시작	{value} Start warehouse transfer
+{value} 창문	{value} window
+{value} 캐릭터	{value} character
+{value} 코스	{value} trip
+{value} 코스 이미지	{value} trip image
+{value} 코스를 시작하는 장소입니다. {value} 동안 주변을 둘러본 뒤 다음 장소로 이동해 보세요.	Start your {value} trip here. Explore for {value}, then continue to the next stop.
+{value} 테마 {value} 화면	{value} theme · {value} screen
+{value} 테마 이미지	{value} theme image
+{value} 테마가 저장되었습니다.	Saved the {value} theme.
+{value} 테마가 적용된 차량 3면 창문	Vehicle windows with the {value} theme on all three screens
+{value} 파일을 만들었습니다.	Created {value}.
+{value} 확대 이미지	{value} enlarged image
+{value}% 일치	{value}% match
+{value}, 3초 후 시작합니다.	{value}, starting in 3 seconds.
+{value}/{value}개 취향 태그 일치 · 데모 기준	{value}/{value} taste tags matched · Demo data
+{value}/{value}곳 표시 · 나머지 장소는 위치를 다시 확인해 주세요.	Showing {value}/{value} places · Check the locations of the remaining places.
+{value}: 위 지도에서 원하는 위치를 누르세요.	{value}: tap a location on the map above.
+{value}{value}개	{value}{value} items
+{value}℃ · 창문 {value}% · {value}	{value}°C · Windows {value}% · {value}
+{value}℃ · 창문 투명도 {value}% · {value}	{value}°C · Window transparency {value}% · {value}
+{value}개	{value} items
+{value}개 결과 · {value}	{value} results · {value}
+{value}개 상품 표시	{value} products shown
+{value}개 주소를 찾았습니다.	Found {value} addresses.
+{value}개 코스	{value} trips
+{value}개 코스에 위치 미확인 장소가 있어요. 좌표가 있는 장소만 지도에 표시합니다.	{value} trips contain places with unconfirmed locations. Only places with coordinates are shown on the map.
+{value}개 표시	{value} shown
+{value}개 품목	{value} items
+{value}건	{value} records
+{value}건 구매	{value} purchases
+{value}건 저장 · 중복 {value}건 제외	{value} saved · {value} duplicates skipped
+{value}곳	{value} stops
+{value}곳 · 나의 코스	{value} stops · My trip
+{value}곳 · 코스 취향 찾기	{value} stops · Find your trip preferences
+{value}곳을 선택하면 코스로 저장할 수 있어요.	Choose {value} places to save a trip.
+{value}는 택시 배차 후보 조건을 모두 통과했습니다.	{value} meets all taxi dispatch requirements.
+{value}는 하드 필터 실패로 배차 후보에서 제외됩니다.	{value} is excluded from dispatch because a required filter failed.
+{value}님	{value}
+{value}님의 선택을 바탕으로 검수 전 데모 코스를 비교합니다.	Compare unreviewed demo trips based on {value}'s choices.
+{value}님의 코스 · {value}	{value}'s trip · {value}
+{value}단계	Step {value}
+{value}단계 코스	{value}-stop trip
+{value}단계 코스는 {value}곳까지만 선택할 수 있어요.	A {value}-stop trip allows up to {value} places.
+{value}대	{value} vehicles
+{value}대 선택	{value} vehicles selected
+{value}대 표시	{value} vehicles shown
+{value}로 들르는 장소입니다. 약 {value} 동안 여유 있게 방문하고 다음 경로를 이어가세요.	Your {value} stop. Spend about {value} here before continuing your route.
+{value}분	{value} min
+{value}분 {value}초	{value} min {value} sec
+{value}분 전	{value} min ago
+{value}순위 · 매칭 {value}%	Rank {value} · {value}% match
+{value}시간	{value} hr
+{value}에 {value}개 남아 있어 바로 구매할 수 있습니다.	{value} has {value} left, available to buy now.
+{value}에 사용할 코스를 골라 주세요.	Choose a trip for {value}.
+{value}원	₩{value}
+{value}원 이하	Up to ₩{value}
+{value}원/시간	₩{value}/hr
+{value}으로 차량을 배정합니다. 예상 요금은 {value}원이며 선택 옵션 {value}개가 적용됩니다.	Assigning a vehicle to {value}. Estimated fare: ₩{value}, with {value} selected options.
+{value}을 장바구니에서 삭제했어요.	Removed {value} from your cart.
+{value}의 현재 위치를 창고 이동 중으로 변경했습니다.	Changed the location of {value} to warehouse transfer in progress.
+{value}종	{value} types
+{value}초	{value} sec
+{value}초 남음	{value} sec left
+{value}초 전	{value} sec ago
+{value}초 후 시작합니다	Starts in {value} sec
+{value}초씩	{value} sec each
+{value}회 · {value}	{value} times · {value}
+· GPS 지연	· GPS delayed
+· {value}/{value} 선택	· {value}/{value} selected
+· 구성요소 진단	· Component diagnostics
+· 이용 중	· In use
+· 흐름 {value}	· Flow {value}
+“{value}”의 정확한 위치를 선택해 주세요. 해당 입력칸에서 장소를 검색할 수 있어요.	Choose the exact location of “{value}”. Search for the place in its input field.
+↪ 로그인 화면으로	↪ Back to sign-in
+ⓘ 재고 상태 기준 Tip	ⓘ Inventory status guide
+가게 이름 검색이 아닌 주소 검색입니다. 검색 결과에서 한글·영문 주소를 확인하세요.	Search by address, rather than store name. Results include Korean and English addresses.
+가격·시간 확인 필요	Check prices and opening hours
+가벼운 도심 이동	Easy city travel
+가입 방식	Sign-up method
+가입 유형	Sign-up type
+가입 채널 구성	Sign-up channels
+가입·결제·이용 이력 조회	View sign-up, payment and usage history
+가입방식	Sign-up method
+가입일	Sign-up date
+각 장소의 운영시간과 가격을 확인한 뒤 이동해 주세요.	Check each place's opening hours and prices before you go.
+감성 탐험형	Atmosphere explorer
+강남	Gangnam
+강남역 7번 출구	Gangnam Station Exit 7
+개방감 있는 창문 설정으로 이동을 즐겨보세요.	Enjoy your ride with a clear view through the windows.
+개인정보·서비스 이용 동의	Privacy and service consent
+거래 ID	Transaction ID
+거래 JSON 형식 다운로드	Download transaction JSON template
+거래 발생일 기준 5년 보관 · 원본 거래는 수정·삭제하지 않습니다. 환불은 별도 거래 ID로 등록합니다.	Retained for 5 years from the transaction date. Original transactions cannot be edited or deleted. Refunds use a separate transaction ID.
+거래 상세	Transaction details
+거래 파일	Transaction file
+거리 근접	Distance proximity
+거리 미확인	Distance unavailable
+거리순	By distance
+건축	Architecture
+검색 결과가 없습니다.	No results found.
+검색 결과가 없습니다. 도로명 또는 지번 주소를 입력하세요.	No results found. Enter a street or lot-number address.
+검색 결과에서 차량을 선택하세요.	Select a vehicle from the results.
+격리	Isolated
+격리·정비·GPS 지연	Isolated · Maintenance · GPS delayed
+격리·정비·오프라인	Isolated · Maintenance · Offline
+견과류	Nuts
+견과류 소형 오리지널	Nuts · Small · Original
+결제 데이터 등록	Import payment data
+결제 시스템에서 내보낸 거래 JSON을 등록합니다. 기존 회원 예시 합계와 실제 거래 원장은 별도로 관리합니다. 결제 카드번호·인증정보·대화 원문은 업로드하지 마세요.	Import transaction JSON exported from the payment system. Sample member totals and actual transaction records are managed separately. Do not upload card numbers, credentials or chat transcripts.
+결제 완료	Payment complete
+결제·거래 내역	Payments and transactions
+결제금액	Amount paid
+결제일	Payment date
+결합 결과 보기	View combined result
+경도	Longitude
+경복궁	Gyeongbokgung Palace
+경유지 {value}	Stop {value}
+경유지 {value} 장소명을 입력하세요	Enter the name of stop {value}
+경유지는 최대 5개까지 선택할 수 있어요.	You can select up to 5 stops.
+경회루	Gyeonghoeru Pavilion
+계란	Eggs
+계정·보안	Account and security
+고깃집	Barbecue restaurant
+공간 상품	Cabin products
+공간 상품과 모빌리티 매출 비교	Compare product and mobility revenue
+공급사	Provider
+공원·산책	Parks and walks
+공유된 데모 코스를 둘러보고 마음에 드는 코스를 관심코스로 저장해 보세요.	Browse shared demo trips and save your favorites.
+공통 + 선택 페르소나 결합	Combine shared policy and selected persona
+공통 시스템	Shared system
+공통 정책과 네 페르소나, 차량별 이용 현황을 관리합니다.	Manage shared policies, four personas and usage by vehicle.
+관리	Manage
+관리 {value}	Manage {value}
+관리 메모	Admin notes
+관리자 API 연결을 확인하세요.	Check the admin API connection.
+관리자 로그인 필요	Admin sign-in required
+관리자 메뉴	Admin menu
+관리자 변경과 자동 상태 전이 이력	Admin changes and automatic status transitions
+관리자 상태 저장 실패 ({value})	Failed to save admin state ({value})
+관리자 페이지	Admin dashboard
+관리자 페이지 새 창으로 열기	Open admin dashboard in a new window
+관심 상품 저장	Save favorite product
+관심 저장한 코스를 한곳에서 확인하세요.	Find all your saved trips in one place.
+관심코스	Saved trips
+광고 {value} 보기	View promotion {value}
+광고 자동 넘김 시작	Start promotion slideshow
+광고 자동 넘김 일시정지	Pause promotion slideshow
+광화문	Gwanghwamun
+구로	Guro
+구성요소	Components
+권장 수량	Recommended quantity
+권장 입고	Recommended restock
+권한 없음	Access denied
+근정전	Geunjeongjeon Hall
+금액	Amount
+기간	Period
+기기의 위치 권한을 허용하면 현재 위치를 출발지로 사용할 수 있어요. 성수동 기준 위치를 사용하거나 지도에서 직접 출발지를 선택할 수 있습니다.	Allow location access to use your current location as the starting point. You can also use the default Seongsu location or choose a starting point on the map.
+기록 저장 공간이 부족해요. 불필요한 사진을 정리해 주세요.	Storage is full. Remove unneeded photos to save your history.
+기본 위치 지도를 표시합니다. 네이버 지도 연결을 확인하세요.	Showing the default location. Check the Naver Maps connection.
+기본 음량 {value}%	Default volume {value}%
+기본 이용시간(분)	Default duration (min)
+기본 제공 테마	Included themes
+기본 추천	Default recommendations
+기본 테마 추가	Add default theme
+기본 테마와 추가 테마를 편집합니다. 대표 이미지, 배경음, 핵심 소리, 선택 소리를 함께 저장할 수 있습니다.	Edit default and custom themes. Save cover images, ambience, core sounds and optional sounds together.
+기본값 복원	Restore defaults
+기존 차량 환경 설정 · 브라우저에 저장	Current cabin settings · Saved in this browser
+기존 회원 요약은 예시 데이터입니다. 실제 결제·거래 내역은 회원 상세에서 별도로 조회합니다. 거래 발생일 기준 5년 보관 정책을 적용합니다.	Member summaries use sample data. View actual payments and transactions in member details. Records are retained for 5 years from the transaction date.
+기타	Other
+기타 피하고 싶은 항목	Other things to avoid
+김민서	Kim Min-seo
+김치컵라면 미니 순한맛	Kimchi cup noodles · Mini · Mild
+깊은 우주 앰비언스	Deep space ambience
+나를 알아가는 시간	Get to know yourself
+나와 취향이 비슷한 코스	Trips matching your taste
+나중에 할게요 · 지금까지 선택한 내용 저장	Do this later · Save my choices
+남은 시간 {value}	Time left: {value}
+내 위치 {value}km	{value} km from me
+내 취향 {value}% 일치	{value}% taste match
+내 취향으로 코스 추천받기	Get trips matching your taste
+내 코스를 등록했어요. 관심코스에서 확인해 주세요.	Your trip is saved. Find it in Saved trips.
+내 테마 {value}	My theme {value}
+넓은 출입구와 경사로, 여유로운 이동 공간으로 휠체어 이용자도 편안하게 승하차할 수 있는 차량입니다.	Wide doors, a ramp and ample space make boarding and exiting comfortable for wheelchair users.
+넓은 출입구와 경사로로 휠체어 이용자도 편안하게 승하차할 수 있는 차량입니다.	Wide doors and a ramp make boarding and exiting comfortable for wheelchair users.
+넓은 출입구와 휠체어 승하차 지원	Wide doors and wheelchair boarding support
+네 페르소나 프롬프트가 모두 필요합니다.	Prompts for all four personas are required.
+네이버 지도	Naver Maps
+네이버 지도 SDK를 불러오지 못했습니다. 인터넷 연결을 확인하세요.	Could not load the Naver Maps SDK. Check your internet connection.
+네이버 지도 SDK를 초기화하지 못했습니다.	Could not initialize the Naver Maps SDK.
+네이버 지도 · 차량 위치 10초 주기 · 교통 데이터 10분 주기	Naver Maps · Vehicle location every 10 sec · Traffic every 10 min
+네이버 지도 연결 확인	Check Naver Maps connection
+네이버 지도 인증 실패: Client ID, Dynamic Map 선택, Web 서비스 URL 등록을 확인하세요.	Naver Maps authentication failed. Check the Client ID, Dynamic Map selection and registered web service URL.
+네트워크 오류로 등록하지 못했습니다.	Could not register due to a network error.
+높은 바람	High winds
+누적 결제	Total payments
+누적 이동	Total distance
+누적결제	Total payments
+누적이동	Total distance
+다시 불러오기	Reload
+다음 예약	Next booking
+단정하게	Clean
+달걀	Eggs
+닭고기	Chicken
+대	vehicles
+대경라이프	Daegyeong Life
+대시보드	Dashboard
+대형 / 장애인	Large / Accessible
+대형 · 고단백	Large · High protein
+대형 · 순한맛	Large · Mild
+대형 · 스위트	Large · Sweet
+대형 · 오리지널	Large · Original
+대형 · 제로	Large · Zero
+대형 · 진한맛	Large · Rich
+대화 시간	Conversation time
+데모 비용 기준입니다. 실제 가격·이동비·영업시간 충족을 보장하지 않습니다.	Based on demo costs. Actual prices, travel costs and opening hours may differ.
+데이터를 불러오지 못했어요: {value}	Could not load data: {value}
+도로명·지번 주소	Street or lot-number address
+도시의 틈에서	Between city moments
+동대문디자인플라자	Dongdaemun Design Plaza
+동의 상태	Consent status
+동의상태	Consent status
+돼지고기	Pork
+뒷배경 이미지	Background image
+등록 결제수단	Saved payment methods
+등록된 소리가 없습니다.	No sounds added.
+등록된 파일 없음 · 최대 20MB	No file selected · Up to 20 MB
+디뮤지엄	D Museum
+딥 스페이스	Deep Space
+딸기바 중형 스위트	Strawberry ice bar · Medium · Sweet
+땅콩	Peanuts
+뚝섬역 3번 출구	Ttukseom Station Exit 3
+라운드	Rounded
+라운지	Lounge
+랜드마크	Landmarks
+렌트 RR-1204	Rental RR-1204
+렌트 가용	Available for rental
+렌트 예약 보호	Rental booking protected
+렌트 운행	Rental in progress
+렌트 이용	Rental usage
+렌트 출발 위치를 먼저 확인해 주세요.	Confirm the rental starting point first.
+렌트기간	Rental period
+렌트이용	Rental usage
+로그인 후 코스명을 추천받을 수 있어요.	Sign in to get suggested trip names.
+로그인 후에는 저장된 설문 취향으로 DB 추천을 받을 수 있어요.	Sign in for database recommendations based on your saved preferences.
+로컬 모드	Local mode
+루나 서버에 문제가 있어요. 잠시 후 다시 시도해 주세요.	Luna's server is having trouble. Please try again shortly.
+루나 응답 실패:	Luna response failed:
+루나가 생각 중...	Luna is thinking...
+링고는 사용자의 언어로 응답하고 승인된 코스 데이터만 사용합니다.	Lingo responds in the user's language and uses only approved trip data.
+마지막 갱신 {value}	Last updated {value}
+마지막 갱신 계산 중	Calculating last update
+마지막 적재: {value} · {value}개 품목	Last loaded: {value} · {value} items
+말동무 관리	Companion management
+말동무 상태	Companion status
+맑은 하늘과 개방감	Clear skies and open views
+맛집 집중형	Food enthusiast
+매출 추이	Revenue trend
+메뉴 닫기	Close menu
+메뉴 열기	Open menu
+명	people
+모드별 공간을 미리 보고 온도, 창문과 조명을 설정하세요.	Preview each cabin mode and adjust temperature, windows and lighting.
+모든 구성요소 최근 정상 수신	All components recently received successfully
+모빌리티	Mobility
+모서리 스타일	Corner style
+목적지로 선택	Set as destination
+목표 SOC 70% · 예상 완료 16:05	Target SOC 70% · Estimated completion 16:05
+몬스터에너지	Monster Energy
+무브는 이동 중 짧고 자연스러운 일상 대화를 제공합니다.	Moov offers short, natural conversations during your ride.
+무인차 관리	Driverless vehicle management
+무인차 보기	View vehicles
+무인차 운영 현황	Driverless vehicle operations
+무인차·공간 상품·회원 관리 데이터 연결	Connected vehicle, product and member management data
+문화역서울284	Culture Station Seoul 284
+미니 · 순한맛	Mini · Mild
+미니 · 오리지널	Mini · Original
+미니 샌드위치 +10개	Mini sandwiches +10
+미술	Art
+미연동	Not connected
+미확정	Unconfirmed
+밀	Wheat
+밀가루	Wheat flour
+바닐라바 대형 오리지널	Vanilla ice bar · Large · Original
+박도윤	Park Do-yun
+반포한강공원 달빛광장	Banpo Hangang Park Moonlight Square
+발생시각	Event time
+발생일	Event date
+방금 전(오프라인 추천값)	Just now (offline recommendations)
+배경 색상	Background color
+배경 이미지 미등록	No background image
+배경음	Ambience
+배리어프리	Accessible
+배차 가능	Available for dispatch
+배차 가능 0 · 확인 필요 0	Available 0 · Needs review 0
+배차 가능 0대	0 vehicles available
+배차 가능 {value} · 운행/이동 {value} · 확인 필요 {value}	Available {value} · Driving/moving {value} · Needs review {value}
+배차 가능 {value}대	{value} vehicles available
+배차 상태	Dispatch status
+배차 판정	Dispatch eligibility
+배치 차량	Assigned vehicle
+백엔드 저장	Save to backend
+백엔드(FastAPI)가 실행 중인지, /api/hot-products가 프록시되는지 확인하세요.	Check that the FastAPI backend is running and /api/hot-products is proxied.
+버터	Butter
+보관 기한	Retention period
+보안 검증	Security verification
+보안 삭제	Secure deletion
+보안상태	Security status
+보조 색상	Secondary color
+보충 불필요	No restock needed
+볶음면 소형 제로	Stir-fried noodles · Small · Zero
+볶음면 중형 제로	Stir-fried noodles · Medium · Zero
+부드럽게	Soft
+북부	North
+북촌	Bukchon
+북촌·서촌	Bukchon and Seochon
+분류	Category
+불고기버거 대형 진한맛	Bulgogi burger · Large · Rich
+불고기삼각김밥 소형 스위트	Bulgogi rice triangle · Small · Sweet
+불러오는 중	Loading
+불러오는 중...	Loading...
+브라우저와 기기의 위치 권한을 허용한 뒤 다시 눌러 주세요.	Allow location access in your browser and device, then try again.
+블루보틀 성수	Blue Bottle Seongsu
+비빔밥 대형 순한맛	Bibimbap · Large · Mild
+비타민음료 대형 제로	Vitamin drink · Large · Zero
+비활성	Inactive
+빠른 재고 관리	Quick inventory management
+사람들의 코스를 발견해 보세요	Discover shared trips
+사용	Use
+사용 가능한 SKU입니다.	This SKU is available.
+사용 활성화	Enable
+사용량 CSV	Usage CSV
+사용자의 언어로 주변 관광정보 안내	Local travel guidance in the user's language
+사진을 눌러 {value}	Tap the photo to {value}
+삭제 검증 완료 · {value}	Deletion verified · {value}
+삭제 확인	Confirm deletion
+삼겹살	Pork belly
+삼성동	Samseong-dong
+삼청동	Samcheong-dong
+상세	Details
+상암	Sangam
+상태	Status
+상태 새로고침	Refresh status
+상태 수집 데이터 없음	No status data collected
+상품 0종 · 입고 필요 0종	0 products · 0 need restocking
+상품 {value}	Product {value}
+상품 {value}종 · 입고 필요 {value}종 · 창고 이동 {value}건	{value} products · {value} need restocking · {value} warehouse transfers
+상품 등록	Add product
+상품 등록, 차량별 재고, 실시간 위치와 창고 이동을 한 화면에서 관리합니다.	Manage products, vehicle inventory, live locations and warehouse transfers in one place.
+상품 분류	Product category
+상품 이미지	Product image
+상품·재고 상세 확인 →	Product and inventory details →
+상품·택시·렌트 결제 비중	Payment share: products, taxi and rental
+상품·택시·렌트 합계	Products, taxi and rental total
+상품과 입고 기능을 하나의 재고 운영 흐름으로 통합했습니다.	Products and restocking are combined into one inventory workflow.
+상품구매	Product purchases
+상품명	Product name
+상품명 또는 SKU 검색	Search product name or SKU
+상품별 수요 예측	Demand forecast by product
+상품을 저장하지 못했습니다.	Could not save the product.
+새 OTT	New streaming service
+새 공간 상품 등록	Add cabin product
+새 공간 상품을 등록했습니다.	Cabin product added.
+새 관심코스 있음	New saved trip
+새 소리	New sound
+새 웰니스	New wellness program
+새 차량번호를 입력하세요.	Enter a new vehicle number.
+새로고침	Refresh
+새로고침 완료	Refresh complete
+새로고침 후 다시 시도하세요.	Refresh and try again.
+새로고침 후 예상	Forecast after refresh
+새우	Shrimp
+샌드아이스크림 소형 고단백	Ice cream sandwich · Small · High protein
+생선	Fish
+생성 중...	Generating...
+서버 설정 · 차량 적용은 말동무 서버 연동 후 사용	Server settings · Vehicle integration requires the companion server
+서버 응답 오류	Server response error
+서버 응답 오류: {value}	Server response error: {value}
+서버 응답에 일치하는 상품이 없어요.	No matching product in the server response.
+서버에 연결하지 못해 저장된 추천값으로 새로고침했어요.	Could not reach the server. Refreshed using saved recommendations.
+서버에 연결할 수 없어요. 네트워크 상태를 확인해 주세요.	Could not connect to the server. Check your network connection.
+서버에 저장된 콘텐츠 설정	Content settings saved on the server
+서버에 저장했습니다.	Saved to the server.
+서버에서 학습 기반 추천 재고를 받아왔어요.	Loaded learned inventory recommendations from the server.
+서비스명	Service name
+서울 무인차 실시간 위치 지도	Live driverless vehicle map of Seoul
+서울 성수동	Seongsu-dong, Seoul
+서울 운영 권역	Seoul service area
+서울숲 동문	Seoul Forest East Gate
+서촌	Seochon
+석촌	Seokchon
+선택 없음	None selected
+선택 테마 편집	Edit selected theme
+선택 테마를 기본값으로 복원했습니다.	Restored the selected theme to its defaults.
+선택한 위치의 주소를 찾고 있습니다…	Finding the address of the selected location…
+선택한 장소	Selected places
+선택한 장소를 렌트 경로로 연결했어요.	Added the selected places to your rental route.
+선택한 장소의 운영시간과 이동 동선을 확인한 뒤 이용해 주세요.	Check opening hours and the route for your selected places before you go.
+선택한 조건과 저장·좋아요 기록을 데모 코스 태그와 비교합니다. 실제 다른 이용자와의 유사도는 아닙니다.	Compares your choices, saved trips and likes with demo trip tags. This does not measure similarity to other users.
+선택한 조건에 맞춰 데모 코스를 비교해요.	Compare demo trips based on your choices.
+선택한 지역이 포함된 코스는 추천에서 제외해요. 앞에서 선택한 선호 지역은 목록에서 제외했어요.	Trips in these areas will be excluded. Your preferred areas are not shown in this list.
+선택한 테마를 목록에서 제거합니다. 저장하면 반영됩니다.	Remove the selected theme from the list. Save to apply.
+선호 공간 테마	Preferred cabin theme
+선호 지역을 고르지 않았어요. 지역을 선택하거나 특별히 없어요로 넘어갈 수 있어요.	No preferred area selected. Choose an area or select No preference to continue.
+선호 지역의 코스를 먼저 추천해요. 다른 지역도 추천될 수 있어요.	Trips in your preferred areas come first. We may also suggest other areas.
+선호 테마	Preferred theme
+선호테마	Preferred theme
+설명	Description
+설문 취향과 선택 조건을 코스 태그와 비교합니다. 실제 장소 운영시간·가격·동선은 확인이 필요해요.	Compares your survey preferences and choices with trip tags. Check actual opening hours, prices and routes.
+설문 취향과 장소 태그를 바탕으로 추천한 코스입니다.	A trip recommended using your survey preferences and place tags.
+설정 JSON 내보내기	Export settings as JSON
+설정 버전	Settings version
+설정 없음	No settings
+설정 저장	Save settings
+설정을 불러오는 중이에요. 잠시 후 다시 열어 주세요.	Settings are loading. Please open this again shortly.
+설정을 불러오는 중입니다.	Loading settings.
+성수 권역 재배치 완료	Seongsu area repositioning complete
+성수동 운영 구역	Seongsu-dong service area
+성수역 · 테스트 위치	Seongsu Station · Test location
+성수역 북측 승하차존	Seongsu Station north pickup zone
+성수역을 테스트용 내 위치로 표시했어요.	Using Seongsu Station as your test location.
+세부 취향을 고르지 않았어요. 원하는 항목을 선택하거나 다음으로 넘어가세요.	No detailed preferences selected. Choose some or continue.
+소고기	Beef
+소리 이름	Sound name
+소형 (경차)	Small (compact)
+소형 · 고단백	Small · High protein
+소형 · 라이트	Small · Light
+소형 · 순한맛	Small · Mild
+소형 · 스위트	Small · Sweet
+소형 · 오리지널	Small · Original
+소형 · 제로	Small · Zero
+소형 · 진한맛	Small · Rich
+속도	Speed
+손소독 물티슈 +16개	Sanitizing wipes +16
+수량 확정과 창고 이동 이력	Stock confirmations and warehouse transfers
+수면 사운드	Sleep sounds
+수신 없음	No update received
+수정 취소	Cancel edits
+수집된 사용량·상태 데이터가 없습니다.	No usage or status data collected.
+수집된 상태 보고를 새로 불러왔습니다. 차량에 진단 명령을 전송하지는 않습니다.	Refreshed collected status reports. No diagnostic command is sent to vehicles.
+순위	Rank
+숲속 바람	Forest breeze
+숲의 빛과 소리	Forest light and sounds
+스테이크	Steak
+시간 여유	Time available
+시스템 프롬프트	System prompt
+신승준 관리자	Admin Shin Seung-jun
+신승준 관리자 · {value} · expected_version 검증 완료	Admin Shin Seung-jun · {value} · expected_version verified
+신촌	Sinchon
+실사 조정	Physical count adjustment
+실시간 차량 위치	Live vehicle location
+실제 결제 내역을 조회하고 있습니다.	Loading actual payment records.
+실제 앱에서는 콘텐츠와 기기 설정에 따라 다르게 보일 수 있습니다.	The app may look different depending on content and device settings.
+실제 차량 서버에서 내보낸 JSON 파일을 가져옵니다. 동일 ID는 중복 집계하지 않습니다.	Import JSON exported from the vehicle server. Duplicate IDs are counted only once.
+실차 API 연동 전 합성·연동 예시 데이터 · 위치·속도·SOC·상태·보안·관측시각	Synthetic and integration sample data before vehicle API connection · Location, speed, SOC, status, security and observation time
+실차 GPS	Vehicle GPS
+실차 GPS 예시	Vehicle GPS sample
+실패	Failed
+아몬드	Almonds
+아직 import된 데이터가 없습니다. backend/scripts/import_hot_products_csv.py를 먼저 실행하세요.	No data imported yet. Run backend/scripts/import_hot_products_csv.py first.
+아직 활동을 고르지 않았어요. 좋아하는 활동을 선택하거나 다음으로 넘어가세요.	No activities selected. Choose your favorites or continue.
+안전·보안 실패 차량은 관리자가 수동으로 배차하거나 운영 복귀시킬 수 없습니다. 모든 조치는 {value} 기준으로 기록됩니다.	Admins cannot manually dispatch or restore vehicles that fail safety or security checks. All actions are recorded based on {value}.
+안전·보안·SOC 통과	Safety, security and SOC checks passed
+안전·보안·SOC·GPS 조건을 먼저 확인하세요.	Check safety, security, SOC and GPS requirements first.
+안정	Healthy
+안정 재고	Healthy stock
+안정: 6개 이상	Healthy: 6+ items
+알려진 장소명과 태그에 해당 항목이 있는 코스를 제외해요. 실제 식재료는 방문 전 매장에 확인해 주세요.	Excludes trips whose known place names or tags match these items. Check ingredients with the venue before visiting.
+알림	Notifications
+알림 문구	Notification text
+압구정	Apgujeong
+앞에서 고른 활동의 세부 취향이에요. 여러 개를 고르거나 넘어가도 괜찮아요.	Refine the activities you chose earlier. Select several options or skip this step.
+액티비티형	Adventure seeker
+앱 기능과 데이터 현황을 확인하세요.	View app features and data status.
+앱 노출	Show in app
+앱 노출 상품 10종 기준	Based on 10 products shown in the app
+앱 미리보기	App preview
+앱 접속	App access
+앱 회원 데이터 기준	Based on app member data
+앱·무인차 데이터 연결됨	App and vehicle data connected
+앱의 공간 테마와 동일한 환경값을 조정합니다.	Adjust the same cabin settings used by the app's themes.
+약 {value}분	About {value} min
+양식	Western food
+어떤 활동을 좋아하세요?	What activities do you enjoy?
+여유로운 라운지형 공간	A spacious lounge-style cabin
+여유롭게	Relaxed
+여의나루역 2번 출구	Yeouinaru Station Exit 2
+여의도	Yeouido
+여의도 환승센터	Yeouido Transfer Center
+역사	History
+역삼	Yeoksam
+연결 관리 메뉴	Connected management menus
+연결 매출 합계	Combined revenue
+연결 설정을 확인하고 있습니다…	Checking connection settings…
+연결 확인 중	Checking connection
+연결을 확인하세요.	Check your connection.
+연남	Yeonnam
+연동 계산	Integrated calculation
+연동 데이터 가져오기	Import integration data
+연동 예시 3 · 합성	3 integration examples · Synthetic
+연동된 이용 기록이 없습니다.	No linked usage history.
+영문 주소가 제공되지 않았습니다.	No English address provided.
+영업시간	Opening hours
+예: 고수, 매운 음식	e.g. cilantro, spicy food
+예: 등산, 놀이공원	e.g. hiking, amusement parks
+예: 무라벨 생수	e.g. label-free bottled water
+예산 · {value}원 이하	Budget · Up to ₩{value}
+예상 변화	Expected change
+예상 소요시간 {value}분	Estimated duration: {value} min
+오늘	Today
+오늘의 운영 현황	Today's operations
+오늘의 취향 필터	Today's preference filters
+오래된 위치는 흐리게 표시	Outdated locations appear faded
+오프라인	Offline
+완료	Complete
+왕십리	Wangsimni
+외 {value}건	and {value} more
+외부 시선 차단 · 창문 투명도 0%	Privacy enabled · Window transparency 0%
+요금정책_요약	Fare_policy_summary
+용산	Yongsan
+우선 입고 검토	Priority restocking review
+우유	Milk
+운영 복귀	Return to service
+운행 TR-9482	Trip TR-9482
+운행·이동 중	Driving or moving
+원문 설계서에 남아 있는 ‘작성 예정’ 표기와 달리 본문에는 네 페르소나 정책이 있어 모두 불러왔습니다.	Imported all four persona policies found in the document, despite its remaining draft labels.
+월곡	Wolgok
+위도	Latitude
+위치 새로고침	Refresh location
+위험	Critical
+위험 재고	Critical stock
+위험: 0~2개	Critical: 0–2 items
+윈도	Window
+유제품	Dairy
+유형	Type
+유효한 위치를 선택해 주세요.	Choose a valid location.
+육류	Meat
+음성 ID · 음성 공급자 등록값	Voice ID · Registered with the voice provider
+음성 ID는 말동무 서버가 지원하는 값을 입력합니다. 아래 재생은 등록한 음성 샘플입니다.	Enter a voice ID supported by the companion server. Playback below uses the uploaded voice sample.
+음성 샘플	Voice sample
+음성 안내 {value}	Voice guidance {value}
+음성 인식 서버에 연결할 수 없어요.	Could not connect to the speech recognition server.
+음성 재생에 실패했어요. 텍스트로 확인해 주세요.	Could not play audio. Please read the text instead.
+음원 파일	Audio file
+이 브라우저에서 생성한 운영 조치가 없습니다.	No operational actions recorded in this browser.
+이 위치에서 확인되는 주소가 없습니다.	No address found at this location.
+이 회원의 실제 거래 데이터가 아직 없습니다.	No actual transactions for this member yet.
+이동 중	Moving
+이동 중에도 나만의 공간을 경험합니다.	Enjoy your own space on the move.
+이미 등록된 SKU입니다.	This SKU is already registered.
+이미지 업로드 실패	Image upload failed
+이미지 업로드에 실패했습니다. 관리자 로그인 상태를 확인하세요.	Image upload failed. Check your admin sign-in status.
+이미지는 20MB 이하만 등록할 수 있습니다.	Images must be 20 MB or smaller.
+이번 달 인기 급상승 품목	Trending products this month
+이번달 판매	Sales this month
+이서아	Lee Seo-a
+이온음료 중형 순한맛	Sports drink · Medium · Mild
+이용 건수	Usage count
+이용 요약	Usage summary
+이전 이용 데이터 삭제 확인	Confirm previous trip data deletion
+이전 자세	Previous pose
+이태원	Itaewon
+익선동	Ikseon-dong
+인기 급상승	Trending
+일반	Standard
+일반 44.2%	Standard 44.2%
+일반 회원	Standard member
+일반 회원가입과 Google 로그인 비중	Standard sign-up and Google sign-in share
+일반·Google 가입 정보와 상품 구매, 택시·렌트, 공간 테마 이용을 통합 관리합니다.	Manage standard and Google accounts alongside product purchases, taxi and rental trips, and cabin theme usage.
+일반형 요금 · 주간·평시	Standard fare · Daytime, regular hours
+입고	Restock
+입고 {value}	Restock {value}
+입고 및 재고 조정	Restocking and inventory adjustment
+입고 사유 또는 확인 사항	Reason for restocking or notes
+입고 필요	Restock needed
+입고 필요 0종	0 products need restocking
+입고 필요 {value}	Restock needed: {value}
+입고 필요 {value}종	{value} products need restocking
+입력 토큰	Input tokens
+입력값과 API 설정을 확인하세요.	Check the input and API settings.
+자동 수집은 차량 서버 연결이 필요합니다. 아직 외부 차량 서버에 연결되지 않았습니다.	Automatic collection requires a vehicle server connection. No external vehicle server is connected yet.
+자동차 {value} km · 약 {value}분	Driving {value} km · About {value} min
+자동차 {value} km · 약 {value}분{value}	Driving {value} km · About {value} min{value}
+자동차 경로 조회 중…	Finding a driving route…
+자동차 경로 확인	Check driving route
+자동차 경로를 찾지 못했어요. 도로 가까운 위치를 선택해 주세요.	No driving route found. Choose a location near a road.
+자연	Nature
+자주 가고 싶은 동네는요?	Which neighborhoods would you like to visit?
+잔잔한 파도	Gentle waves
+잠시 쉬어가세요.	Take a moment to relax.
+장소 데이터 로드 실패	Failed to load place data
+장소 목록	Places
+장소 사진	Place photo
+장소 위치 {value}/{value}곳 표시	Showing {value}/{value} place locations
+장소 위치를 확인하고 있어요	Checking place locations
+장소를 먼저 입력해 주세요.	Enter a place first.
+장소를 입력한 뒤 추천받을 수 있어요.	Enter places to get recommendations.
+장애 감지	Fault detected
+재고 건전성	Inventory health
+재고 관리	Inventory management
+재고 관리에서 수량을 확정한 뒤 창고 이동을 시작하며, 이동 중에도 수량을 다시 확정할 수 있습니다.	Confirm quantities in inventory management before starting a warehouse transfer. Quantities can be reconfirmed during transfer.
+재고 수정 가능	Stock can be edited
+재고 안정	Stock healthy
+재고 연동	Inventory integration
+재고 확정	Confirm stock
+재고 확정·창고 이동 관리	Stock confirmations and warehouse transfers
+재동의 필요	Renewed consent required
+재배치 시작	Start repositioning
+재배치 중	Repositioning
+저장·등록한 코스 {value}개	{value} saved or added trips
+저장하지 않은 변경사항	Unsaved changes
+저지방우유 중형 제로	Low-fat milk · Medium · Zero
+전면 화면의 요가 안내	Yoga guidance on the front screen
+전월대비	Compared with last month
+전주비빔삼각김밥 대형 고단백	Jeonju bibim rice triangle · Large · High protein
+전체 {value}개 중 {value}개 표시	Total {value} · Showing {value}
+전체 {value}대 · 확인 필요 {value}대 · 지도 위치 확인	{value} vehicles total · {value} need review · Check map locations
+전체 {value}명 · 주의/휴면 {value}명 · 결제 이력 연결	{value} members total · {value} flagged/dormant · Payment history linked
+전체 {value}종 · 창고 이동 {value}건 · 재고 확정 가능	{value} products total · {value} warehouse transfers · Stock ready to confirm
+전체 가입 유형	All sign-up types
+전체 데이터	All data
+전체 분류	All categories
+전체 상태	All statuses
+전체 위치	All locations
+전체 조건	All conditions
+전체 차량	All vehicles
+전체 회원	All members
+전체 회원 상태	All member statuses
+전체의 55.8%	55.8% of total
+점검 필요	Inspection needed
+접근성	Accessibility
+정보 밀도	Information density
+정비 전환	Switch to maintenance
+정비 중	Under maintenance
+정상	Normal
+정하준	Jeong Ha-jun
+정확도	Accuracy
+정희 강	Kang Jeong-hui
+제로콜라	Zero cola
+제로콜라 소형 진한맛	Zero cola · Small · Rich
+제외할 지역을 고르지 않았어요. 없으면 그대로 다음으로 넘어가세요.	No areas excluded. Continue if you have none to exclude.
+제육도시락 소형 라이트	Spicy pork lunch box · Small · Light
+조개	Shellfish
+조건에 맞는 데이터가 없습니다.	No data matches these filters.
+조건에 맞는 장소가 없어요	No places match your choices
+조건에 맞는 차량이 없습니다.	No vehicles match these filters.
+조건을 직접 넓히거나 다른 취향 유형을 선택해 주세요.	Broaden your filters or choose another preference type.
+조건을 직접 바꾼 뒤 다시 확인해 주세요.	Change your filters and try again.
+조금 더 자세히 알려주세요	Tell us a little more
+조명 끄기	Turn lights off
+조정 유형	Adjustment type
+조회 기간	Date range
+조회 실패	Could not load
+종	types
+종로	Jongno
+종료 처리	End session
+좋아요. “{value}{value}” 이야기부터 편하게 이어가 볼게요.	Sure. Let's start with “{value}{value}”.
+좋아하는 활동을 모두 골라주세요. 선택하지 않은 활동도 추천될 수 있어요.	Select all activities you enjoy. We may also recommend activities you have not selected.
+좌석과 실내 공간을 라운지처럼 사용할 수 있도록 구성된 프리미엄 차량입니다.	A premium vehicle with seats and an interior designed for a lounge experience.
+주먹밥 중형 매운맛	Rice ball · Medium · Spicy
+주문 ID	Order ID
+주문번호 {value}	Order number {value}
+주소	Address
+주소 검색	Search address
+주소 검색 중…	Searching addresses…
+주소를 2~200자로 입력해 주세요.	Enter an address between 2 and 200 characters.
+주요 색상	Primary color
+주의 재고	Low stock
+주의: 3~5개	Low: 3–5 items
+중형 (준중형, 기존 기준)	Medium (compact sedan, existing category)
+중형 · 매운맛	Medium · Spicy
+중형 · 순한맛	Medium · Mild
+중형 · 스위트	Medium · Sweet
+중형 · 제로	Medium · Zero
+중형 · 진한맛	Medium · Rich
+지금 루나가 답을 못 하고 있어요. 잠시 후 다시 말 걸어주세요.	Luna cannot respond right now. Please try again shortly.
+지난달 판매	Sales last month
+지도 데이터 © NAVER	Map data © NAVER
+지도 로딩 시간이 초과되었습니다. 연결과 키 설정을 확인하세요.	Map loading timed out. Check your connection and API key settings.
+지도 서비스를 이용할 수 없어요. 잠시 후 다시 시도해 주세요.	Map services are unavailable. Please try again shortly.
+지도 선택	Select on map
+지도 연결 설정을 확인해 주세요.	Check map connection settings.
+지도 연결 완료. 주소 검색과 자동차 경로를 확인해 보세요.	Map connected. Try address search and driving directions.
+지도 연결 완료. 주소·경로 검색에는 backend/.env의 Client Secret도 필요합니다.	Map connected. Address and route search also require the Client Secret in backend/.env.
+지도 응답을 확인하지 못했어요. 다시 시도해 주세요.	Could not read the map response. Please try again.
+지도 응답이 지연되고 있어요. 다시 시도해 주세요.	The map response is delayed. Please try again.
+지도 인증을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.	Could not verify map authentication. Please try again shortly.
+지도·SOC·보안 상태 확인	Check map, SOC and security status
+지도·주소·자동차 경로를 확인하는 개발용 페이지입니다.	Development page for checking maps, addresses and driving routes.
+지도를 불러오는 중이에요. 잠시 후 다시 눌러 주세요.	The map is loading. Please try again shortly.
+지도를 불러오는 중입니다.	Loading the map.
+지도를 불러오지 못했어요. 연결을 확인하고 다시 시도해 주세요.	Could not load the map. Check your connection and try again.
+지도에서 보기	View on map
+지도에서 클릭할 위치:	Location to select on the map:
+지원 차량	Supported vehicles
+지점 {value}	Point {value}
+지하철역	Subway station
+직접 코스를 등록하거나, 취향에 맞는 장소를 골라 코스로 연결해요.	Create your own trip or choose places you like and combine them into a route.
+직접 코스를 만들고 저장	Create and save your own trip
+진단	Diagnostics
+차	Tea
+차감	Deduction
+차고지 대기	Waiting at depot
+차량 ID 또는 권역 검색	Search vehicle ID or area
+차량 격리	Isolate vehicle
+차량 내부	Vehicle interior
+차량 데이터 원천 필터	Vehicle data source filter
+차량 데이터를 수집하면 이용 건수·대화 시간·입출력 토큰을 집계합니다. 상태는 STT·LLM·TTS·장치의 최근 5분 보고를 기준으로 확인합니다. 데이터가 없으면 정상으로 판정하지 않습니다.	Collected vehicle data provides usage counts, conversation duration and input/output tokens. Status uses STT, LLM, TTS and device reports from the last 5 minutes. Missing data is not treated as healthy.
+차량 동기화	Vehicle sync
+차량 등록	Register vehicle
+차량 목록	Vehicles
+차량 목록과 상세	Vehicle list and details
+차량 보안	Vehicle security
+차량 사용량·상태	Vehicle usage and status
+차량 상태 조회 실패: {value}	Could not load vehicle status: {value}
+차량 상태 필터	Vehicle status filter
+차량 상태가 확인되면 이용 가능한 {value}가 자동으로 표시됩니다.	Available {value} will appear once vehicle status is confirmed.
+차량 상품	On-board products
+차량 서비스 미연동	Vehicle service not connected
+차량 스트레칭	In-car stretching
+차량 위치, 배차 가능 여부, SOC와 안전·보안 상태를 10초 단위로 확인합니다.	Checks vehicle location, dispatch availability, SOC, safety and security every 10 seconds.
+차량 위치·배차 상태와 공간 상품 적재율	Vehicle locations, dispatch status and product load rate
+차량 위치와 상태를 새로고침했습니다.	Vehicle locations and statuses refreshed.
+차량 재고 {value}	On-board stock {value}
+차량 재고 새로고침, 탑승 1회당 1번만 가능	Refresh on-board stock once per ride
+차량 전체 재고	All on-board inventory
+차량 제어 실패: {value}	Vehicle control failed: {value}
+차량 진열	On-board display
+차량 추가	Add vehicle
+차량 풀 배분	Vehicle pool allocation
+차량 현재 상태 CSV를 만들었습니다.	Created a CSV of current vehicle statuses.
+차량 환경 저장	Save cabin settings
+차량을 선택하세요.	Select a vehicle.
+차종별 탑승 인원과 택시·렌트 요금	Passenger capacity and taxi/rental fares by vehicle
+참고 예산	Budget estimate
+참치김밥 대형 스위트	Tuna gimbap · Large · Sweet
+참치샌드위치 미니 오리지널	Tuna sandwich · Mini · Original
+창고 이동	Warehouse transfer
+창고 이동 중	Transferring to warehouse
+창고 이동 중에도 재고 수량과 배치 차량을 변경하고 다시 확정할 수 있습니다.	You can change stock quantities and assigned vehicles and reconfirm during a warehouse transfer.
+창문 60%	Windows 60%
+창문 {value}%	Windows {value}%
+척척박사는 결론과 근거를 쉬운 말로 설명하고 불확실성을 구분합니다.	Professor explains conclusions and evidence in plain language and identifies uncertainty.
+첫 화면 수치는 각 관리 메뉴의 현재 데이터와 함께 갱신됩니다.	Home metrics update with the current data in each management menu.
+청담	Cheongdam
+초기 배치 차량	Initial assigned vehicle
+초기 재고	Initial stock
+초기화	Reset
+촘촘하게	Compact
+총 {value}개 상품을 결제합니다. 완료 후 좌석 오른쪽 수납함이 자동으로 열리고 구매 내역에 저장됩니다.	Pay for {value} items. After payment, the compartment to your right opens automatically and the purchase is saved to your history.
+촬영/선택	Take or choose photo
+최근 7일 매출 추이 그래프	Revenue chart for the last 7 days
+최근 {value}일	Last {value} days
+최근 보고	Latest report
+최근 운영 조치	Recent operational actions
+최근 이용 기록	Recent usage history
+최근 재고·이동 기록	Recent stock and transfer history
+최근 판매 속도를 반영한 7일 예상	7-day forecast based on recent sales rate
+최근 활동	Recent activity
+최대 4인	Up to 4 passengers
+최대 5인	Up to 5 passengers
+최대 발화 시간을 초과해 자동으로 종료했어요.	Recording stopped automatically after reaching the time limit.
+최유진	Choi Yu-jin
+최종 목적지를 입력해 주세요.	Enter your final destination.
+추가	Add
+추천 결과	Recommendations
+추천 생성 중...	Generating recommendations...
+추천 입고 검토	Review recommended restock
+추천 참고 예산	Recommendation budget estimate
+추천 코스명	Suggested trip names
+추천 코스명을 선택하거나 직접 입력	Choose a suggested trip name or enter your own
+추천받기	Get recommendations
+추천에서 빼고 싶은 동네는요?	Which neighborhoods should we exclude?
+추천할 코스명을 만들지 못했어요.	Could not generate suggested trip names.
+출력 토큰	Output tokens
+출발지로 선택	Set as starting point
+출발지와 목적지를 포함해 2~20개 장소를 선택해 주세요.	Choose 2–20 places, including the starting point and destination.
+충전	Charging
+충전 중	Charging
+충전·SOC	Charging and SOC
+충전·SOC 점검	Check charging and SOC
+취향 기록이 없어요	No preference history yet
+취향 매칭	Taste match
+취향 분석 · {value}	Taste profile · {value}
+취향 수정	Edit preferences
+취향 정보 없음	No preference data
+취향에 맞는 장소를 필터링하고 원하는 단계 수만큼 골라 코스로 저장하거나 바로 이용해요.	Filter places by your preferences, choose the number of stops, then save your trip or start now.
+치즈	Cheese
+카드	Card
+카페라떼 소형 라이트	Café latte · Small · Light
+캔커피 소형 진한맛	Canned coffee · Small · Rich
+커뮤니티	Community
+커피	Coffee
+컴팩트	Compact
+컴팩트·라운지	Compact · Lounge
+컴팩트·접근성	Compact · Accessible
+컵커피 대형 오리지널	Cup coffee · Large · Original
+컵커피 소형 순한맛	Cup coffee · Small · Mild
+코스 DB 저장 실패	Could not save trip to database
+코스 단계	Trip stops
+코스 데이터 로드 실패, 기존 데모 데이터 사용	Trip data failed to load; using existing demo data
+코스 사진 라이선스	Trip photo licenses
+코스 지도 보기	View trip map
+코스 취향 찾기	Find your trip preferences
+코스 취향 찾기 저장 실패	Could not save your preference-based trip
+코스 취향 찾기 코스를 저장했어요.	Saved your preference-based trip.
+코스 취향 찾기에서 선택한 장소로 만든 코스입니다.	A trip made from places you selected in Find your trip preferences.
+코스 하위 메뉴	Trip submenu
+코스의 마지막 장소입니다. {value} 정도 머물며 {value}	This is your final stop. Spend about {value} here and {value}
+코엑스	COEX
+콘텐츠 메뉴 관리	Content menu management
+콘텐츠 설정 저장	Save content settings
+콘텐츠 테마 설정을 불러오는 중입니다.	Loading content theme settings.
+탄산수 +12개	Sparkling water +12
+태깅값 기준	Based on tags
+태깅값 기준 · {value}	Based on tags · {value}
+택시 배차 가능	Available for taxi dispatch
+택시 예비	Taxi reserve
+택시 예비량 3대 확보 · rule dispatch-v1.1	3 vehicles reserved for taxis · rule dispatch-v1.1
+택시 예비량 확보 후 렌트·충전 가용량 계산	Calculate rental and charging capacity after reserving taxis
+택시 운행	Taxi trip in progress
+택시 이용	Taxi usage
+택시 후보 검증	Validate taxi candidates
+택시_요금정책.xlsx	Taxi_fare_policy.xlsx
+택시·렌트 포함	Includes taxi and rental
+택시기간	Taxi duration
+택시이용	Taxi usage
+테마 대표 이미지	Theme cover image
+테마 변경사항을 저장했습니다.	Theme changes saved.
+테마 삭제	Delete theme
+테마 이름	Theme name
+테마 이미지를 등록하세요	Add a theme image
+테마를 추가하세요.	Add a theme.
+테마명	Theme name
+테마명을 입력하세요.	Enter a theme name.
+테마에 어울리는 소리만 표시 · 최대 {value}개	Sounds matching this theme · Up to {value}
+테스트 위치를 표시하고 있어요…	Showing the test location…
+테헤란로 운영 구역	Teheran-ro service area
+토닥이는 판단하지 않고 감정을 확인하며 위기 신호에는 공통 안전 정책을 적용합니다.	Comfort acknowledges feelings without judgment and follows shared safety policies when there are signs of crisis.
+토큰	Tokens
+통과	Passed
+특정 음식	Specific foods
+파란 점이 현재 위치예요.	The blue dot shows your current location.
+파일 등록 완료. 설정을 저장하면 연결됩니다.	File added. Save settings to link it.
+파일 등록됨	File added
+파일 크기는 20MB 이하입니다.	Files must be 20 MB or smaller.
+파일 해제	Remove file
+파일을 업로드하고 있습니다.	Uploading file.
+파일을 읽을 수 없습니다.	Could not read the file.
+판매가	Sale price
+팝콘 소형 라이트	Popcorn · Small · Light
+패밀리	Family
+패밀리·라운지	Family · Lounge
+페르소나	Persona
+페르소나 배경	Persona background
+페르소나 설정	Persona settings
+페르소나 이미지	Persona image
+페르소나명	Persona name
+편집 대상	Editing
+포도주스 중형 진한맛	Grape juice · Medium · Rich
+포도탄산 대형 진한맛	Grape soda · Large · Rich
+포도탄산 소형 고단백	Grape soda · Small · High protein
+프라이버시 글라스가 켜진 나만의 이동 공간입니다.	Your personal space on the move, with privacy glass enabled.
+프로그램명	Program name
+프로토타입에서는 전화 연결 대신 안내만 표시해요. 실제 상황에서는 109 또는 119에 연락해 주세요.	This prototype displays guidance without placing a call. In an actual crisis, call 109 or 119.
+프로필 사진	Profile photo
+프롬프트를 불러왔습니다. 검토 후 설정을 저장하세요.	Prompts imported. Review them before saving settings.
+프리미엄	Premium
+피하고 싶은 것이 있나요?	Anything you would like to avoid?
+피하고 싶은 항목이 없으면 그대로 저장해도 괜찮아요.	If there is nothing to avoid, save without selecting anything.
+픽업 이동	Heading to pickup
+필터 접기	Collapse filters
+필터 펼치기	Expand filters
+필터를 줄이거나 검색어를 바꿔 주세요.	Use fewer filters or change your search.
+하이볼 대형 제로	Highball · Large · Zero
+학습 성장률	Learned growth rate
+학습 추가권고	Learned restocking recommendation
+한	KO
+한국어	Korean
+한남	Hannam
+한식	Korean food
+합성 차량	Synthetic vehicle
+합정	Hapjeong
+항목	Item
+해변과 파도	Beach and waves
+해산물	Seafood
+현재 {value} 이용	Currently using {value}
+현재 {value} 이용 중	Currently using {value}
+현재 위치를 찾지 못했어요. 기기의 위치 기능을 켜고 다시 시도해 주세요.	Could not find your location. Enable location services and try again.
+현재 있는 상품입니다.	This product is currently available.
+현재 재고	Current stock
+현재 진열수량	Current shelf quantity
+호두	Walnuts
+호흡 가이드	Breathing guide
+혼자 또는 둘이 이용하기 좋은 컴팩트형 차량입니다.	A compact vehicle ideal for one or two passengers.
+홈 화면을 연결하지 못했어요.	Could not load the home screen.
+홍대	Hongdae
+홍대·연남	Hongdae and Yeonnam
+홍대걷고싶은거리	Hongdae Walking Street
+홍익대	Hongik University
+화면 기록 비우기	Clear on-screen history
+화면의 운영 조치 기록을 비웠습니다.	On-screen operational history cleared.
+확인 {value}	Confirm {value}
+확정	Confirm
+확정됨	Confirmed
+환불	Refund
+활성	Active
+활성 0 · 주의 0	Active 0 · Flagged 0
+활성 {value} · 주의/휴면 {value} · 결제 {value}	Active {value} · Flagged/dormant {value} · Payments {value}
+활성 회원	Active members
+활성 회원 0명	0 active members
+활성 회원 {value}명	{value} active members
+활성률 69.4%	Active rate 69.4%
+회원	Members
+회원 CSV 내보내기	Export members as CSV
+회원 결제 + 공간 상품 7일 판매	Member payments + 7-day cabin product sales
+회원 관리	Member management
+회원 상태	Member status
+회원 연동	Member integration
+회원 이용 매출 구성	Member revenue breakdown
+회원당 평균 결제	Average payment per member
+회원번호	Member ID
+회원번호, 이름, 이메일 검색	Search member ID, name or email
+회원상태	Member status
+횟집	Sashimi restaurant
+후보 가능	Eligible candidate
+후보 제외	Excluded candidate
+휠체어 승하차 지원	Wheelchair boarding support
+휴면	Dormant
+힐링 산책형	Relaxed walker
+＋ OTT 추가	＋ Add streaming service
+＋ 소리 추가	＋ Add sound
+＋ 테마 추가	＋ Add theme
+＋ 프로그램 추가	＋ Add program
+10시간	10 hr
+15시간	15 hr
+1시간 추가	Add 1 hour
+1시간 추가 시 {value} 추가	Add 1 hour for {value} more
+1시간 추가 시 패키지 할인으로 {value} 절약	Add 1 hour and save {value} with the package discount
+24시간	24 hr
+3~24시간 이용 · 선택 옵션 요금 별도	3–24 hours · Optional extras charged separately
+3시간	3 hr
+6시간	6 hr
+{value} km 남음	{value} km remaining
+{value} · {value}시간 · {value}	{value} · {value} hr · {value}
+{value} · 배터리 {value}%	{value} · Battery {value}%
+{value} · 체류 {value}분	{value} · Stay {value} min
+{value} · 총 예상 요금	{value} · Total estimated fare
+{value} 방면 · 다음 지점 약 {value}분	Toward {value} · Next stop in about {value} min
+{value} 주변의 {value} 차량을 확인하고 있어요.	Checking for vehicles near {value}: {value}.
+{value} 코스 지도로 이동합니다.	Opening the {value} trip map.
+{value} 화면은 통합 앱에서 연결합니다.	The {value} screen opens in the main app.
+{value}{value} km / {value}{value}분	{value}{value} km / {value}{value} min
+{value}시간 ·	{value} hr ·
+{value}시간 · 차량 요금	{value} hr · Vehicle fare
+· 약 {value}분	· About {value} min
+✓ 출발 위치 도착	✓ Arrived at starting point
+검색 결과가 없어요. 다른 검색어를 입력하거나 지도에서 직접 선택해 주세요.	No results found. Try another search or select a location on the map.
+경유지·목적지 위치를 확인하고 경로를 불러오는 중…	Checking stop and destination locations and loading your route…
+내 위치	My location
+내 위치를 찾지 못했어요. 출발지를 입력하거나 지도에서 선택해 주세요.	Could not find your location. Enter a starting point or select one on the map.
+내 위치를 확인하고 있어요…	Finding your location…
+네이버 자동차 경로 · 체류 시간 제외	Naver driving route · Excludes visit time
+도로 경로 다시 조회	Reload driving route
+도로 경로를 불러오지 못했어요. 다시 조회해 주세요.	Could not load the driving route. Please try again.
+도로 경로를 조회하고 있어요.	Finding a driving route.
+도로명·지번 주소 검색	Search street or lot-number address
+렌트 시작	Start rental
+렌트 요금정책	Rental fare policy
+배차 취소 후 출발지로 돌아가기	Cancel dispatch and return to starting point
+석촌호수서호 서울	Seokchon Lake West, Seoul
+선택 위치에서 약 {value}m 떨어진 인근 도로의 승차 지점에서 만나요.	Meet at the pickup point on a nearby road, about {value} m from the selected location.
+선택 후보: {value}	Suggested location: {value}
+시간당 약 {value}	About {value} per hour
+요금정책	Fare policy
+요청을 취소했어요. 시간·차량·출발 위치는 유지됩니다.	Request cancelled. Your time, vehicle and starting point are kept.
+위치 권한을 허용하거나 출발지를 직접 입력해 주세요.	Allow location access or enter your starting point.
+위치 다시 확인	Check location again
+위치 확인이 필요한 장소 {value}곳 · 장소 목록에서 나머지 위치를 지정해 주세요.	{value} places need location confirmation · Set their locations in the place list.
+위치를 확인하지 못한 장소: {value}. 해당 입력칸에서 검색 결과를 선택해 주세요.	Location not confirmed: {value}. Select a search result in its input field.
+장소의 위치를 먼저 확인해 주세요.	Confirm the place's location first.
+전체 경로	Full route
+주소 검색 · 지도 터치로 후보 선택	Search address · Tap the map to select
+주소 검색 · 지도에서 직접 선택 가능	Search address · Or select on the map
+주소 또는 장소 검색	Search address or place
+지도 다시 불러오기	Reload map
+지도를 불러오는 중…	Loading the map…
+지도를 불러오는 중이에요. 잠시 후 다시 선택하세요.	The map is loading. Please select again shortly.
+지도를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.	Could not load the map. Please try again shortly.
+지도에서 승차 위치를 확인해 주세요.	Confirm your pickup point on the map.
+차량 {value} + 옵션 {value}	Vehicle {value} + options {value}
+차량 접근을 약 18초로 줄여 보여주는 체험입니다.	This demo shortens the vehicle's approach to about 18 seconds.
+차량·시간·코스를 선택하고 출발 위치를 확인하세요. 차량이 도착하면 탑승 버튼이 활성화됩니다. 탑승 약 3초 후 코스 이용 화면으로 이동합니다.	Choose a vehicle, time and trip, then confirm your starting point. The board button becomes available when the vehicle arrives. Your trip screen opens about 3 seconds after boarding.
+차량과 시간을 고른 뒤 출발 위치에서 요청해 주세요.	Choose a vehicle and time, then request pickup at your starting point.
+최대	Maximum
+최소	Minimum
+출발 위치 수정	Edit starting point
+출발 위치 지도	Starting point map
+출발 위치로 돌아가기	Back to starting point
+출발 위치로 이동하거나 탑승을 기다리고 있어요.	Heading to the starting point or waiting for boarding.
+출발 위치를 확정했어요.	Starting point confirmed.
+출발 주변 지도	Map around starting point
+출발 후보 선택 지도	Select starting point on map
+출발지로 오는 차량 경로를 확인하지 못했어요. 출발 위치를 확인한 뒤 다시 요청해 주세요.	Could not find the vehicle's route to your starting point. Check the location and try again.
+코스를 변경했어요. {value}	Trip changed. {value}
+확정된 출발 위치	Confirmed starting point
+지도로 보기	View on map
+최근 7일 {value}	Last 7 days {value}
+편집	Edit
+음료·간식	Drinks and snacks
+MOOV 관리자 대시보드	MOOV Admin Dashboard
+MOOV 무인차 플랫폼의 차량 공간 서비스	Cabin services for the MOOV driverless vehicle platform
+AI 말동무, 공간, 택시·렌트, 나들이를 하나로 연결한 MOOV 무인차 플랫폼 앱 프로토타입	MOOV driverless vehicle app prototype connecting AI companions, cabin experiences, taxi rides, rentals and outings
+3시간 10,180원부터	From ₩10,180 for 3 hr
+AI 코스 추천 열기	Open AI trip recommendations
+MOOV Space 이미지·음악·영상 자산 미리보기 및 다운로드	Preview and download MOOV Space images, music and videos
+OTT 목록	Streaming services
+{value} 배경음	{value} ambience
+{value}개 장소	{value} places
+가까운 차량 약 3분	Nearby vehicle in about 3 min
+관심 코스에서 선택	Choose from saved trips
+바로 이용하기	Use now
+이번 달 수요 +{value}%	Demand this month +{value}%
+장소 추천	Place recommendations
+저장됨으로 저장	Save to saved items
+지도 초기화	Reset map
+지도에서 핀 선택	Select a pin on the map
+결과 보기	View results
+진행 상태 보기	View progress
+차량 기록 정리 중	Clearing vehicle records
+최근 개인 기록 정리 완료	Recent personal records cleared

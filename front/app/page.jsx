@@ -1,7 +1,9 @@
-export default function Home() {
+export default async function Home({ searchParams }) {
+  const { lang } = await searchParams;
+  const query = lang === "en" || lang === "ko" ? `?lang=${lang}` : "";
   return (
     <iframe
-      src="/moov.html"
+      src={`/moov.html${query}`}
       title="MOOV"
       allow="geolocation"
       style={{

@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="./styles.css" /><link rel="stylesheet" href="./manage.css" /><link rel="stylesheet" href="./content-management.css" /><link rel="stylesheet" href="./vehicle-management.css" />
 </head>
 <body>
+  <script src="../i18n-data.js"></script>
+  <script src="../i18n.js"></script>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar__top">
@@ -53,6 +55,7 @@
 
     <div class="app-main">
       <header class="topbar">
+        <div role="group" aria-label="Language" data-i18n-skip><button type="button" class="button button--ghost" data-language="ko">한국어</button><button type="button" class="button button--ghost" data-language="en">English</button></div>
         <button class="icon-button menu-button" type="button" id="menu-button" aria-label="메뉴 열기">☰</button>
         <div class="topbar__context">
           <span class="live-dot"></span>

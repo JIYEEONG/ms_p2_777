@@ -2692,7 +2692,8 @@ function renderHomeModeChoice() {
 }
 
 function renderHomePromotionSlider() {
-  const slides = homePromotions;
+  const englishImages = { food: "./assets/banner-food-en.png", exhibit: "./assets/banner-exhibit-en.png" };
+  const slides = homePromotions.map(promo => ({ ...promo, image: window.MoovI18n?.getLanguage() === "en" ? englishImages[promo.id] || promo.image : promo.image }));
   return `<section class="home-promo-section" aria-label="광고와 추천 코스"><div class="section-row"><strong>광고·프로모션</strong></div><div class="home-promo-slider" data-drag-scroll>${slides.map((promo, index) => `<button class="home-promo-slide promo-${promo.id}" data-action="${promo.action}" aria-label="${escapeHtml(promo.title)}"><img src="${promo.image}" alt="${escapeHtml(promo.title)}" /><span class="home-promo-shade"></span><span class="home-promo-copy"><small>${escapeHtml(promo.tag)}</small><strong>${escapeHtml(promo.title)}</strong><em>${escapeHtml(promo.desc)}</em></span></button>`).join("")}</div></section>`;
 }
 
@@ -4894,6 +4895,11 @@ function handleSearchKeydown(event) {
 
 window.addEventListener("moov:language-change", () => {
   if (document.querySelector("#taxi-naver-map")) render();
+  const englishImages = { food: "./assets/banner-food-en.png", exhibit: "./assets/banner-exhibit-en.png" };
+  for (const promo of homePromotions) {
+    const image = document.querySelector(`.home-promo-slide.promo-${promo.id} img`);
+    if (image) image.src = window.MoovI18n?.getLanguage() === "en" ? englishImages[promo.id] || promo.image : promo.image;
+  }
 });
 
 function updateClock() { document.querySelector("#clock").textContent = new Date().toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit", hour12: false }); }

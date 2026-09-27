@@ -1,5 +1,23 @@
 # MOOV English translation work
 
+The `영어버전` branch is based on `origin/main` at `de39442`. It opens in English when no language preference is saved; `?lang=en` and `?lang=ko` explicitly select a language, including the Next.js iframe entry points.
+
+Current source translations are reviewed in `current-en.tsv`. `runtime-en.json` holds the small set of labels assembled at runtime (for example compartment numbers and sample member display names). `site-overrides.json` only retains overrides that still exist in the current inventory. Old workbook comparison sheets and `wellness-en.json` are historical translation references, not a separate version of the app.
+
+Refresh in this order after updating the Korean source:
+
+```sh
+python tools/extract_translations.py
+python tools/extract_home_translations.py
+python tools/export_site_translations.py
+python tools/export_home_translations.py
+node tools/check_english.cjs
+```
+
+The extractor follows current public JS/HTML files, preserves existing English, reuses inline bilingual labels, and records complete dynamic templates using `{value}`. It omits image paths and replaces interpolated icons with empty text. The browser exporter filters source-only overrides against this inventory, so removed source labels are not reintroduced. Review new blank workbook entries and obsolete TSV/runtime entries after each sync.
+
+`tools/check_english.cjs` uses a temporary Edge profile and mocked authentication to check visible UI labels, attributes, dynamic updates and Korean restoration. It does not translate user-authored content, editable configuration values, third-party map labels or arbitrary backend records. See `docs/english-sync-2026-09-27.md` and `sync-report.json` for this update's comparison and remaining limitations.
+
 `moov-ko-en.xlsx` contains Korean strings found in the MOOV web source and the selected English translations. The `UI and voice` and `Home rental` sheets keep the existing app and integrated home/rental screen separate. Source locations make each entry traceable. The former `Map labels` sheet is a translation archive and is no longer exported to the app.
 
 The `2차변경` column beside `English` records later wording changes shown in the UI. It leaves the original English draft intact. Context-dependent labels, such as featured sounds for each theme, list each display context in one cell. The browser export still reads `English` plus `site-overrides.json`; controls with context-specific wording use `data-i18n-en` in the UI source.

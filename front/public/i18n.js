@@ -5,7 +5,20 @@
   const textState = new WeakMap();
   const attributeState = new WeakMap();
   const attributes = ["aria-label", "alt", "placeholder", "title"];
-  const skippedTags = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEXTAREA"]);
+  const skippedTags = new Set(["SCRIPT", "STYLE", "NOSCRIPT"]);
+  const templates = Object.entries(english)
+    .filter(([ko, en]) => ko.includes("{value}") && ko.split("{value}").length === en.split("{value}").length)
+    .sort((a, b) => b[0].replaceAll("{value}", "").length - a[0].replaceAll("{value}", "").length)
+    .map(([ko, en]) => ({
+      pattern: new RegExp("^" + ko.split("{value}").map((part, index) => {
+        const literal = part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        if (!index) return literal;
+        // Counters/currency accept numbers, never arbitrary place or user names.
+        const capture = /^(?:개|건|곳|단계|대|분|시간|원|종|초|회|%|℃)/.test(part) ? "([+−-]?[\\d][\\d,.~–— -]*|[—–-])" : "(.+?)";
+        return capture + literal;
+      }).join("") + "$"),
+      english: en
+    }));
   const originalTitle = document.title;
   const originalDescription = document.querySelector('meta[name="description"]')?.content || "";
   let language = readLanguage();
@@ -14,13 +27,19 @@
     try {
       const requested = new URLSearchParams(location.search).get("lang");
       if (requested === "ko" || requested === "en") return requested;
-      return localStorage.getItem(STORAGE_KEY) === "en" ? "en" : "ko";
-    } catch { return "ko"; }
+      return localStorage.getItem(STORAGE_KEY) === "ko" ? "ko" : "en";
+    } catch { return "en"; }
   }
 
   function dictionaryValue(source) {
     const normalized = source.replace(/\s+/g, " ").trim();
     if (Object.prototype.hasOwnProperty.call(english, normalized)) return english[normalized];
+    const date = normalized.match(/^(?:(\d{4})년\s*)?(\d{1,2})월\s*(\d{1,2})일\s*\(?([일월화수목금토])(?:요일)?\)?$/);
+    if (date) {
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const days = { 일: "Sun", 월: "Mon", 화: "Tue", 수: "Wed", 목: "Thu", 금: "Fri", 토: "Sat" };
+      return `${days[date[4]]}, ${months[Number(date[2]) - 1]} ${Number(date[3])}${date[1] ? `, ${date[1]}` : ""}`;
+    }
 
     let quoted = normalized.match(/^["“](.+)["”]$/);
     if (quoted && Object.prototype.hasOwnProperty.call(english, quoted[1])) return `“${english[quoted[1]]}”`;
@@ -127,7 +146,7 @@
     return null;
   }
 
-  function translateCore(source) {
+  function translateCore(source, depth = 0) {
     if (language !== "en" || typeof source !== "string") return source;
     const direct = dictionaryValue(source);
     if (direct !== null) return direct;
@@ -135,12 +154,26 @@
     if (typeof pageTranslation === "string") return pageTranslation;
 
     // Many cards combine translated labels with changing prices or durations.
-    const fragments = source.split(/(\s*[·|]\s*)/);
+    const fragments = source.split(/(\s+[·|]\s+|\s*\|\s*)/);
     if (fragments.length > 1) {
-      const translated = fragments.map((part, index) => index % 2 ? part : dictionaryValue(part) ?? part).join("");
+      const translated = fragments.map((part, index) => index % 2 ? part : depth < 3 ? translateCore(part, depth + 1) : dictionaryValue(part) ?? part).join("");
       if (translated !== source && !/[가-힣]/.test(translated)) return translated;
     }
-    return source;
+    let partial = null;
+    let remaining = Infinity;
+    for (const template of templates) {
+      const match = source.match(template.pattern);
+      if (!match) continue;
+      let index = 0;
+      const rendered = template.english.replace(/\{value\}/g, () => {
+        const part = match[++index];
+        return depth < 3 ? translateCore(part, depth + 1) : dictionaryValue(part) ?? part;
+      });
+      const untranslated = (rendered.match(/[가-힣]/g) || []).length;
+      if (!untranslated) return rendered;
+      if (untranslated < remaining) { partial = rendered; remaining = untranslated; }
+    }
+    return partial ?? source;
   }
 
   function translate(source) {
@@ -155,10 +188,12 @@
   }
 
   function translateText(node) {
-    if (skip(node.parentElement) || !node.nodeValue.trim()) return;
+    if (skip(node.parentElement) || node.parentElement.tagName === "TEXTAREA" || !node.nodeValue.trim()) return;
     let state = textState.get(node);
     if (!state || node.nodeValue !== state.rendered) state = { source: node.nodeValue, rendered: node.nodeValue };
-    const next = language === "en" ? node.parentElement.dataset.i18nEn || translate(state.source) : state.source;
+    const explicit = node.parentElement.closest("[data-i18n-en]");
+    const override = explicit && explicit.textContent.trim() === node.nodeValue.trim() ? explicit.dataset.i18nEn : null;
+    const next = language === "en" ? override || translate(state.source) : state.source;
     state.rendered = next;
     textState.set(node, state);
     if (node.nodeValue !== next) node.nodeValue = next;
@@ -184,6 +219,8 @@
     // Freeze that internal value before translating the label.
     if (root.tagName === "OPTION" && !root.hasAttribute("value")) root.setAttribute("value", root.textContent);
     for (const name of attributes) translateAttribute(root, name);
+    // Translate textarea hints while preserving user-entered/default content.
+    if (root.tagName === "TEXTAREA") return;
     for (const child of root.childNodes) visit(child);
   }
 

@@ -13,7 +13,7 @@ import subprocess
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
-from extract_translations import ROOT, VisibleHTML, fragments
+from extract_translations import ROOT, VisibleHTML, fragments, reviewed_translations, translate_template
 
 
 MODULE = ROOT / "front" / "public" / "moov-home"
@@ -81,6 +81,7 @@ def main():
     entries = inventory()
     workbook = load_workbook(WORKBOOK)
     shared = {row[1]: row[2] for row in list(workbook["UI and voice"].values)[1:] if row[1] and row[2]}
+    shared.update(reviewed_translations())
     existing = {}
     if SHEET_NAME in workbook:
         existing = {row[1]: (row[2], row[3]) for row in list(workbook[SHEET_NAME].values)[1:] if row[1]}
@@ -89,6 +90,7 @@ def main():
     sheet.append(["ID", "한국어", "English", "검수 상태", "원본 위치"])
     for index, (korean, locations) in enumerate(sorted(entries.items()), start=1):
         english, status = existing.get(korean, (shared.get(korean, ""), "기존 번역" if korean in shared else "번역 필요"))
+        english = shared.get(korean) or english or translate_template(korean, shared)
         sheet.append([f"HOME-{index:04d}", korean, english, status, "\n".join(sorted(locations))])
     sheet.freeze_panes = "C2"
     sheet.auto_filter.ref = sheet.dimensions

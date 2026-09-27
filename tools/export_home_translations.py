@@ -20,11 +20,6 @@ def main():
     sheet = workbook["Home rental"]
     translations = {korean: english for _, korean, english, *_ in list(sheet.values)[1:]
                     if isinstance(korean, str) and isinstance(english, str) and english.strip()}
-    # Preserve the departure wording while the workbook still has pickup labels.
-    for korean, english in list(translations.items()):
-        if '픽업' in korean:
-            translations.setdefault(korean.replace('픽업', '출발').replace('출발으로', '출발지로'), english)
-    translations['출발'] = 'Start'
     output = json.dumps(dict(sorted(translations.items())), ensure_ascii=False, indent=2)
     OUTPUT.write_text(
         "// Generated from the Home rental sheet in translations/moov-ko-en.xlsx.\n"

@@ -9,8 +9,8 @@ const rentalOptionCatalog = [
   { id: "ott", name: "OTT 엔터테인먼트", price: 4000 },
 ];
 const homePromotions = [
-  { id: "food", tag: "프로모션", title: "특별한 오늘, 더 특별한 한 끼", desc: "근처 프리미엄 다이닝 코스를 추천해요.", image: "../assets/배너_음식점.png", imageEn:"../assets/배너_음식점.png", action: "browse-courses-home" },
-  { id: "exhibit", tag: "추천 코스", title: "큐비스트: 시각의 혁신가들", desc: "전시와 산책을 잇는 문화 나들이.", image: "../assets/배너_전시.png", imageEn: "../assets/배너_전시.png", action: "browse-courses-home" },
+  { id: "food", tag: "프로모션", title: "특별한 오늘, 더 특별한 한 끼", desc: "근처 프리미엄 다이닝 코스를 추천해요.", image: "../assets/배너_음식점.png", imageEn:"../assets/banner-food-en.png", action: "browse-courses-home" },
+  { id: "exhibit", tag: "추천 코스", title: "큐비스트: 시각의 혁신가들", desc: "전시와 산책을 잇는 문화 나들이.", image: "../assets/배너_전시.png", imageEn: "../assets/banner-exhibit-en.png", action: "browse-courses-home" },
   { id: "movie", tag: "광고", title: "스파이더맨 브랜드 뉴 데이", desc: "극장가 이벤트와 주변 코스를 함께 확인하세요.", image: "../assets/배너_스파이더맨.webp", imageEn: "../assets/배너_스파이더맨.webp", action: "browse-courses-home" },
 ];
 const appNotices = [
