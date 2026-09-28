@@ -52,8 +52,11 @@
     return {
       id: course.id, name: generic && namedStops.length ? namedStops.join(' → ') : originalName || '나들이 코스',
       _originalName: originalName,
+      firstPlaceCover: Boolean(course.first_place_cover), preserveCourseIdentity: Boolean(course.preserve_course_identity),
+      imageSource: course.image_source || null,
       desc: course.description || '', image: course.image_url || null, author: course.author || 'MOOV', createdAt: course.created_at,
       stops: stopNames,
+      stopDetails: points.map(point => ({photo: point.place_image_url || null})),
       duration_seconds: course.duration_seconds, distance_m: course.distance_m,
       distance: distanceKm(course), time: seconds > 0 && Number.isFinite(seconds) ? `약 ${Math.ceil(seconds / 60)}분` : `${points.length}곳`,
       _dbPoints: points, _dbTags: course.tags || {},
@@ -66,6 +69,11 @@
     return courses.filter(course => {
       if (!course) return false;
       const keys = course.id == null ? [] : ['id:' + course.id];
+      if (course.preserveCourseIdentity && course.id != null) {
+        if (seen.has(keys[0])) return false;
+        seen.add(keys[0]);
+        return true;
+      }
       const names = (course.stops || []).map(keyText);
       if (names.length >= 2 && names.every(name => name && !/^지점\d+$/.test(name))) keys.push('stops:' + names.join('>'));
       if (names.length === 1 && names[0] && !/^지점\d+$/.test(names[0]) && keyText(course.name)) keys.push('single:' + names[0] + '|' + keyText(course.name));

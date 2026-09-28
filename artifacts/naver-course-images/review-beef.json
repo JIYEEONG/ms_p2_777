@@ -1,0 +1,642 @@
+{
+  "course-00015": {
+    "sha256": "813ab17f5f83b86762cfddb1a9488e4a44e79ce9f597e8ab0bee42a9103f14df",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00018": {
+    "sha256": "2710ddc5fe7e6a0a562a2c1efbf89861f16f33f1810d4d8b2f65137e26ecbcc0",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00024": {
+    "sha256": "9ca2128a20653749f883b4817d42ede3f3d706d4b999b16bf08173eaa9d29362",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00027": {
+    "sha256": "e002ff9557f59599fe089ca31a7190deb1b6f11e3804c14fc5850d272469c162",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00034": {
+    "sha256": "bcea86d91f92868458dc005652e94015153455c8b61da5a1a27c2f840b3af3d6",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00042": {
+    "sha256": "d0faec16d97a47cf291d6544649003fa15e896a6b4ccb3f092ce0e2beff450b8",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00045": {
+    "sha256": "5e4a3562dbe942db68f4e95500966ccf9dddf9e19ad5d51c48b5ee6eb9247b9c",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00047": {
+    "sha256": "39eb750993a505bb668be673571ebc93c6ff38eae42ef557e65afde7c216c061",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00048": {
+    "sha256": "92191d60eefaf95cf5635fd90733a7addebf6364fbe04aa2da5de713d9c3325e",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00058": {
+    "sha256": "16371362a04a8090490deb93ed0d2874be0e281bf314b791115d9ad274062790",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00065": {
+    "sha256": "f66fe74175d2eceb058dff056c08433b7333fec97c9e544d711275ce7a2ffb98",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00066": {
+    "sha256": "4e6ca1b1471614d004cb638dec78b96bf3dae7742be41b2d1570e67ba0c0873a",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00089": {
+    "sha256": "5d064c8d5086968559e0590285c922dcd1efe131f78692d3d02aa75170de0a8f",
+    "decision": "reject",
+    "reason": "Text-heavy promotional poster, not an unobstructed venue photograph."
+  },
+  "course-00113": {
+    "sha256": "ce0c8eb9fe9335ca3ca12b36d906a73ca2011d9e2c3e5dd1c93b2e4d07d96daf",
+    "decision": "reject",
+    "reason": "Hazy low-detail interior image with blown highlights; poor thumbnail clarity."
+  },
+  "course-00116": {
+    "sha256": "ef9886d74560503a5244f9ac751d98e1e62c5061cd5f550598e5077e0407eaa5",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00129": {
+    "sha256": "0acdb30cf1ab9ad5e8cf9d3477edd6bb4218a2eb43f85b9812e72f79b95eb6af",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00134": {
+    "sha256": "f98dc662a8560b7ea5a6bf63c1081fb77f0a0d85c95fb57ee0d2ef78debe740a",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00144": {
+    "sha256": "159ff462c578b5c9e32a731dc857b7a1b0d9560e7f83e9e05ce8233682537a13",
+    "decision": "reject",
+    "reason": "Text-heavy promotional poster, not an unobstructed venue photograph."
+  },
+  "course-00149": {
+    "sha256": "c54fab7dbf9a67fc437265fbdfed257ca1dad768bd2c213f819df4ba45153e45",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00153": {
+    "sha256": "4cae44eee68711f2fc71a430a202c5a4ac8b523adef2cb62e4f2b097e6ea4936",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00155": {
+    "sha256": "b443a334d4204408c5ab9e62bce61a2ac361b960af2beb7bbd45330b06f9fa5a",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00157": {
+    "sha256": "c03379e7a079ec900d53837ecdda9d0fcfaaa2c0df1110ad5d42764400999c14",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00162": {
+    "sha256": "cd69f9d05ce8ce68bd69cc3d37c8e5f981e807ca0e2933391c0ad6fc9d94d6cc",
+    "decision": "reject",
+    "reason": "Near-duplicate table composition of course-00157."
+  },
+  "course-00196": {
+    "sha256": "27b70dec7dd582fdafe1f72ba22b5bae3e72fb59ac1598e7ca40c945c97a8b44",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00203": {
+    "sha256": "91aa7cfc1c54a23ab17b0e9d02225cf49cda355cab7d971af04b8d413d9aac41",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00206": {
+    "sha256": "1c6ec81ed93392f2ac2eebd5fbf3098157a68efb6a51032e10d561f3e7cb4160",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00236": {
+    "sha256": "6ee768199b36e3e56768f32994da2a19459d51fcb2ca74e172182ac86381e338",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00244": {
+    "sha256": "2c6f71de82cf7bc614e608607496bd0bb0e726b9a7834f31facddd0b92fb95ca",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00250": {
+    "sha256": "27f9e8f9932bdb6ba9eba8dc809ae9b94cc63a02bf52b3d9f434c373b90ebe84",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00261": {
+    "sha256": "872e7d82e4ba089b69e2ec3c370be0ce0c8c96492bbff353ddbf65245c79099f",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00280": {
+    "sha256": "701984ea0a3e45695deccc51f2e8cd6afa3ba0d4b79681a72dd1eda6e293c985",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00286": {
+    "sha256": "5e8e57df65571753165844ed2876a3c63472848cb2750ef2de1df5aa6e008c89",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00287": {
+    "sha256": "a01dbec5df0beba3ee7e06aeee153a2398ffa8ec17230a3547b4045257d801a2",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00295": {
+    "sha256": "3c5d8730eaa97e5393b71350e6609d2def98ae086d4b0cab28eb5cc84f124ded",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00304": {
+    "sha256": "0f09ec968dee3a0525e2507275eb762578e592108ca1d33ca75cc5292aaf1c77",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00311": {
+    "sha256": "d6d2267dc245fd92f6d19f7742d0011dc6642c35c7349576fb6f735f0c743801",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00328": {
+    "sha256": "d786d519b530f21f3a6db0d974a8fcf5dc75e3ea4146b5959c688030dfc4c016",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00336": {
+    "sha256": "48522ddd5be5fd3adc9c53b4c60b4aa6a9ad9f627feef3aa697284fe7723b73b",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00340": {
+    "sha256": "a79f1745d89d7defbdb4ef11038e8ebcd7b1f3b9bda9a5f02d916bcd01b34d7f",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00345": {
+    "sha256": "e7d20c91a0a6186d70f1937d1e65bc1b8c4579313666a3dd0d408d12f5c6baef",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00351": {
+    "sha256": "720085b33984406b5e8f5cac8377c42d0a704ab5e1878f5798247406c767c945",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00352": {
+    "sha256": "183cdf35361079cb41c3babaa3f1a2e34e00cf99159f4b57d3c1fe16685bb3b0",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00356": {
+    "sha256": "7786f850931af65dd80e0b972157ad9a1f3029e5a6355eba1e093c7a692ee5b3",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00363": {
+    "sha256": "cf274a5a48ea89c62fb3fae53ecaaf006e348acdc53bcf9aa51a5e62c9702ee5",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00364": {
+    "sha256": "394adff407b864b5f66c0a3ca1870336d041eba0fe39b1a529519882be6b8d94",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00367": {
+    "sha256": "1eb317e949648a8b1222ec040a722a07e4404248b204967a0f8c1718aaa9a143",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00368": {
+    "sha256": "d58d7e3d49aeeb11704028b802f1a932766a96f1b50120ec64eb3f278ed29818",
+    "decision": "reject",
+    "reason": "Photograph is a printed drinks menu."
+  },
+  "course-00373": {
+    "sha256": "19bf739b1cc62be1a8e4967f7a4f6463310831644964a3f6e28a8c9fa0a7f264",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00384": {
+    "sha256": "7844e3cda10475e02e9da67396562f1874f2a94bc20bf980ca83c61dd9a61131",
+    "decision": "reject",
+    "reason": "Sign-only close-up; text dominates and no usable venue view is visible."
+  },
+  "course-00385": {
+    "sha256": "8cc88de7bbee994d8fba0711d78d163eaab077428a102c343bc2acc5d9f9c9f7",
+    "decision": "reject",
+    "reason": "Isolated branded liquor bottle/product detail does not show the venue or a meal."
+  },
+  "course-00399": {
+    "sha256": "7304afa4446b4e65f757b6da3e6f1db9667d8a57c1750215ad86153c6a8f01c8",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00403": {
+    "sha256": "35f05ee7748d110912ab537b35af59a4562a5737582d5590f90e4c5f293c63ea",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00413": {
+    "sha256": "9eea0bc136454ce8c33c9d2722ea343352690b2415ed54c12aadfc49912c8583",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00414": {
+    "sha256": "10fa17f6c7addcb9226d1f1988e2ba0fa618eed0a4ae4fce0dd2e63f66a10d8d",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00419": {
+    "sha256": "b8395dc71dc2dbfa6738f1f2a076d7271757f543e1acc2b28ed773bc4a29a472",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00422": {
+    "sha256": "6578d9663bef92bc5a1dbbe66380a29efc362cdc4b4af352532d043b7cfb2819",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00428": {
+    "sha256": "29deb2bd0971fcd8ed74c7234e6fb8c79956aed204ec96e26c11317cf5ec673e",
+    "decision": "reject",
+    "reason": "Near-duplicate/cropped interior photograph already used by course-00018."
+  },
+  "course-00432": {
+    "sha256": "cd6a975f90964b96d30505e6bb29687cae1cbd771b5c61d7443eb9647cf88226",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00436": {
+    "sha256": "5e1f785ed44dafb2dc3ee7edf6e3116cb320d1713eb8fc59b395e28d763004e5",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00446": {
+    "sha256": "8a1c808c26cecb479ba72f853fa81b399003b80aac80c63977f4c69d5c152fce",
+    "decision": "reject",
+    "reason": "Near-duplicate/cropped interior photograph already used by course-00018."
+  },
+  "course-00447": {
+    "sha256": "19096fb4571b6dfa706a223959e540f1179bfcd28d5779001e08f2cd861a2b50",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00449": {
+    "sha256": "a807406c129ffd371d18def489450fc327472a5cbefd75dec631656403634440",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00455": {
+    "sha256": "dbd72095007b26e4da0c67767dd024eeb4d4af43a4549663b5b34ca931a80cbf",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00463": {
+    "sha256": "7c06e2182d5d676b36bf72252696e9c7d3255d3f40ea1f49504a8d26d3f0f97e",
+    "decision": "reject",
+    "reason": "Near-duplicate meat-board composition already used by course-00129."
+  },
+  "course-00472": {
+    "sha256": "fb9041bc4655511279052d8f7e7c11e0e7a8f0f9ba4cd1f479954994968b3885",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00484": {
+    "sha256": "a51dcaf8a514f819f648758e1710fcc01d5501e7dec4f7ebfde4aafa0fbe1d51",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00492": {
+    "sha256": "a5b0f1973fef5cf791f264a4f324cf41d7d79c9a5fb0e47634e2cb85bd28925e",
+    "decision": "reject",
+    "reason": "Near-duplicate/cropped meat-board photograph already used by course-00449."
+  },
+  "course-00498": {
+    "sha256": "941432b44c6e1ed6a30dde57f3090f49cc125bdac57468d634f70f13f5cd6b7e",
+    "decision": "reject",
+    "reason": "Near-duplicate presentation-box composition already used by course-00065."
+  },
+  "course-00500": {
+    "sha256": "d14551c48673577db718c9af0d619fe08b2929bf606d127236ce3423c2f7c2a6",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00510": {
+    "sha256": "47d0df2357698e9401860b3546ac97b1c3ef5e989e261992391302e9a9c40d27",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00519": {
+    "sha256": "11c91ebb57f5a6c6eaca94e7910a11c2f57c0012a1aa2f796132baeeb339f24a",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00520": {
+    "sha256": "367422b37e1ef8b372959312931bc761705b3f48f3ae35fe6977a9d10a728c54",
+    "decision": "reject",
+    "reason": "Wider crop of the meat-board composition already used by course-00250."
+  },
+  "course-00525": {
+    "sha256": "8ea69ef215043b43c7eb267f13974e621becf3678f4e7f0f2bd2b4e466d274de",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00529": {
+    "sha256": "0803b815775373edbae3cc4fe7a25e389f02296073ab6c2cad34dbce879b30ec",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00532": {
+    "sha256": "cb316231866f8169042844521d98b3554a7496f19d27514c5954e10c8f20b3c2",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00550": {
+    "sha256": "7ec2c612070ec7ca0d08f69bf248f935fc878fa78d1d2ab9f9f75ee0fec4c9c4",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00552": {
+    "sha256": "8dfa840f9d381e9c01a9f6bd5e060e2018102ca844f9ad84754ba31e66ce2a40",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00608": {
+    "sha256": "4d8d4e2d9adb5d6bbc56cc9515e010af66a7bb019a3c523eca85c7eaa19d241d",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00613": {
+    "sha256": "bb4a9e6f7193bb7ea616a8e396c34cae8e73f0c17e13ac61585f829918e508bd",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00618": {
+    "sha256": "170fda0b9be8c6dd97ff8c8de907fde8cabacc6a5b7b8d0db3e581d4c3b4f2f5",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00621": {
+    "sha256": "c03328f27171fb1554af34fb9ad8ff511f2d4d04ce8118873cfb2bd7da9c298b",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00623": {
+    "sha256": "ad768b6f2fc9c5377035deea38a52dac287d2f4952fda3d39712678214e77d7f",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00625": {
+    "sha256": "38bf7cfcd9f8ed3af94b7d94056f2ac678b8557254aecc650a718f113799db01",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00638": {
+    "sha256": "07776e235d7d8dc996e658e45e8f165f93e7d8d5dc3a508eb6a526ea323a7e11",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00653": {
+    "sha256": "8c4dc3624eb1377fe4dc952bc449e5ca824e0441dcc77994f0c0f73d5cc11902",
+    "decision": "reject",
+    "reason": "Close-up of decorative writing, dominated by text and without useful venue context."
+  },
+  "course-00656": {
+    "sha256": "875b7e4950ff22406e156ec98da083d40f8aca4aa96b8924442607da80273f3d",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00659": {
+    "sha256": "3638605416cf8d3d5ca1304953da5a1544151f61dd6d2089ff2c127d59a4ff33",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00661": {
+    "sha256": "061f345f2c5ab696a01e62f548ad91558d43957cd05867347ccfabe50a3c57a9",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00689": {
+    "sha256": "434747cdb7364e7586a357828b3eea85f3cf4f8893af70579979dac9a2b8bc92",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00690": {
+    "sha256": "e7434b520e8e5253d66c3e11921bd25546c1194d13ab862bf94d76bf1f188ca9",
+    "decision": "reject",
+    "reason": "Near-duplicate chopsticks/meat close-up already represented by course-00625."
+  },
+  "course-00704": {
+    "sha256": "43126c55a2aa31ca74017e464312043e5498b264c4964da53aaec4b935b00aff",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00707": {
+    "sha256": "1aa3baa6acff2bdf423943065df702c29115fd2ae3cb4cedb0e0895ab8b8da34",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00713": {
+    "sha256": "b08f8271bb9f069a8791ecb73cb97321a8011ef5a9215cf7a99262e609397e75",
+    "decision": "reject",
+    "reason": "Near-duplicate fillet-board photograph already represented by course-00519."
+  },
+  "course-00721": {
+    "sha256": "250ac03abddde20bd6557f10d7cd8b25c679cab0b06d9fbbdb51e5b0b4614ddd",
+    "decision": "reject",
+    "reason": "Photograph is a printed menu."
+  },
+  "course-00744": {
+    "sha256": "00a0fdc5b7f7f3dce33a9b283fd0dac3586c7d570b2edb034bda9d448b466870",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00746": {
+    "sha256": "e1e2aeb67726451587753cb1bf10300af0039963e2f2bbc9573db482fc1ceb23",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00754": {
+    "sha256": "372227c833c5894999f80e86d826a292c5fc87cb603b8a46c13c6c67b449162c",
+    "decision": "reject",
+    "reason": "Soft, low-detail vertical image; the food is blurred."
+  },
+  "course-00756": {
+    "sha256": "fdbf0ca23e0f9f308dc2abb16b20eb4ee694cf56a032ab42ddcc2b49c6d9fc20",
+    "decision": "reject",
+    "reason": "Near-duplicate of the pan/table composition already represented by course-00621."
+  },
+  "course-00758": {
+    "sha256": "7f095b6e28d0b3f61312c54e794fe953af0d86c96546997fa1abb936a7e444fe",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00781": {
+    "sha256": "6bf7c279cc538abca904b05b6108832e7317d84e5f65fe104a3d2c8398f417da",
+    "decision": "reject",
+    "reason": "Photograph is a printed menu."
+  },
+  "course-00786": {
+    "sha256": "fde9b6153a9110a93ea5bc3e747a68b25c9e9371eb2568df1b63d417be05bea7",
+    "decision": "reject",
+    "reason": "Photograph is a printed menu."
+  },
+  "course-00789": {
+    "sha256": "9e10d505a8715ff266097aac663b71f8ffc0c02248f72f954fd3537b12628ea2",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00794": {
+    "sha256": "c3a047f246879e15556f3f616b516be2566738fdeea9f04df8adca2c0d706a08",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00796": {
+    "sha256": "6cf5c82b0a6ac1a7f62199eb4b43e16c723f3a429adacd01ed7f0ea93984e12f",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00807": {
+    "sha256": "31d03b16d8586b20c02cc233f94441d85af014f665487fb059caee4ec569afc1",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00811": {
+    "sha256": "0a14ac36f8eeb48224e59e308d6bab0241906229a308b9a11e05f544dbfa2f56",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00815": {
+    "sha256": "7a34604aa0f5e16a345f36f5d898f360d98292557ff19d72f541add88ea3f3d8",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00821": {
+    "sha256": "825ab8fe0bdbb827d258d4101d070677d7c989303f87b10957824c7e105aaca1",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00829": {
+    "sha256": "b4676fcac280d5f8bc1ac76fed0941e4198bc46ba0bcdea636191aa8393423de",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00833": {
+    "sha256": "b920df14c9bf56ec570255da639e8ed37b509ef6fa44bb64d3da8257f26e6660",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00837": {
+    "sha256": "7e619d7b7aa1bfc6c93ddfc571788512562dfd6b330ac6d0519f3517dc62ca98",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00839": {
+    "sha256": "0f9517d2921c4aa771f29e1d16dc90d77bc1c8993bbf871aad4f749c2261245d",
+    "decision": "reject",
+    "reason": "Near-duplicate presentation-box/grill composition already represented by course-00833."
+  },
+  "course-00843": {
+    "sha256": "c8edbeb011207467b017ab412883a0696e9b84e8788aab5112c6db87b6ad8713",
+    "decision": "reject",
+    "reason": "Only charcoal fuel is visible; no food or identifiable restaurant scene."
+  },
+  "course-00849": {
+    "sha256": "b10179da1b7e31f879ee53ef89439f35935b21d61005781b0aad6e9c9dd64271",
+    "decision": "reject",
+    "reason": "Near-duplicate fillet-board composition already represented by course-00608."
+  },
+  "course-00872": {
+    "sha256": "7fce0ca6e7374b4f8381d560000e101f40481fbda97b25b0c902b3385e82c01c",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00894": {
+    "sha256": "67b428f632efda02dca913781beac6f0ebddf7a627c6de7c702a4aae1a4eaff1",
+    "decision": "reject",
+    "reason": "Near-duplicate fillet-board composition already represented by course-00608."
+  },
+  "course-00895": {
+    "sha256": "86bbdd469fea04f450955a419399b09ea496b93d1c26574fcbd0d34c8a140b2c",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00902": {
+    "sha256": "49f8d0e587060f82655440274b9e6f184ebbd3dd257bf9983f4c708cb9401c93",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00921": {
+    "sha256": "8476ea5639d1e61c987ff8e03331fd595130a6c8a1a6330a2e8bebd47d74152b",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00927": {
+    "sha256": "0fcf8c7db3ac76d3739dfe7ad95f8776999198b52f54d32271fb7ed70c5317a7",
+    "decision": "reject",
+    "reason": "Near-duplicate chopsticks/meat composition already represented by course-00921."
+  },
+  "course-00949": {
+    "sha256": "8a2e8c5744a98c36ccfcb5384222049d62f99bc6e9fd4559f6c3ea6daed32d73",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00960": {
+    "sha256": "74511c4fadd08ded2bbb5f846b387796d3debe327d78f34df12746af8ee3dce3",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00962": {
+    "sha256": "7dd7c11a1743fe6309f004c8c3b8d84bd40e2c62ad3870d70dcf9f82a0251ec0",
+    "decision": "reject",
+    "reason": "Branded alcohol product dominates the image; no useful restaurant scene or meal."
+  },
+  "course-00965": {
+    "sha256": "e836dd993afea9ae4967c416bf0eb8581923f540b98b41b55cf1fddf865dafb3",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00966": {
+    "sha256": "4ca5d065fb5bbe33c48be1ff89d62cf6ed6470a9343bc8a4fd62002bc0e0ddfc",
+    "decision": "reject",
+    "reason": "Photograph is a printed menu."
+  },
+  "course-00970": {
+    "sha256": "11c65e070cd06655bbbab744d8a3fe2771a37914cdd41c72773a29201f61f932",
+    "decision": "approve",
+    "reason": "Visually reviewed restaurant exterior/interior; consistent with the matched venue source title."
+  },
+  "course-00980": {
+    "sha256": "592697e48efac7220b3276c604d467321a359f31c5d737bf08527604acab30af",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  },
+  "course-00981": {
+    "sha256": "885c4fd7f7477ba55aed750ce9230b46e7643f6c19cfe370d7b772fd884f6a47",
+    "decision": "approve",
+    "reason": "Visually reviewed actual meat or prepared food photograph; consistent with the matched steak-restaurant source title."
+  }
+}

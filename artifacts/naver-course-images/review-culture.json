@@ -1,0 +1,657 @@
+{
+  "course-00009": {
+    "sha256": "a46d38e2c608050321f499c865340b3101fc436c766fbfb2b50940880a636c48",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00010": {
+    "sha256": "421ca55355c8e2e2548d4f36b50a0d005c3ba64e45110374a61a92855caf9526",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00016": {
+    "sha256": "fa7c6aaa2cddc3dc030ef1fd42a3fd95819d153d377dd10d02ba9cbf1b67f0af",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00022": {
+    "sha256": "5d230603b90220b70d42025af7a79b1cb7ce8b87d00224a6a76d6767ecdffd2e",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00023": {
+    "sha256": "46a105e50d4a11829d2bcec08dfe650c8b36bfa871fe754759f6c2bc6f1207f6",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00043": {
+    "sha256": "693b1cd9d8977be0798d41347e25e495a56743371b3cdd3eb3de6b2893e04146",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00044": {
+    "sha256": "a3382949d4aced92201eb4c57fedcf3cd4deb17a1049c003b882a892b32f59ea",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00051": {
+    "sha256": "f03c7489ed7cbe840b088cb3de0f1b0d0a90043997e639732dfd32db87bc8b5d",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00052": {
+    "sha256": "18832f096b02ab61de00ed6f57fac81fd2725c7d456490a13273cd224d20d590",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00057": {
+    "sha256": "d8979e10ec50c4ef87cba8cc0ef8edfdd8f3e0328afd5520386ab2ee360c7c25",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00059": {
+    "sha256": "17012138c2b01a85fd5a9461becda8184dd0e218b3a0f9d7962e5988d5cacd69",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00064": {
+    "sha256": "bb6247aa7eda21b39d32c42b8b2d819f1263a5830200a4697c373bf373d7970f",
+    "decision": "reject",
+    "reason": "Foreground person obscures venue"
+  },
+  "course-00079": {
+    "sha256": "be4c7a2c763836427f0e6d17fc0a526781e163658626b62d1ae8c3d90d7f756a",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00083": {
+    "sha256": "b66f1bec86c12e3e8ef92708c58ad98827224edab02c53f4a889905e6f80c096",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00084": {
+    "sha256": "cfbf56ba2a7750ba92e02bba7729d6c16218e0a86d0d8fb42ec25c47f94c2629",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00095": {
+    "sha256": "b20f86be55e175f0f4eeaf1a878a34ec7954845e31c78d0e856b106d6cd63ad0",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00108": {
+    "sha256": "b8731d422b8489e9903ae6a5c4dacd4cbfe3b0daeec2951a7574ee5d503eb05f",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00110": {
+    "sha256": "46f402fcb97b9a0ad1f223ac97d7ea93127122671a4df02e76f218c98924f2c1",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00114": {
+    "sha256": "0279a9aee8e7251798e786ec93337e961f973bce3d2b6fd416b33fb2d98f5fc3",
+    "decision": "reject",
+    "reason": "Blurred venue"
+  },
+  "course-00124": {
+    "sha256": "ac7612efab097d6dca05d2526d67450d9862aa1378a3148412850ba8ec0cae8c",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00128": {
+    "sha256": "ac22b648dae4263567ce7a6ad722e4e243808d3942861ecd55246d5cfef64ed6",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00130": {
+    "sha256": "ea7ad4a9f2f1c7e366ac7f0c610d441e8a1b242a81c7b81efa1df929cc317c49",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00141": {
+    "sha256": "c4fe92bf26828eabe67a39ffa2760be5e4ef89b0aaabaa71b7d740c5cceb57b7",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00147": {
+    "sha256": "f9e8d396ad9a602928a4aa61dd9739ec8f1d824bc7c3923b242aa2eb125c6ad0",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00171": {
+    "sha256": "525ff515803d7c73a90ab4a439741e09b5232dd325e123400f5654210492ca93",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00175": {
+    "sha256": "7d5c4a041b8b47e27ee23b42bb593ad124e8ca760f5e2713e45820cac4cd3b7e",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00181": {
+    "sha256": "410c53c5a116ab7251d1d63c28ee5ebec32d7aab7a4d08673c2230090a7a7ad8",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00184": {
+    "sha256": "89a428c5bc42c75df756f3dc0efc4bfda4a7df5265678226c6198fdd3345e46b",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00187": {
+    "sha256": "0a0164aa5d5f4fe129bcc3440389ef623b3c21c6ce5652edf4c14fe1e0d89af7",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00199": {
+    "sha256": "c765b8527f14a91a0340fcf62e0454c7845a4c5bd7d02b72b495be8a32b1d667",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00205": {
+    "sha256": "2e9aeff9ae4d56881743cd123a18544658f542b3217bfc2da7733919e6b73dfc",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00228": {
+    "sha256": "2ca6c4507bd0a708af154ea38bacce11ceb63b049ff435bbedf82302e17db8f5",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00237": {
+    "sha256": "6437b28ff0ce929c36e12ce9d1273e14619e9ea0ac1aa8585136b60bc132aeba",
+    "decision": "reject",
+    "reason": "People dominate room"
+  },
+  "course-00243": {
+    "sha256": "9035dca7f0389d3a89700a79b3919284fca088cd332eecf84738e30358cbbff7",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00246": {
+    "sha256": "b1876a87dd750aa240fc6fce0179bba6dc3561a9eefaf5523c7c0e68b5388e87",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00259": {
+    "sha256": "528fc716bae4948115db5e5780dab40bf5ffc802e2f9d49528d24237f143e554",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00272": {
+    "sha256": "d75b6126e56d7c67a32db43b0b0cd511bbd02d484790a3719511c59e5eb8f39c",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00276": {
+    "sha256": "ffdec69d1e89fabdad8fdfe4e116be7575527737fc6f83513536cbae856c3c8b",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00284": {
+    "sha256": "01356950605766e024e97ceb1c22e11f812042d059652664a364689ed147160c",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00292": {
+    "sha256": "5bafab875846576a8916dd5c708d615b28191e5f969999efe488698b8fe9b4e1",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00293": {
+    "sha256": "76e2e7bfecdf0e99255298e019194a3590b713ee020a1424cb2bbbf1b03d2680",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00301": {
+    "sha256": "2df5a98aa00eae63857ac3434ffb9c55f9ae673d5f502236feeb603ba3e77b59",
+    "decision": "reject",
+    "reason": "Ceremony crowd dominates"
+  },
+  "course-00302": {
+    "sha256": "b1662c9ceefaecae1d257e8e06e07493b04d5e974b8a68f715bf3abd902ab645",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00318": {
+    "sha256": "128f49a193115ea8d98d0247b79fc23c6939de1af868ea12c3440bb9baa31e67",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00337": {
+    "sha256": "056452ffcbeb779eccde91d09abb30cf898433a0a88d1271eaf064e943d16905",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00339": {
+    "sha256": "2a4d9bb16b0de4e8696e69f305a2b22d9dec8e65e7f2d1043b8aa0a7937e03d2",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00342": {
+    "sha256": "cd979a19d63e8349664727e8e86bb2ed691aa3af7add6190e4ef9ea04d6cc6bb",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00359": {
+    "sha256": "99531320d1bb64d386e00b8885bc5f1a78ed215a68bc90360aa73fc529045478",
+    "decision": "reject",
+    "reason": "Newsprint overlay"
+  },
+  "course-00377": {
+    "sha256": "7b4b1b1d628919c11f587f416d145a7b6e25890216e25575025e1498e8d815f2",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00379": {
+    "sha256": "1f90c40fd6752f0db0b493d6db075add87d56d2f20d2e9b2e186f3ecb707fe06",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00380": {
+    "sha256": "d7c2e8266a8a1cf95da8eb3dc97553c0982627c2277c72a4d4683a7e02d2df3a",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00390": {
+    "sha256": "d539baecba441443f4b5864f78ffd88a824b97a859e0161f3fd12a4a6f26b784",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00392": {
+    "sha256": "725276d5eb71c962a4ed7f4599f2bf2f11ef89241d008021700643c92603ba02",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00400": {
+    "sha256": "23cdb88d375ec5b7a8975a0deaa1ff2616f8fcc0f66b1770b67a3de53b26ecd8",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00408": {
+    "sha256": "d8b750a09c8c567c481debef0fff709883a7495e27c80a1888d6feafffe456b4",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00423": {
+    "sha256": "d1282dacfda0b1650fe28da148e6e874abd1392460fb997b664905e68da89317",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00424": {
+    "sha256": "706714800c9921fd2e46b198c9d8dfa05619fe1bd87752f46c50e5ef790e90a9",
+    "decision": "reject",
+    "reason": "Collage"
+  },
+  "course-00439": {
+    "sha256": "81a5548142aa5dc6a712008a32401bb4fe5ead8262bf6d092c7553ffa3e0d2ac",
+    "decision": "reject",
+    "reason": "Illustration poster"
+  },
+  "course-00456": {
+    "sha256": "f8180d1a7c7604629715f425864ce014931a382f614f52afa44f1d3c66b8b7b0",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00467": {
+    "sha256": "13602a6f24bb5604d92c145495ff6a9539824978c816eed0c1e4ec23cdb266ed",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00475": {
+    "sha256": "d747595172786ecee8b91c193a8688028c44e9c30e539a97073a6b952c7ce878",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00479": {
+    "sha256": "f394eab4e31dd65f50e265f7367dceede740ee99d8aa90f59d4d2bbc4e3070e4",
+    "decision": "reject",
+    "reason": "Illustration"
+  },
+  "course-00485": {
+    "sha256": "cdbb28e6fe7ae7e47d96689e67462b25720251ec9d5848af2f4792c9c40c3a4c",
+    "decision": "reject",
+    "reason": "Collage"
+  },
+  "course-00501": {
+    "sha256": "a1dea8f9884c91a047cffbd9f0aeead58d634ea302bb41830ae472a93971c45c",
+    "decision": "reject",
+    "reason": "Costumed performer dominates"
+  },
+  "course-00523": {
+    "sha256": "f67fe77fe22e3cf743c551250abe2593e5229bfa605648ec7d204ce4d356ef58",
+    "decision": "reject",
+    "reason": "People camera closeup"
+  },
+  "course-00530": {
+    "sha256": "aad88346c03f2694f7caccc37df573615615ca010d82564aa9434c1c6e007d9a",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00537": {
+    "sha256": "2a59f4bba517e41f59018fd9d311953cb61ffa0be5c70a199a1440a1a39d1778",
+    "decision": "reject",
+    "reason": "Graphic poster"
+  },
+  "course-00542": {
+    "sha256": "cddf2e1c22054cfdb03d89b185687628edd4a30c140a08ab0b70476b87269cdc",
+    "decision": "reject",
+    "reason": "Dancers dominate"
+  },
+  "course-00546": {
+    "sha256": "d29588827fca70f9553c98dc52e98ffa1746581a0b3271628f6e967f79550848",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00551": {
+    "sha256": "03c5f4220d5b89d4efc86aaef5658fa7ead7e865306877265f5e905830494a08",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00557": {
+    "sha256": "217c4e80418f6f040f0ea0dc3e8cec8b7ba4f7a0b047a6fa37b664872c745401",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00559": {
+    "sha256": "23eaed4418b4d2a54098ac3e5b89855b06f2ccb4716977a3aa85ea39d50b036e",
+    "decision": "reject",
+    "reason": "Handheld brochure foreground"
+  },
+  "course-00569": {
+    "sha256": "feae525fb708fe5aeaa9c29c7408be3f58d51acb3f0660a2d37161f0d3573d4e",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00571": {
+    "sha256": "049b6773377610f0c7b1a7fd27abce704535eb4b3e7f23b23c418a38ece2650a",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00572": {
+    "sha256": "21e98cc114aa0fa0f803b91b59feaa18a61bc436c4617569cc4bf5c8fe9de91f",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00574": {
+    "sha256": "72b790afd7d14dfc652a9e6415668b3073ac8bab5b988427cf1f2fb7b9191673",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00587": {
+    "sha256": "05ba6da87daeae57f8f60f1553ceb87d13a258743ceaa0b5b802b3b49b828012",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00596": {
+    "sha256": "c7945797eb795e665d27db216ae883db5ace1e9f78419d02496161b8615afc98",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00599": {
+    "sha256": "74867db25e45e910e3ccd05d54d027abad1b07e583b405800fb796b9ec967426",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00600": {
+    "sha256": "f1b4c53b62fcba022e35e2f78ad4dec6973f12aecbcd2f9c3095d2714214cf81",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00612": {
+    "sha256": "d172c649d47112284e19d84fdbb57d888e62edcd4892ef7395f87f09c316f210",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00614": {
+    "sha256": "205c1f47480385ac311c85047c44e69379a0fc51a7478a5a51528c16d1191535",
+    "decision": "reject",
+    "reason": "Different building"
+  },
+  "course-00616": {
+    "sha256": "e7aa3d745ff80ca3c534c208018e3fb498fd0dc12233111de64502a3b79fc500",
+    "decision": "reject",
+    "reason": "Drawing"
+  },
+  "course-00617": {
+    "sha256": "3bb1cf8723dc0583982bd118bed8bfe415eb5ac4f50e1c4215e20b7aa5cd9a88",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00632": {
+    "sha256": "a50ddfc0d3e10299c7f31d76120b1e1894a6122c3fc62777217ef23cec426e4e",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00639": {
+    "sha256": "9005beffc975202ae21153858d534bd83192946992c0f30465b3dc9f54e9fe65",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00646": {
+    "sha256": "f27537e7de04bf5bcf84b1c65f1413e60750f4bffcdfd0cb79be02b65fbb75bf",
+    "decision": "reject",
+    "reason": "Blurred photo"
+  },
+  "course-00651": {
+    "sha256": "e9c7deeab99201b0955986cd5ec5581dbaa1457faf2e19f4b1a4bc96c2d610cd",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00664": {
+    "sha256": "1ca85831b449b1213667f9edb73400170f0e896a5c7a248d6bfc1557d64eec53",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00682": {
+    "sha256": "3fcf29963fecf1e878e206b543783ab6938b72cf3009203749a4aa5a9fbf560d",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00684": {
+    "sha256": "27616fd961063dddc7065d5b7abf789ee6693fec7f0f712eda724464705f0c25",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00685": {
+    "sha256": "e8d1a963ec4ca4267c72067fd4eb4415fc313c12260111f9b51c607c75f2d32e",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00695": {
+    "sha256": "6ec520f0606e5e540c559d41fff9170bbc9bcc94e76bf8c3c8f31c0f7c553e9f",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00698": {
+    "sha256": "260e4978e012e39e09445467934f05a169378de06a937226efe0c8eb6533d3fb",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00699": {
+    "sha256": "b2d0623793673bdcb4efe887a4ceb7b1ce3bba1a0eeaf60121a1f1f4ac48ae3f",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00708": {
+    "sha256": "6cb69816e599273bae6d1de4b7899b043202c9e27e862576922997c703ea8e92",
+    "decision": "reject",
+    "reason": "Near duplicate of course-00009"
+  },
+  "course-00723": {
+    "sha256": "a0ac62ccd8cf8852173cd63ecbdd4c6a3917043249af29a74e07355ce814d404",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00737": {
+    "sha256": "ad12cc303557fc499b60591b5a18479b32e7008a1d29829c47c571315cbc58dc",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00738": {
+    "sha256": "6ea460c3e9a16e77229635e3659318203064f04d7569dfd4a0847000979ac3b6",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00743": {
+    "sha256": "bea39dea1592f50b2809b5b31dc54981a167c1f986223e9c0f32d1601fcfd2ff",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00747": {
+    "sha256": "91f251b4195071844f85bc7d57649e694babf5ff9bdd9eac9659a80945271db4",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00752": {
+    "sha256": "7b4ae2e95c3b27bab074cc5207cf450a6d23e05fa286c3e42474e9ef2ce5bd67",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00779": {
+    "sha256": "23c4b0291d6ed2484b24ce484cb7cb453c54474ed0defef48c43422a6684f7f0",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00785": {
+    "sha256": "6b6d33bb7d2cd025019e76f32fe76121f4bf56a90bbb6092f7966148de4739f6",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00790": {
+    "sha256": "da728e3cd1af53dbf865c3cada0afb5b9935557937969b71e1ea29e84d527597",
+    "decision": "reject",
+    "reason": "Near duplicate of course-00043"
+  },
+  "course-00793": {
+    "sha256": "3d36d14fe9634c9541bda6cb698140bce21922fd3cf9ca24d028e58e125e9b4e",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00795": {
+    "sha256": "9617ad2a1aa8f58ac4b4ace2e30b12ee656f87ff2c86f6be9179e77045c00c9f",
+    "decision": "reject",
+    "reason": "Heavy graphic overlay"
+  },
+  "course-00799": {
+    "sha256": "2c1690804aa4e02f3b50d7cb9f156e375e35df7143be0aed63c7c1f583c574c8",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00822": {
+    "sha256": "353a7636f5f50529bd9d7a2473db4118a050d68861ba723e36d8a4839c854f98",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00848": {
+    "sha256": "6775beefbed5b5f16b77cd5960bd5ba996335f9f9254dff7d5a204196de04cb7",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00850": {
+    "sha256": "b908b5c26f56dd0199162d769b698bc7b9db857ed7330e80cb3050b7088b69b5",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00857": {
+    "sha256": "a1df016b6d61113e6b653e194aee19b07e62d93507faa1cfc20fc98318638d84",
+    "decision": "reject",
+    "reason": "Cropped near duplicate"
+  },
+  "course-00859": {
+    "sha256": "2459d0c87ac5a79bf512bbff78abfb6045a060a3475d68e4cea7e8eee9e2a5f8",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00861": {
+    "sha256": "f326bfebc99789910a7fac47be216e59a953c9c697423b1c8eb27991499b8285",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00870": {
+    "sha256": "38b1d2ffc4d0b480cbfa80666fbe7e2a71f094ee04339891fa92a1aecacf8383",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00880": {
+    "sha256": "44a0148292c8027075be2804f2e33fe6c5d53900617baebe949216492992f011",
+    "decision": "reject",
+    "reason": "Cropped near duplicate of course-00044"
+  },
+  "course-00884": {
+    "sha256": "32c428bb2205398db0205d22a0ef0b7f2b3e0ac66c361bc2e4bc7efc8a596a08",
+    "decision": "reject",
+    "reason": "Blurred nighttime image"
+  },
+  "course-00885": {
+    "sha256": "88059775fea081592bacc9b8162a6e2864751d91186f31530e944f611004f765",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00888": {
+    "sha256": "f02fef021ce87771e94181e1d9dba656ab5dd60c2be518eb9ebd6b56bbf7ee7e",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00898": {
+    "sha256": "61b3ef088839ccdd36ce0d5259d61f19baf05ac56e3f1bc8d9ddd3b1e04ab9c6",
+    "decision": "reject",
+    "reason": "Near duplicate of course-00057"
+  },
+  "course-00916": {
+    "sha256": "658fdf9f7ff82ab04009151668f45fce15dbe88996219b42f4fa4b06bc6ac272",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00924": {
+    "sha256": "8731fe3137d7e053c9840f41575b2cfb385689594df4a289759d58611311b939",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00929": {
+    "sha256": "a7cb922b209341ee3ea704247c7eb93ac94ae53e658d7d8cd32f68aff06304fe",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00930": {
+    "sha256": "084aa4059a2d38eafa36c5270b3860e2527943709b1fad97e9fc29fece3a5a70",
+    "decision": "reject",
+    "reason": "Ceremony crowd"
+  },
+  "course-00936": {
+    "sha256": "a3c265c470d18e9e676f307080ba9705e0567ebc780b792b4cd8535970a7e35f",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00940": {
+    "sha256": "b41595a6c6eaf6639a77a8c3c0eb283f3c93985090dacf25af8964b9d4453399",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00955": {
+    "sha256": "b83f365f9ae655fc457232add24876c45cab2a5cfb049f58f2964eed59dd2f6a",
+    "decision": "reject",
+    "reason": "Costumed performer dominates"
+  },
+  "course-00967": {
+    "sha256": "f5b6563605ef03c170bccb7e1b8dba0e06667a0f2fbdfa40ac8874f4b9114643",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  },
+  "course-00984": {
+    "sha256": "16f41b33d0b81709c37b0099e8c7760e6ce4859c69b72d35e420175a7bcfb0fd",
+    "decision": "reject",
+    "reason": "Performer near duplicate"
+  },
+  "course-00998": {
+    "sha256": "74c0df29646506d1aa8a84798fdd636281909bb7f41ee825900b60eb2b5802fc",
+    "decision": "reject",
+    "reason": "Performer near duplicate"
+  },
+  "course-00999": {
+    "sha256": "e0d28aefe65aae42f15438d1ec2e448979712cb862b71968241a2b8fe9cb5a9c",
+    "decision": "approve",
+    "reason": "Viewed actual venue architecture or exhibition in culture review sheet"
+  }
+}

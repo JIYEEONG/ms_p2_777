@@ -1400,18 +1400,15 @@ async function loadCoursesFromDB() {
     if (!res.ok) throw new Error("Course service unavailable");
     const data = await res.json();
     if (!Array.isArray(data.courses)) throw new Error("Invalid course list");
-    dbCourses = data.courses.map((c) => ({
-      id: c.id,
-      name: c.title || generateCourseName(c.tags),
-      desc: "",
-      image: c.image_url || null,
-      createdAt: c.created_at,
-      stops: c.points.map((p) => coursePointDisplayName(p)),
-      duration_seconds: c.duration_seconds,
-      distance_m: c.distance_m,
-      _dbPoints: c.points,
-      _dbTags: c.tags,
-    }));
+    dbCourses = data.courses.map((record) => {
+      const course = MoovOutingData.fromDatabase(record);
+      return {
+        ...course,
+        stopDetails: course.stopDetails.map((stop, index) => ({
+          ...stop, name: course.stops[index], type: getCourseStopRole(index, course.stops.length),
+        })),
+      };
+    });
     if (!dbPlaces.length) dbPlaces = fallbackPlacesFromCourses();
     void hydrateMissingCourseImages(dbCourses);
     if (state.isAuthenticated && state.activeTab === "outing") render();
@@ -1488,6 +1485,7 @@ async function hydrateMissingCourseImages(courses) {
   }, new Map());
   const seenImages = new Set();
   for (const course of courses) {
+    if (course.firstPlaceCover) continue;
     const titleKey = normalizeSearch(course.name || course.title);
     const uniqueTitle = titleKey && titleCounts.get(titleKey) === 1;
     const duplicatedAutoImage = course.image && imageCounts.get(course.image) > 1 && (course.image.includes("/external/pixabay-") || course.image.includes("pixabay.com"));
@@ -3677,9 +3675,9 @@ function courseCard(course) {
   const bestBadge = matchPercent >= 90 ? `<span class="best-course-badge">BEST COURSE</span>` : "";
 const cover = getCourseCoverImage(course);
 const visual = cover
-  ? `<button class="course-visual" data-action="course-detail" data-value="${escapeHtml(course.id)}" aria-label="${escapeHtml(course.name)} 상세 보기">${bestBadge}<img src="${escapeHtml(cover)}" alt="${escapeHtml(course.name)} 코스 이미지" loading="lazy" /><span class="photo-detail-hint">${icon("search")} 상세 보기</span></button>`
+  ? `<button class="course-visual" data-action="course-detail" data-value="${escapeHtml(course.id)}" aria-label="${escapeHtml(course.name)} 상세 보기">${bestBadge}<img src="${escapeHtml(cover)}" alt="${escapeHtml(course.name)} 코스 이미지" loading="lazy" ${course.firstPlaceCover ? `data-course-photos="[]" data-course-cover="${escapeHtml(course.id)}"` : ""} /><span class="photo-detail-hint">${icon("search")} 상세 보기</span></button>`
   : `<button class="course-visual no-image" data-action="course-detail" data-value="${escapeHtml(course.id)}">${bestBadge}${icon("pin")}<span class="small" data-i18n-en="View course map">코스 지도 보기</span></button>`;
-  const stopPhotos = course.stopDetails ? `<div class="registered-stops">${course.stopDetails.map((stop,index) => {const photo=stop.photo || getMatchedCoursePlaceImage(stop.name);return `<div>${photo ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(stop.name)} 사진" loading="lazy" />` : `<span class="no-stop-photo">${icon("image")}</span>`}<small>${escapeHtml(stop.type)} · ${escapeHtml(stop.name)}</small></div>`;}).join("")}</div>` : "";
+  const stopPhotos = course.stopDetails ? `<div class="registered-stops">${course.stopDetails.map((stop,index) => {const photo=course.firstPlaceCover ? getCourseStopImage(course, stop.name, index) : stop.photo || getMatchedCoursePlaceImage(stop.name);return `<div>${photo ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(stop.name)} 사진" loading="lazy" />` : `<span class="no-stop-photo">${icon("image")}</span>`}<small>${escapeHtml(stop.type)} · ${escapeHtml(stop.name)}</small></div>`;}).join("")}</div>` : "";
   return `<article class="course-card">${visual}<div class="course-body"><div class="row"><span class="small muted">${escapeHtml(course.author || state.username)}님의 코스 · ${distanceLabel}</span><span class="badge orange">${escapeHtml(course.time || `${course.stops.length}곳`)}</span></div>${renderMatchBadge(matchPercent)}<h4>${escapeHtml(course.name)}</h4><p>${escapeHtml(course.desc)}</p>${stopPhotos}${coursePhotoCredits(course)}<div class="course-stats"><span>${icon("heart")} 최근 7일 ${state.popularityAt ? (state.popularityCounts[course.id] || 0) : "—"}</span><span>${icon("compass")} ${course.stops.length}개 장소</span><span>가격·시간 확인 필요</span></div><div class="course-actions"><button class="${likedCourse ? "liked" : ""}" data-action="course-like" data-value="${escapeHtml(course.id)}">${icon("heart")}<span>${likedCourse ? "좋아요 취소" : "좋아요"}</span></button><button class="${savedCourse ? "saved" : ""}" data-action="course-save" data-value="${escapeHtml(course.id)}">${icon("bookmark")}<span>${savedCourse ? "저장됨" : "관심 저장"}</span></button><button class="follow" data-action="follow-course" data-value="${escapeHtml(course.id)}">${icon("pin")}<span data-i18n-skip>${courseFollowLabel()}</span></button></div></div></article>`;
 }
 
@@ -3698,9 +3696,12 @@ function getCourseStopRole(index, count) {
 }
 
 function getCourseCoverImage(course) {
+  if (course.firstPlaceCover) return MoovCourseMedia.candidates(course)[0] || null;
   return course.image || course.stopDetails?.find(stop=>stop.photo)?.photo || getMatchedCoursePlaceImage(course.name) || [...(course.stops || [])].reverse().map(getMatchedCoursePlaceImage).find(Boolean) || getCourseTagImage(course) || "./assets/course-cafe.jpg";
 }
 function getCourseStopImage(course, stop, index) {
+  if (course.firstPlaceCover && index === 0) return MoovCourseMedia.candidates(course, 0)[0] || null;
+  if (course.firstPlaceCover) return course.stopDetails?.[index]?.photo || null;
   return course.stopDetails?.[index]?.photo || getMatchedCoursePlaceImage(stop) || course.image || getCourseTagImage(course) || "./assets/course-cafe.jpg";
 }
 function getCourseTagImage(course) {
@@ -3723,6 +3724,13 @@ function getMatchedCoursePlaceImage(stop) {
 }
 
 function coursePhotoCredits(course) {
+  if (course.imageSource?.source?.startsWith("naver-")) {
+    return [
+      [course.imageSource.original_url, taxiMapText("사진 원본", "Original photo")],
+      [course.imageSource.original_post_url || course.imageSource.search_url, course.imageSource.original_post_url ? taxiMapText("사진 출처", "Photo source") : taxiMapText("네이버 이미지 검색", "NAVER image search")],
+    ].filter(([href]) => /^https?:\/\//i.test(href || ""))
+      .map(([href, label]) => `<a class="course-photo-credit" href="${escapeHtml(href)}" target="_blank" rel="noopener" data-i18n-skip>${label}</a>`).join(" ");
+  }
   const images = [getCourseCoverImage(course), ...(course.stops || []).map((stop,index)=>getCourseStopImage(course,stop,index))];
   if (course.pixabayCredit || images.some(src=>src?.includes('pixabay.com'))) {
     const href = course.pixabayCredit?.page_url || "https://pixabay.com/";

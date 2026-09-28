@@ -112,6 +112,9 @@
     return file && files.has(file) ? 'bundled:' + file : photo;
   }
   function candidates(course, index = null) {
+    if (course.firstPlaceCover && (index == null || index === 0)) {
+      return [course.image].filter(available);
+    }
     const stop = index == null ? null : course.stops?.[index];
     const sources = index == null
       ? [displayed.get(identity(course)), course._displayCover, ...(course._photoChoices || []), ...actualPhotos(course).filter(photo => !(course._duplicatePhotos || []).includes(photo)), ...representatives(course)]
@@ -193,6 +196,10 @@
     // Sorting makes the same course keep its image when sort/filter order changes.
     const ordered = [...courses].sort((a,b) => Number(Boolean(b.image))-Number(Boolean(a.image)) || String(a.id || a.name).localeCompare(String(b.id || b.name)));
     for (const course of ordered) {
+      if (course.firstPlaceCover) {
+        result.set(course, {...course, _displayCover: available(course.image) ? course.image : null, _photoChoices: []});
+        continue;
+      }
       // Reused generic uploads may be unrelated to the places (e.g. palace/cafe).
       const exact = placePhotos(course);
       const options = [...new Set([...exact,...representatives(course)])];

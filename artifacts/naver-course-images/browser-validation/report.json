@@ -1,0 +1,85 @@
+{
+  "status": "passed",
+  "mode": "Offline: isolated localhost fixtures, external browser requests blocked",
+  "expected": {
+    "count": 1000,
+    "photographed": 612,
+    "missing": 388
+  },
+  "startedAt": "2026-09-28T01:50:10.884Z",
+  "limits": [
+    "Uses real backend catalog adapter and active moov.html with mocked local auth/API; no live database, external authentication or remote image search.",
+    "Image decoding and app mapping checks supplement earlier visual review; they do not verify current venue hours, road routes or photo reuse rights."
+  ],
+  "mapping": {
+    "count": 1000,
+    "uniqueIds": 1000,
+    "photos": 612,
+    "missing": 388,
+    "mismatches": [],
+    "unfixed": [],
+    "missingFallback": [],
+    "uniquePhotos": 612
+  },
+  "cards": {
+    "withImage": 612,
+    "blank": 388,
+    "wrong": []
+  },
+  "decoding": {
+    "loaded": 612,
+    "failed": [],
+    "minWidth": 300,
+    "minHeight": 251
+  },
+  "feed": {
+    "cards": 1000,
+    "photos": 612,
+    "blank": 388
+  },
+  "detail": {
+    "id": "course-00000",
+    "photo": "/assets/naver-courses/daf9bb44a9e6f99a96486ac0.jpg",
+    "photoMatches": true
+  },
+  "failureFallback": {
+    "cover": null,
+    "firstStop": null,
+    "blank": true,
+    "image": false
+  },
+  "runtimeExceptions": [],
+  "blockedExternalRequests": [],
+  "localApiRequests": [
+    {
+      "path": "/api/outing/courses",
+      "method": "GET"
+    },
+    {
+      "path": "/api/outing/places",
+      "method": "GET"
+    },
+    {
+      "path": "/api/auth/config",
+      "method": "GET"
+    },
+    {
+      "path": "/api/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/outing/survey",
+      "method": "GET"
+    },
+    {
+      "path": "/api/outing/popularity",
+      "method": "GET"
+    },
+    {
+      "path": "/api/maps/config",
+      "method": "GET"
+    }
+  ],
+  "unexpectedPhotoSearchRequests": [],
+  "finishedAt": "2026-09-28T01:51:09.129Z"
+}

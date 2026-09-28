@@ -24,3 +24,17 @@ __pycache__/
 front/public/assets/courses/
 front/public/data/
 backend/account_snapshots/
+
+# Temporary NAVER research/review caches; final catalogs and CSVs remain visible.
+artifacts/naver-course-images/search/
+artifacts/naver-course-images/blog-search/
+artifacts/naver-course-images/blog-pages/
+artifacts/naver-course-images/downloads/
+artifacts/naver-course-images/review-sheets/
+artifacts/naver-course-images/browser-validation/*.png
+artifacts/naver-course-images/rejected-assets/
+artifacts/naver-course-images/expand_*.py
+artifacts/naver-course-images/*-expansion.json
+artifacts/naver-course-images/source-candidates.json
+artifacts/naver-course-images/routes-plan.json
+artifacts/naver-course-images/review-catalog.json

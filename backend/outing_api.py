@@ -23,6 +23,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 if __package__:
+    from .course_image_catalog import apply_course_images
     from .db import get_conn, release_conn
     from .google_auth_api import require_auth_user
     from .preference_scoring import (
@@ -36,6 +37,7 @@ if __package__:
         rank_candidates,
     )
 else:
+    from course_image_catalog import apply_course_images
     from db import get_conn, release_conn
     from google_auth_api import require_auth_user
     from preference_scoring import (
@@ -1400,7 +1402,7 @@ def _load_courses(conn):
             "points": sorted(course["points"].values(), key=lambda p: p["sequence_no"]),
             "tags": {k: sorted(v) for k, v in course["tags"].items()},
         })
-    return result
+    return apply_course_images(result)
 
 
 @router.get("/courses")
