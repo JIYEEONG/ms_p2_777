@@ -14,7 +14,11 @@ const python = fs.existsSync(path.join(root,'.venv/Scripts/python.exe')) ? path.
 const adapted = spawnSync(python, ['-X','utf8','-c', 'import json,sys;sys.path.insert(0,"backend");from course_image_catalog import apply_course_images;data=json.load(open("backend/data/naver-course-images.json",encoding="utf-8"));print(json.dumps({"courses":apply_course_images(data["courses"])},ensure_ascii=False))'], {cwd:root,encoding:'utf8',windowsHide:true,maxBuffer:15000000,env:{...process.env,PYTHONDONTWRITEBYTECODE:'1'}});
 if(adapted.status !== 0) throw new Error('Local catalog adapter failed: '+adapted.stderr);
 const payload = JSON.parse(adapted.stdout);
-const expected = {count:1000, photographed:612, missing:388};
+const photographed = catalog.courses.filter(course => course.image_url);
+const expected = {
+ count: catalog.count, photographed: photographed.length, missing: catalog.courses.length-photographed.length,
+ roles: Object.fromEntries(['first','destination','waypoint'].map(role => [role,photographed.filter(course => (course.cover_role || 'first') === role).length])),
+};
 assert.equal(payload.courses.length,expected.count);
 const localRequests=[];
 const report={status:'running',mode:'Offline: isolated localhost fixtures, external browser requests blocked',expected,startedAt:new Date().toISOString(),limits:['Uses real backend catalog adapter and active moov.html with mocked local auth/API; no live database, external authentication or remote image search.', 'Image decoding and app mapping checks supplement earlier visual review; they do not verify current venue hours, road routes or photo reuse rights.']};
@@ -69,32 +73,73 @@ async function main(){
   await send('Page.enable');await send('Runtime.enable');await send('Fetch.enable',{patterns:[{urlPattern:'*',requestStage:'Request'}]});
   await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1050,deviceScaleFactor:1,mobile:false});
   await send('Page.navigate',{url:base+'/moov.html?lang=ko'});
-  await wait(`typeof dbCourses!=='undefined' && dbCourses.length===1000 && typeof courseCard==='function'`,'real catalog app data');
+  await wait(`typeof dbCourses!=='undefined' && dbCourses.length===${expected.count} && typeof courseCard==='function'`,'real catalog app data');
   await wait(`typeof state!=='undefined' && state.isAuthenticated`,'local auth fixture');
   const sourceIds=catalog.courses.map(x=>x.id).sort();
-  report.mapping=await evaluate(`(()=>{const c=allOutingCourses();return {count:c.length,uniqueIds:new Set(c.map(x=>x.id)).size,ids:c.map(x=>x.id).sort(),photos:c.filter(x=>getCourseCoverImage(x)).length,missing:c.filter(x=>!getCourseCoverImage(x)).length,mismatches:c.filter(x=>getCourseCoverImage(x)!==getCourseStopImage(x,x.stops[0],0)).map(x=>x.id),unfixed:c.filter(x=>!x.firstPlaceCover||!x.preserveCourseIdentity).map(x=>x.id),missingFallback:c.filter(x=>!x.image&&(getCourseCoverImage(x)||getCourseStopImage(x,x.stops[0],0))).map(x=>x.id),uniquePhotos:new Set(c.map(x=>getCourseCoverImage(x)).filter(Boolean)).size}})()`);
-  assert.deepEqual(report.mapping.ids,sourceIds,'All original 1,000 IDs preserved');delete report.mapping.ids;
-  assert.equal(report.mapping.count,1000);assert.equal(report.mapping.uniqueIds,1000);assert.equal(report.mapping.photos,612);assert.equal(report.mapping.missing,388);assert.equal(report.mapping.uniquePhotos,612);
-  assert.deepEqual(report.mapping.mismatches,[]);assert.deepEqual(report.mapping.unfixed,[]);assert.deepEqual(report.mapping.missingFallback,[]);
+  report.mapping=await evaluate(`(()=>{const c=allOutingCourses();return {count:c.length,uniqueIds:new Set(c.map(x=>x.id)).size,ids:c.map(x=>x.id).sort(),photos:c.filter(x=>getCourseCoverImage(x)).length,missing:c.filter(x=>!getCourseCoverImage(x)).length,mismatches:c.filter(x=>getCourseCoverImage(x)!==getCourseStopImage(x,x.stops[x.coverStopIndex],x.coverStopIndex)).map(x=>x.id),wrongPlace:c.filter(x=>x.image&&x.imagePlace!==x.stops[x.coverStopIndex]).map(x=>x.id),otherStopPhotos:c.filter(x=>x.stops.some((stop,index)=>index!==x.coverStopIndex&&getCourseStopImage(x,stop,index))).map(x=>x.id),unfixed:c.filter(x=>!x.firstPlaceCover||!x.preserveCourseIdentity).map(x=>x.id),missingFallback:c.filter(x=>!x.image&&(getCourseCoverImage(x)||x.stops.some((stop,index)=>getCourseStopImage(x,stop,index)))).map(x=>x.id),uniquePhotos:new Set(c.map(x=>getCourseCoverImage(x)).filter(Boolean)).size,roles:Object.fromEntries(['first','destination','waypoint'].map(role=>[role,c.filter(x=>x.image&&x.coverRole===role).length]))}})()`);
+  assert.deepEqual(report.mapping.ids,sourceIds,'All original catalog IDs preserved');delete report.mapping.ids;
+  assert.equal(report.mapping.count,expected.count);assert.equal(report.mapping.uniqueIds,expected.count);assert.equal(report.mapping.photos,expected.photographed);assert.equal(report.mapping.missing,expected.missing);assert.equal(report.mapping.uniquePhotos,expected.photographed);
+  for(const key of ['mismatches','wrongPlace','otherStopPhotos','unfixed','missingFallback']) assert.deepEqual(report.mapping[key],[],key);
+  assert.deepEqual(report.mapping.roles,expected.roles);
   report.cards=await evaluate(`(()=>{let withImage=0,blank=0;const wrong=[];for(const c of allOutingCourses()){const t=document.createElement('template');t.innerHTML=courseCard(c);const image=t.content.querySelector('.course-visual img');const noImage=t.content.querySelector('.course-visual.no-image');if(image){withImage++;if(image.getAttribute('src')!==c.image)wrong.push(c.id);}else if(noImage)blank++;else wrong.push(c.id);if(!c.image&&t.content.querySelector('.registered-stops img'))wrong.push(c.id);}return {withImage,blank,wrong};})()`);
-  assert.deepEqual(report.cards,{withImage:612,blank:388,wrong:[]});
+  assert.deepEqual(report.cards,{withImage:expected.photographed,blank:expected.missing,wrong:[]});
   report.decoding=await evaluate(`(async()=>{const urls=allOutingCourses().map(x=>getCourseCoverImage(x)).filter(Boolean),loaded=[],failed=[];let cursor=0;await Promise.all(Array.from({length:12},async()=>{while(cursor<urls.length){const url=urls[cursor++];try{const image=new Image();image.src=url;await image.decode();if(!image.naturalWidth)throw new Error('empty image');loaded.push({url,width:image.naturalWidth,height:image.naturalHeight});}catch(e){failed.push({url,error:String(e)});}}}));return {loaded:loaded.length,failed,minWidth:Math.min(...loaded.map(x=>x.width)),minHeight:Math.min(...loaded.map(x=>x.height))};})()`);
-  assert.equal(report.decoding.loaded,612);assert.deepEqual(report.decoding.failed,[]);
+  assert.equal(report.decoding.loaded,expected.photographed);assert.deepEqual(report.decoding.failed,[]);
   await evaluate(`state.outingQuery='';state.outingFilters=defaultOutingFilters();state.outingSub='community';state.outingSort='latest';state.outingMapOpen=false;state.communityRecommendationOpen=false;showScreen('app');setTab('outing',true);`);
   await wait(`document.querySelectorAll('.course-card').length>0`,'active community DOM');
   report.feed=await evaluate(`({cards:document.querySelectorAll('.course-card').length,photos:document.querySelectorAll('.course-visual img').length,blank:document.querySelectorAll('.course-visual.no-image').length})`);
   await evaluate(`[...document.querySelectorAll('.course-visual img')].forEach(x=>x.loading='eager')`);
   await wait(`[...document.querySelectorAll('.course-visual img')].every(x=>x.complete&&x.naturalWidth>0)`,'visible covers loaded');
   await screenshot('community-catalog');
-  await evaluate(`document.querySelector('.course-visual.no-image').closest('.course-card').scrollIntoView({block:'start'})`);
-  await delay(150);await screenshot('community-missing-photo');
-  const sampled=await evaluate(`(()=>{const c=allOutingCourses().find(x=>x.image);window.__smokePhotoCourse=c.id;openCourseDetail(c);return {id:c.id,photo:c.image};})()`);
-  await wait(`document.querySelector('.detail-cover img')?.naturalWidth>0`,'first place detail photo');
-  report.detail={...sampled,photoMatches:await evaluate(`document.querySelector('.detail-cover img').getAttribute('src')===getCourseCoverImage(getCourse(window.__smokePhotoCourse))`)};
-  assert.equal(report.detail.photoMatches,true);await delay(350);await screenshot('course-first-place-detail');
-  await evaluate(`closeModal();const c=getCourse(window.__smokePhotoCourse);MoovCourseMedia.markFailed(c.image);render();`);
-  report.failureFallback=await evaluate(`(()=>{const c=getCourse(window.__smokePhotoCourse);const t=document.createElement('template');t.innerHTML=courseCard(c);return {cover:getCourseCoverImage(c),firstStop:getCourseStopImage(c,c.stops[0],0),blank:!!t.content.querySelector('.course-visual.no-image'),image:!!t.content.querySelector('.course-visual img')};})()`);
-  assert.deepEqual(report.failureFallback,{cover:null,firstStop:null,blank:true,image:false});
+  if(report.feed.blank){
+   await evaluate(`document.querySelector('.course-visual.no-image').closest('.course-card').scrollIntoView({block:'start'})`);
+   await delay(150);await screenshot('community-missing-photo');
+  }
+  report.details=[];
+  for(const role of ['first','destination','waypoint']){
+   const sampled=await evaluate(`(()=>{
+    const role=${JSON.stringify(role)},courses=allOutingCourses();
+    let c=courses.find(x=>x.image&&x.coverRole===role),fixture=false;
+    if(!c){
+     const original=courses.find(x=>x.image&&x.stops.length>=(role==='waypoint'?3:2));
+     if(!original)return null;
+     fixture=true;
+     const selected=original._dbPoints[original.coverStopIndex],others=original._dbPoints.filter((_,i)=>i!==original.coverStopIndex);
+     const index=role==='first'?0:role==='destination'?others.length:1;
+     others.splice(index,0,selected);
+     const record={id:'fixture-'+role,title:original.name,description:original.desc,image_url:original.image,
+      first_place_cover:true,preserve_course_identity:true,cover_stop_index:index,image_place:original.imagePlace,cover_role:role,
+      image_source:{...original.imageSource,cover_stop_index:index,image_place:original.imagePlace,cover_role:role},
+      points:others.map((point,i)=>({...point,sequence_no:i,place_image_url:i===index?original.image:null}))};
+     c=MoovOutingData.fromDatabase(record);
+     c.stopDetails=c.stopDetails.map((stop,i)=>({...stop,name:c.stops[i],type:getCourseStopRole(i,c.stops.length)}));
+    }
+    window.__smokePhotoCourse=c;openCourseDetail(c);
+    return {id:c.id,role:c.coverRole,place:c.imagePlace,index:c.coverStopIndex,photo:c.image,fixture};
+   })()`);
+   if(!sampled){report.details.push({role,skipped:'No photographed course with enough stops for this role'});continue;}
+   await wait(`document.querySelector('.detail-cover img')?.naturalWidth>0`,role+' course detail photo');
+   const label={first:'첫 장소 사진',destination:'도착지 사진',waypoint:'경유지 사진'}[role]+' · '+sampled.place;
+   sampled.coverMatches=await evaluate(`document.querySelector('.detail-cover img').getAttribute('src')===window.__smokePhotoCourse.image`);
+   sampled.creditMatches=await evaluate(`document.querySelector('#modal-body').textContent.includes(${JSON.stringify(label)})`);
+   assert.equal(sampled.coverMatches,true);assert.equal(sampled.creditMatches,true);
+   await delay(150);await screenshot('course-'+role+'-detail');
+   await evaluate(`openCourseStopDetail(window.__smokePhotoCourse,window.__smokePhotoCourse.coverStopIndex)`);
+   await wait(`document.querySelector('.stop-detail-image img')?.naturalWidth>0`,role+' selected stop photo');
+   sampled.selectedStopMatches=await evaluate(`document.querySelector('.stop-detail-image img').getAttribute('src')===window.__smokePhotoCourse.image`);
+   assert.equal(sampled.selectedStopMatches,true);
+   if(role!=='first'){
+    await evaluate(`openCourseStopDetail(window.__smokePhotoCourse,0)`);
+    sampled.firstStopPhoto=await evaluate(`document.querySelector('.stop-detail-image img')?.getAttribute('src')||null`);
+    assert.equal(sampled.firstStopPhoto,null,'Fallback cover must not appear on first-stop detail');
+   }
+   report.details.push(sampled);await evaluate(`closeModal()`);
+  }
+  if(expected.photographed){
+   await evaluate(`const c=allOutingCourses().find(x=>x.image&&x.coverRole!=='first')||allOutingCourses().find(x=>x.image);window.__smokePhotoCourse=c;MoovCourseMedia.markFailed(c.image);render();`);
+   report.failureFallback=await evaluate(`(()=>{const c=window.__smokePhotoCourse;const t=document.createElement('template');t.innerHTML=courseCard(c);return {cover:getCourseCoverImage(c),selectedStop:getCourseStopImage(c,c.stops[c.coverStopIndex],c.coverStopIndex),otherStopPhotos:c.stops.some((stop,index)=>getCourseStopImage(c,stop,index)),blank:!!t.content.querySelector('.course-visual.no-image'),image:!!t.content.querySelector('.course-visual img')};})()`);
+   assert.deepEqual(report.failureFallback,{cover:null,selectedStop:null,otherStopPhotos:false,blank:true,image:false});
+  }
   report.runtimeExceptions=exceptions;report.blockedExternalRequests=[...blocked];
   report.localApiRequests=localRequests.filter(x=>x.path.startsWith('/api/'));
   report.unexpectedPhotoSearchRequests=report.localApiRequests.filter(x=>/pixabay|commons|image-search|photo-search/.test(x.path));

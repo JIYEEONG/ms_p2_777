@@ -1,0 +1,42 @@
+{
+  "course-00252": {
+    "sha256": "13eaa1c21f3d2112bea88b085dc9b4d8fb6d1e4babe9d270d5689236f526acd4",
+    "decision": "reject",
+    "reason": "Requested branch 1; source explicitly describes branch 2 and another address"
+  },
+  "course-00338": {
+    "sha256": "961d57f5c75d04dacafb16e49c9cf58ac8e0984f5985b5c9497b61aaadda02d6",
+    "decision": "reject",
+    "reason": "Source identifies Sofitel / KT Starbucks rather than selected Seokchon Lake branch"
+  },
+  "course-00810": {
+    "sha256": "5fc8a2b814beb04aee52bf564a096a518da8df64aa6b84e1cdcba7321b3e04a4",
+    "decision": "reject",
+    "reason": "Source explicitly identifies Seongsu branch in another district"
+  },
+  "course-00993": {
+    "sha256": "a51c4789c175d2a0e4fdacac0e608e2b62544b315f6b9ca618bd3e059e328a4a",
+    "decision": "reject",
+    "reason": "Source depicts event at Gangnam Seoul Auction, not the selected Yeongdeungpo location"
+  },
+  "course-00279": {
+    "sha256": "29425fec6d0d49d6004584219de7b250cd8b40a8b9e4aadc5ffd4d76da1b76e9",
+    "decision": "reject",
+    "reason": "Source identifies Songpanaru Starbucks rather than selected Seokchon Lake branch"
+  },
+  "course-00359": {
+    "sha256": "2eb3c67633d324e76af11c59d201ffe824b713f7619879d115b6c7cadee6c091",
+    "decision": "reject",
+    "reason": "Source address differs from selected route stop; venue continuity unconfirmed"
+  },
+  "course-00428": {
+    "sha256": "314f0efcf91920528d29f67e327a9afa6fe50901cb1094a823eed31658cd0848",
+    "decision": "reject",
+    "reason": "Nearby restaurants aggregate does not establish this beverage belongs to selected cafe"
+  },
+  "course-00708": {
+    "sha256": "4c667117dbc30ee627c754f38f1b24e777d350d2b3fc12ebe0f42f1fc08c2041",
+    "decision": "reject",
+    "reason": "Source explicitly identifies adjacent Gojong path, not selected Deoksugung stonewall route"
+  }
+}

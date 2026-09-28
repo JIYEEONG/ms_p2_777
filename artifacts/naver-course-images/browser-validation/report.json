@@ -3,10 +3,15 @@
   "mode": "Offline: isolated localhost fixtures, external browser requests blocked",
   "expected": {
     "count": 1000,
-    "photographed": 612,
-    "missing": 388
+    "photographed": 973,
+    "missing": 27,
+    "roles": {
+      "first": 612,
+      "destination": 295,
+      "waypoint": 66
+    }
   },
-  "startedAt": "2026-09-28T01:50:10.884Z",
+  "startedAt": "2026-09-28T02:26:07.677Z",
   "limits": [
     "Uses real backend catalog adapter and active moov.html with mocked local auth/API; no live database, external authentication or remote image search.",
     "Image decoding and app mapping checks supplement earlier visual review; they do not verify current venue hours, road routes or photo reuse rights."
@@ -14,37 +19,77 @@
   "mapping": {
     "count": 1000,
     "uniqueIds": 1000,
-    "photos": 612,
-    "missing": 388,
+    "photos": 973,
+    "missing": 27,
     "mismatches": [],
+    "wrongPlace": [],
+    "otherStopPhotos": [],
     "unfixed": [],
     "missingFallback": [],
-    "uniquePhotos": 612
+    "uniquePhotos": 973,
+    "roles": {
+      "first": 612,
+      "destination": 295,
+      "waypoint": 66
+    }
   },
   "cards": {
-    "withImage": 612,
-    "blank": 388,
+    "withImage": 973,
+    "blank": 27,
     "wrong": []
   },
   "decoding": {
-    "loaded": 612,
+    "loaded": 973,
     "failed": [],
-    "minWidth": 300,
+    "minWidth": 270,
     "minHeight": 251
   },
   "feed": {
     "cards": 1000,
-    "photos": 612,
-    "blank": 388
+    "photos": 973,
+    "blank": 27
   },
-  "detail": {
-    "id": "course-00000",
-    "photo": "/assets/naver-courses/daf9bb44a9e6f99a96486ac0.jpg",
-    "photoMatches": true
-  },
+  "details": [
+    {
+      "id": "course-00000",
+      "role": "first",
+      "place": "태양커피 서울사당점",
+      "index": 0,
+      "photo": "/assets/naver-courses/daf9bb44a9e6f99a96486ac0.jpg",
+      "fixture": false,
+      "coverMatches": true,
+      "creditMatches": true,
+      "selectedStopMatches": true
+    },
+    {
+      "id": "course-00041",
+      "role": "destination",
+      "place": "띵똥와플 본점",
+      "index": 2,
+      "photo": "/assets/naver-courses/9f7b4c8c7151c6ea17b102fe.jpg",
+      "fixture": false,
+      "coverMatches": true,
+      "creditMatches": true,
+      "selectedStopMatches": true,
+      "firstStopPhoto": null
+    },
+    {
+      "id": "course-00158",
+      "role": "waypoint",
+      "place": "띵똥와플 본점",
+      "index": 1,
+      "photo": "/assets/naver-courses/519bc4e34dd6745778e0266e.jpg",
+      "fixture": false,
+      "coverMatches": true,
+      "creditMatches": true,
+      "selectedStopMatches": true,
+      "firstStopPhoto": null
+    }
+  ],
   "failureFallback": {
     "cover": null,
-    "firstStop": null,
+    "selectedStop": null,
+    "otherStopPhotos": false,
     "blank": true,
     "image": false
   },
@@ -78,8 +123,16 @@
     {
       "path": "/api/maps/config",
       "method": "GET"
+    },
+    {
+      "path": "/api/maps/config",
+      "method": "GET"
+    },
+    {
+      "path": "/api/maps/config",
+      "method": "GET"
     }
   ],
   "unexpectedPhotoSearchRequests": [],
-  "finishedAt": "2026-09-28T01:51:09.129Z"
+  "finishedAt": "2026-09-28T02:27:31.041Z"
 }

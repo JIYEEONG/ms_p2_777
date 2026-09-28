@@ -1,0 +1,232 @@
+{
+  "course-00264": {
+    "sha256": "1e866cd3b73d93508e7ca04de78cc9aca081e059b9ed2f108d258b208572d387",
+    "decision": "reject",
+    "reason": "포토부스의 커튼과 안내판만 담겨 브이스퀘어의 장소 공간을 식별하기 어려움"
+  },
+  "course-00298": {
+    "sha256": "fb5e93cf5fe8531a7ef54c4f83c51db26c1e0a19b0b173e3257e93211eb58674",
+    "decision": "reject",
+    "reason": "무대 연사와 행사 참가자가 중심인 사진으로 거리 전경이 아님"
+  },
+  "course-00362": {
+    "sha256": "5f0e55c28296b8aebe0271a8eed94233c22ec02be38f930607b2c5d996f6649f",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 건물·거리·매장 또는 음식 장면이 확인됨"
+  },
+  "course-00385": {
+    "sha256": "aa6717df0448525ccb010728798bd114f81abbd668f28304923c735e496a0ef0",
+    "decision": "reject",
+    "reason": "공장 연기를 찍은 흑백 작품 이미지로 갤러리 공간 사진이 아님"
+  },
+  "course-00492": {
+    "sha256": "af3b85d0b4f904b266c66f49b601a1c913d3b93ae3233036681bda5379e54e8c",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 건물·거리·매장 또는 음식 장면이 확인됨"
+  },
+  "course-00494": {
+    "sha256": "3201d57c64bce2a18237bfe7f65e87ed841bcf517b44edf131a799765a723fcd",
+    "decision": "reject",
+    "reason": "인터뷰 인물 사진으로 지하 쇼핑센터 장소 사진이 아님"
+  },
+  "course-00559": {
+    "sha256": "863e4e9e8f6512d4a3a6626c69e532b72849dc04b72f02db451da57b1587fc3e",
+    "decision": "reject",
+    "reason": "사람 미니어처 상품의 판매 이미지로 실제 장소가 아님"
+  },
+  "course-00693": {
+    "sha256": "3852cc815076f3cd56d4d000031192edcd20dcbaaea86e9cf506772170578ba9",
+    "decision": "reject",
+    "reason": "일반 세일 뉴스사진으로 해당 이름의 실제 방문 장소와 연결되지 않음"
+  },
+  "course-00576": {
+    "sha256": "9850fb0ee35462a8fe673eab01055f2e66d82a08b70d172b10e63182b8b40291",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 건물·거리·매장 또는 음식 장면이 확인됨"
+  },
+  "course-00593": {
+    "sha256": "e4bdc6b78f0e7fd8df75065be6510ce188a16028cc0315dfc50670d1725a4ae2",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 건물·거리·매장 또는 음식 장면이 확인됨"
+  },
+  "course-00620": {
+    "sha256": "023e21e29cc9300720f0ddaa32ed53856393e5852ab89ef8e1bf6c6dd49127a0",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 건물·거리·매장 또는 음식 장면이 확인됨"
+  },
+  "course-00641": {
+    "sha256": "7c5e3a8b0655f4885de735b2f5952d87b6a74ed5bbdfc544a6bd7c46f1158556",
+    "decision": "reject",
+    "reason": "인터뷰 방송의 인물 중심 화면으로 카페 장소 사진이 아님"
+  },
+  "course-00633": {
+    "sha256": "5884cf8e718c64acf2619d627c7189108b60097351631c98ce41a852236663b4",
+    "decision": "reject",
+    "reason": "인물 중심의 전시 인증 사진으로 전시장 공간보다 인물이 강조됨"
+  },
+  "course-00634": {
+    "sha256": "26e48a58bf597a4401ba07518b9bc0e4b430e3dda6515204267ffdde7b1aa80e",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 건물·거리·매장 또는 음식 장면이 확인됨"
+  },
+  "course-00635": {
+    "sha256": "169c08b22cabd83a9d38d30bd9bff980c49e01cf39bdaa92f378480851e7bbed",
+    "decision": "reject",
+    "reason": "거리 인근의 숙박업소 방 사진으로 먹자골목 사진이 아님"
+  },
+  "course-00847": {
+    "sha256": "59bf310cd2bb75487dd5b9c345e8aaf7021cfd7310ad87d37a8b2af1c641e800",
+    "decision": "reject",
+    "reason": "개별 음식점 음식 사진으로 방이동먹자골목 거리 자체를 식별하기 어려움"
+  },
+  "course-00708": {
+    "sha256": "4c667117dbc30ee627c754f38f1b24e777d350d2b3fc12ebe0f42f1fc08c2041",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 건물·거리·매장 또는 음식 장면이 확인됨"
+  },
+  "course-00733": {
+    "sha256": "026e805bd4923304c0272287daef273e4206b7827d40c53e7b52f3964a88ad6e",
+    "decision": "reject",
+    "reason": "추석 휴무 안내문으로 실제 장소 사진이 아님"
+  },
+  "course-00741": {
+    "sha256": "9133df933f635e639db3957e9c19f4672aa7ac85f522808ecd49885c2080c982",
+    "decision": "reject",
+    "reason": "용 그림만 채워진 작품 이미지로 박물관 공간을 확인할 수 없음"
+  },
+  "course-00751": {
+    "sha256": "ef8d8f78bd35e8bd0acbadf25e9244695dd7364e201570adb93a301ed397cc71",
+    "decision": "reject",
+    "reason": "포즈를 취한 방문객이 중심인 사진으로 전시장 공간보다 인물이 강조됨"
+  },
+  "course-00745": {
+    "sha256": "766ea55a1ee5e90edbfa1a2fb195f844b8ee5b6928b32dff4b7cb8decc79b51f",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식 또는 방문지 시설이 확인됨"
+  },
+  "course-00764": {
+    "sha256": "37b103b50bf8a330755fe32751517f4f5ab43abb41873aed124210eec3b78e19",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식 또는 방문지 시설이 확인됨"
+  },
+  "course-00777": {
+    "sha256": "bcca4736bf86fd7f877a45b651bc2286d5e59f721fdf93623258e7e68fbd8803",
+    "decision": "reject",
+    "reason": "웹툰 원화 홍보 이미지로 전시 장소 공간 사진이 아님"
+  },
+  "course-00812": {
+    "sha256": "33f4faeba59bfd6bdbbc7bbc368c986ef7e2388717162a8f6f4d3bcf344d36cc",
+    "decision": "reject",
+    "reason": "비문 글자만 확대해 장소 전경을 식별하기 어려움"
+  },
+  "course-00931": {
+    "sha256": "70d9e8fc8785bc2139eea9f156338adb0c62e7a5caba5222793150fbc751f20b",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식 또는 방문지 시설이 확인됨"
+  },
+  "course-00844": {
+    "sha256": "1ec8dba5300685df2ae1057c2875c09ab24fad9a4d6906ee4002d69a1d078da8",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식 또는 방문지 시설이 확인됨"
+  },
+  "course-00876": {
+    "sha256": "52944d7bda0035394972b300fa79d3ce410fa54fd3c62657d1b3cf16c2a8e0af",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식 또는 방문지 시설이 확인됨"
+  },
+  "course-00886": {
+    "sha256": "f7e1de6f79d7c635a72ca6923cd44de597fd87e9589c7c1a48cf5d5875d084bb",
+    "decision": "reject",
+    "reason": "쇼핑몰 제작 교육 광고 문구만 있는 화면으로 실제 방문 장소 사진이 아님"
+  },
+  "course-00907": {
+    "sha256": "3c6a356f380dfef0415868fa7c51f1001c0296ec45af6c515a22072445d013e8",
+    "decision": "reject",
+    "reason": "애니메이션 상영 행사 홍보물 중심으로 쇼핑타워 장소를 확인하기 어려움"
+  },
+  "course-00912": {
+    "sha256": "163f3a22a0c8b1749142110ab50d02a69d5a5ac3efcadf74d5b0ef12a0bf0d75",
+    "decision": "reject",
+    "reason": "전시 홍보 포스터로 실제 전시장 공간 사진이 아님"
+  },
+  "course-00941": {
+    "sha256": "9de8110c7e377f91f678a3e2f42663b609df81c195d59b90fe4bb7cec6dbf44e",
+    "decision": "reject",
+    "reason": "입장권을 든 사진으로 실제 전시장 공간을 확인할 수 없음"
+  },
+  "course-00969": {
+    "sha256": "75d2e762af4d7f5a87ee838358d843a3ba95044e180baa733a1f792a18a00be7",
+    "decision": "reject",
+    "reason": "쓰레기와 전봇대를 중심으로 찍은 청소 기사 사진으로 클럽거리 장소 식별이 어려움"
+  },
+  "course-00982": {
+    "sha256": "93a79d950f977c0a3b53bcec3e737d1d9e11237016a217ccf143683c21672877",
+    "decision": "reject",
+    "reason": "특정 BBQ 음식점 외관 사진으로 송리단길 거리 전체를 확인할 수 없음"
+  },
+  "course-00158": {
+    "sha256": "519bc4e34dd6745778e0266ea139ef80a48aad489a4814b01b751b3c829b2102",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식 또는 방문지 시설이 확인됨"
+  },
+  "course-00257": {
+    "sha256": "2c804342f6766e13ed3921720fe5231b29e197d351be4db0748dd184fec868d4",
+    "decision": "reject",
+    "reason": "어두운 전시에서 방문객 실루엣이 화면을 크게 차지해 공간 확인이 어려움"
+  },
+  "course-00354": {
+    "sha256": "30030e57c8eac41f57f4d7cbf910a9d8bc87a5d2c2e9d76835934a5e5f767581",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식 또는 방문지 시설이 확인됨"
+  },
+  "course-00415": {
+    "sha256": "48848f2b03cbe53c5c603ad78a8669b7dfedf45d41f6b4f546e8f4f9b880578f",
+    "decision": "reject",
+    "reason": "입점 음식점의 음식만 담겨 파스텔시티 건물·쇼핑몰 장소를 식별하기 어려움"
+  },
+  "course-00439": {
+    "sha256": "243bad150dfa3a7ce1ab56ba9dd8b7e96f61e1a66277a52f4d16e3581deff876",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식 또는 방문지 시설이 확인됨"
+  },
+  "course-00463": {
+    "sha256": "650d37b25ba0fd53fe6356b2931956cfda8cde87bc2879df45bda004aae618a2",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식 또는 방문지 시설이 확인됨"
+  },
+  "course-00466": {
+    "sha256": "73f614a8510c36ab0c44ca83e37a2aa962dfc91a62aaa30c6d6c59679d0e4da6",
+    "decision": "reject",
+    "reason": "출처는 스타벅스 여의도의사당점으로 대상 스타벅스 사당점과 다른 지점"
+  },
+  "course-00473": {
+    "sha256": "3529e75566ccd502480df233321c486dbcfd63989522054c63536c88ef767cfa",
+    "decision": "reject",
+    "reason": "개별 음식점 음식만 담겨 사당1동먹자골목 거리 장소를 확인할 수 없음"
+  },
+  "course-00832": {
+    "sha256": "56359e03eaf042cf3f3c68b2691d27f665555eed8eed590607e10f3681966b07",
+    "decision": "reject",
+    "reason": "정치인과 참석자 중심의 행사 사진으로 거리 장소보다 인물이 강조됨"
+  },
+  "course-00524": {
+    "sha256": "9473ad31aa29c60631fdb0557b06b8a2bfafd3485b2aacc0e79b707035a314ef",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장 외관 또는 음식·음료 장면이 확인됨"
+  },
+  "course-00681": {
+    "sha256": "01a86e74b91fc8ae57bf47b3f3794da38eb8626ba0291ccdf0402cda44afe9ab",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장 외관 또는 음식·음료 장면이 확인됨"
+  },
+  "course-00757": {
+    "sha256": "49a8c68c14cad06b9c0e91ffc2a673cef3e8cff571c236540f791d7cb089dfba",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장 외관 또는 음식·음료 장면이 확인됨"
+  },
+  "course-00813": {
+    "sha256": "5b1b47566f3d9267b8a2c06c87b29406fe70322f7f1281cd8890a76c6bd5dec6",
+    "decision": "reject",
+    "reason": "손 위 도마뱀만 확대된 사진으로 갤러리 공간을 확인할 수 없음"
+  }
+}

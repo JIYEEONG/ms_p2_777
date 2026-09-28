@@ -112,8 +112,9 @@
     return file && files.has(file) ? 'bundled:' + file : photo;
   }
   function candidates(course, index = null) {
-    if (course.firstPlaceCover && (index == null || index === 0)) {
-      return [course.image].filter(available);
+    if (course.firstPlaceCover) {
+      return [index == null || index === (course.coverStopIndex ?? 0)
+        ? course.image : course.stopDetails?.[index]?.photo].filter(available);
     }
     const stop = index == null ? null : course.stops?.[index];
     const sources = index == null

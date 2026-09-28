@@ -26,3 +26,32 @@ test('catalog cover and first stop use the same fixed photo across sort orders',
   assert.deepEqual(media.candidates(courses[0]), []);
   assert.deepEqual(media.candidates(courses[0], 0), []);
 });
+
+test('a fixed destination photo never becomes a first-stop or generic waypoint photo', () => {
+  const course = data.fromDatabase({id: 'destination-cover', title: '서울숲 산책',
+    image_url: '/assets/naver-courses/destination-cover.jpg', first_place_cover: true,
+    cover_stop_index: 2, image_place: '경복궁', cover_role: 'destination',
+    points: [{sequence_no: 0, place_name: '서울숲'}, {sequence_no: 1, place_name: '인사동길'},
+      {sequence_no: 2, place_name: '경복궁', place_image_url: '/assets/naver-courses/destination-cover.jpg'}],
+  });
+  assert.equal(course.coverStopIndex, 2);
+  assert.equal(course.imagePlace, '경복궁');
+  assert.equal(course.coverRole, 'destination');
+  assert.deepEqual(media.candidates(course), [course.image]);
+  assert.deepEqual(media.candidates(course, 0), []);
+  assert.deepEqual(media.candidates(course, 1), []);
+  assert.deepEqual(media.candidates(course, 2), [course.image]);
+  media.markFailed(course.image);
+  assert.deepEqual(media.candidates(course), []);
+  assert.deepEqual(media.candidates(course, 2), []);
+});
+
+test('a catalog course without a photo stays blank even at recognizable landmarks', () => {
+  const course = data.fromDatabase({id: 'unresolved', title: '서울숲 산책',
+    first_place_cover: true, image_url: null,
+    points: [{sequence_no: 0, place_name: '서울숲'}, {sequence_no: 1, place_name: '경복궁'}],
+  });
+  assert.deepEqual(media.candidates(course), []);
+  assert.deepEqual(media.candidates(course, 0), []);
+  assert.deepEqual(media.candidates(course, 1), []);
+});

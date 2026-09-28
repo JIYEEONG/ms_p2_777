@@ -6,12 +6,14 @@ const { pathToFileURL } = require('node:url');
 const root = path.resolve(__dirname, '..');
 const out = path.join(root, 'artifacts/naver-course-images/review-sheets', process.env.MOOV_REVIEW_TAG || 'default');
 fs.mkdirSync(out, { recursive: true });
-const progress = JSON.parse(fs.readFileSync(path.join(root, 'artifacts/naver-course-images/progress.json'), 'utf8'));
+const progressPath = path.resolve(root, process.env.MOOV_REVIEW_PROGRESS || 'artifacts/naver-course-images/progress.json');
+const progress = JSON.parse(fs.readFileSync(progressPath, 'utf8'));
 const venues = process.argv.slice(2);
 const excluded = (process.env.MOOV_REVIEW_EXCLUDE || '').split('|');
-const decisionPath = path.join(root, 'artifacts/naver-course-images/review-agent.json');
+const decisionPath = path.resolve(root, process.env.MOOV_REVIEW_DECISIONS || 'artifacts/naver-course-images/review-agent.json');
 const reviewed = process.env.MOOV_REVIEW_SKIP_DONE && fs.existsSync(decisionPath) ? JSON.parse(fs.readFileSync(decisionPath,'utf8')) : {};
-const rows = Object.entries(progress).filter(([id, x]) => (venues.length === 0 || venues.includes(x.first_place)) && !excluded.includes(x.first_place) && reviewed[id]?.sha256 !== x.sha256);
+const imagePlace = x => x.image_place || x.first_place;
+const rows = Object.entries(progress).filter(([id, x]) => x.image_url && x.sha256 && (venues.length === 0 || venues.includes(imagePlace(x))) && !excluded.includes(imagePlace(x)) && reviewed[id]?.sha256 !== x.sha256);
 const pageSize = Number(process.env.MOOV_REVIEW_PAGE_SIZE) || 30;
 const esc = s => String(s).replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
 const manifest = [];
@@ -36,7 +38,7 @@ for (let offset = 0; offset < rows.length; offset += pageSize) {
   const number = Math.floor(offset / pageSize) + 1;
   const basename = `sheet-${String(number).padStart(3, '0')}`;
   const slice = rows.slice(offset, offset + pageSize);
-  const html = `<!doctype html><meta charset="utf-8"><style>body{margin:8px;background:#eee;font:14px Arial}.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.cell{min-width:0;background:white;height:254px;overflow:hidden;padding:3px}img{width:100%;height:194px;object-fit:contain;background:#ddd}.name{font-weight:bold;font-size:12px}.title{font-size:11px;line-height:12px;height:24px;overflow:hidden}</style><div class="grid">${slice.map(([id,x])=>`<div class="cell"><img src="${pathToFileURL(path.join(root,'front/public',x.image_url)).href}"><div class="name">${esc(id)} ${esc(x.first_place)}</div><div class="title">${esc(x.source_title)}</div></div>`).join('')}</div>`;
+  const html = `<!doctype html><meta charset="utf-8"><style>body{margin:8px;background:#eee;font:14px Arial}.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.cell{min-width:0;background:white;height:254px;overflow:hidden;padding:3px}img{width:100%;height:194px;object-fit:contain;background:#ddd}.name{font-weight:bold;font-size:12px}.title{font-size:11px;line-height:12px;height:24px;overflow:hidden}</style><div class="grid">${slice.map(([id,x])=>`<div class="cell"><img src="${pathToFileURL(path.join(root,'front/public',x.image_url)).href}"><div class="name">${esc(id)} ${esc(imagePlace(x))}${x.cover_stop_index === undefined ? '' : ` (방문지 ${Number(x.cover_stop_index) + 1})`}</div><div class="title">${esc(x.source_title)}</div></div>`).join('')}</div>`;
   const htmlPath = path.join(out, basename + '.html');
   const imagePath = path.join(out, basename + '.png');
   fs.writeFileSync(htmlPath, html);
@@ -49,7 +51,7 @@ for (let offset = 0; offset < rows.length; offset += pageSize) {
   }
   const shot=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   fs.writeFileSync(imagePath,Buffer.from(shot.data,'base64'));
-  manifest.push({ sheet: basename, photos: slice.map(([id,x])=>({id,sha256:x.sha256,first_place:x.first_place,image_url:x.image_url,source_title:x.source_title})) });
+  manifest.push({ sheet: basename, photos: slice.map(([id,x])=>({id,sha256:x.sha256,first_place:x.first_place,image_place:imagePlace(x),cover_stop_index:x.cover_stop_index,image_url:x.image_url,source_title:x.source_title})) });
   console.log(imagePath);
 }
 fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest,null,2)+'\n');

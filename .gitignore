@@ -38,3 +38,6 @@ artifacts/naver-course-images/*-expansion.json
 artifacts/naver-course-images/source-candidates.json
 artifacts/naver-course-images/routes-plan.json
 artifacts/naver-course-images/review-catalog.json
+artifacts/naver-course-images/fallback-*-snapshot*.json
+artifacts/naver-course-images/fallback-*-before-replacements.json
+artifacts/naver-course-images/fallback-review-*-ids.json

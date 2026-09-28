@@ -1,0 +1,442 @@
+{
+  "course-00055": {
+    "sha256": "75c430fccbf6d7401bfd15bbef461e4c7d90a4b2326bda51d9bbb19ab4819feb",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00064": {
+    "sha256": "675ad9edd70e9e281bbcd1d13639684c0b499345674bf34e27b4c3a02243267b",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00150": {
+    "sha256": "fc0d1f1a58c8a6e61a4a761dac9a5487d5183935e06d15f8a052117d70dbedd0",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00158": {
+    "sha256": "292433834cf8faa247e356a6ea1ea18a7cf1cabc8b5d463f06e471103d01b217",
+    "decision": "reject",
+    "reason": "Same artwork reproduction as rejected image, without venue context."
+  },
+  "course-00162": {
+    "sha256": "faac20f2c8af58881bf73f4737e9d7817962a80aa6a7658fa04f3693d74c2244",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00225": {
+    "sha256": "4a9998b28cbeb98280dbefd905e5bcc80258fc03a8db7f84a7e08a1ad900a403",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00240": {
+    "sha256": "367f3fd134ee781949f4dcde80bcda5b642b8e906da944175a0e033a63c22c02",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00633": {
+    "sha256": "34bae7427f8e703d52b8d9c59607141cb5f979c219cceb8cdc50dea04df509c5",
+    "decision": "reject",
+    "reason": "Posed person dominates exhibition photograph."
+  },
+  "course-00257": {
+    "sha256": "3322fbead44c98da1890660e1036eec9c39f5f5d058a0cd84ec0f902b3d7da3f",
+    "decision": "reject",
+    "reason": "Job-listing screenshot, not place photograph."
+  },
+  "course-00354": {
+    "sha256": "4d107793887a8478b0183e118d4344b519fc306cb52798e005d007b684df9a08",
+    "decision": "reject",
+    "reason": "Corporate agreement ceremony portrait."
+  },
+  "course-00757": {
+    "sha256": "4e241b29ea18d4ebf707d5f3e0f4f6e769e9f3ea6f541f106aae8b8c542b6594",
+    "decision": "reject",
+    "reason": "Posed agreement ceremony portrait."
+  },
+  "course-00264": {
+    "sha256": "264d656616503725934f22ae46bd7a97cc6152d80c0ae3ff2596be2f86b50954",
+    "decision": "reject",
+    "reason": "Opening advertisement graphic."
+  },
+  "course-00290": {
+    "sha256": "34ea4b307b316b014daddea388607e2d358e3342174ec642861306828048c47f",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00298": {
+    "sha256": "3ec1e898cc505befd11e8af5c832cd82cdd2f4fb598815688dfed83ff3628afa",
+    "decision": "reject",
+    "reason": "Coronavirus editorial composite with stock virus illustration."
+  },
+  "course-00362": {
+    "sha256": "573a95d1c44df6c0e7e97f30cc068b0aadd0f2bca83314ed3447d5bb9666e54f",
+    "decision": "reject",
+    "reason": "Illustrated logo graphic."
+  },
+  "course-00937": {
+    "sha256": "fbfefdeb95f384189946be25ce432eda6f06d2194e7ed9f1c3af85ff463e1076",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00384": {
+    "sha256": "78a22585c9120a9c0c8288cf03f0339314786000996b5d9b9875e24955d4acb9",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00385": {
+    "sha256": "9ac56f8d1f05802ba50b0c710e45ff8e5d43c008679e93e4b518e1cf054fb1fb",
+    "decision": "reject",
+    "reason": "Exhibition advertising poster."
+  },
+  "course-00386": {
+    "sha256": "6bf89c3fa200311a5528c1999339d992516d01e27c118599d787fc128fa8bd6f",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00407": {
+    "sha256": "50646fa5f06e94ca1eed82ddf533b3f4376b90a587abca009f0d5e5df8e316b7",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00434": {
+    "sha256": "a1b2167544def603f58c02c3ccd7abfbfe0076a0c45983b55c735eebc4b9505b",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00452": {
+    "sha256": "a63fc694eb8d1c4cd344ae5fe973afccb8881950930af975ec95a11a4196cb38",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00458": {
+    "sha256": "86f3ec88f0189591a389941bdc829aab1e2c07d2a43218a54d88138902bddb6e",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00463": {
+    "sha256": "98738b576139b1d7184d7325598a74019143d7f1219fc0b70a8a0237dd831f1c",
+    "decision": "reject",
+    "reason": "Gallery floor-plan diagram."
+  },
+  "course-00466": {
+    "sha256": "0a1d7be4531043385284903f17877960beec1a523977029e58d4208e14459407",
+    "decision": "reject",
+    "reason": "Posed ribbon-cutting group portrait."
+  },
+  "course-00473": {
+    "sha256": "6e7334a074b07dba055333a45537dad0d1008acf82fb49cf4c749a09216f1bf3",
+    "decision": "reject",
+    "reason": "Corporate meeting photograph."
+  },
+  "course-00487": {
+    "sha256": "988bd22f88207ba71555473dc4a4dffeb234cd5b24b7089eb1a7ed03c61d8c45",
+    "decision": "reject",
+    "reason": "Posed ribbon-cutting group portrait."
+  },
+  "course-00491": {
+    "sha256": "f2314ae6d22effb8ff91e8c927bbfed0032de47dd054e9d7d7abf7a4288c1fde",
+    "decision": "reject",
+    "reason": "Posed ribbon-cutting group portrait."
+  },
+  "course-00481": {
+    "sha256": "0302f19f308ab54bbad6dadf1d7bb0ff22c027b388d7f7bacb55db6759d530b9",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00538": {
+    "sha256": "06bf4140bff180d02cac24b2347363df25cf8b5f94860fff140f45290fe6fcb4",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00634": {
+    "sha256": "5d32d4bc0b890ef0767e60ef3db0192632737c2f6f769eab3f9ba423a6e4eb19",
+    "decision": "reject",
+    "reason": "Restaurant menu photograph."
+  },
+  "course-00482": {
+    "sha256": "078a8426f9af06694c3ebda9c2c1728774f0d33b194f62f9e9afe1f437f51010",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00490": {
+    "sha256": "a1e47451513d4d5e811739a93fbd92b6ca6480cca85ba33a224cdda7b0156c15",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00492": {
+    "sha256": "0cbaa54d219b50a8f59702bb0ac929a9264e0f5e31e9c2a0a4eb97bbe3728f81",
+    "decision": "reject",
+    "reason": "Real-estate price chart."
+  },
+  "course-00520": {
+    "sha256": "cd18987d3541aa620be18760623d3ecf2446744cbf3514af03b9eeb4e72647fe",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00494": {
+    "sha256": "2421719a2d0ee08ba5a50fd79d40ca6acef01bf3473bcb38c9ca6f22b11493f3",
+    "decision": "reject",
+    "reason": "Lotte World Tower skyline, not requested underground shopping center."
+  },
+  "course-00495": {
+    "sha256": "e00f6aad66839f12ac26d48c8f84d1c39e36a966efea402d6808a0538dafa778",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00985": {
+    "sha256": "1bd660683771f75bafa82885217216f2e1e587d48fbdd9d4d3b1b5e8ca0f680c",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00506": {
+    "sha256": "12d00f4c6b6f70e988ef67ec562f16d35965d5d82df09dd17b7c576dbcba540c",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00652": {
+    "sha256": "64f28f73eb6143f0ffb06755723c31e5bac9f8ccc36198758297fe3f6af9c6d9",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00524": {
+    "sha256": "d035f09dc323420a4459978e429138ae34e716796a9e195a1cf3f91252d16f90",
+    "decision": "reject",
+    "reason": "Garden photograph lacks identifiable street/venue context."
+  },
+  "course-00542": {
+    "sha256": "85746c59f793a7cfef9bea0c3816f0a07be4d6cbe2aaf92f6c41f232a5b356dc",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00543": {
+    "sha256": "8769df264af43589a75edfd070044d277959850d5a4202625f8b98e411446019",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00645": {
+    "sha256": "96b032dae14b1b6c29decd6dec3b8c3e9582f3a7c7320b8f74ee90c9d61011b8",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00559": {
+    "sha256": "a74efef82f43b0407e329aa4f9f41f15348247a34f5408c2a404cfbc94499b9a",
+    "decision": "reject",
+    "reason": "Generic Pexels stock shopping street photograph, unrelated to named venue."
+  },
+  "course-00693": {
+    "sha256": "13108977f4c8fb6e64c30584173623360096215047472600faf3f06d852328d7",
+    "decision": "reject",
+    "reason": "Miniature figurine product photograph, unrelated to actual venue."
+  },
+  "course-00562": {
+    "sha256": "755372fc1764bd3c991cb388c0840ecad4457c75be33c610676d3394b598a4c3",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00576": {
+    "sha256": "de0365f24387bca8f141132bebf5de395f35049a638fba0d9b0f7602084aa88b",
+    "decision": "reject",
+    "reason": "Route map graphic."
+  },
+  "course-00577": {
+    "sha256": "eee9d7f059b57b530984a906719f250ddb3ed28d5287eb951f34bc8fe2ab29e2",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00750": {
+    "sha256": "0b53d2164f0c784e040390b537e39a86f738a6ae914f8c4056a150014bf52848",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00764": {
+    "sha256": "7bff67ca427abade55d275c6a32f36125a7555a366023d4b1cb55ac6ecf07278",
+    "decision": "reject",
+    "reason": "Packaged coffee product photograph with ambiguous multiple branches in source title."
+  },
+  "course-00897": {
+    "sha256": "519b55651b8bfdaf26443fec02ecf2d7e2de50b0d9ecb63d2babff6afddd105b",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00592": {
+    "sha256": "491e3c52f871c7b68ca23dbbc1af1460500791df2286f2f52f1498cc2eea369a",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00605": {
+    "sha256": "efcbcd7a28510636f037c481cbcb4ae0b6facc517388cea62dafd77541e7f4c5",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00635": {
+    "sha256": "9216e4c36e96caa42a662d69fea1add5d84a1743036a27b5a9a257bc5fb0a36c",
+    "decision": "reject",
+    "reason": "Collage of storefront and food."
+  },
+  "course-00636": {
+    "sha256": "1d423ea1d046d393d472d85783b053543be2081647f20bcffa0e32f7458f5de1",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00847": {
+    "sha256": "f76b324648c3d25136034430591856ca3fb041df797121fab3629c76bbd80332",
+    "decision": "reject",
+    "reason": "Police inspection portrait, not requested street photograph."
+  },
+  "course-00593": {
+    "sha256": "3e10a73bcbb97a2e437620a3516c588ae0e546a82601f6671c0a2f4ac6e3f749",
+    "decision": "reject",
+    "reason": "Buffet restaurant display does not visually match baking studio."
+  },
+  "course-00597": {
+    "sha256": "8439a6fef1aa48a663cdb95ffb4255a6dc5217d4d1fbf6a4b4625dc821db5c5a",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00663": {
+    "sha256": "d4c7bbbbfa41853677a2d0c3284e58c4e20ffaf5aeb83308689384cb1bf97028",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00952": {
+    "sha256": "bc968be01e3d27425738bcb937f735682ba59e4b1d84a356477d88610d8051eb",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00969": {
+    "sha256": "d200d2f0b8b99ddb617626b901f85bb97b36a868685eeaf575b13f6d6769f4a6",
+    "decision": "reject",
+    "reason": "Generic DJ close-up, not a photograph identifying Hongdae club street."
+  },
+  "course-00614": {
+    "sha256": "960b04d69def3f883d953a53da7aa7adc16394d6f2129c2701453c57f402b96f",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00616": {
+    "sha256": "1221b45d59cc0f4d0afab1d5e8eb4bccc391ee0637f4607f026ba3b8166e5a99",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00620": {
+    "sha256": "6603225fe99805ebad4ab404544b45c3cb7dcc899babb1774a0d769dd0a35dd1",
+    "decision": "reject",
+    "reason": "Vacant closed cafe facade with lease notice, unsuitable current venue thumbnail."
+  },
+  "course-00641": {
+    "sha256": "1e35cbe434f61fdd6f502a55b1336ccf9123d7cf30fa5e245cda8316bef84424",
+    "decision": "reject",
+    "reason": "Archival street photograph without identifiable cafe venue."
+  },
+  "course-00629": {
+    "sha256": "9017346fda5c74280912f83389ffc5fc90fc35bc7ee9c698a8c29d7a2a341d10",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00708": {
+    "sha256": "5f8fd35df3f1fbc9fde1c19d4899fe0d00ada1a144b5e0f30a8d470c1d5821ef",
+    "decision": "reject",
+    "reason": "Cafe promotional collage, not Deoksugung stonewall path."
+  },
+  "course-00717": {
+    "sha256": "07f421b599e866153ad01f7f45f8b5b853ba6c48f46a6398f1caaac4e2dbcf11",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00719": {
+    "sha256": "ff3710f64618980dd0dc0fbe2c500e5b47696ad7fe0ea9005e206f63522bce7a",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00777": {
+    "sha256": "ad4e1cc1f8ef18c8a5cfe455c3aaa17e72c278d6a74999cfcdc27eaa01a78cc3",
+    "decision": "reject",
+    "reason": "Anime promotional screenshot, not immersive exhibition venue photograph."
+  },
+  "course-00798": {
+    "sha256": "0cf9e2e1173e2343b5558f2c83512a92bbf2898ed1284212008ba767ab429ca7",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00867": {
+    "sha256": "bf5de0e0ad278c3677657f60919e948ebdd0c3210be7e39d7cf232fef718d2a0",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00945": {
+    "sha256": "4d01b36ab16b665114d7d760ece3a37699d05e444ec466f71839c47f1351eae1",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00953": {
+    "sha256": "12beb4af77fd5eda21b7f111ce044dd31c999b6158a70cd58847694fd37da0bf",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00198": {
+    "sha256": "9f966ccc77c49338b67d8b015a06e3882c6fa0091cb1adc427ddda793dd8c6e0",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00323": {
+    "sha256": "9ee37a4fced4fa9e8c503c6c3b4509d67867122157265571076e7e4d3cef9769",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00570": {
+    "sha256": "934efe3888680b6f4952437dcc5d4e2e0b91b64ffab27b102745e8ad8a3cb759",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00700": {
+    "sha256": "83e9978f0ea5ff0ce7fe3c00045014c40898e628ef1db268a4422402a7f3c7b7",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00802": {
+    "sha256": "98ca6d1827ccb4e911d41d1e5ff38b5ea0c8709b551979e0b6e831f4a232d1fd",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00370": {
+    "sha256": "cef9e788ef06e8fe7d4812e36177703590d550c9aa4e7aedc6d18c848899f868",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00446": {
+    "sha256": "c892bc90cdfe609682df9fd634f6ed2186ff771dd40c9d2998ab11a9e96d72d6",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00451": {
+    "sha256": "1ce62b1395ecffa7ccb4730c34871103a281fd69ebd8a2e90554e579f5f5e5b6",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00573": {
+    "sha256": "260e886b60fed152fe784d78b311b2e23765215f428c23d88ef4bc008f815170",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00591": {
+    "sha256": "6960381c14614ecd615ef73e25719e66280d799af2eb1dae2b22c6492c34252f",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00601": {
+    "sha256": "f20fef9b93b22c9527e36bbeb2c152fe117cfaadfd0bee09e78751077c6d4b8f",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00770": {
+    "sha256": "cce4897ccee95ad04fc45c80d2d76368610552698c9a27ac57b6312fea088bc1",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  },
+  "course-00975": {
+    "sha256": "3bb6a2175dffd7825686e81914d9083253573bf20f52434c283e3c4119c1edf2",
+    "decision": "approve",
+    "reason": "Visually reviewed: venue exterior, interior, exhibit, view or food photograph; source title matches image place."
+  }
+}

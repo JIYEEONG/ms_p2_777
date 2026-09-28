@@ -88,6 +88,42 @@ test('the active app never replaces a failed catalog cover with a category photo
   assert.equal(app.getCourseStopImage(course, course.stops[1], 1), '/later-stop.jpg');
 });
 
+test('the active app preserves the destination thumbnail and credits its actual place', async () => {
+  const record = fixture('destination');
+  Object.assign(record, {cover_stop_index: 1, image_place: '서울숲', cover_role: 'destination'});
+  record.points[0].place_image_url = record.image_url;
+  record.points[1].place_image_url = null;
+  const app = appContext([record]);
+  await app.loadCoursesFromDB();
+  const course = app.allOutingCourses()[0];
+  assert.equal(course.coverStopIndex, 1);
+  assert.equal(course.coverRole, 'destination');
+  assert.equal(app.getCourseCoverImage(course), record.image_url);
+  assert.equal(app.getCourseStopImage(course, course.stops[0], 0), null);
+  assert.equal(app.getCourseStopImage(course, course.stops[1], 1), record.image_url);
+  assert.match(app.coursePhotoCredits(course), /도착지 사진 · 서울숲/);
+  assert.doesNotMatch(app.coursePhotoCredits(course), /첫 장소 사진/);
+  media.markFailed(course.image);
+  assert.equal(app.getCourseCoverImage(course), null);
+  assert.equal(app.getCourseStopImage(course, course.stops[1], 1), null);
+  assert.equal(app.coursePhotoCredits(course), '');
+});
+
+test('the active app attaches a waypoint cover only to its middle stop', async () => {
+  const record = fixture('waypoint');
+  Object.assign(record, {cover_stop_index: 1, image_place: '서울숲', cover_role: 'waypoint'});
+  record.points[0].place_image_url = record.image_url;
+  record.points[1].place_image_url = null;
+  record.points.push({sequence_no: 2, place_name: '경복궁', place_image_url: null});
+  const app = appContext([record]);
+  await app.loadCoursesFromDB();
+  const course = app.allOutingCourses()[0];
+  assert.equal(app.getCourseStopImage(course, course.stops[0], 0), null);
+  assert.equal(app.getCourseStopImage(course, course.stops[1], 1), record.image_url);
+  assert.equal(app.getCourseStopImage(course, course.stops[2], 2), null);
+  assert.match(app.coursePhotoCredits(course), /경유지 사진 · 서울숲/);
+});
+
 test('automatic hydration leaves fixed first-place catalog photos alone', async () => {
   const app = appContext([]);
   let unrelatedSearches = 0;

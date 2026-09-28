@@ -375,12 +375,15 @@ def publish():
             raise ValueError(f"Image changed after review: {course['id']}")
         course["review"] = "venue-source-match; visual-reviewed"
     with (WORK / "courses-with-images.csv").open("w", encoding="utf-8-sig", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["course_id", "title", "image_url", "장소들", "카테고리", "검색어", "원본이미지"])
+        writer = csv.DictWriter(handle, fieldnames=["course_id", "title", "image_url", "장소들", "카테고리", "검색어", "원본이미지", "사진_장소", "사진_역할", "사진_방문순서"])
         writer.writeheader()
         for course in completed:
             writer.writerow({"course_id": course["id"], "title": course["title"], "image_url": course["image_url"],
                              "장소들": " → ".join(p["place_name"] for p in course["points"]),
-                             "카테고리": ", ".join(course["tags"]["category"]), "검색어": course.get("query", ""), "원본이미지": course.get("original_url", "")})
+                             "카테고리": ", ".join(course["tags"]["category"]), "검색어": course.get("query", ""), "원본이미지": course.get("original_url", ""),
+                             "사진_장소": course.get("image_place", course["first_place"]) if course.get("image_url") else "",
+                             "사진_역할": course.get("cover_role", "first") if course.get("image_url") else "",
+                             "사진_방문순서": course.get("cover_stop_index", 0) + 1 if course.get("image_url") else ""})
     write_json(MANIFEST, data)
     print(f"Published {len(completed)} courses with {len(photographed)} reviewed photos: {MANIFEST}", flush=True)
 

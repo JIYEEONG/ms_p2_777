@@ -3700,8 +3700,7 @@ function getCourseCoverImage(course) {
   return course.image || course.stopDetails?.find(stop=>stop.photo)?.photo || getMatchedCoursePlaceImage(course.name) || [...(course.stops || [])].reverse().map(getMatchedCoursePlaceImage).find(Boolean) || getCourseTagImage(course) || "./assets/course-cafe.jpg";
 }
 function getCourseStopImage(course, stop, index) {
-  if (course.firstPlaceCover && index === 0) return MoovCourseMedia.candidates(course, 0)[0] || null;
-  if (course.firstPlaceCover) return course.stopDetails?.[index]?.photo || null;
+  if (course.firstPlaceCover) return MoovCourseMedia.candidates(course, index)[0] || null;
   return course.stopDetails?.[index]?.photo || getMatchedCoursePlaceImage(stop) || course.image || getCourseTagImage(course) || "./assets/course-cafe.jpg";
 }
 function getCourseTagImage(course) {
@@ -3725,7 +3724,13 @@ function getMatchedCoursePlaceImage(stop) {
 
 function coursePhotoCredits(course) {
   if (course.imageSource?.source?.startsWith("naver-")) {
-    return [
+    if (course.firstPlaceCover && !getCourseCoverImage(course)) return "";
+    const photoPlace = course.imagePlace || course.imageSource.image_place || course.stops?.[course.coverStopIndex ?? 0];
+    const photoRole = course.coverRole || course.imageSource.cover_role || "first";
+    const roleLabel = photoRole === "destination" ? taxiMapText("도착지 사진", "Destination photo")
+      : photoRole === "waypoint" ? taxiMapText("경유지 사진", "Waypoint photo") : taxiMapText("첫 장소 사진", "First stop photo");
+    const placeCredit = photoPlace ? `<span class="course-photo-credit" data-i18n-skip>${roleLabel} · ${escapeHtml(photoPlace)}</span> ` : "";
+    return placeCredit + [
       [course.imageSource.original_url, taxiMapText("사진 원본", "Original photo")],
       [course.imageSource.original_post_url || course.imageSource.search_url, course.imageSource.original_post_url ? taxiMapText("사진 출처", "Photo source") : taxiMapText("네이버 이미지 검색", "NAVER image search")],
     ].filter(([href]) => /^https?:\/\//i.test(href || ""))

@@ -1,0 +1,162 @@
+{
+  "course-00264": {
+    "sha256": "629bd636f85415295bf5d78772ee18ee573634a4b8c01ee74a0552defc7081e9",
+    "decision": "reject",
+    "reason": "Memorial sticky-note display rather than representative gaming venue"
+  },
+  "course-00279": {
+    "sha256": "42603922a9df6185b17437f76b9356cc5fea7767818f235e853881d7ec98b862",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00338": {
+    "sha256": "f10c027b9332ec0c5c2bb8963870829bb6ecaebbc1f868bb154f630921067aba",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00298": {
+    "sha256": "cc88c584acc11d63b8d8f67fd7ddb9410491933a070143a4d8295f0c643ccb03",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00385": {
+    "sha256": "7acde13c3f55b23c0e68f422c20eb5fc41c86a81b2253ec66c49c0eb14e59cf2",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00428": {
+    "sha256": "61fdfb5dc6f3e3018a98cf284733b6a4363ad1b3001953300a23b49c0be8d0cb",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00494": {
+    "sha256": "c1ec6bdc9e4d19a6bf11c2b48c22f67f60ac0bd68406d16fd37d32fe7b38da3d",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00777": {
+    "sha256": "43032b9add45d8e71f6a79dfabaa6512a3cf720f5ad1c01e5016bd951ec6aabb",
+    "decision": "reject",
+    "reason": "Advertising poster"
+  },
+  "course-00559": {
+    "sha256": "0f30591a725c932acc3c16ce4a4e189545840fe3ff441f912bfd47c53d25fe84",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00633": {
+    "sha256": "abc3ac7be0e7924680adc3ffc9d8fec50bce14702c97d9037bbdd240dc27c990",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00635": {
+    "sha256": "a066f4694cf92ac43a5196a12e37aa2ab3b02b5681f3ebb9cf627093a14d6f2d",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00741": {
+    "sha256": "9086754b68de28a0a61ca4155dff9189bea763aab8d7b0e35ba0615946d0d4db",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00751": {
+    "sha256": "0e7fd992f91f311f58de50a25e5c5c53d28004a19735f495276f78161dab5cca",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00810": {
+    "sha256": "42cc97465d1bd56b3eb8307ccce98c8e8dc0ee95b3fc491e650e14e71bfc3afc",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00812": {
+    "sha256": "3bbaa69055855d7d2418d9e6c08033d6668a9909a2ac82f3b093e8f62a50bad7",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00847": {
+    "sha256": "d27dcfaa4188d5e8b7d97f4824e01fc393f9a780820be728bb90c3aed29984cb",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00907": {
+    "sha256": "337cb2db2b540a78eef4cd3ebe3d59c33036532942c324526ffefde660e41e61",
+    "decision": "reject",
+    "reason": "Advertising poster"
+  },
+  "course-00912": {
+    "sha256": "8bde48ccbc3926cb1e9e45ecd8faaab5e41e291dfe638653b300a7027504e83a",
+    "decision": "reject",
+    "reason": "Menu board"
+  },
+  "course-00941": {
+    "sha256": "9d693ee112fc471093228afe48b1ca1e58367a23c1940c67272e0242ea8ddb64",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00969": {
+    "sha256": "22e2a8732f106d27d0bf54f4aaa7ecca6a75631d7aaf17153912180d85d4326b",
+    "decision": "reject",
+    "reason": "People-dominant group event photo"
+  },
+  "course-00982": {
+    "sha256": "acaee5bf06205356c60fb8bc51c8754bfa349807056c4da8208a20e85d107ee8",
+    "decision": "reject",
+    "reason": "Partially eaten dish, poor representative thumbnail"
+  },
+  "course-00993": {
+    "sha256": "b9f8b9d642c3c09ecc8f260df05b44ada9e232f15a87bcde9121313dc28c8cab",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00252": {
+    "sha256": "56a9171c99f1c460a42ae6b78b966216e54d117353e20cc3cecb35893857d46c",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00257": {
+    "sha256": "88f801a49d84d43209e4faac2d47e124e951bf08009b9ab51414202333622223",
+    "decision": "reject",
+    "reason": "Promotional anime collage"
+  },
+  "course-00415": {
+    "sha256": "4f78cf1b5fffcd23417aa3b188860ee7f2356be999c673ec55a631b1b45943d5",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00466": {
+    "sha256": "c50dbaff5c5f9a85e4b8c851b28539dda08c3a3f44945217fd58781917e30f86",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00473": {
+    "sha256": "8695d0c7705e38cb71016328e2c0efa0892aa201bf89c5b1410581ddce4349b5",
+    "decision": "reject",
+    "reason": "Restaurant meal does not depict selected street"
+  },
+  "course-00832": {
+    "sha256": "85c8451cbb22fe3385acdccbea8bb0d701230a5dde594659f74f52062473c1ee",
+    "decision": "reject",
+    "reason": "Government support logo"
+  },
+  "course-00641": {
+    "sha256": "24500a54f5cc1bf7c79611cae15dcdfc6cd4046fa3c06d68f043d583ce607b5e",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  },
+  "course-00693": {
+    "sha256": "1de19fef640d3a2cd617f4b5337b9b6ca34b00b883c925d159043d59859e5308",
+    "decision": "reject",
+    "reason": "Generic stock shopping photo unrelated to exact venue"
+  },
+  "course-00813": {
+    "sha256": "14511acd82e05e1b37c598732db2e5c782db4270f0316dd69101f02a559334a1",
+    "decision": "reject",
+    "reason": "Event poster with illustrated character"
+  },
+  "course-00886": {
+    "sha256": "b34c41c29d33a89ffa3ac585a0d0c13baa8e4f7a8c14a8806f39ad40e0d1256a",
+    "decision": "approve",
+    "reason": "Visually reviewed real venue/food photo; selected branch/location matches source"
+  }
+}

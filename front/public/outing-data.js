@@ -53,6 +53,8 @@
       id: course.id, name: generic && namedStops.length ? namedStops.join(' → ') : originalName || '나들이 코스',
       _originalName: originalName,
       firstPlaceCover: Boolean(course.first_place_cover), preserveCourseIdentity: Boolean(course.preserve_course_identity),
+      coverStopIndex: Number.isInteger(course.cover_stop_index) ? course.cover_stop_index : 0,
+      imagePlace: course.image_place || null, coverRole: course.cover_role || 'first',
       imageSource: course.image_source || null,
       desc: course.description || '', image: course.image_url || null, author: course.author || 'MOOV', createdAt: course.created_at,
       stops: stopNames,

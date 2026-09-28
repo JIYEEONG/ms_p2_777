@@ -1,0 +1,492 @@
+{
+  "course-00720": {
+    "sha256": "060e9197eb7edb434f3a5382f7c6963f2105c1ef1d562a3780bc9b4bca752363",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00968": {
+    "sha256": "1a285d03832532c818593448ec1ab66b5dfb8b6d927282b06ab2759808185882",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00721": {
+    "sha256": "6beccd53c40c667d4e32dd151ee340d2d2a8e353445bc25a0c9a66b241ff9aad",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00754": {
+    "sha256": "930b52e6652d3466d4bb711f8c9d9ff19df64f1e04c08067c6daece14790bcd5",
+    "decision": "approve",
+    "reason": "네이버 해당 업소 사진 출처와 지점명이 일치하는 실제 음식·음료 사진이며 가격표·광고 문구 없음"
+  },
+  "course-00730": {
+    "sha256": "c44d5dd9da6e747e56e72583e6ae95dc6c5c9496d5f48caa142ef438238277f1",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00733": {
+    "sha256": "8c7722f7f033273f8bbc228a2e944a5222bc8e3aa6ad51217a792e1233593d24",
+    "decision": "reject",
+    "reason": "게임 캐릭터와 GALLERY 문구의 홍보 그래픽으로 장소 사진이 아님"
+  },
+  "course-00735": {
+    "sha256": "8f5c1da4e93ab9b85f5bc5caa9fc5fae97a993fd36e7660148b585bfff2a9f44",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00951": {
+    "sha256": "1437a0884dc183266f98a9259638de2bccc77ef4f60b664943737a5c1673123b",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00739": {
+    "sha256": "0d5565036132e00a223fdec110a8df7a086a4dceb0298128f0f44f35407f89b0",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00759": {
+    "sha256": "df7a56e902e9d85c71f38abfe238263710608d2ab11fec89a158e75ffe8072ee",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00812": {
+    "sha256": "bd3b49626ceaf374ebba4e5c507a3fe490628c28190f7597b9d10e767b86bcd8",
+    "decision": "reject",
+    "reason": "비문 글자만 확대한 사진으로 장소 전경을 식별하기 어려움"
+  },
+  "course-00852": {
+    "sha256": "a9a113ae335bf1e0f3ec89106bfb9709d9eb4c821c59a5b5a83efa57b2191b25",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00931": {
+    "sha256": "f62dae9573afabeac2b02bde08fa3ee167018eff237bf009489363a8c345a4ab",
+    "decision": "reject",
+    "reason": "기념비 앞 행사의 의장대 인물이 크게 차지하는 행사 사진"
+  },
+  "course-00741": {
+    "sha256": "445d970906c8812ed1aef099946271d2e246db878e27e2ed9ee3c0b29cd6362c",
+    "decision": "reject",
+    "reason": "공룡 그림만 담은 작품 중심 사진으로 전시장 장소 맥락을 확인하기 어려움"
+  },
+  "course-00751": {
+    "sha256": "8cafd732cbc8e768a536f14116da8db89920006320971862284438c67a775a82",
+    "decision": "reject",
+    "reason": "트릭아트 작품 중심 사진으로 전시장 장소 맥락을 확인하기 어려움"
+  },
+  "course-00745": {
+    "sha256": "a97de7e7ed19062934ce36771e81a6df2f7859fad61954ddbaab136d9a942fc2",
+    "decision": "reject",
+    "reason": "물컵과 반찬만 담겨 라멘집 장소나 대표 음식을 확인하기 어려움"
+  },
+  "course-00791": {
+    "sha256": "2b396a27fa04e353976667ad8695577f50aa3c39878c95ae4ba1285d2b91822c",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00800": {
+    "sha256": "df27c1c2c98312ca849eb9ea96a54f4a093f8d330d2371cb99517340709dd4a3",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00816": {
+    "sha256": "6dec5f7cfb24cf1f5260ce5c535f404a5c06464c77b901d02ee609f59a5b0607",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00926": {
+    "sha256": "57693caeb0b2fc687e345ef985280c0f5d1bc304d7f68d3b91d1eed75225424b",
+    "decision": "approve",
+    "reason": "장소명과 검색 출처가 일치하며 실제 매장·음식·방문지 장면이 확인됨"
+  },
+  "course-00961": {
+    "sha256": "0434794b06763f10f28328cfcde17f84cbeaab0362de54138e5edc49bf8572b3",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00977": {
+    "sha256": "90199f84ad2c2f578312787230cc762f2040c016770b5d3ec4b56063d7032524",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00989": {
+    "sha256": "6b202f1bb4ea6e41949d0d88bacc060bd80feab2a8ddefd203025ac08b71008d",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00748": {
+    "sha256": "f9d348cd6c0652452a48dd468d9ad32b4c712bebd3321b89bce2b3503720b52f",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00760": {
+    "sha256": "fe25534276a0a115074f900da6e30cd1d9673ebb690e2f2e2051b6d1438c03a2",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00773": {
+    "sha256": "989d74a93f1a6084474cdac5802372c53f3b886e55637f0c80182dc5965e23ba",
+    "decision": "approve",
+    "reason": "확대 확인에서 N:NEWS 박물관 간판이 보이는 실제 건물 외관"
+  },
+  "course-00766": {
+    "sha256": "cb2e45f067e471fdd1b5991d9ff3b8cd883b6cfb5e62c47ecb42a5fa7a1c986d",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00781": {
+    "sha256": "6fd3aaad648207b48acffc2432cda57e79e9401eca704fe33f485cd0743c0782",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00786": {
+    "sha256": "7b491aace4c28dbab236742ed8d1e60e347852ade710c27ccdcf5ec08031ba68",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00894": {
+    "sha256": "33aeb3029acf962e5d49e0778547df4870836de2fe56c40787c5c0c5900194ff",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00810": {
+    "sha256": "5fc8a2b814beb04aee52bf564a096a518da8df64aa6b84e1cdcba7321b3e04a4",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00959": {
+    "sha256": "8935cf66e487c656027ac6b84f863d6f1b5cc2065998c686b70384622c6e0994",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00818": {
+    "sha256": "993562f745a8a6061395fc99b78deb64315e4b26591315efc52cea3e84ff4b7f",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00839": {
+    "sha256": "e5823cdb6fa91801eb2f95bfba6f06ff222807a356b8c36975195ef88185e599",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00846": {
+    "sha256": "b79d27222aa0b5ccad2b13703fddd766de9f20fb22bc8e455196eda9b7404f5e",
+    "decision": "approve",
+    "reason": "네이버 해당 업소 사진 출처와 지점명이 일치하는 실제 음식·음료 사진이며 가격표·광고 문구 없음"
+  },
+  "course-00849": {
+    "sha256": "9491c48ede0114a069d07d3e8bb50fbdfd07c559c79d55986500b48e5f235358",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00854": {
+    "sha256": "c9c1a70b1e07a45e05b39376466f785b6eabee4123ae432a311b1cf5337edaeb",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00857": {
+    "sha256": "de6415e46ee0ec374e0c5a9cff9c86cee4643b77eb553faef298256c1cf69b3d",
+    "decision": "approve",
+    "reason": "확대 확인에서 목멱산방 남산타워점 간판이 명확한 실제 매장 외관"
+  },
+  "course-00860": {
+    "sha256": "d243453fcd6010615a9490ab4fe6148b1b9d939c70fad500fdfeb4b44012c867",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00866": {
+    "sha256": "9fc92d1dd8c3dd21ba71a4ac1f782b1dee9ead0e2b10f90a9a8fbef2b3abea94",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00868": {
+    "sha256": "7aef101ebc905632a8b1852c258aa7b9e699bb85e6bd0738ce9bdc2145c3934b",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00876": {
+    "sha256": "c63bd306f735b4bb586dd705b8a69e02bb98eea61587f2fe28071c9cf518ff83",
+    "decision": "reject",
+    "reason": "전시 안내 포스터로 실제 장소 사진이 아님"
+  },
+  "course-00880": {
+    "sha256": "adeb1e21a36777d5d628e99dabb635a9568b8462571cb8736825cf776f766a3c",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00930": {
+    "sha256": "f1fa1ecd38127e711e9ba4f5117dc805a49c881cec1f264219665f7f77ab0aa1",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00955": {
+    "sha256": "8ddbc6a0747e8d00bd70e96b7f023c9a582050c604afd5a2623f7c1e3fc83e32",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00907": {
+    "sha256": "116e11b77bbda8a061a05286dc6190a3f398f69485033b6a175212c8ecc5f4e0",
+    "decision": "reject",
+    "reason": "인물이 든 만화 캐릭터 인쇄물 중심으로 쇼핑타워 장소 사진이 아님"
+  },
+  "course-00908": {
+    "sha256": "554c356a1404361aad3ecea548e92b530d91d24f9b9849255b6abc485d1faad9",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00911": {
+    "sha256": "86116c2dccb8d9c79d5b271d356633cf7607333e9a7533b136097854b04ed06e",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00994": {
+    "sha256": "54dba5c35edb8e8d135d8a8d54b3df4a449545a70c08158cd14edc108b7caa0e",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00912": {
+    "sha256": "a12878caf23758100b05f3760e1251177f4455eaf4689253efb9253e6eedf41d",
+    "decision": "reject",
+    "reason": "전시 홍보 포스터로 실제 장소 사진이 아님"
+  },
+  "course-00941": {
+    "sha256": "47169f35cc3303038d3bd2849db00930a78a877850e5b77ddbdb7b1bc0c95ffb",
+    "decision": "reject",
+    "reason": "인물 중심으로 합성된 전시 방문 사진으로 장소보다 인물이 강조됨"
+  },
+  "course-00922": {
+    "sha256": "e8cbf8e11c1079df214cb0c0f2c2e2b210fde1199a72cabda65fc20659f9b4fa",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00925": {
+    "sha256": "e9920073ce6738ba4633ee2421a1c31a0c66be3ce5b6e9bba9c6e1029ce06eee",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00947": {
+    "sha256": "8f1914ba225a5a0a0ffc0d9576b60b82c16bda8cf892f58f7b09fa452652109a",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00948": {
+    "sha256": "cdd9fcbbab852cd18f458a16991f59514c2197bb70420fcdae61148318500b68",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00956": {
+    "sha256": "25b9bb7cf43eea43b3da2ad61689a3451445f9575b0870a3f31f198b93c31b16",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00962": {
+    "sha256": "1749a1cf08033b26d7582e238452e30e96b780b1468af8d2fb7746c6cdfa8a4d",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00966": {
+    "sha256": "9d11e8922d0da7dc63c955a75368e2b1c753141e68a4c51b4af1a31245373d56",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00978": {
+    "sha256": "3d49192828fe9c11d1db4f29c975936e78b0d0ed85b2f813a5401030c3e29f2e",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00982": {
+    "sha256": "0ac8f982dd30304137a16be3d45d719ea4305df4f12ca7371f62088e7ac643d4",
+    "decision": "reject",
+    "reason": "상권 지도와 설명을 담은 인포그래픽으로 실제 거리 사진이 아님"
+  },
+  "course-00993": {
+    "sha256": "a51c4789c175d2a0e4fdacac0e608e2b62544b315f6b9ca618bd3e059e328a4a",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00180": {
+    "sha256": "962e6c3232588128042d7429b0372891b4da1631fb285d967755b98f8560205c",
+    "decision": "approve",
+    "reason": "네이버 해당 업소 사진 출처와 지점명이 일치하는 실제 음식·음료 사진이며 가격표·광고 문구 없음"
+  },
+  "course-00853": {
+    "sha256": "1636c901546c4df621d6f3cbccc05e8bc632637ddb98661b909e6e1ca6119831",
+    "decision": "approve",
+    "reason": "네이버 해당 업소 사진 출처와 지점명이 일치하는 실제 음식·음료 사진이며 가격표·광고 문구 없음"
+  },
+  "course-00238": {
+    "sha256": "077d40012459924f723b1892ae45be7799f33020a0e47614c645212b5eb37cfb",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00681": {
+    "sha256": "237afce104e2035eeb8e213a5ea9d5e3b95be42c5b9024ca7adb0c975f78db3a",
+    "decision": "reject",
+    "reason": "화분과 인형만 담긴 장식 사진으로 카페 공간이나 음식을 확인하기 어려움"
+  },
+  "course-00732": {
+    "sha256": "6ff939326b86c6d38adf75463df3a5389283cfb2561c85d72bc17033ece056b0",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00282": {
+    "sha256": "7238f3fee2e129650a19bc5293f10446957b128d0f9b7df0b5d4dba709f52e8a",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00305": {
+    "sha256": "0e0b9cc991dfbce0629062a7de6a312f693c595ba391b22345185ae9623ebc5f",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00814": {
+    "sha256": "cb531b166454315adb4f9bf26807f853ccb229424980fd244931b91983ab37c1",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00845": {
+    "sha256": "e062e4e517d72faaa5fb4ef061247dfd20ab72a93dadf20279cc923d87ce3ecc",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00855": {
+    "sha256": "c115087134d8b6ea6cc0514295f2f579b880e4205693c41c776ddeab3180ea1f",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00355": {
+    "sha256": "7a70dd6053b1bcb78be28802646898a5fbe9176993b0e9e19b11dfae5475c1a4",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00834": {
+    "sha256": "eed0bc9f482af24d188c2a657bd84c2696dc813dd94ef6384ba962fca5d44920",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00893": {
+    "sha256": "bdb0fc065ee20faf5cb36ac2b4135c046d1b41b40f12bdfa8bb4cd3d5644f238",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00935": {
+    "sha256": "f47783890b5ecf399876192ca3e1206ac1acde048077be212e2433ab6eb185d8",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00359": {
+    "sha256": "2eb3c67633d324e76af11c59d201ffe824b713f7619879d115b6c7cadee6c091",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00415": {
+    "sha256": "6e9cfabf22387b97fc2fec2049bb33fda5c2fcf60d16b3a717bc5dba9e55a1d2",
+    "decision": "reject",
+    "reason": "입점 음식점의 음식만 담겨 파스텔시티 건물·쇼핑몰 장소를 식별하기 어려움"
+  },
+  "course-00883": {
+    "sha256": "5111371953951b937b891c82507715dbd9d0d11e45816e372b1585d2cfdaef34",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00416": {
+    "sha256": "118123559deecf52c086e555f8d495b2c854fc0f900463391b575db8d7043203",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00429": {
+    "sha256": "011745b980af41496647d7e98329730e4db6ef25cc2de23f0607b9f1f0982c1e",
+    "decision": "approve",
+    "reason": "출처 장소명과 일치하는 실제 매장·음식·거리 또는 전시장 공간이 확인됨"
+  },
+  "course-00439": {
+    "sha256": "b02a28c053f3d2b1da71d5feed709f1b9712c10eb3ce083d94c134d578bb2180",
+    "decision": "reject",
+    "reason": "쇼핑몰 출처의 브랜드 텀블러 제품 이미지로 실제 카페 장소 사진이 아님"
+  },
+  "course-00442": {
+    "sha256": "445813b49afe974a8a9924ebb3825c9868e3c8e3f0c40640820e3ce218f5921c",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00457": {
+    "sha256": "d20eddae8aca9f556012cd473c60b823e0b05ebe5d251bdd9221561ce19d4ed0",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00900": {
+    "sha256": "17b9f53320ff72b94f1274e3e81c661433d4779381541a9affb6da9993aa0eca",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00906": {
+    "sha256": "094f62035ccc9c7dd85f6d2b2857db5a8115ae779843a7b85478ae1738078b8d",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00934": {
+    "sha256": "2e60e6c3bcfd11f76a3eb182ea2512371a48125d79322bd94bc8ff473c99a1e7",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00609": {
+    "sha256": "e86809c968e6140854b021dc9d23d3d1b4dbfffa4d27b46e5c9d8f1da56dc154",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00694": {
+    "sha256": "a3b360f81cbeebdfdcb2ff6802907aeb460320bf4c2d6d98e8a1481e11dcfeff",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00725": {
+    "sha256": "ea4cbd4e080e5b18747a8fa565ac9dc333bd5209bdaf3e9b2af5856b4c5f2ece",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00765": {
+    "sha256": "d79955bf4d19bd9ed38a0eb52edabdb9e34957bc865f1a63c758f12ae7f08efa",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00806": {
+    "sha256": "2c429699f7ba7d19ed5bda009be288b898bd41140ecca87833692d20f2dfad4e",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00813": {
+    "sha256": "898559526574ec825217dfea84e8d966ca0d190adec7bb5f5b154b08d88da04e",
+    "decision": "reject",
+    "reason": "GOCAN 브랜드 로고만 있는 이미지로 갤러리 장소 사진이 아님"
+  },
+  "course-00826": {
+    "sha256": "2d29754743d34058f19146dddc0128d952756ed4aa115d1eb232d4aa4b7ed7be",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00832": {
+    "sha256": "9d9c63ba32b309a2c441ff4db8a08fdb95d2288e1e825eee68d081d9600c80c0",
+    "decision": "reject",
+    "reason": "개별 식당의 음식만 담겨 사당1동먹자골목 거리 장소를 확인할 수 없음"
+  },
+  "course-00831": {
+    "sha256": "a5a838d760331aee38ff0e95a3a88a97727b592b1684dff6c6d074d8b4f5757b",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00882": {
+    "sha256": "69276e415e0be1b9442523a5cc31876427046f53b2b25e673345f2c2f94b5767",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00878": {
+    "sha256": "a082cccfa1d5c4f1746e2c51d6cfb0b5b5b4535509027172aa7f2be39e25690f",
+    "decision": "approve",
+    "reason": "출처의 장소명과 일치하는 실제 매장·음식 또는 거리 장면이 확인됨"
+  },
+  "course-00886": {
+    "sha256": "d155921001de39875ce4c90991a9be493d947d2fe02cfb005ff66e0a9c879612",
+    "decision": "reject",
+    "reason": "사진 위 큰 상호 홍보 문구가 중앙을 가리는 광고용 그래픽"
+  }
+}

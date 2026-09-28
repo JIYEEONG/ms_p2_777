@@ -1,0 +1,507 @@
+{
+  "course-00778": {
+    "sha256": "20ef4d48d728e19a160c79516b90e56e465319cba06bbac99e6c54883269d701",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00890": {
+    "sha256": "78c4b981839c64364ac723f94f2de017957b0de35fb1f6d6b2f2ab8521aa8b03",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00950": {
+    "sha256": "f60c494ee02bbddb243996408a0749fd555c22eace912a7fb8615b2871cf94bc",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00972": {
+    "sha256": "4f9c0470ac14ce1cde902902a22d86e91c5426f6de44dc39137a127865bba790",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00985": {
+    "sha256": "8c309310618784e7a0698e8631fb08bacb222ba1447fb734496a06f7376b75f5",
+    "decision": "reject",
+    "reason": "Multi-photo collage"
+  },
+  "course-00499": {
+    "sha256": "68fc129c34474e08c91c1c8a57a692c8c3044c549f8f236bd7c9ef4930857d2d",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00503": {
+    "sha256": "7f3754616976c2327621896543d9bcfa715d20f680ae976930a90941467378c7",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00795": {
+    "sha256": "07d625ac29f28fecf2f6640680944590ac0aefce8f90e3289eb28d6f3f9ee753",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00506": {
+    "sha256": "c7d7c61a09afb8eda3fa7ddd85f6e3e1ee6dccb92b6e7c7af9f64f253f461095",
+    "decision": "reject",
+    "reason": "Branded cup close-up, no venue or food view"
+  },
+  "course-00518": {
+    "sha256": "0dc0040bbcfebac50461f97494673e1658923a1f44c190e88e481daa3a3a1c16",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00561": {
+    "sha256": "dc6e9f0eba887f340b1a61e4da198dc6853757ffa78b8b04215e938fd725e40d",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00584": {
+    "sha256": "aa14afd70c9a812928011f547e8828198b9dba7ce6f6d0f133bf1981bf4bf4b0",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00643": {
+    "sha256": "b884ec945b29fd6ae9e382b56a08ce6826a8e9a000886f3f13c672e81bace2d9",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00652": {
+    "sha256": "7df90c63d5ec09497124837d2b410b393fdc8da2253f168fe3f426ece7f429ff",
+    "decision": "reject",
+    "reason": "Menu board"
+  },
+  "course-00657": {
+    "sha256": "06139fa72741aadc4c6b2acb84f416e89efeeed47c200abb528c3229deb7d1d9",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00667": {
+    "sha256": "725ca46f5e4282ce51a4d5ae82bbef7320c2c8bf80d2025c3d55e3a73a723136",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00688": {
+    "sha256": "53318b1be7d58ee07532ab433c06d3a7735565560e869abb87ab1c945d3fc2e4",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00838": {
+    "sha256": "7092bbb64502eb70df6e06bf8e315290a12da4650595059160961f0af302b5fc",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00844": {
+    "sha256": "ed8b03ee2d48f3da10a2a9a71193eabb33c1d4b054bea1094a07b7b33d50b10d",
+    "decision": "reject",
+    "reason": "Visually too similar to another accepted soup photograph from the same venue"
+  },
+  "course-00507": {
+    "sha256": "fc4cd4b45270543ca482c5501f29cf0e4fbce0eff65e260967fbd2d83e615959",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00515": {
+    "sha256": "91fe7aa5a8e890f77af7115b86a4da06ba88b4d43e8ac5729c2bf1b236aea41d",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00544": {
+    "sha256": "ce9342b886ed1cdc7373baa16fdb7841fe045bdd581adb2dc8f4158f6bd74057",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00719": {
+    "sha256": "435bec3d3f2e09187c1d334dc88b13ecea09dd8ced5b816d4a08ecfadc97e74c",
+    "decision": "reject",
+    "reason": "Promotional architectural rendering"
+  },
+  "course-00514": {
+    "sha256": "b090d6d5ca38fe09fbb515063114ea79c98f154d4444d7a02a83ed143b2a6a25",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00568": {
+    "sha256": "0ac4d861f914dfa1dfee692ff1e8ad9003d21227a932d4e80de93c3c7dfd73c3",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00576": {
+    "sha256": "1bfbf9c7c43ad4dac0c54136830459c62aca119618d62227d656542ec40ece2f",
+    "decision": "reject",
+    "reason": "Map graphic"
+  },
+  "course-00517": {
+    "sha256": "1136e56681dbc259dfea667f12bd4d743186635460f9531db17e5e7b0a5d910b",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00905": {
+    "sha256": "16d5296b797c63642d569dc0c6066d62afca3fe46d13d724e7459239b1a29d0f",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00521": {
+    "sha256": "57132b3b00f317db0800f8c6edfcb09223a9365326e6fc5f4b182e68b29bd29d",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00523": {
+    "sha256": "5a197f23f11b30092d9139868236f7988a4f49c10f50827728e8c8829bda0e3b",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00524": {
+    "sha256": "92edc85214c43f5caff1caab613452382cc31904656ab6db31f11ff80f1ce624",
+    "decision": "reject",
+    "reason": "Tour signage with decorative text overlay"
+  },
+  "course-00555": {
+    "sha256": "2e9c05dcdf11bcc1f5330ae1da252894fc47b6abc45bba346d63b14febb533ba",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00976": {
+    "sha256": "014bca45cae220b196307ca2d526b57625a45ec0cd12e4197d5141753ba2c746",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00537": {
+    "sha256": "24b920d9d12c72ac05688d070253d8643b1b6b12c894b571af56902f09f4f5b4",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00540": {
+    "sha256": "7e80f7091e03be1cc8747e14a90487d8b3bbec366f317fa57d8a5da349204955",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00578": {
+    "sha256": "53394c7c7227dc31943d58b1bd3f06eb2b8692d86d1ea8d431ff10288e9bb143",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00597": {
+    "sha256": "eae31782323723ab9355739f8de7ec4a62e1e01539f949f2de881ea0752c2609",
+    "decision": "reject",
+    "reason": "People-dominant inspection group"
+  },
+  "course-00663": {
+    "sha256": "bcf47501af7762d6869df03cc7ff16ea8ed5836cc0a23f696a4d8b4345b9f529",
+    "decision": "reject",
+    "reason": "People-dominant inspection"
+  },
+  "course-00952": {
+    "sha256": "d6c8b4fbfaaedb472d3909f8680926f67277e7300a95ccde86bcaa21fe9742e1",
+    "decision": "reject",
+    "reason": "People-dominant inspection"
+  },
+  "course-00969": {
+    "sha256": "ddccf060cac31f54218cacbf6ac78a85e85442f6ec908086965e65858c001a28",
+    "decision": "reject",
+    "reason": "People-dominant inspection"
+  },
+  "course-00542": {
+    "sha256": "699996a0fea026c3e1a2c2b8067c2a4a6c413458994b676ab12c27f780b63cf8",
+    "decision": "reject",
+    "reason": "Festival poster"
+  },
+  "course-00543": {
+    "sha256": "833141573aa62a87d8deae33f042e358e72c92c8780d9608800c94bedfdf33a4",
+    "decision": "reject",
+    "reason": "Notebook close-up"
+  },
+  "course-00645": {
+    "sha256": "2667d4e42804f112b7c75c5bdf598d83e0055b223cb7fa723a4e72c78863cc34",
+    "decision": "reject",
+    "reason": "Notebook close-up"
+  },
+  "course-00650": {
+    "sha256": "26a67da77dcdccb7f35845a300a0c32d7f68937c22847ee2f28dd40f9a044f70",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00668": {
+    "sha256": "38f274efda536f6ca209cffe578008798e7d317e558b0734030bb1a66f8a6422",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00851": {
+    "sha256": "7f253b0a5edac1044a9282fd012e56fa22c78d9833435960672581ea244e7e17",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00873": {
+    "sha256": "7006cf190c1d42eb53333f7ab4b7e79ebd1cfa0d3bbd3fdcc1a63c7ac4c75f79",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00545": {
+    "sha256": "f0cc3b616b1fb5bfa830b67e5d7992f3d0586245f9197ad60316ab971e90f2da",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00547": {
+    "sha256": "7dd03c86884722f06b7533ea6f6a87a70eb552956f884adf695e10f62660f16d",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00626": {
+    "sha256": "d2bd44d041753d354d1e74f7dcece88702cd19c4470257def65f70acae453bea",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00724": {
+    "sha256": "7bd4a2b25117fbeeb233c2f5911fffbc01f6a5152c6eb4d067ece618d0f52951",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00559": {
+    "sha256": "9485b5a4db1ddd1a03797f7fd2103828b1dcf4b47884197fcb0f644840d7b781",
+    "decision": "reject",
+    "reason": "Unrelated stock illustration"
+  },
+  "course-00693": {
+    "sha256": "a1f53d8f831053ca40edf967997e286577e5f0b4cdfc1fda78a3e6264ba60b8d",
+    "decision": "reject",
+    "reason": "Unrelated stock illustration"
+  },
+  "course-00562": {
+    "sha256": "903e36239cf42ebb067c5398f8e1fb657a7e137e406329a48ec86c8245a74715",
+    "decision": "reject",
+    "reason": "Black image"
+  },
+  "course-00896": {
+    "sha256": "6a08a97affceaaf58e27babe8883afe48264d70530fd07366a3ebe43654bb8cd",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00899": {
+    "sha256": "3085eb3b8b379fd77352def100d82851dbebc7d86f1fc6c7a80dd358c62b79c4",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00579": {
+    "sha256": "9db1fcd21d2ce96b834737a5a3223769e2ad6ec7d667b014b441073fae97c1cd",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00581": {
+    "sha256": "dfb818b1cdd0fdb71616bc41bed31403371479b3a87322b2412220b142ec3b18",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00604": {
+    "sha256": "06568342ad1bb3ea79453b9533114f7f9289f5d17e364ab25c313593e7bea5b5",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00611": {
+    "sha256": "7632e787474178f63475ff25d5833828fe3b0f72ec34c66197319fc4b31fda05",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00649": {
+    "sha256": "cedffc80e68cbf3334a0ec7167e60790b347f054c0b152694055b20f7493ce75",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00662": {
+    "sha256": "dd290ea55fd9a904fe5b20b6aa452bd1937d61cb439429d8fa80ac1bce96159c",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00753": {
+    "sha256": "965e0a3265f944801d45ebf2702a697d01e98d22fe2c95d003e8be17df1eb13b",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00891": {
+    "sha256": "a585a90b3a02057f6d0a88b93f03439cd679b5d5b2667de263d067dc9a58d970",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00589": {
+    "sha256": "1720c392d2d9b2966d0d6b8dfb1584583c690d5a7be4e114c3a25e5bfbed3348",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00590": {
+    "sha256": "8545acaed6d27c8eb97ab1f633f9dbb68426bcd58285f840df5b81339671c431",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00592": {
+    "sha256": "741e77832ea73ad6d94742329916ee34db74225f006bb3bc1c8eae250d0f0e0c",
+    "decision": "reject",
+    "reason": "Individual restaurant meal does not depict the street"
+  },
+  "course-00605": {
+    "sha256": "9dc15daaa0cf4b6c1c6ce6077c475d6e8cfc825de9bb45cdea9841cafb1bd3c4",
+    "decision": "reject",
+    "reason": "Individual restaurant meal does not depict the street"
+  },
+  "course-00628": {
+    "sha256": "debb69110024260de28349c9e90e732ef7eeb4a717b054246add5808bb9310e0",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00635": {
+    "sha256": "f8ca0247d97a037788278727163c7d6575e3ba25e6844c5389d7359a6a4e69bc",
+    "decision": "reject",
+    "reason": "Individual restaurant meal does not depict the street"
+  },
+  "course-00636": {
+    "sha256": "28e8c4526c44b7633f2336c702abf7c9f8eaf4f05871c7baafc768abf593d199",
+    "decision": "reject",
+    "reason": "Individual restaurant meal does not depict the street"
+  },
+  "course-00847": {
+    "sha256": "c76cb8343d6c123ef4f80e5b5afbc5b92c9f981ec5b4ca49b569fe4cf31e122d",
+    "decision": "reject",
+    "reason": "Brewery worker unrelated to street view"
+  },
+  "course-00593": {
+    "sha256": "5041feabeec8840bf0c6fb060e4ad3a7da5b902de53422f6db997aeff6b04cdc",
+    "decision": "reject",
+    "reason": "Advertising text overlay"
+  },
+  "course-00692": {
+    "sha256": "ece66be76101961a14c3888d223236733b22acc4f2ef1c2bf7cbeee0fcbd7dda",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00697": {
+    "sha256": "5993ac11b2d4e10f987570fee80007e124a123717dd0aefca8e15d19848e5caa",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00595": {
+    "sha256": "5e06a97aef4fbe04a276b24ac2f897d32b98181ac0ca550ee05ebad99a88d29d",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00678": {
+    "sha256": "1737b78f4cda06727f8a8fc27e4ba24d079961cd7d82c52bc1a22290f6088498",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00610": {
+    "sha256": "ea77ba7f02a693c8dceaf98e9b2b7cad933301f0536c8e4238899c55fe846715",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00686": {
+    "sha256": "74583b8911884f6c65f9322110f48e644dc2b402fc400591aabda8bec4bd7354",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00614": {
+    "sha256": "e7561b611fc0adf602f882a58e072d34aece68cd866df32f307dac343fc175c6",
+    "decision": "reject",
+    "reason": "Historical archival image rather than present venue"
+  },
+  "course-00790": {
+    "sha256": "b55815b23fb7ea39262264d7785e00d42863b98432025d699008ad326e44e342",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00884": {
+    "sha256": "84aa1ed92db32a5c4ab5d66fb518b35126d68c52fb1ef48c8235361a48df2adf",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00615": {
+    "sha256": "0dc56ab4e4587353edeef2388b2276914d599c6985fae9b60dac79d10ba3e4e5",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00629": {
+    "sha256": "54fcfc6650f71d1ca693bef8513effd317f6521a0a260c751769add5d332e481",
+    "decision": "reject",
+    "reason": "Advertising title graphic"
+  },
+  "course-00862": {
+    "sha256": "c7ef2b946a296a8cc915894db0adb39454ba235b3a5543eb7523034c7a06d399",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00616": {
+    "sha256": "b142374c9d6d8dc3b48726666b1934093d41f9da9de3d6cc80e6e3e54fb63202",
+    "decision": "reject",
+    "reason": "Transit service logo"
+  },
+  "course-00620": {
+    "sha256": "273181ff96baaff6c91e5be3fa1906a7b4353f82beed3c2485188500b2878707",
+    "decision": "reject",
+    "reason": "Historical streetscape rather than cafe"
+  },
+  "course-00641": {
+    "sha256": "009573d05aa0d1e52de0d3c859fe86d9dbc385642fbe0ffb0cd672813b22b3e7",
+    "decision": "reject",
+    "reason": "Adjacent cathedral rather than cafe interior or exterior"
+  },
+  "course-00755": {
+    "sha256": "64b938692280787dfecc8b4a6684e837a673385d9e142ccd2721a4059222ba36",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00646": {
+    "sha256": "e56db19c8101a68b242ab658713a9533901dc21fb29b6c3cf960da2739695069",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00867": {
+    "sha256": "49bddf439eed046da52018c68c64bbdfec8bdcf3bb7d42cae56017f5ed7c607f",
+    "decision": "reject",
+    "reason": "Menu board"
+  },
+  "course-00964": {
+    "sha256": "03b136363767dde517b779b09ef99199dff443c5642fabcc840be6639614565a",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00653": {
+    "sha256": "0154c765917a02727a8fdb96ab09dc9276115834392559419cd9f67c913b8f5e",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00654": {
+    "sha256": "4b1e715e7972cf0d11bdcfb8a84b609eba12a68d995d7b88bebfab73272bac7c",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00690": {
+    "sha256": "fa061279c124f1e43e3d2b0638e167ec97c74ccc5348f47d50ee11d9b4e00650",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00706": {
+    "sha256": "26b8e06dd33f1f42162fc6ccd31e95b70f94c278b93c951a6e12941b18f83c3e",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00938": {
+    "sha256": "57d25841ebcd63553775ea5bdea07ee9adb8f344763904fef0ab4ac076070bfa",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00953": {
+    "sha256": "e0e96545cfc5fd5da27a9dfd3ca57e1c3ee671bb707a0135049642839dfc071e",
+    "decision": "reject",
+    "reason": "Menu tablet"
+  },
+  "course-00708": {
+    "sha256": "17e7c202c55f1bc0fcd5b420bb0ca1a7fe44520ffe9fcd17f8b7097802bb7257",
+    "decision": "reject",
+    "reason": "People-dominant interview scene"
+  },
+  "course-00998": {
+    "sha256": "02e8b8fce4e5718622290a5a4e7c483a9e08abca0cc2d3d52eb944e3b1f824f3",
+    "decision": "approve",
+    "reason": "Visually reviewed photograph agrees with named venue/branch in source title"
+  },
+  "course-00717": {
+    "sha256": "e5d853dd8d89fb78ecc7a4bcc6a377a19ad3268aee54c57a551c4520b9aa78be",
+    "decision": "reject",
+    "reason": "Unrelated stock coffee illustration"
+  }
+}
