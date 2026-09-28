@@ -268,7 +268,8 @@ def auth_config():
 def _demo_enabled():
     try:
         return (os.getenv('ENABLE_DEMO_LOGIN', 'true').lower() == 'true'
-                and urlsplit(_app_base()).hostname in ('localhost', '127.0.0.1', '::1'))
+                and (os.getenv('DEMO_LOGIN_ALLOW_REMOTE', 'false').lower() == 'true'
+                     or urlsplit(_app_base()).hostname in ('localhost', '127.0.0.1', '::1')))
     except ValueError:
         return False
 

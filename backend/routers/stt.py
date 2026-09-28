@@ -1,9 +1,10 @@
 # backend/routers/stt.py
 import os
+import subprocess
 import tempfile
 import azure.cognitiveservices.speech as speechsdk
 from fastapi import APIRouter, UploadFile, File
-from pydub import AudioSegment
+import imageio_ffmpeg
 
 from config import AZURE_SPEECH_KEY, AZURE_SPEECH_REGION
 
@@ -19,11 +20,15 @@ async def stt(audio: UploadFile = File(...)):
     src_tmp.write(raw_bytes)
     src_tmp.close()
 
-    sound = AudioSegment.from_file(src_tmp.name)
-    sound = sound.set_frame_rate(16000).set_channels(1)
+    # webm → WAV(16kHz mono): pip 패키지에 포함된 ffmpeg 사용 (시스템 ffmpeg 설치 불필요)
     wav_path = src_tmp.name + ".wav"
-    sound.export(wav_path, format="wav")
-    os.remove(src_tmp.name)
+    try:
+        subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-y", "-i", src_tmp.name, "-ar", "16000", "-ac", "1", wav_path],
+                       check=True, capture_output=True)
+    except subprocess.CalledProcessError:
+        return {"error": "STT 실패: 오디오 변환 오류"}
+    finally:
+        os.remove(src_tmp.name)
 
     speech_config = speechsdk.SpeechConfig(
         subscription=AZURE_SPEECH_KEY,
