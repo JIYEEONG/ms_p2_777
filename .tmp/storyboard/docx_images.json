@@ -1,0 +1,57 @@
+[
+  {
+    "index": 1,
+    "heading": "4 대시보드",
+    "file": "01_4 대시보드.png"
+  },
+  {
+    "index": 2,
+    "heading": "5 무인차 관리",
+    "file": "02_5 무인차 관리.png"
+  },
+  {
+    "index": 3,
+    "heading": "6 공간 상품",
+    "file": "03_6 공간 상품.png"
+  },
+  {
+    "index": 4,
+    "heading": "7 회원 관리",
+    "file": "04_7 회원 관리.png"
+  },
+  {
+    "index": 5,
+    "heading": "8 AI 말동무 관리",
+    "file": "05_8 AI 말동무 관리.png"
+  },
+  {
+    "index": 6,
+    "heading": "8.3 페르소나 설정",
+    "file": "06_8.3 페르소나 설정.png"
+  },
+  {
+    "index": 7,
+    "heading": "8.5 차량 사용량과 상태",
+    "file": "07_8.5 차량 사용량과 상태.png"
+  },
+  {
+    "index": 8,
+    "heading": "9 공간 테마 설정",
+    "file": "08_9 공간 테마 설정.png"
+  },
+  {
+    "index": 9,
+    "heading": "9.2 Wellness 정책",
+    "file": "09_9.2 Wellness 정책.png"
+  },
+  {
+    "index": 10,
+    "heading": "9.3 Thema 콘텐츠 정책",
+    "file": "10_9.3 Thema 콘텐츠 정책.png"
+  },
+  {
+    "index": 11,
+    "heading": "9.4 차량 환경 정책",
+    "file": "11_9.4 차량 환경 정책.png"
+  }
+]
