@@ -24,3 +24,4 @@ __pycache__/
 front/public/assets/courses/
 front/public/data/
 backend/account_snapshots/
+backend/.moov-pixabay-image-cache.json
