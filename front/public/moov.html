@@ -849,7 +849,7 @@ html[lang="en"] .category-row.compact .category-card { padding-block: 4px; font-
 .match-badge strong { display: block; font-size: .84rem; }
 .match-badge span { display: block; margin-top: 2px; font-size: .43rem; letter-spacing: .02em; }
 .match-badge.best { border-color: var(--green); background: #f7fff9; }
-.course-body > .match-badge { position: absolute; right: 14px; top: 43px; }
+.course-visual > .match-badge { position: absolute; right: 12px; top: 12px; z-index: 3; }
 .course-stats { display: flex; gap: 12px; margin-top: 10px; color: #777; font-size: .64rem; }
 .course-stats span { display: inline-flex; align-items: center; gap: 4px; }
 .course-stats svg { width: 14px; height: 14px; }
@@ -3675,12 +3675,13 @@ function courseCard(course) {
   const distanceLabel = courseDistanceLabel(course);
   const matchPercent = courseMatchPercent(course);
   const bestBadge = matchPercent >= 90 ? `<span class="best-course-badge">BEST COURSE</span>` : "";
-const cover = getCourseCoverImage(course);
-const visual = cover
-  ? `<button class="course-visual" data-action="course-detail" data-value="${escapeHtml(course.id)}" aria-label="${escapeHtml(course.name)} 상세 보기">${bestBadge}<img src="${escapeHtml(cover)}" alt="${escapeHtml(course.name)} 코스 이미지" loading="lazy" /><span class="photo-detail-hint">${icon("search")} 상세 보기</span></button>`
-  : `<button class="course-visual no-image" data-action="course-detail" data-value="${escapeHtml(course.id)}">${bestBadge}${icon("pin")}<span class="small" data-i18n-en="View course map">코스 지도 보기</span></button>`;
+  const matchBadge = renderMatchBadge(matchPercent);
+  const cover = getCourseCoverImage(course);
+  const visual = cover
+    ? `<button class="course-visual" data-action="course-detail" data-value="${escapeHtml(course.id)}" aria-label="${escapeHtml(course.name)} 상세 보기">${bestBadge}${matchBadge}<img src="${escapeHtml(cover)}" alt="${escapeHtml(course.name)} 코스 이미지" loading="lazy" /><span class="photo-detail-hint">${icon("search")} 상세 보기</span></button>`
+    : `<button class="course-visual no-image" data-action="course-detail" data-value="${escapeHtml(course.id)}">${bestBadge}${matchBadge}${icon("pin")}<span class="small" data-i18n-en="View course map">코스 지도 보기</span></button>`;
   const stopPhotos = course.stopDetails ? `<div class="registered-stops">${course.stopDetails.map((stop,index) => {const photo=stop.photo || getMatchedCoursePlaceImage(stop.name);return `<div>${photo ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(stop.name)} 사진" loading="lazy" />` : `<span class="no-stop-photo">${icon("image")}</span>`}<small>${escapeHtml(stop.type)} · ${escapeHtml(stop.name)}</small></div>`;}).join("")}</div>` : "";
-  return `<article class="course-card">${visual}<div class="course-body"><div class="row"><span class="small muted">${escapeHtml(course.author || state.username)}님의 코스 · ${distanceLabel}</span><span class="badge orange">${escapeHtml(course.time || `${course.stops.length}곳`)}</span></div>${renderMatchBadge(matchPercent)}<h4>${escapeHtml(course.name)}</h4><p>${escapeHtml(course.desc)}</p>${stopPhotos}${coursePhotoCredits(course)}<div class="course-stats"><span>${icon("heart")} 최근 7일 ${state.popularityAt ? (state.popularityCounts[course.id] || 0) : "—"}</span><span>${icon("compass")} ${course.stops.length}개 장소</span><span>가격·시간 확인 필요</span></div><div class="course-actions"><button class="${likedCourse ? "liked" : ""}" data-action="course-like" data-value="${escapeHtml(course.id)}">${icon("heart")}<span>${likedCourse ? "좋아요 취소" : "좋아요"}</span></button><button class="${savedCourse ? "saved" : ""}" data-action="course-save" data-value="${escapeHtml(course.id)}">${icon("bookmark")}<span>${savedCourse ? "저장됨" : "관심 저장"}</span></button><button class="follow" data-action="follow-course" data-value="${escapeHtml(course.id)}">${icon("pin")}<span data-i18n-skip>${courseFollowLabel()}</span></button></div></div></article>`;
+  return `<article class="course-card">${visual}<div class="course-body"><div class="row"><span class="small muted">${escapeHtml(course.author || state.username)}님의 코스 · ${distanceLabel}</span><span class="badge orange">${escapeHtml(course.time || `${course.stops.length}곳`)}</span></div><h4>${escapeHtml(course.name)}</h4><p>${escapeHtml(course.desc)}</p>${stopPhotos}${coursePhotoCredits(course)}<div class="course-stats"><span>${icon("heart")} 최근 7일 ${state.popularityAt ? (state.popularityCounts[course.id] || 0) : "—"}</span><span>${icon("compass")} ${course.stops.length}개 장소</span><span>가격·시간 확인 필요</span></div><div class="course-actions"><button class="${likedCourse ? "liked" : ""}" data-action="course-like" data-value="${escapeHtml(course.id)}">${icon("heart")}<span>${likedCourse ? "좋아요 취소" : "좋아요"}</span></button><button class="${savedCourse ? "saved" : ""}" data-action="course-save" data-value="${escapeHtml(course.id)}">${icon("bookmark")}<span>${savedCourse ? "저장됨" : "관심 저장"}</span></button><button class="follow" data-action="follow-course" data-value="${escapeHtml(course.id)}">${icon("pin")}<span data-i18n-skip>${courseFollowLabel()}</span></button></div></div></article>`;
 }
 
 function courseDistanceLabel(course) {
