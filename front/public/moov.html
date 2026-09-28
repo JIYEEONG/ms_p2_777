@@ -1992,6 +1992,21 @@ function applyAuthenticatedUser(user) {
   clearAccountUi();
   const snapshotMissing = MoovAccountSnapshot.missing(localStorage, user.id);
   Object.assign(state, createAppState(readSaved(user.id), user));
+  try {
+    if (localStorage.getItem("moov-vending-reset-pending")) {
+      state.vendingStockOverrides = {};
+      state.vendingRefreshedAt = null;
+      localStorage.removeItem("moov-vending-reset-pending");
+      const vendingKey = appStorageKey(user.id);
+      const savedRaw = localStorage.getItem(vendingKey);
+      if (savedRaw) {
+        const savedData = JSON.parse(savedRaw);
+        savedData.vendingStockOverrides = {};
+        savedData.vendingRefreshedAt = null;
+        localStorage.setItem(vendingKey, JSON.stringify(savedData));
+      }
+    }
+  } catch { /* storage optional */ }
   state.snapshotMissing = snapshotMissing;
   state.backupPending = true;
   restoreAuthenticatedTrip();
@@ -4218,7 +4233,7 @@ splashTimer = setTimeout(enterAuthenticatedScreen, 1200);
 void MoovGoogleAuth.init({
   onAuthenticated: applyAuthenticatedUser,
   onSignedOut: () => { clearAccountUi(); if (splashFinished) showScreen("login"); },
-  onLogoutSuccess: () => { enterAuthenticatedScreen(); toast(taxiText("로그아웃했어요.", "You have signed out.")); },
+  onLogoutSuccess: () => { try { localStorage.setItem("moov-vending-reset-pending", "1"); } catch { /* storage optional */ } enterAuthenticatedScreen(); toast(taxiText("로그아웃했어요.", "You have signed out.")); },
   onLogoutError: message => toast(message),
 });
 
