@@ -2395,6 +2395,7 @@ function setTab(tab, surveyChecked = false) {
   if (!state.isAuthenticated) return;
   if (tab === 'outing' && !surveyChecked && MoovLoginSurvey.requestCompletion(() => { showScreen('app'); setTab(tab, true); })) return;
   if(tab!=='outing')state.returnToHomeAfterCourse=false;
+  if (tab === "outing" && state.outingSub === "community") state.outingMapOpen = false;
   state.activeTab = tab;
   state.mapPinOpen = false;
   const [nextKicker, nextTitle] = tabMeta[tab];
@@ -3570,9 +3571,8 @@ function getFilteredOutingCourses() {
 function getVisibleOutingCourses() {
   let courses = getFilteredOutingCourses();
   if (state.outingSort === "preference") {
-    if (state.surveyRecord?.profile) return rankSurveyCourses(courses).map((item) => item.course);
-    const context = outingDistanceContext();
-    return MoovOutingData.rank(courses, state.recommendationPrefs, getCourseTags, context).map(item => item.course);
+    const scores = new Map(courses.map((course) => [course.id, courseMatchPercent(course) ?? -1]));
+    return [...courses].sort((a, b) => scores.get(b.id) - scores.get(a.id));
   }
   const context = outingDistanceContext();
   return MoovOutingData.sort(courses, state.outingSort, state.recommendationPrefs,
@@ -4502,6 +4502,7 @@ document.addEventListener("click", (event) => {
   if (action === "outing-sub") {
     state.outingSub = value;
     if (value === "interest") state.hasUnseenInterestCourse = false;
+    if (value === "community") state.outingMapOpen = false;
     if (value === "register" && !state.returnToHomeAfterCourse) state.tasteBuilderSub = "taste";
     persist(); render();
   }
